@@ -1,0 +1,116 @@
+<!-- @dsCard group="DMD" name="Dot-matrix display" subtitle="128×32 grid · 5-level amber · DIGITS 5×7 bitmap font" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pinball Reverie — DMD</title>
+<style>
+  :root {
+    --void:#0c0d14; --ink:#07080d;
+    --steel-300:#7f8fc9; --steel-500:#4a5680; --steel-700:#2c3352; --chrome-200:#d7dce8; --chrome-400:#aeb6c8;
+  }
+  body { margin:0; padding:24px; background:var(--void); color:var(--steel-300);
+         font:12px/1.5 ui-monospace,"Cascadia Mono",monospace; }
+  h1 { font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--chrome-200); margin:0; }
+  .sub { color:var(--steel-500); margin:2px 0 16px; }
+  .bezel { display:inline-block; padding:10px 12px; background:var(--steel-700);
+           border:1px solid var(--ink); border-top:2px solid var(--chrome-400); border-radius:6px; }
+  canvas { display:block; image-rendering:pixelated; }
+  .spec { color:var(--steel-500); font-size:11px; max-width:640px; margin-top:14px; }
+  .levels { display:flex; gap:6px; align-items:center; margin-top:14px; }
+  .levels span { font-size:10px; color:var(--steel-500); margin-right:4px; }
+  .dot { width:16px; height:16px; border-radius:50%; border:1px solid var(--ink); }
+</style>
+</head>
+<body>
+  <h1>Dot-matrix display</h1>
+  <p class="sub">128 × 32 · round dots at 0.72 pitch · amber plasma behind smoked glass</p>
+
+  <div class="bezel"><canvas id="dmd" width="768" height="192"></canvas></div>
+
+  <div class="levels">
+    <span>levels</span>
+    <div class="dot" style="background:#1a0e08" title="0 off"></div>
+    <div class="dot" style="background:#4a2410" title="1 dim"></div>
+    <div class="dot" style="background:#c4671b" title="2 mid"></div>
+    <div class="dot" style="background:#ffb637" title="3 lit"></div>
+    <div class="dot" style="background:radial-gradient(circle at 40% 35%, #ffe29a 0 35%, #ffb637 70%)" title="3 + hi core"></div>
+  </div>
+
+  <p class="spec">Scenes are authored at 128×32 logical resolution in exactly these 5 dot states —
+  no intermediate colors. Lit dots get a bloom halo ≈40% of dot diameter, applied by the runtime
+  LED shader: bake plain levels, never pre-bloomed art. Score/status lines use the DIGITS 5×7 and
+  SMALL 3×5 bitmap fonts (5×7 shown). Baked to sprite-sheet frames at build time (plan §5c);
+  never live SVG/DOM on the grid.</p>
+
+<script>
+  // 5×7 bitmap font — each glyph is 7 rows, 5 bits, bit 4 = leftmost column.
+  const FONT = {
+    "0":[0x0E,0x11,0x13,0x15,0x19,0x11,0x0E], "1":[0x04,0x0C,0x04,0x04,0x04,0x04,0x0E],
+    "2":[0x0E,0x11,0x01,0x02,0x04,0x08,0x1F], "3":[0x1F,0x02,0x04,0x02,0x01,0x11,0x0E],
+    "4":[0x02,0x06,0x0A,0x12,0x1F,0x02,0x02], "5":[0x1F,0x10,0x1E,0x01,0x01,0x11,0x0E],
+    "6":[0x06,0x08,0x10,0x1E,0x11,0x11,0x0E], "7":[0x1F,0x01,0x02,0x04,0x08,0x08,0x08],
+    "8":[0x0E,0x11,0x11,0x0E,0x11,0x11,0x0E], "9":[0x0E,0x11,0x11,0x0F,0x01,0x02,0x0C],
+    "A":[0x0E,0x11,0x11,0x1F,0x11,0x11,0x11], "B":[0x1E,0x11,0x11,0x1E,0x11,0x11,0x1E],
+    "C":[0x0E,0x11,0x10,0x10,0x10,0x11,0x0E], "J":[0x07,0x02,0x02,0x02,0x02,0x12,0x0C],
+    "K":[0x11,0x12,0x14,0x18,0x14,0x12,0x11], "L":[0x10,0x10,0x10,0x10,0x10,0x10,0x1F],
+    "O":[0x0E,0x11,0x11,0x11,0x11,0x11,0x0E], "P":[0x1E,0x11,0x11,0x1E,0x10,0x10,0x10],
+    "T":[0x1F,0x04,0x04,0x04,0x04,0x04,0x04], " ":[0,0,0,0,0,0,0],
+  };
+  const COLS = 128, ROWS = 32, S = 6; // 6px per logical dot
+  const LEVEL = ["#1a0e08", "#4a2410", "#c4671b", "#ffb637"];
+  const grid = new Uint8Array(COLS * ROWS);
+
+  function text(str, x, y, level) {
+    for (const ch of str) {
+      const g = FONT[ch] ?? FONT[" "];
+      for (let r = 0; r < 7; r++)
+        for (let c = 0; c < 5; c++)
+          if (g[r] & (1 << (4 - c))) {
+            const px = x + c, py = y + r;
+            if (px >= 0 && px < COLS && py >= 0 && py < ROWS) grid[py * COLS + px] = level;
+          }
+      x += 6;
+    }
+  }
+  const center = (str) => Math.floor((COLS - (str.length * 6 - 1)) / 2);
+
+  const ctx = document.getElementById("dmd").getContext("2d");
+  function draw(jackpotLevel) {
+    grid.fill(0);
+    // faint dim frame — shows level 1 in use
+    for (let x = 0; x < COLS; x++) { grid[x] = 1; grid[(ROWS - 1) * COLS + x] = 1; }
+    text("JACKPOT", center("JACKPOT"), 4, jackpotLevel);
+    text("1250400", center("1250400"), 14, 2);
+    text("BALL 1", 2, 24, 1);
+    text("2 5 0", COLS - 32, 24, 1);
+
+    ctx.fillStyle = "#0f0805";
+    ctx.fillRect(0, 0, COLS * S, ROWS * S);
+    const r = S * 0.36;
+    for (let y = 0; y < ROWS; y++)
+      for (let x = 0; x < COLS; x++) {
+        const lv = grid[y * COLS + x];
+        const cx = x * S + S / 2, cy = y * S + S / 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = LEVEL[lv];
+        ctx.fill();
+        if (lv === 3) { // hi core + bloom on lit dots
+          ctx.save();
+          ctx.shadowColor = "#ffb637";
+          ctx.shadowBlur = S * 0.8;
+          ctx.beginPath();
+          ctx.arc(cx - r * 0.15, cy - r * 0.15, r * 0.45, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffe29a";
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+  }
+  let flash = 3;
+  draw(flash);
+  setInterval(() => { flash = flash === 3 ? 2 : 3; draw(flash); }, 450);
+</script>
+</body>
+</html>

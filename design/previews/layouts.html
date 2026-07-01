@@ -1,0 +1,80 @@
+<!-- @dsCard group="Layout" name="Viewport layouts" subtitle="Portrait: DMD over table · Landscape: side panels — table aspect is sacred" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pinball Reverie — Layouts</title>
+<style>
+  :root {
+    --void:#0c0d14; --field-900:#12141f; --field-800:#1b1e2c; --field-700:#262a3e; --ink:#07080d;
+    --steel-300:#7f8fc9; --steel-500:#4a5680; --steel-700:#2c3352; --chrome-200:#d7dce8;
+    --dmd-bg:#0f0805; --dmd-lit:#ffb637;
+  }
+  body { margin:0; padding:24px; background:var(--void); color:var(--steel-300);
+         font:12px/1.5 ui-monospace,"Cascadia Mono",monospace; }
+  h1 { font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--chrome-200); margin:0; }
+  .sub { color:var(--steel-500); margin:2px 0 16px; }
+  .wrap { display:flex; gap:40px; align-items:flex-start; }
+  .cap { color:var(--steel-500); font-size:10px; margin-top:8px; }
+  .spec { color:var(--steel-500); font-size:11px; max-width:660px; margin-top:16px; }
+  svg text { font-family:ui-monospace,monospace; }
+</style>
+</head>
+<body>
+  <h1>Viewport layouts</h1>
+  <p class="sub">The table never stretches — 520:1050 native aspect always; only the chrome moves.</p>
+
+  <div class="wrap">
+    <div>
+      <svg width="200" height="400" viewBox="0 0 200 400">
+        <rect x="1" y="1" width="198" height="398" rx="14" fill="#12141f" stroke="#2c3352" stroke-width="2"/>
+        <!-- DMD strip 4:1 -->
+        <rect x="14" y="14" width="172" height="43" rx="3" fill="#0f0805" stroke="#07080d"/>
+        <text x="100" y="40" text-anchor="middle" fill="#ffb637" font-size="11" letter-spacing="2">1 250 400</text>
+        <!-- table at native aspect: width 172 → height 172*(1050/520)=347 > space; fit height 316 → width 156 -->
+        <rect x="22" y="66" width="156" height="315" rx="4" fill="#1b1e2c" stroke="#7f8fc9"/>
+        <text x="100" y="230" text-anchor="middle" fill="#4a5680" font-size="10">TABLE</text>
+        <text x="100" y="243" text-anchor="middle" fill="#4a5680" font-size="8">520 : 1050</text>
+        <!-- touch zones -->
+        <rect x="22" y="286" width="78" height="95" fill="#8c6bff" opacity="0.12"/>
+        <rect x="100" y="286" width="78" height="95" fill="#8c6bff" opacity="0.12"/>
+        <text x="61" y="372" text-anchor="middle" fill="#8c6bff" font-size="8" opacity="0.8">L FLIP</text>
+        <text x="139" y="372" text-anchor="middle" fill="#8c6bff" font-size="8" opacity="0.8">R FLIP</text>
+        <rect x="150" y="250" width="28" height="30" rx="4" fill="none" stroke="#2fc9d6" stroke-dasharray="3 2"/>
+        <text x="164" y="245" text-anchor="middle" fill="#2fc9d6" font-size="7">PLUNGE</text>
+      </svg>
+      <div class="cap">PORTRAIT — classic: DMD strip (4:1) above, table below, touch overlay from day one</div>
+    </div>
+
+    <div>
+      <svg width="440" height="248" viewBox="0 0 440 248">
+        <rect x="1" y="1" width="438" height="246" rx="10" fill="#12141f" stroke="#2c3352" stroke-width="2"/>
+        <!-- center table column: full height, width = 232*(520/1050) = 115 -->
+        <rect x="162" y="8" width="115" height="232" rx="4" fill="#1b1e2c" stroke="#7f8fc9"/>
+        <text x="220" y="120" text-anchor="middle" fill="#4a5680" font-size="10">TABLE</text>
+        <text x="220" y="133" text-anchor="middle" fill="#4a5680" font-size="8">520 : 1050</text>
+        <!-- left panel: logo + DMD -->
+        <rect x="12" y="8" width="138" height="232" rx="6" fill="#262a3e" stroke="#07080d"/>
+        <text x="81" y="52" text-anchor="middle" fill="#d7dce8" font-size="13" letter-spacing="3">REVERIE</text>
+        <rect x="24" y="72" width="114" height="29" rx="2" fill="#0f0805" stroke="#07080d"/>
+        <text x="81" y="90" text-anchor="middle" fill="#ffb637" font-size="8" letter-spacing="1">1 250 400</text>
+        <text x="81" y="130" text-anchor="middle" fill="#4a5680" font-size="8">LOGO + DMD</text>
+        <!-- right panel: status -->
+        <rect x="289" y="8" width="138" height="232" rx="6" fill="#262a3e" stroke="#07080d"/>
+        <text x="358" y="40" text-anchor="middle" fill="#7f8fc9" font-size="9">SCORE · BALL 1</text>
+        <text x="358" y="58" text-anchor="middle" fill="#7f8fc9" font-size="9">BONUS ×2</text>
+        <circle cx="334" cy="82" r="5" fill="#ff5555" opacity="0.35"/>
+        <circle cx="358" cy="82" r="5" fill="#ff5555" opacity="0.35"/>
+        <circle cx="382" cy="82" r="5" fill="#ff5555" opacity="0.9"/>
+        <text x="358" y="104" text-anchor="middle" fill="#4a5680" font-size="8">TILT LAMPS · STATUS</text>
+      </svg>
+      <div class="cap">LANDSCAPE — table full-height center column; backglass content moves beside it</div>
+    </div>
+  </div>
+
+  <p class="spec">The camera's vertical scroll is identical in both orientations. Surplus space is
+  always void with the standard 8% vignette. Panels are field-700 cards with ink borders on void.
+  Portrait touch zones (violet) and the plunger drag zone (cyan) ship in the overlay from the first
+  build — retrofitting touch breaks the visual system.</p>
+</body>
+</html>

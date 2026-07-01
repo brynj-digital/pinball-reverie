@@ -1,0 +1,98 @@
+<!-- @dsCard group="Colors" name="Palette" subtitle="Field · steel · chrome · brass · neon · DMD · debug" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pinball Reverie — Palette</title>
+<style>
+  :root {
+    --void:#0c0d14; --field-900:#12141f; --field-800:#1b1e2c; --field-700:#262a3e; --ink:#07080d;
+    --steel-300:#7f8fc9; --steel-500:#4a5680; --steel-700:#2c3352;
+    --chrome-50:#ffffff; --chrome-200:#d7dce8; --chrome-400:#aeb6c8; --chrome-600:#565d6e; --chrome-800:#23262f;
+    --brass-300:#f4d27a; --brass-400:#e0b64e; --brass-600:#9c7c2c;
+    --magenta-400:#ff3e9a; --magenta-600:#b01860; --cyan-400:#2fc9d6; --cyan-600:#147986;
+    --violet-400:#8c6bff; --violet-600:#4e37a8; --alert-400:#ff5555;
+    --dmd-hi:#ffe29a; --dmd-lit:#ffb637; --dmd-mid:#c4671b; --dmd-dim:#4a2410; --dmd-off:#1a0e08; --dmd-bg:#0f0805;
+    --debug-body:#3ddc84; --debug-sensor:#ff9f43;
+  }
+  body { margin:0; padding:24px; background:var(--void); color:var(--steel-300);
+         font:12px/1.5 ui-monospace,"Cascadia Mono",monospace; }
+  h1 { font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--chrome-200); margin:0; }
+  .sub { color:var(--steel-500); margin:2px 0 20px; }
+  h2 { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--steel-500); margin:18px 0 8px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .sw { width:104px; }
+  .sw .chip { height:56px; border-radius:4px; border:1px solid var(--ink); }
+  .sw .name { color:var(--chrome-200); margin-top:5px; }
+  .sw .hex { color:var(--steel-500); text-transform:uppercase; font-size:11px; }
+  .note { color:var(--steel-500); max-width:620px; margin-top:20px; border-top:1px solid var(--steel-700); padding-top:12px; }
+</style>
+</head>
+<body>
+  <h1>Palette</h1>
+  <p class="sub">~70% field &amp; steel darks · ~20% chrome mids · ≤10% neon accents</p>
+
+  <h2>Field</h2>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--void)"></div><div class="name">void</div><div class="hex">#0C0D14</div></div>
+    <div class="sw"><div class="chip" style="background:var(--field-900)"></div><div class="name">field-900</div><div class="hex">#12141F</div></div>
+    <div class="sw"><div class="chip" style="background:var(--field-800)"></div><div class="name">field-800</div><div class="hex">#1B1E2C</div></div>
+    <div class="sw"><div class="chip" style="background:var(--field-700)"></div><div class="name">field-700</div><div class="hex">#262A3E</div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink)"></div><div class="name">ink</div><div class="hex">#07080D</div></div>
+  </div>
+
+  <h2>Steel</h2>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--steel-300)"></div><div class="name">steel-300</div><div class="hex">#7F8FC9</div></div>
+    <div class="sw"><div class="chip" style="background:var(--steel-500)"></div><div class="name">steel-500</div><div class="hex">#4A5680</div></div>
+    <div class="sw"><div class="chip" style="background:var(--steel-700)"></div><div class="name">steel-700</div><div class="hex">#2C3352</div></div>
+  </div>
+
+  <h2>Chrome</h2>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--chrome-50)"></div><div class="name">chrome-50</div><div class="hex">#FFFFFF</div></div>
+    <div class="sw"><div class="chip" style="background:var(--chrome-200)"></div><div class="name">chrome-200</div><div class="hex">#D7DCE8</div></div>
+    <div class="sw"><div class="chip" style="background:var(--chrome-400)"></div><div class="name">chrome-400</div><div class="hex">#AEB6C8</div></div>
+    <div class="sw"><div class="chip" style="background:var(--chrome-600)"></div><div class="name">chrome-600</div><div class="hex">#565D6E</div></div>
+    <div class="sw"><div class="chip" style="background:var(--chrome-800)"></div><div class="name">chrome-800</div><div class="hex">#23262F</div></div>
+  </div>
+
+  <h2>Brass — things the ball touches</h2>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--brass-300)"></div><div class="name">brass-300</div><div class="hex">#F4D27A</div></div>
+    <div class="sw"><div class="chip" style="background:var(--brass-400)"></div><div class="name">brass-400</div><div class="hex">#E0B64E</div></div>
+    <div class="sw"><div class="chip" style="background:var(--brass-600)"></div><div class="name">brass-600</div><div class="hex">#9C7C2C</div></div>
+  </div>
+
+  <h2>Neon — inserts &amp; feature art</h2>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--violet-400)"></div><div class="name">violet-400 ★</div><div class="hex">#8C6BFF</div></div>
+    <div class="sw"><div class="chip" style="background:var(--violet-600)"></div><div class="name">violet-600</div><div class="hex">#4E37A8</div></div>
+    <div class="sw"><div class="chip" style="background:var(--magenta-400)"></div><div class="name">magenta-400</div><div class="hex">#FF3E9A</div></div>
+    <div class="sw"><div class="chip" style="background:var(--magenta-600)"></div><div class="name">magenta-600</div><div class="hex">#B01860</div></div>
+    <div class="sw"><div class="chip" style="background:var(--cyan-400)"></div><div class="name">cyan-400</div><div class="hex">#2FC9D6</div></div>
+    <div class="sw"><div class="chip" style="background:var(--cyan-600)"></div><div class="name">cyan-600</div><div class="hex">#147986</div></div>
+    <div class="sw"><div class="chip" style="background:var(--alert-400)"></div><div class="name">alert-400</div><div class="hex">#FF5555</div></div>
+  </div>
+
+  <h2>DMD amber — 5-level ramp</h2>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--dmd-hi)"></div><div class="name">dmd-hi</div><div class="hex">#FFE29A</div></div>
+    <div class="sw"><div class="chip" style="background:var(--dmd-lit)"></div><div class="name">dmd-lit</div><div class="hex">#FFB637</div></div>
+    <div class="sw"><div class="chip" style="background:var(--dmd-mid)"></div><div class="name">dmd-mid</div><div class="hex">#C4671B</div></div>
+    <div class="sw"><div class="chip" style="background:var(--dmd-dim)"></div><div class="name">dmd-dim</div><div class="hex">#4A2410</div></div>
+    <div class="sw"><div class="chip" style="background:var(--dmd-off)"></div><div class="name">dmd-off</div><div class="hex">#1A0E08</div></div>
+    <div class="sw"><div class="chip" style="background:var(--dmd-bg)"></div><div class="name">dmd-bg</div><div class="hex">#0F0805</div></div>
+  </div>
+
+  <h2>Debug — engineering overlay only, never in art</h2>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--debug-body)"></div><div class="name">debug-body</div><div class="hex">#3DDC84</div></div>
+    <div class="sw"><div class="chip" style="background:var(--debug-sensor)"></div><div class="name">debug-sensor</div><div class="hex">#FF9F43</div></div>
+  </div>
+
+  <p class="note">★ violet is the Reverie signature hue — logo glow and premium inserts.
+  Brass is reserved for parts the ball physically strikes. No new hexes without amending
+  STYLE-GUIDE.md; the debug pair matches the in-game physics overlay exactly.</p>
+</body>
+</html>

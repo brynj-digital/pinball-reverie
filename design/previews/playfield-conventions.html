@@ -1,0 +1,83 @@
+<!-- @dsCard group="Playfield" name="Playfield conventions" subtitle="1 unit = 1 mm · collision/sensor/anchor layer naming · gap rules" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Pinball Reverie — Playfield conventions</title>
+<style>
+  :root {
+    --void:#0c0d14; --field-800:#1b1e2c; --ink:#07080d;
+    --steel-300:#7f8fc9; --steel-500:#4a5680; --steel-700:#2c3352; --chrome-200:#d7dce8;
+    --debug-body:#3ddc84; --debug-sensor:#ff9f43; --cyan-400:#2fc9d6;
+  }
+  body { margin:0; padding:24px; background:var(--void); color:var(--steel-300);
+         font:12px/1.5 ui-monospace,"Cascadia Mono",monospace; }
+  h1 { font-size:13px; letter-spacing:.18em; text-transform:uppercase; color:var(--chrome-200); margin:0; }
+  .sub { color:var(--steel-500); margin:2px 0 16px; }
+  .wrap { display:flex; gap:32px; align-items:flex-start; }
+  table { border-collapse:collapse; font-size:11px; }
+  th, td { text-align:left; padding:5px 12px 5px 0; border-bottom:1px solid var(--steel-700); vertical-align:top; }
+  th { color:var(--steel-500); font-weight:normal; text-transform:uppercase; font-size:10px; letter-spacing:.1em; }
+  code { color:var(--chrome-200); }
+  .k-body { color:var(--debug-body); } .k-sensor { color:var(--debug-sensor); } .k-anchor { color:var(--cyan-400); }
+  .spec { color:var(--steel-500); font-size:11px; max-width:660px; margin-top:16px; }
+  .cap { color:var(--steel-500); font-size:10px; margin-top:6px; }
+</style>
+</head>
+<body>
+  <h1>Playfield conventions</h1>
+  <p class="sub">The SVG is the single source of truth for table shape — art and collision in one file.</p>
+
+  <div class="wrap">
+    <div>
+      <!-- lower playfield excerpt at 0.55× of master mm units -->
+      <svg width="300" height="180" viewBox="140 780 260 290" style="background:#1b1e2c;border:1px solid #07080d;border-radius:4px" preserveAspectRatio="xMidYMid meet">
+        <g transform="scale(1)">
+          <!-- art (dimmed) -->
+          <path d="M 140 800 L 178.4 940.6 L 163 955 L 163 1050" fill="none" stroke="#4a5680" stroke-width="10" opacity="0.35"/>
+          <path d="M 400 800 L 340 942.1 L 357 955 L 357 1050" fill="none" stroke="#4a5680" stroke-width="10" opacity="0.35"/>
+          <!-- collision walls -->
+          <path d="M 140 800 L 178.4 940.6 L 163 955 L 163 1050" fill="none" stroke="#3ddc84" stroke-width="2"/>
+          <path d="M 400 800 L 340 942.1 L 357 955 L 357 1050" fill="none" stroke="#3ddc84" stroke-width="2"/>
+          <!-- drain sensor -->
+          <rect x="163" y="1005" width="230" height="30" fill="none" stroke="#ff9f43" stroke-width="2" stroke-dasharray="6 4"/>
+          <!-- anchors -->
+          <circle cx="171" cy="950" r="5" fill="none" stroke="#2fc9d6" stroke-width="2"/>
+          <line x1="164" y1="950" x2="178" y2="950" stroke="#2fc9d6" stroke-width="1"/>
+          <line x1="171" y1="943" x2="171" y2="957" stroke="#2fc9d6" stroke-width="1"/>
+          <circle cx="349" cy="950" r="5" fill="none" stroke="#2fc9d6" stroke-width="2"/>
+          <line x1="342" y1="950" x2="356" y2="950" stroke="#2fc9d6" stroke-width="1"/>
+          <line x1="349" y1="943" x2="349" y2="957" stroke="#2fc9d6" stroke-width="1"/>
+          <!-- flipper ghosts -->
+          <g opacity="0.5">
+            <path d="M 171 938 L 246 943 L 246 957 L 171 962 A 12 12 0 0 1 171 938" fill="#e0b64e" stroke="#07080d"/>
+            <path d="M 349 938 L 274 943 L 274 957 L 349 962 A 12 12 0 0 0 349 938" fill="#e0b64e" stroke="#07080d"/>
+          </g>
+        </g>
+      </svg>
+      <div class="cap">Lower playfield excerpt (master mm units) — <span class="k-body">collision</span> ·
+      <span class="k-sensor">sensor</span> · <span class="k-anchor">anchor</span> over dimmed art</div>
+    </div>
+
+    <div>
+      <table>
+        <tr><th>Layer id prefix</th><th>Meaning</th></tr>
+        <tr><td><code class="k-body">collision-wall-&lt;name&gt;</code></td><td>solid open chain (path centerline)</td></tr>
+        <tr><td><code class="k-body">collision-loop-&lt;name&gt;</code></td><td>solid closed chain</td></tr>
+        <tr><td><code class="k-sensor">sensor-&lt;kind&gt;-&lt;name&gt;</code></td><td>scoring zone, non-solid → EventBus<br/>kinds: drain · ramp-entry · ramp-exit · rollover · lane · kicker · spinner · target</td></tr>
+        <tr><td><code class="k-anchor">anchor-&lt;entity&gt;[-&lt;which&gt;]</code></td><td>circle center places a code-defined body<br/>required: flipper-left · flipper-right · plunger · spawn</td></tr>
+        <tr><td><code>art-…</code> / unprefixed</td><td>visual only — parser ignores</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <p class="spec">
+    <strong>Units:</strong> 1 SVG user unit = 1 mm; playfield viewBox <code>0 0 520 1050</code>;
+    the parser divides by 1000 — no other scale anywhere. Curves flatten to ≤1 mm chord error.<br/><br/>
+    <strong>Gap rules (from the physics):</strong> every gap between collision surfaces is
+    &lt;13.5 mm (ball can't enter) or &gt;38 mm (passes freely) — between wedges the ball.
+    Inlane guides end <em>tangent</em> to the flipper base circle (r 12 mm at the anchor), past its
+    apex. Verify every table against the in-game debug overlay before shipping art.
+  </p>
+</body>
+</html>

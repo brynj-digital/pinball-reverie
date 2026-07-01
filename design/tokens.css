@@ -1,0 +1,51 @@
+/*
+ * Pinball Reverie — design tokens.
+ * Canonical values; the written system lives in design/STYLE-GUIDE.md.
+ * Every asset (table art, ball, DMD, backglass, UI) draws from these.
+ */
+:root {
+  /* field — the playfield woods and darks */
+  --void: #0c0d14; /* cabinet surround / page background */
+  --field-900: #12141f; /* playfield deep shadow / ambient occlusion */
+  --field-800: #1b1e2c; /* playfield base */
+  --field-700: #262a3e; /* raised panels, aprons */
+  --ink: #07080d; /* every outline */
+
+  /* steel blues — guides, rails, secondary structure */
+  --steel-300: #7f8fc9;
+  --steel-500: #4a5680;
+  --steel-700: #2c3352;
+
+  /* chrome — the ball, wireforms, bezels */
+  --chrome-50: #ffffff;
+  --chrome-200: #d7dce8;
+  --chrome-400: #aeb6c8;
+  --chrome-600: #565d6e;
+  --chrome-800: #23262f;
+
+  /* brass — flippers, kickers, warm mechanicals */
+  --brass-300: #f4d27a;
+  --brass-400: #e0b64e;
+  --brass-600: #9c7c2c;
+
+  /* neon — inserts, lamps, feature art accents (max ~10% of any composition) */
+  --magenta-400: #ff3e9a;
+  --magenta-600: #b01860;
+  --cyan-400: #2fc9d6;
+  --cyan-600: #147986;
+  --violet-400: #8c6bff; /* the Reverie signature hue */
+  --violet-600: #4e37a8;
+  --alert-400: #ff5555; /* tilt, danger lamps */
+
+  /* DMD — amber plasma, 4 brightness levels + off */
+  --dmd-hi: #ffe29a; /* level 3 core */
+  --dmd-lit: #ffb637; /* level 3 */
+  --dmd-mid: #c4671b; /* level 2 */
+  --dmd-dim: #4a2410; /* level 1 */
+  --dmd-off: #1a0e08; /* unlit dot */
+  --dmd-bg: #0f0805; /* panel glass */
+
+  /* debug overlay — engineering only, never in shipped art */
+  --debug-body: #3ddc84;
+  --debug-sensor: #ff9f43;
+}
