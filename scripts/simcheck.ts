@@ -122,10 +122,11 @@ check("drain sensor fires", drained);
 // 5 — traps: seam drops, tip gap, and zero-speed creeps down each wall
 for (const [label, x, y] of [
   ["left seam drop", 0.178, 0.915],
-  ["right seam drop", 0.34, 0.915],
+  ["right seam drop", 0.342, 0.915],
   ["tip gap drop", 0.26, 0.915],
   ["left wall creep", 0.1084, 0.8682],
-  ["right wall creep", 0.3756, 0.8812],
+  ["right wall creep", 0.4116, 0.8682], // mirror of the left creep point
+
 ] as const) {
   drained = false;
   placeBall(x, y);
@@ -149,7 +150,7 @@ left.update(false, t);
 run(0.5);
 
 // 7 — pop bumper kicks the ball away harder than it arrived
-placeBall(0.2, 0.29, 0, 0.8);
+placeBall(0.19, 0.275, 0, 0.8);
 let maxSpeed = 0;
 run(0.4, () => {
   const v = ball.body.getLinearVelocity();
@@ -180,7 +181,7 @@ check("middle rollover fires", sensors.includes("rollover:2"));
 
 // 10 — drop targets: three hits drop the bank, bonus fires, bank resets
 for (const y of DROP_TARGETS.ys) {
-  placeBall(0.4, y, 1.5, 0);
+  placeBall(0.45, y, 1.5, 0);
   run(0.5);
 }
 check("all three targets dropped + bank bonus", bankDone && bank.targets.every((x) => !x.up));

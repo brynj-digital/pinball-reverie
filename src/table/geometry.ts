@@ -16,16 +16,24 @@ export interface Pt {
 
 export const BALL_RADIUS = 0.0135; // real pinball: 27 mm diameter
 
+/**
+ * Pinball Fantasies convention: the plunger lane lives OUTSIDE the playfield
+ * walls. The playfield proper is 0..0.52 with every structural element
+ * mirror-symmetric about x = 0.26; the lane (0.52..0.575) is appended on the
+ * right and only meets the playfield through the orbit at the top.
+ */
 export const TABLE = {
-  width: 0.52,
+  width: 0.575,
+  /** Right wall of the symmetric playfield = inner wall of the plunger lane. */
+  playfieldW: 0.52,
   height: 1.05,
   /** x of the wall separating the plunger lane from the playfield. */
-  laneWallX: 0.465,
-  /** y where the plunger lane opens into the playfield. */
+  laneWallX: 0.52,
+  /** y where the plunger lane's inner wall ends (orbit tail joins here). */
   laneTopY: 0.3,
-  spawn: { x: 0.4925, y: 1.0 },
-  /** Drain sensor box (centre + half extents), spanning outlanes + centre gap. */
-  drain: { cx: 0.2325, cy: 1.02, hw: 0.2325, hh: 0.015 },
+  spawn: { x: 0.5475, y: 1.0 },
+  /** Drain sensor box: spans the playfield only, never the plunger lane. */
+  drain: { cx: 0.26, cy: 1.02, hw: 0.26, hh: 0.015 },
 } as const;
 
 export const FLIPPER = {
@@ -48,8 +56,14 @@ export const FLIPPER = {
 
 export type FlipperSide = "left" | "right";
 
-/** Outer arch across the top (also the orbit's outer wall). */
+/**
+ * Outer arch across the top (also the orbit's outer wall). The left quarter
+ * is r 0.26 about (0.26, 0.26); the top-right quarter is r 0.315 about
+ * (0.26, 0.315) so it reaches over the plunger lane — both arcs share the
+ * apex (0.26, 0) with a horizontal tangent, so the shell is smooth.
+ */
 export const ARCH = { cx: 0.26, cy: 0.26, r: 0.26 } as const;
+export const ARCH_RIGHT = { cx: 0.26, cy: 0.315, r: 0.315 } as const;
 
 /**
  * The orbit ("ramp" of milestone 3): an inner guide wall concentric with the
@@ -70,11 +84,11 @@ export interface BumperDef {
   y: number;
   r: number;
 }
-/** Pop bumper triangle, mid-upper field. All edge gaps > 38 mm. */
+/** Pop bumper triangle, mid-upper field, symmetric about x = 0.26. */
 export const BUMPERS: readonly BumperDef[] = [
-  { id: "1", x: 0.2, y: 0.34, r: 0.028 },
-  { id: "2", x: 0.33, y: 0.32, r: 0.028 },
-  { id: "3", x: 0.265, y: 0.42, r: 0.028 },
+  { id: "1", x: 0.19, y: 0.33, r: 0.028 },
+  { id: "2", x: 0.33, y: 0.33, r: 0.028 },
+  { id: "3", x: 0.26, y: 0.425, r: 0.028 },
 ];
 
 export interface SlingDef {
@@ -93,15 +107,12 @@ export const SLINGS: readonly SlingDef[] = [
     ],
     kick: { x: 0.848, y: -0.53 },
   },
-  // Right sling sits 20 mm further from the lane wall than mirror-symmetry
-  // would put it: at x 0.43 its bottom corner left a 26 mm wedge against the
-  // right funnel wall (soak-verified trap); at 0.41 the passage is 41 mm.
   {
     id: "right",
     verts: [
-      { x: 0.41, y: 0.72 },
-      { x: 0.41, y: 0.8 },
-      { x: 0.36, y: 0.8 },
+      { x: 0.43, y: 0.72 },
+      { x: 0.43, y: 0.8 },
+      { x: 0.38, y: 0.8 },
     ],
     kick: { x: -0.848, y: -0.53 },
   },
@@ -113,7 +124,7 @@ export const SLINGS: readonly SlingDef[] = [
  * brackets above and below the bank.
  */
 export const DROP_TARGETS = {
-  x: 0.44, // center of the thin boxes
+  x: 0.495, // center of the thin boxes, housed against the playfield's right wall
   hw: 0.004,
   hh: 0.018,
   ys: [0.518, 0.56, 0.602],
@@ -138,7 +149,7 @@ export const SPINNER = { x: ORBIT.laneX / 2, y: 0.4, halfW: ORBIT.laneX / 2 } as
 /** Orbit entry (bottom of the left lane) and exit (right arch channel) sensors. */
 export const ORBIT_SENSORS = {
   entry: { x: ORBIT.laneX / 2, y: 0.5, hw: 0.03, hh: 0.008 },
-  exit: { x: 0.457, y: 0.146, hw: 0.012, hh: 0.012 },
+  exit: { x: 0.46, y: 0.135, hw: 0.018, hh: 0.018 },
 } as const;
 
 /** y of the inner orbit arc at a given x (for butting the lane dividers into it). */
@@ -175,18 +186,25 @@ export interface Polyline {
 export function wallPolylines(): Polyline[] {
   const { width, height, laneWallX, laneTopY } = TABLE;
 
-  // Rounded arch across the top: semicircle radius = half table width.
-  const R = width / 2;
+  // Outer shell: left wall, r-0.26 quarter-arc to the apex, then the larger
+  // r-0.315 quarter-arc down over the plunger lane, right wall. Both arcs
+  // pass through (0.26, 0) with a horizontal tangent — no kink at the apex.
   const outer: Pt[] = [
     { x: 0, y: height },
-    { x: 0, y: R },
+    { x: 0, y: ARCH.cy },
   ];
-  const N = 14;
-  for (let i = 1; i < N; i++) {
-    const th = Math.PI - (i * Math.PI) / N;
-    outer.push({ x: R + R * Math.cos(th), y: R - R * Math.sin(th) });
+  const N = 7;
+  for (let i = 1; i <= N; i++) {
+    const th = Math.PI - (i * (Math.PI / 2)) / N; // 180° → 90°
+    outer.push({ x: ARCH.cx + ARCH.r * Math.cos(th), y: ARCH.cy - ARCH.r * Math.sin(th) });
   }
-  outer.push({ x: width, y: R });
+  for (let i = 1; i <= N; i++) {
+    const th = Math.PI / 2 - (i * (Math.PI / 2)) / N; // 90° → 0°
+    outer.push({
+      x: ARCH_RIGHT.cx + ARCH_RIGHT.r * Math.cos(th),
+      y: ARCH_RIGHT.cy - ARCH_RIGHT.r * Math.sin(th),
+    });
+  }
   outer.push({ x: width, y: height }); // loop closure adds the floor
 
   return [
@@ -212,10 +230,11 @@ export function wallPolylines(): Polyline[] {
       ],
       loop: false,
     },
+    // exact mirror of the left funnel now that the lane sits outside
     {
       pts: [
-        { x: laneWallX, y: 0.8 },
-        { x: 0.34, y: 0.9421 }, // tangent to right base circle
+        { x: TABLE.playfieldW, y: 0.8 },
+        { x: 0.3416, y: 0.9406 }, // tangent to right base circle
         { x: 0.357, y: 0.955 }, // buried inside the circle
         { x: 0.357, y: height },
       ],
