@@ -118,20 +118,28 @@ export class Renderer2D implements Renderer {
     // tall; blitting all of it rasterized ~45% wasted pixels every frame).
     this.ensureArt(s); // s is device px per metre (canvas is DPR-sized)
     if (this.art) {
+      // Quantize the slice to WHOLE source pixels and derive the destination
+      // from them: browsers snap drawImage source rects to texels, so a
+      // fractionally-moving source judders against the smooth transform.
+      // With integer source + matching dest the mapping is constant and all
+      // scroll motion comes from the transform — as smooth as a full blit.
       const pad = 0.03 + Math.abs(camera.shakeY); // slack for shake + rounding
-      const top = Math.max(0, camera.y - pad);
-      const bot = Math.min(this.table.height, camera.y + camera.viewH + pad);
       const pxPerM = this.art.height / this.table.height;
+      const sy = Math.max(0, Math.floor((camera.y - pad) * pxPerM));
+      const sh = Math.min(
+        this.art.height - sy,
+        Math.ceil((camera.viewH + 2 * pad) * pxPerM) + 2,
+      );
       ctx.drawImage(
         this.art,
         0,
-        top * pxPerM,
+        sy,
         this.art.width,
-        (bot - top) * pxPerM,
+        sh,
         0,
-        top,
+        sy / pxPerM,
         this.table.width,
-        bot - top,
+        sh / pxPerM,
       );
     } else {
       ctx.fillStyle = "#1b1e2c";
