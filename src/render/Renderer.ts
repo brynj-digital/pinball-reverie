@@ -70,7 +70,8 @@ export interface WorldSnapshot {
   debugShapes?: DebugShape[];
 }
 
-export type EffectKind = "flash" | "shake" | "trail";
+/** In-world juice effects (plan §5d): impact ring, launch puff, drain pulse. */
+export type EffectKind = "flash" | "launch" | "drain";
 
 export interface Renderer {
   init(table: TableRenderData): void;

@@ -54,6 +54,12 @@ export class DotMatrix {
     this.dirty = true;
   }
 
+  /** Copy a whole baked frame onto the grid. */
+  blit(levels: Uint8Array): void {
+    this.grid.set(levels);
+    this.dirty = true;
+  }
+
   set(x: number, y: number, level: number): void {
     if (x < 0 || x >= DMD_COLS || y < 0 || y >= DMD_ROWS) return;
     this.grid[y * DMD_COLS + x] = level;

@@ -75,6 +75,34 @@ export class MessageScene implements DmdScene {
   }
 }
 
+/**
+ * A baked animation (frames from bake.ts) with an optional caption row —
+ * the runtime form of Claude Design-authored event scenes (plan §5c).
+ */
+export class BakedDmdScene implements DmdScene {
+  private t = 0;
+  private lastFrame = -1;
+
+  constructor(
+    private frames: Uint8Array[],
+    private fps: number,
+    private caption?: string,
+    private holdS = 0.7,
+  ) {}
+
+  update(dt: number, dmd: DotMatrix): boolean {
+    this.t += dt;
+    if (this.t >= this.frames.length / this.fps + this.holdS) return true;
+    const idx = Math.min(this.frames.length - 1, Math.floor(this.t * this.fps));
+    if (idx !== this.lastFrame) {
+      this.lastFrame = idx;
+      dmd.blit(this.frames[idx]);
+      if (this.caption) dmd.centerText(this.caption, 24, 2);
+    }
+    return false;
+  }
+}
+
 /** Attract-mode loop: title, prompt, high score. Never finishes. */
 export class AttractScene implements DmdScene {
   private t = 0;

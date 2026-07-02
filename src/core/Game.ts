@@ -13,7 +13,16 @@ import { Scoring } from "../game/Scoring";
 import { HighScores } from "../game/HighScores";
 import { DotMatrix } from "../render/dmd/DotMatrix";
 import { DmdQueue } from "../render/dmd/DmdQueue";
-import { AttractScene, MessageScene, ScoreScene, fmtScore } from "../render/dmd/DmdScene";
+import {
+  AttractScene,
+  BakedDmdScene,
+  MessageScene,
+  ScoreScene,
+  fmtScore,
+} from "../render/dmd/DmdScene";
+import { bakeDmdFrames } from "../render/dmd/bake";
+import orbitSceneSvg from "../../design/dmd-scenes/orbit.svg?raw";
+import multiplierSceneSvg from "../../design/dmd-scenes/multiplier.svg?raw";
 import { buildTableFromSvg, type DevTable } from "../table/DevTable";
 // The playfield SVG is both physics source (→ SvgCollision) and art (the
 // renderer rasterizes the same text at display scale): one file, both jobs.
@@ -80,6 +89,8 @@ export class Game {
   private tiltBob = 0;
   private tilted = false;
   private gameOverUntil = 0;
+  /** Baked Claude Design DMD scenes (loaded async; text scenes until ready). */
+  private baked: { orbit?: Uint8Array[]; moon?: Uint8Array[] } = {};
 
   constructor(canvas: HTMLCanvasElement) {
     this.tuning = loadTuning();
@@ -115,38 +126,58 @@ export class Game {
     }));
     this.attractScene = new AttractScene(() => this.highScores.top);
     this.dmdQueue = new DmdQueue(this.attractScene);
+    void bakeDmdFrames(orbitSceneSvg, 8).then((f) => (this.baked.orbit = f));
+    void bakeDmdFrames(multiplierSceneSvg, 6).then((f) => (this.baked.moon = f));
 
     this.bus.on("sensor", ({ kind, id }) => {
       // Drain starts a short visible fall-out (ball keeps simulating, fades,
       // then respawns) instead of teleporting away the instant the sensor
       // fires — the sensor sits above the floor, mid-drop.
-      if (kind === "drain" && this.drainTimer <= 0) this.drainTimer = 0.7;
-      else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
+      if (kind === "drain" && this.drainTimer <= 0) {
+        this.drainTimer = 0.7;
+        this.renderer.spawnEffect("drain", 0.26, 1.0);
+        this.camera.shake(0.003);
+      } else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
       else if (kind === "rollover" && id) {
         this.rolloverLit.set(id, 1);
         this.onMoonLit(id);
       }
     });
     this.bus.on("launch", () => {
+      this.renderer.spawnEffect("launch", TABLE.spawn.x, TABLE.spawn.y);
+      this.camera.shake(0.002);
       if (this.phase === "play" && !this.ballStarted) {
         this.ballStarted = true;
         this.saverUntil = this.gameTime + BALL_SAVER_S;
       }
     });
     this.bus.on("score", ({ label, points }) => {
-      if (DMD_LABELS.has(label))
+      if (label === "ORBIT" && this.baked.orbit) {
+        this.dmdQueue.push(new BakedDmdScene(this.baked.orbit, 11, `ORBIT ${fmtScore(points)}`));
+      } else if (DMD_LABELS.has(label)) {
         this.dmdQueue.push(new MessageScene([[label, fmtScore(points)]], 1.3));
+      }
     });
     this.bus.on("hit", ({ kind, id }) => {
-      if (kind === "bumper")
-        this.bumpers
-          .find((b) => b.def.id === id)
-          ?.kick(this.ball, this.physics, this.tuning.bumperKick);
-      else if (kind === "sling")
-        this.slings
-          .find((s) => s.def.id === id)
-          ?.kick(this.ball, this.physics, this.tuning.slingKick);
-      else if (kind === "target") this.targetBank.onHit(id);
+      if (kind === "bumper") {
+        const b = this.bumpers.find((b) => b.def.id === id);
+        b?.kick(this.ball, this.physics, this.tuning.bumperKick);
+        if (b) this.renderer.spawnEffect("flash", b.def.x, b.def.y);
+        this.camera.shake(0.0028);
+      } else if (kind === "sling") {
+        const sl = this.slings.find((s) => s.def.id === id);
+        if (sl?.kick(this.ball, this.physics, this.tuning.slingKick)) {
+          const c = sl.def.verts.reduce(
+            (a, p) => ({ x: a.x + p.x / 3, y: a.y + p.y / 3 }),
+            { x: 0, y: 0 },
+          );
+          this.renderer.spawnEffect("flash", c.x, c.y);
+          this.camera.shake(0.0022);
+        }
+      } else if (kind === "target") {
+        this.targetBank.onHit(id);
+        this.camera.shake(0.0015);
+      }
     });
   }
 
@@ -295,8 +326,11 @@ export class Game {
       this.litMoons.clear();
       if (this.scoring.multiplier < 5) {
         this.scoring.multiplier++;
+        const caption = `MULTIPLIER ×${this.scoring.multiplier}`;
         this.dmdQueue.push(
-          new MessageScene([[`MULTIPLIER ×${this.scoring.multiplier}`]], 1.4, true),
+          this.baked.moon
+            ? new BakedDmdScene(this.baked.moon, 9, caption)
+            : new MessageScene([[caption]], 1.4, true),
           2,
         );
       }
@@ -313,9 +347,11 @@ export class Game {
           ? new Vec2(0.02, -0.008)
           : new Vec2(0, -0.024);
     this.ball.body.applyLinearImpulse(imp, this.ball.body.getPosition(), true);
+    this.camera.shake(0.006);
     this.tiltBob += 1;
     if (this.tiltBob > TILT_LIMIT) {
       this.tilted = true;
+      this.camera.shake(0.012);
       this.dmdQueue.push(new MessageScene([["TILT"]], 3.5, true), 3);
     } else if (this.tiltBob > TILT_LIMIT - 1) {
       this.dmdQueue.push(new MessageScene([["CAREFUL!"]], 0.8), 1);

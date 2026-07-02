@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 32" width="768" height="32">
+  <!-- MOONDIAL DMD scene: MULTIPLIER — the moon waxes to full. 6 frames. -->
+  <rect width="768" height="32" fill="#000"/>
+  <g transform="translate(0,0)">
+    <circle cx="24" cy="7" r="0.9" fill="#666"/><circle cx="102" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="16" r="11" fill="#fff"/>
+    <circle cx="68.0" cy="16" r="11" fill="#000"/>
+    
+  </g>
+  <g transform="translate(128,0)">
+    <circle cx="24" cy="7" r="0.9" fill="#666"/><circle cx="102" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="16" r="11" fill="#fff"/>
+    <circle cx="73.2" cy="16" r="11" fill="#000"/>
+    
+  </g>
+  <g transform="translate(256,0)">
+    <circle cx="24" cy="7" r="0.9" fill="#666"/><circle cx="102" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="16" r="11" fill="#fff"/>
+    <circle cx="78.4" cy="16" r="11" fill="#000"/>
+    
+  </g>
+  <g transform="translate(384,0)">
+    <circle cx="24" cy="7" r="0.9" fill="#666"/><circle cx="102" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="16" r="11" fill="#fff"/>
+    <circle cx="83.6" cy="16" r="11" fill="#000"/>
+    
+  </g>
+  <g transform="translate(512,0)">
+    <circle cx="24" cy="7" r="0.9" fill="#666"/><circle cx="102" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="16" r="11" fill="#fff"/>
+    <circle cx="88.8" cy="16" r="11" fill="#000"/>
+    
+  </g>
+  <g transform="translate(640,0)">
+    <circle cx="24" cy="7" r="0.9" fill="#666"/><circle cx="102" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="16" r="11" fill="#fff"/>
+    <circle cx="94.0" cy="16" r="11" fill="#000"/>
+    <line x1="74.7" y1="23.3" x2="77.2" y2="25.0" stroke="#888" stroke-width="1.4"/><line x1="56.3" y1="26.5" x2="54.6" y2="28.9" stroke="#888" stroke-width="1.4"/><line x1="54.6" y1="7.1" x2="52.4" y2="5.0" stroke="#888" stroke-width="1.4"/><line x1="72.3" y1="6.0" x2="74.2" y2="3.6" stroke="#888" stroke-width="1.4"/>
+  </g>
+</svg>

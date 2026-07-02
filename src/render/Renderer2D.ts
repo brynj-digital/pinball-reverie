@@ -91,11 +91,11 @@ export class Renderer2D implements Renderer {
     ctx.fillStyle = "#0c0d14";
     ctx.fillRect(0, 0, w, h);
 
-    // world transform: metres → pixels, camera scroll, table centred
+    // world transform: metres → pixels, camera scroll + shake, table centred
     const s = h / camera.viewH;
     const ox = (w - s * this.table.width) / 2;
     this.lastOx = ox;
-    ctx.setTransform(s, 0, 0, s, ox, -camera.y * s);
+    ctx.setTransform(s, 0, 0, s, ox + camera.shakeX * s, -(camera.y + camera.shakeY) * s);
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -109,6 +109,7 @@ export class Renderer2D implements Renderer {
     }
 
     this.drawElements(snap);
+    this.drawEffects();
     this.drawPlunger(snap.plungerCharge);
 
     // flippers
@@ -216,8 +217,37 @@ export class Renderer2D implements Renderer {
     this.drawHud(snap, w, h, dpr);
   }
 
-  spawnEffect(_kind: EffectKind, _x: number, _y: number): void {
-    // in-world juice lands in Milestone 5
+  private effects: { kind: EffectKind; x: number; y: number; born: number }[] = [];
+
+  spawnEffect(kind: EffectKind, x: number, y: number): void {
+    this.effects.push({ kind, x, y, born: performance.now() / 1000 });
+    if (this.effects.length > 24) this.effects.shift();
+  }
+
+  /** Pooled expanding-ring effects, additive, per §5d. */
+  private drawEffects(): void {
+    if (this.effects.length === 0) return;
+    const { ctx } = this;
+    const now = performance.now() / 1000;
+    const COLORS: Record<EffectKind, string> = {
+      flash: "#52e0e8",
+      launch: "#f4d27a",
+      drain: "#8c6bff",
+    };
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    this.effects = this.effects.filter((e) => {
+      const f = (now - e.born) / 0.35;
+      if (f >= 1) return false;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, 0.012 + f * 0.045, 0, Math.PI * 2);
+      ctx.strokeStyle = COLORS[e.kind];
+      ctx.globalAlpha = 0.7 * (1 - f);
+      ctx.lineWidth = 0.005 * (1 - f) + 0.001;
+      ctx.stroke();
+      return true;
+    });
+    ctx.restore();
   }
 
   /**
