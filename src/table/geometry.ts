@@ -34,7 +34,23 @@ export const TABLE = {
   laneWallX: 0.52,
   /** y where the plunger lane's inner wall ends (orbit tail joins here). */
   laneTopY: 0.3,
-  spawn: { x: 0.5475, y: 1.0 },
+  spawn: { x: 0.5475, y: 0.98 },
+} as const;
+
+/**
+ * Plunger visuals: the ball rests on a saddle bar (collision, in the SVG);
+ * the renderer draws the animated rod + spring assembly beneath it.
+ */
+export const PLUNGER = {
+  x: 0.5475,
+  /** Centerline y of the saddle bar the ball rests on. */
+  saddleY: 1.0,
+  /** Rod tip rest y (just under the saddle). */
+  tipRestY: 0.998,
+  /** How far the tip retracts at full charge (spring keeps ~9 mm squashed height). */
+  pull: 0.02,
+  /** Spring base plate y (on the lane floor). */
+  baseY: 1.04,
 } as const;
 
 export const FLIPPER = {

@@ -1,4 +1,13 @@
-import { World, Vec2, Contact, CircleShape, PolygonShape, ChainShape, Settings } from "planck";
+import {
+  World,
+  Vec2,
+  Body,
+  Contact,
+  CircleShape,
+  PolygonShape,
+  ChainShape,
+  Settings,
+} from "planck";
 import { EventBus } from "./EventBus";
 import type { Tuning } from "../tuning";
 import { effectiveGravity } from "../tuning";
@@ -87,31 +96,53 @@ export class PhysicsWorld {
       this.bus.emit("hit", { kind: other.kind, id: other.id ?? "" });
   }
 
-  /** Fixture outlines for the debug overlay (plan §5e: non-negotiable). */
+  private staticShapeCache: DebugShape[] | null = null;
+  private staticFixtureCount = -1;
+
+  /**
+   * Fixture outlines for the debug overlay (plan §5e: non-negotiable).
+   * Static bodies never move, so their shapes are cached and rebuilt only
+   * when the static fixture count changes (drop targets destroy/recreate);
+   * only dynamic bodies (ball, flippers) are recomputed per frame.
+   */
   collectDebugShapes(): DebugShape[] {
-    const shapes: DebugShape[] = [];
-    for (let body = this.world.getBodyList(); body; body = body.getNext()) {
-      for (let f = body.getFixtureList(); f; f = f.getNext()) {
-        const sensor = f.isSensor();
-        const type = f.getType();
-        if (type === "circle") {
-          const s = f.getShape() as CircleShape;
-          const p = body.getWorldPoint(s.m_p);
-          shapes.push({ type: "circle", x: p.x, y: p.y, r: s.m_radius, sensor });
-        } else if (type === "polygon" || type === "chain") {
-          const verts = (f.getShape() as PolygonShape | ChainShape).m_vertices;
-          shapes.push({
-            type: "poly",
-            pts: verts.map((v) => {
-              const p = body.getWorldPoint(v);
-              return { x: p.x, y: p.y };
-            }),
-            closed: type === "polygon",
-            sensor,
-          });
-        }
+    let staticCount = 0;
+    for (let body = this.world.getBodyList(); body; body = body.getNext())
+      if (body.isStatic()) for (let f = body.getFixtureList(); f; f = f.getNext()) staticCount++;
+
+    if (!this.staticShapeCache || staticCount !== this.staticFixtureCount) {
+      this.staticShapeCache = [];
+      for (let body = this.world.getBodyList(); body; body = body.getNext())
+        if (body.isStatic()) this.collectBodyShapes(body, this.staticShapeCache);
+      this.staticFixtureCount = staticCount;
+    }
+
+    const shapes = this.staticShapeCache.slice();
+    for (let body = this.world.getBodyList(); body; body = body.getNext())
+      if (!body.isStatic()) this.collectBodyShapes(body, shapes);
+    return shapes;
+  }
+
+  private collectBodyShapes(body: Body, out: DebugShape[]): void {
+    for (let f = body.getFixtureList(); f; f = f.getNext()) {
+      const sensor = f.isSensor();
+      const type = f.getType();
+      if (type === "circle") {
+        const s = f.getShape() as CircleShape;
+        const p = body.getWorldPoint(s.m_p);
+        out.push({ type: "circle", x: p.x, y: p.y, r: s.m_radius, sensor });
+      } else if (type === "polygon" || type === "chain") {
+        const verts = (f.getShape() as PolygonShape | ChainShape).m_vertices;
+        out.push({
+          type: "poly",
+          pts: verts.map((v) => {
+            const p = body.getWorldPoint(v);
+            return { x: p.x, y: p.y };
+          }),
+          closed: type === "polygon",
+          sensor,
+        });
       }
     }
-    return shapes;
   }
 }

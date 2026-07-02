@@ -28,6 +28,9 @@ const SLIDERS: SliderDef[] = [
  * hardcode). Mutates the shared Tuning object in place; Game reads it live.
  */
 export class TuningPanel {
+  /** Bumped on every user change; Game re-applies tuning only when it moves. */
+  version = 0;
+
   private root: HTMLDivElement;
   private refreshers: (() => void)[] = [];
 
@@ -82,6 +85,7 @@ export class TuningPanel {
     input.oninput = () => {
       (this.tuning as unknown as Record<string, number>)[def.key] = parseFloat(input.value);
       value.textContent = parseFloat(input.value).toFixed(def.step < 0.1 ? 2 : 1);
+      this.version++;
       saveTuning(this.tuning);
     };
 
@@ -117,6 +121,7 @@ export class TuningPanel {
     btn.textContent = "Reset to defaults";
     btn.onclick = () => {
       Object.assign(this.tuning, DEFAULT_TUNING);
+      this.version++;
       saveTuning(this.tuning);
       this.refreshers.forEach((fn) => fn());
     };

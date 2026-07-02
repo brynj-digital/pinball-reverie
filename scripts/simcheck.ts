@@ -16,7 +16,15 @@ import { Slingshot } from "../src/entities/Slingshot";
 import { DropTargetBank } from "../src/entities/DropTargetBank";
 import { Spinner } from "../src/entities/Spinner";
 import { Scoring } from "../src/game/Scoring";
-import { TABLE, FLIPPER, BALL_RADIUS, BUMPERS, SLINGS, DROP_TARGETS } from "../src/table/geometry";
+import {
+  TABLE,
+  FLIPPER,
+  PLUNGER,
+  BALL_RADIUS,
+  BUMPERS,
+  SLINGS,
+  DROP_TARGETS,
+} from "../src/table/geometry";
 import { DEFAULT_TUNING } from "../src/tuning";
 
 let failures = 0;
@@ -87,16 +95,16 @@ function placeBall(x: number, y: number, vx = 0, vy = 0): void {
   ball.body.setAngularVelocity(0);
 }
 
-// 1 — ball falls under slope-gravity and settles ON the plunger-lane floor
+// 1 — ball falls under slope-gravity and settles ON the plunger saddle
 run(2);
 {
   const p = ball.body.getPosition();
   const v = ball.body.getLinearVelocity();
-  const restY = TABLE.height - wallR - BALL_RADIUS;
+  const restY = PLUNGER.saddleY - wallR - BALL_RADIUS;
   check(
-    "ball settles ON the lane floor",
+    "ball settles ON the plunger saddle",
     Math.abs(p.y - restY) < 0.004 && p.x > TABLE.laneWallX && Math.abs(v.y) < 0.05,
-    `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)}), saddle rest y=${restY.toFixed(3)}`,
   );
 }
 

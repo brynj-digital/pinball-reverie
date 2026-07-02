@@ -363,6 +363,8 @@
       <path data-width="12" id="collision-wall-divider-right" d="M 305 74.3 L 305 150"/>
       <!-- drop-target bank housing -->
       <path data-width="12" id="collision-wall-bank-housing" d="M 520 490 L 503 498 L 503 622 L 520 630"/>
+      <!-- plunger saddle: the ball rests here, above the animated spring -->
+      <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>
   </defs>
   <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -387,7 +389,7 @@
   <g fill="none" stroke="none">
     <circle id="anchor-flipper-left" cx="171" cy="950" r="5"/>
     <circle id="anchor-flipper-right" cx="349" cy="950" r="5"/>
-    <circle id="anchor-spawn" cx="547.5" cy="1000" r="5"/>
+    <circle id="anchor-spawn" cx="547.5" cy="980" r="5"/>
     <circle id="anchor-bumper-1" cx="190" cy="330" r="5"/>
     <circle id="anchor-bumper-2" cx="330" cy="330" r="5"/>
     <circle id="anchor-bumper-3" cx="260" cy="425" r="5"/>

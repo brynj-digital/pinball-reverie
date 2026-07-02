@@ -1,5 +1,5 @@
 import type { Camera } from "../core/Camera";
-import { BALL_RADIUS, FLIPPER, flipperVerts } from "../table/geometry";
+import { BALL_RADIUS, FLIPPER, PLUNGER, flipperVerts } from "../table/geometry";
 import type {
   EffectKind,
   Renderer,
@@ -41,6 +41,8 @@ export class Renderer2D implements Renderer {
   private ballArt?: HTMLImageElement;
   /** Recent ball positions for the speed-scaled motion trail. */
   private trail: { x: number; y: number }[] = [];
+  private lastCharge = 0;
+  private strikeAt = -Infinity; // performance.now()/1000 of the last release
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
@@ -105,6 +107,7 @@ export class Renderer2D implements Renderer {
     }
 
     this.drawElements(snap);
+    this.drawPlunger(snap.plungerCharge);
 
     // flippers
     for (const f of snap.flippers) {
@@ -213,22 +216,93 @@ export class Renderer2D implements Renderer {
   }
 
   /**
-   * Additive radial halo (style guide §7: lamps glow additively). rgb is
-   * "r, g, b" so alpha can be composed per stop.
+   * The plunger assembly under the saddle: chrome rod + tip plate, a coil
+   * spring that squashes as the charge pulls the rod down, and a brass base.
+   * On release the tip snaps up with a brief overshoot past its rest.
+   */
+  private drawPlunger(charge: number): void {
+    const { ctx } = this;
+    const now = performance.now() / 1000;
+    if (this.lastCharge > 0.1 && charge === 0) this.strikeAt = now;
+    this.lastCharge = charge;
+
+    const strikePhase = (now - this.strikeAt) / 0.14;
+    const overshoot =
+      strikePhase >= 0 && strikePhase < 1 ? Math.sin(Math.PI * strikePhase) * 0.007 : 0;
+    const tipY = PLUNGER.tipRestY + PLUNGER.pull * charge - overshoot;
+    const x = PLUNGER.x;
+
+    // coil spring between rod bottom and base plate
+    const springTop = tipY + 0.013;
+    const springBot = PLUNGER.baseY;
+    const coils = 6;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    for (const [w, color] of [
+      [0.0045, "#07080d"],
+      [0.0024, "#7f8fc9"],
+    ] as const) {
+      ctx.beginPath();
+      ctx.moveTo(x, springTop);
+      for (let i = 0; i < coils; i++) {
+        const t0 = springTop + ((i + 0.5) * (springBot - springTop)) / coils;
+        ctx.lineTo(x + (i % 2 === 0 ? 0.011 : -0.011), t0);
+      }
+      ctx.lineTo(x, springBot);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = w;
+      ctx.stroke();
+    }
+
+    // rod + tip plate
+    ctx.fillStyle = "#aeb6c8";
+    ctx.strokeStyle = "#07080d";
+    ctx.lineWidth = 0.0015;
+    ctx.beginPath();
+    ctx.rect(x - 0.004, tipY, 0.008, 0.014);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.roundRect(x - 0.009, tipY - 0.005, 0.018, 0.005, 0.0015);
+    ctx.fillStyle = "#d7dce8";
+    ctx.fill();
+    ctx.stroke();
+
+    // base plate
+    ctx.beginPath();
+    ctx.roundRect(x - 0.011, springBot, 0.022, 0.006, 0.0015);
+    ctx.fillStyle = "#e0b64e";
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  private glowSprites = new Map<string, HTMLCanvasElement>();
+
+  /**
+   * Additive radial halo (style guide §7: lamps glow additively). The
+   * gradient is baked once per color into a small sprite; per-frame cost is
+   * a single drawImage with globalAlpha — same output as a live gradient.
    */
   private drawGlow(x: number, y: number, radius: number, rgb: string, alpha: number): void {
     if (alpha <= 0.01) return;
+    let sprite = this.glowSprites.get(rgb);
+    if (!sprite) {
+      sprite = document.createElement("canvas");
+      sprite.width = sprite.height = 64;
+      const g = sprite.getContext("2d")!;
+      const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, `rgba(${rgb}, 0.55)`);
+      grad.addColorStop(0.4, `rgba(${rgb}, 0.25)`);
+      grad.addColorStop(1, `rgba(${rgb}, 0)`);
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 64, 64);
+      this.glowSprites.set(rgb, sprite);
+    }
     const { ctx } = this;
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
-    g.addColorStop(0, `rgba(${rgb}, ${0.55 * alpha})`);
-    g.addColorStop(0.4, `rgba(${rgb}, ${0.25 * alpha})`);
-    g.addColorStop(1, `rgba(${rgb}, 0)`);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(sprite, x - radius, y - radius, radius * 2, radius * 2);
     ctx.restore();
   }
 

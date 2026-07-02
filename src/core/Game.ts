@@ -44,6 +44,8 @@ export class Game {
   private renderer: Renderer;
   private input: Input;
 
+  private panel: TuningPanel;
+  private appliedTuningVersion = -1; // force one application on the first frame
   private plungerCharge = 0;
   private charging = false;
   private pendingDrain = false;
@@ -71,7 +73,7 @@ export class Game {
     this.renderer.init(this.table.renderData);
     this.input = new Input();
     this.input.onReset(() => this.respawn());
-    new TuningPanel(this.tuning);
+    this.panel = new TuningPanel(this.tuning);
 
     this.bus.on("sensor", ({ kind, id }) => {
       // world is mid-step during contact callbacks — defer mutation to after update()
@@ -110,12 +112,15 @@ export class Game {
     const t = this.tuning;
     const s = this.input.state;
 
-    // live tuning → physics
-    this.physics.setSlope(t);
-    this.ball.applyTuning(t);
-    for (const f of this.table.wallFixtures) {
-      f.setRestitution(t.wallRestitution);
-      f.setFriction(t.wallFriction);
+    // live tuning → physics, only when a slider actually moved
+    if (this.panel.version !== this.appliedTuningVersion) {
+      this.appliedTuningVersion = this.panel.version;
+      this.physics.setSlope(t);
+      this.ball.applyTuning(t);
+      for (const f of this.table.wallFixtures) {
+        f.setRestitution(t.wallRestitution);
+        f.setFriction(t.wallFriction);
+      }
     }
 
     this.flippers[0].update(s.left || this.input.consumeTap("left"), t);
