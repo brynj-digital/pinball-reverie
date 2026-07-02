@@ -21,6 +21,9 @@ export class DotMatrix {
   private grid = new Uint8Array(DMD_COLS * DMD_ROWS);
   private dirty = true;
   private sprites: HTMLCanvasElement[];
+  /** The all-off panel (bg + every level-0 dot), baked once — repaints blit
+   * this and then stamp only the lit dots (~10× fewer draw calls). */
+  private unlitPanel: HTMLCanvasElement;
 
   constructor() {
     this.canvas.width = DMD_COLS * SCALE;
@@ -47,6 +50,16 @@ export class DotMatrix {
       }
       return c;
     });
+
+    this.unlitPanel = document.createElement("canvas");
+    this.unlitPanel.width = this.canvas.width;
+    this.unlitPanel.height = this.canvas.height;
+    const g = this.unlitPanel.getContext("2d")!;
+    g.fillStyle = "#0f0805";
+    g.fillRect(0, 0, this.unlitPanel.width, this.unlitPanel.height);
+    for (let y = 0; y < DMD_ROWS; y++)
+      for (let x = 0; x < DMD_COLS; x++)
+        g.drawImage(this.sprites[0], x * SCALE - SCALE, y * SCALE - SCALE);
   }
 
   clear(): void {
@@ -84,11 +97,14 @@ export class DotMatrix {
   render(): void {
     if (!this.dirty) return;
     this.dirty = false;
-    const { ctx } = this;
-    ctx.fillStyle = "#0f0805";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    for (let y = 0; y < DMD_ROWS; y++)
-      for (let x = 0; x < DMD_COLS; x++)
-        ctx.drawImage(this.sprites[this.grid[y * DMD_COLS + x]], x * SCALE - SCALE, y * SCALE - SCALE);
+    const { ctx, grid, sprites } = this;
+    ctx.drawImage(this.unlitPanel, 0, 0);
+    for (let y = 0; y < DMD_ROWS; y++) {
+      const row = y * DMD_COLS;
+      for (let x = 0; x < DMD_COLS; x++) {
+        const lv = grid[row + x];
+        if (lv) ctx.drawImage(sprites[lv], x * SCALE - SCALE, y * SCALE - SCALE);
+      }
+    }
   }
 }
