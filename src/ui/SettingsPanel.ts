@@ -47,8 +47,10 @@ export class SettingsPanel {
     title.textContent = "Settings";
     card.appendChild(title);
 
-    card.appendChild(this.volumeRow("SFX volume", "sfxVolume"));
-    card.appendChild(this.volumeRow("Music volume", "musicVolume"));
+    card.appendChild(this.sliderRow("SFX volume", "sfxVolume", 0));
+    card.appendChild(this.sliderRow("Music volume", "musicVolume", 0));
+    // performance option: fewer pixels to paint at the cost of sharpness
+    card.appendChild(this.sliderRow("Render scale", "renderScale", 0.5));
 
     const keysTitle = document.createElement("h3");
     keysTitle.textContent = "Keys";
@@ -113,14 +115,18 @@ export class SettingsPanel {
     for (const [action, btn] of this.keyButtons) btn.textContent = this.input.label(action);
   }
 
-  private volumeRow(label: string, key: "sfxVolume" | "musicVolume"): HTMLElement {
+  private sliderRow(
+    label: string,
+    key: "sfxVolume" | "musicVolume" | "renderScale",
+    min: number,
+  ): HTMLElement {
     const row = document.createElement("div");
     row.className = "vol-row";
     const span = document.createElement("span");
     span.textContent = label;
     const input = document.createElement("input");
     input.type = "range";
-    input.min = "0";
+    input.min = String(min);
     input.max = "1";
     input.step = "0.05";
     input.value = String(this.tuning[key]);

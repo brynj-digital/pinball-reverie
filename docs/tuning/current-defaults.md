@@ -28,6 +28,7 @@ their localStorage values until they hit "Reset to defaults" in the panel.
 | `bumperKick` | 0.09 | — | Pop-bumper impulse |
 | `slingKick` | 0.11 | — | Slingshot impulse |
 | `cameraViewH` | 0.75 | — | Camera zoom (not physics) |
+| `renderScale` | 1 | new 2026-07-02 | Canvas resolution fraction (paint-bound perf option; Esc settings) |
 | `sfxVolume` | 0.5 | — | SFX bus |
 | `musicVolume` | 0.25 | — | Music bus |
 | `debugOverlay` | true | — | Dev overlay |

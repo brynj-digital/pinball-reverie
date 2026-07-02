@@ -86,9 +86,12 @@ export class Renderer2D implements Renderer {
     });
   }
 
+  private dprEff = 1; // native DPR × renderScale, shared with HUD/panel layout
+
   drawFrame(snap: WorldSnapshot, camera: Camera): void {
     const { ctx, canvas } = this;
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = (window.devicePixelRatio || 1) * (snap.renderScale || 1);
+    this.dprEff = dpr;
     const w = Math.round(canvas.clientWidth * dpr);
     const h = Math.round(canvas.clientHeight * dpr);
     if (canvas.width !== w || canvas.height !== h) {
@@ -297,7 +300,7 @@ export class Renderer2D implements Renderer {
    */
   private drawDmdPanel(dmd: HTMLCanvasElement): void {
     const { ctx } = this;
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = this.dprEff;
     const margin = this.lastOx / dpr; // void left of the table, CSS px
     let w: number, x: number, y: number;
     if (margin >= 240) {

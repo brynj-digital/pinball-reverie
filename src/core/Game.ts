@@ -616,6 +616,7 @@ export class Game {
       plungerCharge: this.plungerCharge,
       fps: this.fps,
       jsMs: this.jsMs,
+      renderScale: this.tuning.renderScale,
       dmd: this.dmd.canvas,
       debugShapes: this.tuning.debugOverlay ? this.physics.collectDebugShapes() : undefined,
     };

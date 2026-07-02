@@ -28,6 +28,11 @@ export interface Tuning {
   slingKick: number;
   /** Visible playfield height in metres (camera zoom). */
   cameraViewH: number;
+  /**
+   * Canvas resolution as a fraction of native DPI (0.5–1). Lower = fewer
+   * pixels to paint — the lever for paint-bound machines. 1 = full sharpness.
+   */
+  renderScale: number;
   sfxVolume: number;
   musicVolume: number;
   debugOverlay: boolean;
@@ -51,6 +56,7 @@ export const DEFAULT_TUNING: Tuning = {
   bumperKick: 0.09, // Δv ≈ 1.1 m/s on an 80 g ball
   slingKick: 0.11,
   cameraViewH: 0.75,
+  renderScale: 1,
   sfxVolume: 0.5,
   musicVolume: 0.25,
   debugOverlay: true,
