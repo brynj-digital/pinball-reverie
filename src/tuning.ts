@@ -43,7 +43,7 @@ export const DEFAULT_TUNING: Tuning = {
   ballDensity: 140, // ~80 g for a 13.5 mm-radius disc, matching a real ball
   ballRestitution: 0.2,
   ballFriction: 0.05,
-  ballLinearDamping: 0.15,
+  ballLinearDamping: 0.1,
   ballAngularDamping: 0.02,
   wallRestitution: 0.15,
   wallFriction: 0.1,
