@@ -76,13 +76,16 @@ export function parseTableSvg(svgText: string): ParsedTable {
     if (!a.id?.startsWith("collision-") || !a.d) continue;
     const { pts, loop } = parsePathPoints(a.d);
     if (pts.length < 2) throw new Error(`collision path ${a.id} has <2 points`);
-    if (!a["stroke-width"])
-      throw new Error(`collision path ${a.id} needs an explicit stroke-width`);
+    // data-width is preferred: it isn't a presentation attribute, so art
+    // layers can restroke the same path via <use> at decorative widths
+    const width = a["data-width"] ?? a["stroke-width"];
+    if (!width)
+      throw new Error(`collision path ${a.id} needs an explicit data-width (or stroke-width)`);
     result.walls.push({
       name: a.id,
       pts,
       loop: loop || a.id.startsWith("collision-loop-"),
-      radius: (Number(a["stroke-width"]) / 2) * MM,
+      radius: (Number(width) / 2) * MM,
     });
   }
 

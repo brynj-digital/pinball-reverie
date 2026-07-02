@@ -13,10 +13,10 @@
   </defs>
   <circle cx="13.5" cy="13.5" r="13.2" fill="url(#ballChrome)"/>
   <g clip-path="url(#ballClip)">
-    <ellipse cx="13.5" cy="17" rx="14.5" ry="5" fill="#23262f" opacity="0.55"/>
+    <ellipse cx="13.5" cy="17" rx="14.5" ry="5" fill="#23262f" opacity="0.28"/>
     <ellipse cx="9.5" cy="19.5" rx="9.5" ry="6" fill="#4e37a8" opacity="0.16"/>
     <ellipse cx="13.5" cy="6.8" rx="10.8" ry="4.6" fill="#ffffff" opacity="0.4"/>
-    <ellipse cx="13.5" cy="23" rx="9" ry="3.4" fill="#d7dce8" opacity="0.45"/>
+    <ellipse cx="13.5" cy="23" rx="9" ry="3.4" fill="#d7dce8" opacity="0.18"/>
   </g>
   <circle cx="13.5" cy="13.5" r="13.2" fill="none" stroke="#07080d" stroke-width="0.5"/>
   <circle cx="9.2" cy="8.6" r="2.4" fill="#ffffff"/>

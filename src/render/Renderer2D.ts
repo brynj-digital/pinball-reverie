@@ -111,20 +111,33 @@ export class Renderer2D implements Renderer {
       ctx.save();
       ctx.translate(f.x, f.y);
       ctx.rotate(f.angle);
+      // brass ramp along the bat + rim light on the striking face (§7)
+      const dir = f.side === "left" ? 1 : -1;
+      const bat = ctx.createLinearGradient(0, 0, dir * FLIPPER.length, 0);
+      bat.addColorStop(0, "#f4d27a");
+      bat.addColorStop(0.55, "#e0b64e");
+      bat.addColorStop(1, "#9c7c2c");
       ctx.beginPath();
       flipperVerts(f.side).forEach((p, i) =>
         i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y),
       );
       ctx.closePath();
-      ctx.fillStyle = "#e0b64e";
+      ctx.fillStyle = bat;
       ctx.fill();
-      ctx.strokeStyle = "#9c7c2c";
-      ctx.lineWidth = 0.003;
+      ctx.strokeStyle = "#07080d";
+      ctx.lineWidth = 0.0025;
       ctx.stroke();
       // round base over the pivot, matching the physics fixture
       ctx.beginPath();
       ctx.arc(0, 0, FLIPPER.baseRadius, 0, Math.PI * 2);
       ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(dir * 0.006, -FLIPPER.baseRadius + 0.0025);
+      ctx.lineTo(dir * (FLIPPER.length - 0.005), -0.0055);
+      ctx.strokeStyle = "rgba(255, 246, 214, 0.75)";
+      ctx.lineWidth = 0.0022;
+      ctx.lineCap = "round";
       ctx.stroke();
       ctx.restore();
     }
@@ -263,22 +276,38 @@ export class Renderer2D implements Renderer {
         const cy = s.verts.reduce((a, p) => a + p.y, 0) / s.verts.length;
         this.drawGlow(cx, cy, 0.06, "244, 210, 122", s.flash);
       }
+      const ys = s.verts.map((p) => p.y);
+      const grad = ctx.createLinearGradient(0, Math.min(...ys), 0, Math.max(...ys));
+      grad.addColorStop(0, "#f4d27a");
+      grad.addColorStop(0.5, "#e0b64e");
+      grad.addColorStop(1, "#9c7c2c");
       ctx.beginPath();
       s.verts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
       ctx.closePath();
-      ctx.fillStyle = s.flash > 0.01 ? `rgba(244, 210, 122, ${0.55 + 0.45 * s.flash})` : "#9c7c2c";
+      ctx.fillStyle = s.flash > 0.01 ? `rgba(255, 240, 200, ${0.6 + 0.4 * s.flash})` : grad;
       ctx.fill();
       ctx.lineWidth = 0.003;
       ctx.strokeStyle = "#07080d";
       ctx.stroke();
+      // rim light along the striking face (apex → second vertex)
+      ctx.beginPath();
+      ctx.moveTo(s.verts[0].x, s.verts[0].y);
+      ctx.lineTo(s.verts[1].x, s.verts[1].y);
+      ctx.strokeStyle = "rgba(255, 246, 214, 0.7)";
+      ctx.lineWidth = 0.0025;
+      ctx.lineCap = "round";
+      ctx.stroke();
     }
 
-    // drop targets — brass faces; dropped = dim outline
+    // drop targets — brass faces lit from the playfield side; dropped = dim outline
     for (const t of el.targets) {
       ctx.beginPath();
       ctx.rect(t.x - t.hw, t.y - t.hh, t.hw * 2, t.hh * 2);
       if (t.up) {
-        ctx.fillStyle = "#e0b64e";
+        const tg = ctx.createLinearGradient(t.x - t.hw, 0, t.x + t.hw, 0);
+        tg.addColorStop(0, "#f4d27a");
+        tg.addColorStop(1, "#9c7c2c");
+        ctx.fillStyle = tg;
         ctx.fill();
         ctx.lineWidth = 0.002;
         ctx.strokeStyle = "#07080d";

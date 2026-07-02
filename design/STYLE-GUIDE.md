@@ -66,11 +66,15 @@ prefix; everything else is art. Curves are flattened to ≤1 mm chord error.
 | `anchor-<entity>[-<which>]` | placement point for a code-defined body | circle center |
 | `art-…` or unprefixed | visual only | ignored by parser |
 
-Every collision path carries an **explicit `stroke-width`**: the physics
+Every collision path carries an **explicit `data-width`** (mm): the physics
 chain takes half of it as its shape radius, so the collision surface is the
-drawn stroke's *edge* on both sides — the visible wall and the physical wall
+drawn wall's *edge* on both sides — the visible wall and the physical wall
 are the same object, and the ball never sinks into the art. Author clearances
-face-to-face, not centerline-to-centerline.
+face-to-face, not centerline-to-centerline. `data-width` isn't a presentation
+attribute, so art may restroke the same paths via `<use>` at decorative
+widths — Moondial renders them as layered steel rails (16 ink / 12 steel-500
+body / 6.5 steel-300 / 2.2 chrome-200 core) where the 12 mm body is the
+physical width.
 
 Sensor kinds: `drain`, `ramp-entry`, `ramp-exit`, `rollover`, `lane`,
 `kicker`, `spinner`, `target`. Required anchors per table:
