@@ -36,11 +36,11 @@ export interface Tuning {
 export const DEFAULT_TUNING: Tuning = {
   slopeDeg: 6.5,
   ballDensity: 140, // ~80 g for a 13.5 mm-radius disc, matching a real ball
-  ballRestitution: 0.3,
+  ballRestitution: 0.2,
   ballFriction: 0.05,
   ballLinearDamping: 0.02,
   ballAngularDamping: 0.02,
-  wallRestitution: 0.25,
+  wallRestitution: 0.15,
   wallFriction: 0.1,
   flipperMaxTorque: 1.5,
   flipperUpSpeed: 30,
