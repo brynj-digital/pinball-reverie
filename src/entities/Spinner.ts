@@ -12,6 +12,11 @@ export class Spinner {
 
   constructor(private bus: EventBus) {}
 
+  /** Normalised spin intensity, 0..1 — drives the renderer's glow. */
+  get spin01(): number {
+    return Math.min(1, Math.abs(this.angularVel) / 60);
+  }
+
   /** Called when the ball crosses the spinner sensor. */
   trip(ballVy: number): void {
     // spin with the ball's direction of travel through the lane

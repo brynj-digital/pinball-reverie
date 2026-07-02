@@ -39,6 +39,8 @@ export class Renderer2D implements Renderer {
   private artScale = 0; // px per metre the current art raster was built for
   private artPendingScale = 0;
   private ballArt?: HTMLImageElement;
+  /** Recent ball positions for the speed-scaled motion trail. */
+  private trail: { x: number; y: number }[] = [];
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
@@ -127,8 +129,28 @@ export class Renderer2D implements Renderer {
       ctx.restore();
     }
 
-    // ball — SVG chrome art, procedural gradient until it loads
+    // motion trail: additive ghosts, fading in above ~0.6 m/s
     const b = snap.ball;
+    const speed = Math.hypot(b.vx, b.vy);
+    const last = this.trail[this.trail.length - 1];
+    if (last && Math.hypot(b.x - last.x, b.y - last.y) > 0.15) this.trail.length = 0; // teleport
+    this.trail.push({ x: b.x, y: b.y });
+    if (this.trail.length > 9) this.trail.shift();
+    const trailAlpha = Math.min(0.5, Math.max(0, (speed - 0.6) / 2.5));
+    if (trailAlpha > 0.02) {
+      for (let i = 0; i < this.trail.length - 1; i++) {
+        const f = (i + 1) / this.trail.length;
+        this.drawGlow(
+          this.trail[i].x,
+          this.trail[i].y,
+          BALL_RADIUS * (0.4 + 0.6 * f),
+          "215, 224, 240",
+          trailAlpha * f * f,
+        );
+      }
+    }
+
+    // ball — stainless SVG art, procedural gradient until it loads
     if (this.ballArt) {
       ctx.drawImage(
         this.ballArt,
@@ -137,6 +159,19 @@ export class Renderer2D implements Renderer {
         BALL_RADIUS * 2,
         BALL_RADIUS * 2,
       );
+      // rolling cue: faint reflection smudges that rotate with the ball's spin
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(b.angle);
+      ctx.strokeStyle = "rgba(35, 38, 47, 0.22)";
+      ctx.lineWidth = BALL_RADIUS * 0.3;
+      ctx.beginPath();
+      ctx.arc(0, 0, BALL_RADIUS * 0.58, -0.35, 0.35);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, BALL_RADIUS * 0.58, Math.PI - 0.35, Math.PI + 0.35);
+      ctx.stroke();
+      ctx.restore();
     } else {
       const grad = ctx.createRadialGradient(
         b.x - BALL_RADIUS * 0.35,
@@ -164,6 +199,26 @@ export class Renderer2D implements Renderer {
     // in-world juice lands in Milestone 5
   }
 
+  /**
+   * Additive radial halo (style guide §7: lamps glow additively). rgb is
+   * "r, g, b" so alpha can be composed per stop.
+   */
+  private drawGlow(x: number, y: number, radius: number, rgb: string, alpha: number): void {
+    if (alpha <= 0.01) return;
+    const { ctx } = this;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    g.addColorStop(0, `rgba(${rgb}, ${0.55 * alpha})`);
+    g.addColorStop(0.4, `rgba(${rgb}, ${0.25 * alpha})`);
+    g.addColorStop(1, `rgba(${rgb}, 0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   /** Placeholder element art per the style guide's materials card. */
   private drawElements(snap: WorldSnapshot): void {
     const { ctx } = this;
@@ -174,13 +229,10 @@ export class Renderer2D implements Renderer {
     for (const r of el.rollovers) {
       if (r.lit > 0) {
         ctx.beginPath();
-        ctx.arc(r.x, r.y, 0.012, 0, Math.PI * 2);
-        ctx.fillStyle = "#8c6bff";
-        ctx.save();
-        ctx.shadowColor = "#8c6bff";
-        ctx.shadowBlur = 0.035 * r.lit;
+        ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(140, 107, 255, ${0.4 + 0.6 * r.lit})`;
         ctx.fill();
-        ctx.restore();
+        this.drawGlow(r.x, r.y, 0.032, "140, 107, 255", r.lit);
       } else if (!this.art) {
         ctx.beginPath();
         ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);
@@ -194,6 +246,7 @@ export class Renderer2D implements Renderer {
 
     // spinner — bar whose projected thickness fakes rotation about the lane axis
     const sp = el.spinner;
+    this.drawGlow(sp.x, sp.y, 0.03, "244, 210, 122", sp.spin * 0.9);
     const thick = Math.max(0.003, 0.013 * Math.abs(Math.cos(sp.angle)));
     ctx.fillStyle = "#e0b64e";
     ctx.strokeStyle = "#07080d";
@@ -203,8 +256,13 @@ export class Renderer2D implements Renderer {
     ctx.fill();
     ctx.stroke();
 
-    // slingshots — brass triangles, flash whitens
+    // slingshots — brass triangles, flash whitens with an additive halo
     for (const s of el.slings) {
+      if (s.flash > 0.01) {
+        const cx = s.verts.reduce((a, p) => a + p.x, 0) / s.verts.length;
+        const cy = s.verts.reduce((a, p) => a + p.y, 0) / s.verts.length;
+        this.drawGlow(cx, cy, 0.06, "244, 210, 122", s.flash);
+      }
       ctx.beginPath();
       s.verts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
       ctx.closePath();
@@ -262,10 +320,13 @@ export class Renderer2D implements Renderer {
       ctx.arc(b.x, b.y, b.r * 0.3, 0, Math.PI * 2);
       ctx.fillStyle = "#f4d27a";
       ctx.fill();
+      // always-powered lamp: faint idle glow; hit: bright additive burst
+      this.drawGlow(b.x, b.y, b.r * 1.8, "82, 224, 232", 0.16 + 0.84 * b.flash);
       if (b.flash > 0.01) {
+        this.drawGlow(b.x, b.y, b.r * 3.2, "255, 255, 255", 0.55 * b.flash);
         ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r * (1 + 0.25 * b.flash), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${0.45 * b.flash})`;
+        ctx.arc(b.x, b.y, b.r * (1 + 0.2 * b.flash), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.35 * b.flash})`;
         ctx.fill();
       }
     }

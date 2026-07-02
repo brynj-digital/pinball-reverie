@@ -191,7 +191,7 @@ export class Game {
           y: r.y,
           lit: this.rolloverLit.get(r.id) ?? 0,
         })),
-        spinner: { ...SPINNER, angle: this.spinner.angle },
+        spinner: { ...SPINNER, angle: this.spinner.angle, spin: this.spinner.spin01 },
       },
       score: this.scoring.total,
       scoreLabel: this.scoring.lastLabel,

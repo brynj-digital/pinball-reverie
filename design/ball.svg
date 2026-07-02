@@ -1,13 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27" width="27" height="27">
-  <!-- The ball: 27 mm chrome, style guide §7 — 3-stop radial toward the
-       top-left key light plus exactly one crisp highlight. -->
+  <!-- The ball: 27 mm stainless steel. Chrome radial base toward the
+       top-left key light, mirrored environment: dark horizon band, bright
+       sky reflection above, floor bounce-light below, a violet cast from the
+       playfield, and two crisp speculars. -->
   <defs>
-    <radialGradient id="ballChrome" cx="0.38" cy="0.35" r="0.85">
+    <radialGradient id="ballChrome" cx="0.38" cy="0.32" r="0.9">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="0.5" stop-color="#aeb6c8"/>
+      <stop offset="0.55" stop-color="#aeb6c8"/>
       <stop offset="1" stop-color="#565d6e"/>
     </radialGradient>
+    <clipPath id="ballClip"><circle cx="13.5" cy="13.5" r="13.2"/></clipPath>
   </defs>
-  <circle cx="13.5" cy="13.5" r="13.2" fill="url(#ballChrome)" stroke="#07080d" stroke-width="0.5"/>
-  <circle cx="9.6" cy="9.2" r="2.3" fill="#ffffff"/>
+  <circle cx="13.5" cy="13.5" r="13.2" fill="url(#ballChrome)"/>
+  <g clip-path="url(#ballClip)">
+    <ellipse cx="13.5" cy="17" rx="14.5" ry="5" fill="#23262f" opacity="0.55"/>
+    <ellipse cx="9.5" cy="19.5" rx="9.5" ry="6" fill="#4e37a8" opacity="0.16"/>
+    <ellipse cx="13.5" cy="6.8" rx="10.8" ry="4.6" fill="#ffffff" opacity="0.4"/>
+    <ellipse cx="13.5" cy="23" rx="9" ry="3.4" fill="#d7dce8" opacity="0.45"/>
+  </g>
+  <circle cx="13.5" cy="13.5" r="13.2" fill="none" stroke="#07080d" stroke-width="0.5"/>
+  <circle cx="9.2" cy="8.6" r="2.4" fill="#ffffff"/>
+  <circle cx="17.4" cy="6.6" r="1.1" fill="#ffffff" opacity="0.85"/>
 </svg>

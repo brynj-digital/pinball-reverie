@@ -46,7 +46,7 @@ export interface ElementsSnapshot {
   targets: { x: number; y: number; hw: number; hh: number; up: boolean }[];
   /** lit: 1 → 0 after the ball rolls over. */
   rollovers: { x: number; y: number; lit: number }[];
-  spinner: { x: number; y: number; halfW: number; angle: number };
+  spinner: { x: number; y: number; halfW: number; angle: number; spin: number };
 }
 
 export interface WorldSnapshot {
