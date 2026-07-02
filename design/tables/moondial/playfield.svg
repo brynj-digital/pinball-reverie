@@ -254,16 +254,27 @@
       <rect x="342" y="80" width="36" height="66" rx="10"/>
     </g>
 
-    <!-- comet icons pointing at the target bank -->
-    <g id="art-comets" opacity="0.8">
-      <g stroke="#2fc9d6" stroke-width="2" stroke-linecap="round">
-        <line x1="448" y1="510" x2="470" y2="516"/><line x1="450" y1="518" x2="468" y2="521"/>
-        <line x1="448" y1="552" x2="470" y2="558"/><line x1="450" y1="560" x2="468" y2="563"/>
-        <line x1="448" y1="594" x2="470" y2="600"/><line x1="450" y1="602" x2="468" y2="605"/>
+    <!-- mini-comets streaking into the target bank: tapered two-tone tails
+         behind specular heads, echoing the big comet at the top-right -->
+    <g id="art-comets">
+      <g transform="translate(473 518) rotate(8)">
+        <path d="M 0 0 L -27 -6 L -21 3 Z" fill="#147986" opacity="0.85"/>
+        <path d="M 0 0 L -17 -3 L -13 2 Z" fill="#2fc9d6" opacity="0.9"/>
+        <circle r="4" fill="#2fc9d6" stroke="#07080d" stroke-width="1"/>
+        <circle cx="-1" cy="-1.2" r="1.4" fill="#d7dce8"/>
       </g>
-      <circle cx="474" cy="518" r="4.5" fill="#2fc9d6"/>
-      <circle cx="474" cy="560" r="4.5" fill="#2fc9d6"/>
-      <circle cx="474" cy="602" r="4.5" fill="#2fc9d6"/>
+      <g transform="translate(473 560)">
+        <path d="M 0 0 L -27 -6 L -21 3 Z" fill="#147986" opacity="0.85"/>
+        <path d="M 0 0 L -17 -3 L -13 2 Z" fill="#2fc9d6" opacity="0.9"/>
+        <circle r="4" fill="#2fc9d6" stroke="#07080d" stroke-width="1"/>
+        <circle cx="-1" cy="-1.2" r="1.4" fill="#d7dce8"/>
+      </g>
+      <g transform="translate(473 602) rotate(-8)">
+        <path d="M 0 0 L -27 -6 L -21 3 Z" fill="#147986" opacity="0.85"/>
+        <path d="M 0 0 L -17 -3 L -13 2 Z" fill="#2fc9d6" opacity="0.9"/>
+        <circle r="4" fill="#2fc9d6" stroke="#07080d" stroke-width="1"/>
+        <circle cx="-1" cy="-1.2" r="1.4" fill="#d7dce8"/>
+      </g>
     </g>
 
     <!-- orbit lane arrows (shot direction: up the left lane) -->
