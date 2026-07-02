@@ -9,10 +9,15 @@ import type { Camera } from "../core/Camera";
 export interface TableRenderData {
   width: number;
   height: number;
-  /** URL of the playfield art SVG (drawn as the base layer when loaded). */
-  artUrl?: string;
-  /** URL of the ball art SVG. */
-  ballArtUrl?: string;
+  /**
+   * Raw SVG text of the playfield art (drawn as the base layer). Text, not a
+   * URL: the renderer re-rasterizes it at the display scale for crispness —
+   * browsers rasterize SVG images at their intrinsic size, so drawing the
+   * 575 px master onto a ~2600 px canvas via URL would blur.
+   */
+  artSvgText?: string;
+  /** Raw SVG text of the ball art. */
+  ballSvgText?: string;
 }
 
 export interface BallSnapshot {

@@ -7,6 +7,7 @@
     This file is the single source of truth for table shape (§5e):
     collision-/sensor-/anchor- prefixed elements are parsed into physics by
     src/table/SvgCollision.ts. The collision strokes ARE the drawn walls.
+    Art may use any SVG features; collision paths are polylines only.
   -->
   <defs>
     <linearGradient id="fieldGrad" x1="0" y1="0" x2="0" y2="1">
@@ -16,15 +17,7 @@
     </linearGradient>
     <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.8">
       <stop offset="0.6" stop-color="#07080d" stop-opacity="0"/>
-      <stop offset="1" stop-color="#07080d" stop-opacity="0.4"/>
-    </radialGradient>
-    <radialGradient id="nebulaViolet" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#4e37a8" stop-opacity="0.30"/>
-      <stop offset="1" stop-color="#4e37a8" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="nebulaMagenta" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#b01860" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#b01860" stop-opacity="0"/>
+      <stop offset="1" stop-color="#07080d" stop-opacity="0.42"/>
     </radialGradient>
     <linearGradient id="chromeText" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ffffff"/>
@@ -33,20 +26,58 @@
       <stop offset="0.60" stop-color="#aeb6c8"/>
       <stop offset="1" stop-color="#ffffff"/>
     </linearGradient>
+    <linearGradient id="brassBar" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0" stop-color="#f4d27a"/>
+      <stop offset="0.55" stop-color="#e0b64e"/>
+      <stop offset="1" stop-color="#9c7c2c"/>
+    </linearGradient>
+    <radialGradient id="milky" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#d7dce8" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="#d7dce8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="moonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8c6bff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#8c6bff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cometTail" x1="1" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#2fc9d6" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#2fc9d6" stop-opacity="0"/>
+    </linearGradient>
     <filter id="glowSoft" x="-60%" y="-60%" width="220%" height="220%">
       <feGaussianBlur stdDeviation="6" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
 
-  <!-- ═══════════════ art: field ═══════════════ -->
+  <!-- ═══════════════ art: sky ═══════════════ -->
   <g id="art-field">
     <rect x="0" y="0" width="575" height="1050" fill="url(#fieldGrad)"/>
-    <ellipse cx="180" cy="300" rx="200" ry="160" fill="url(#nebulaViolet)"/>
-    <ellipse cx="400" cy="560" rx="180" ry="150" fill="url(#nebulaMagenta)"/>
-    <ellipse cx="290" cy="850" rx="220" ry="140" fill="url(#nebulaViolet)" opacity="0.5"/>
 
-    <!-- starfield -->
+    <!-- deco ray fan from the apex — classic playfield sunburst, moon-toned -->
+    <g fill="#8c6bff">
+      <polygon points="260,62 20,600 92,620" opacity="0.05"/>
+      <polygon points="260,62 148,630 208,638" opacity="0.075"/>
+      <polygon points="260,62 244,642 276,642" opacity="0.05"/>
+      <polygon points="260,62 312,638 372,630" opacity="0.075"/>
+      <polygon points="260,62 428,620 500,600" opacity="0.05"/>
+    </g>
+
+    <!-- banded airbrush nebulae (visible stepping is era-authentic) -->
+    <g>
+      <ellipse cx="170" cy="290" rx="210" ry="165" fill="#4e37a8" opacity="0.06"/>
+      <ellipse cx="170" cy="290" rx="150" ry="118" fill="#4e37a8" opacity="0.09"/>
+      <ellipse cx="170" cy="290" rx="92" ry="72" fill="#4e37a8" opacity="0.11"/>
+      <ellipse cx="405" cy="565" rx="190" ry="150" fill="#b01860" opacity="0.05"/>
+      <ellipse cx="405" cy="565" rx="132" ry="104" fill="#b01860" opacity="0.08"/>
+      <ellipse cx="405" cy="565" rx="76" ry="60" fill="#b01860" opacity="0.10"/>
+      <ellipse cx="250" cy="860" rx="230" ry="130" fill="#4e37a8" opacity="0.07"/>
+      <ellipse cx="250" cy="860" rx="140" ry="80" fill="#4e37a8" opacity="0.08"/>
+    </g>
+
+    <!-- milky way band -->
+    <ellipse cx="300" cy="400" rx="340" ry="80" fill="url(#milky)" transform="rotate(-28 300 400)"/>
+
+    <!-- starfield: three magnitudes + tinted giants -->
     <g fill="#d7dce8">
       <circle cx="38" cy="620" r="1.4" opacity="0.55"/><circle cx="92" cy="480" r="1.0" opacity="0.4"/>
       <circle cx="140" cy="560" r="1.7" opacity="0.6"/><circle cx="205" cy="500" r="1.1" opacity="0.45"/>
@@ -55,7 +86,7 @@
       <circle cx="470" cy="560" r="1.5" opacity="0.5"/><circle cx="118" cy="655" r="1.2" opacity="0.5"/>
       <circle cx="180" cy="690" r="1.0" opacity="0.4"/><circle cx="330" cy="675" r="1.4" opacity="0.55"/>
       <circle cx="415" cy="650" r="1.1" opacity="0.4"/><circle cx="90" cy="760" r="1.5" opacity="0.5"/>
-      <circle cx="240" cy="760" r="1.1" opacity="0.4"/><circle cx="390" cy="755" r="1.6" opacity="0.55"/>
+      <circle cx="240" cy="756" r="1.1" opacity="0.4"/><circle cx="390" cy="755" r="1.6" opacity="0.55"/>
       <circle cx="160" cy="850" r="1.2" opacity="0.45"/><circle cx="352" cy="860" r="1.3" opacity="0.5"/>
       <circle cx="262" cy="912" r="1.0" opacity="0.35"/><circle cx="60" cy="900" r="1.1" opacity="0.4"/>
       <circle cx="455" cy="840" r="1.2" opacity="0.45"/><circle cx="110" cy="205" r="1.3" opacity="0.5"/>
@@ -66,26 +97,119 @@
       <circle cx="130" cy="415" r="1.0" opacity="0.35"/><circle cx="392" cy="408" r="1.1" opacity="0.4"/>
       <circle cx="228" cy="640" r="1.8" opacity="0.65"/><circle cx="300" cy="600" r="1.2" opacity="0.45"/>
       <circle cx="48" cy="530" r="1.2" opacity="0.45"/><circle cx="496" cy="700" r="1.3" opacity="0.5"/>
+      <circle cx="72" cy="592" r="0.9" opacity="0.35"/><circle cx="188" cy="612" r="1.0" opacity="0.4"/>
+      <circle cx="340" cy="585" r="0.9" opacity="0.35"/><circle cx="452" cy="615" r="1.1" opacity="0.4"/>
+      <circle cx="30" cy="700" r="1.0" opacity="0.4"/><circle cx="490" cy="770" r="1.0" opacity="0.4"/>
+      <circle cx="205" cy="800" r="0.9" opacity="0.3"/><circle cx="318" cy="808" r="1.0" opacity="0.35"/>
+      <circle cx="120" cy="925" r="1.1" opacity="0.4"/><circle cx="400" cy="918" r="1.2" opacity="0.4"/>
+      <circle cx="35" cy="985" r="1.0" opacity="0.35"/><circle cx="483" cy="965" r="1.0" opacity="0.35"/>
+      <circle cx="98" cy="130" r="1.0" opacity="0.4"/><circle cx="420" cy="118" r="1.0" opacity="0.4"/>
+      <circle cx="262" cy="330" r="0.9" opacity="0.3"/><circle cx="180" cy="382" r="0.9" opacity="0.3"/>
+      <circle cx="345" cy="392" r="0.9" opacity="0.3"/><circle cx="60" cy="440" r="1.2" opacity="0.45"/>
+      <circle cx="500" cy="430" r="1.2" opacity="0.45"/><circle cx="545" cy="500" r="1.0" opacity="0.4"/>
+      <circle cx="548" cy="590" r="1.2" opacity="0.45"/><circle cx="545" cy="930" r="1.0" opacity="0.4"/>
+    </g>
+    <g fill="#2fc9d6"><circle cx="440" cy="590" r="1.8" opacity="0.55"/><circle cx="84" cy="672" r="1.6" opacity="0.5"/></g>
+    <g fill="#f4d27a"><circle cx="152" cy="480" r="1.8" opacity="0.5"/><circle cx="378" cy="700" r="1.6" opacity="0.45"/></g>
+
+    <!-- sparkle crosses -->
+    <g fill="#d7dce8">
+      <path d="M 108 588 L 110.5 596 L 118 598 L 110.5 600 L 108 608 L 105.5 600 L 98 598 L 105.5 596 Z" opacity="0.7"/>
+      <path d="M 424 528 L 426 534 L 432 536 L 426 538 L 424 544 L 422 538 L 416 536 L 422 534 Z" opacity="0.6"/>
+      <path d="M 200 720 L 202 726 L 208 728 L 202 730 L 200 736 L 198 730 L 192 728 L 198 726 Z" opacity="0.55"/>
+      <path d="M 470 890 L 472 896 L 478 898 L 472 900 L 470 906 L 468 900 L 462 898 L 468 896 Z" opacity="0.5"/>
+      <path d="M 66 802 L 68 808 L 74 810 L 68 812 L 66 818 L 64 812 L 58 810 L 64 808 Z" opacity="0.5"/>
+      <path d="M 348 156 L 350 162 L 356 164 L 350 166 L 348 172 L 346 166 L 340 164 L 346 162 Z" opacity="0.55"/>
+    </g>
+  </g>
+
+  <!-- ═══════════════ art: celestial motifs ═══════════════ -->
+  <g id="art-motifs">
+    <!-- large waning moon, mid-left field -->
+    <g>
+      <circle cx="142" cy="505" r="58" fill="url(#moonGlow)"/>
+      <circle cx="142" cy="505" r="41" fill="#565d6e" stroke="#07080d" stroke-width="2"/>
+      <path d="M 142 464 a 41 41 0 0 0 0 82 a 30 41 0 0 1 0 -82 Z" fill="#aeb6c8" opacity="0.85"/>
+      <circle cx="158" cy="488" r="6" fill="#565d6e" opacity="0.8"/>
+      <circle cx="166" cy="516" r="4" fill="#565d6e" opacity="0.7"/>
+      <circle cx="150" cy="534" r="3" fill="#565d6e" opacity="0.6"/>
     </g>
 
-    <!-- orrery chart rings around the constellation (bumper nest) -->
+    <!-- ringed planet, mid-right field -->
+    <g transform="rotate(-18 396 478)">
+      <ellipse cx="396" cy="478" rx="33" ry="9" fill="none" stroke="#9c7c2c" stroke-width="3"/>
+      <circle cx="396" cy="478" r="18" fill="#147986" stroke="#07080d" stroke-width="2"/>
+      <path d="M 378 478 a 18 18 0 0 1 36 0 Z" fill="#2fc9d6" opacity="0.5"/>
+      <ellipse cx="396" cy="478" rx="33" ry="9" fill="none" stroke="#e0b64e" stroke-width="1.2" stroke-dasharray="4 3"/>
+    </g>
+
+    <!-- comet streaking the top-right channel -->
+    <g>
+      <path d="M 452 138 Q 415 100 352 60 L 368 52 Q 428 92 460 126 Z" fill="url(#cometTail)"/>
+      <circle cx="456" cy="132" r="6.5" fill="#2fc9d6" filter="url(#glowSoft)"/>
+      <circle cx="454" cy="130" r="2.6" fill="#ffffff"/>
+    </g>
+
+    <!-- protractor arc over the orrery: observatory instrument graticule -->
+    <g fill="none" stroke="#4a5680">
+      <path d="M 92.7 320.9 A 178 178 0 0 1 427.3 320.9" stroke-width="1.6"/>
+      <g stroke-width="1.6">
+        <line x1="92.7" y1="320.9" x2="101.1" y2="317.9"/>
+        <line x1="107.5" y1="286.3" x2="115.4" y2="290.4"/>
+        <line x1="129.9" y1="255.7" x2="136.8" y2="261.4"/>
+        <line x1="158.4" y1="231.1" x2="164.0" y2="238.1"/>
+        <line x1="191.6" y1="213.9" x2="195.6" y2="221.9"/>
+        <line x1="227.9" y1="204.9" x2="229.9" y2="213.6"/>
+        <line x1="292.1" y1="204.9" x2="290.1" y2="213.6"/>
+        <line x1="328.4" y1="213.9" x2="324.4" y2="221.9"/>
+        <line x1="361.6" y1="231.1" x2="356.0" y2="238.1"/>
+        <line x1="390.1" y1="255.7" x2="383.2" y2="261.4"/>
+        <line x1="412.5" y1="286.3" x2="404.6" y2="290.4"/>
+        <line x1="427.3" y1="320.9" x2="418.9" y2="317.9"/>
+      </g>
+      <line x1="260" y1="82" x2="260" y2="94" stroke="#9c7c2c" stroke-width="2"/>
+    </g>
+
+    <!-- orrery rings with planets riding them -->
     <g fill="none" stroke="#2c3352" stroke-width="1.5">
+      <circle cx="260" cy="362" r="66" stroke-dasharray="3 8"/>
       <circle cx="260" cy="362" r="98" stroke-dasharray="5 7"/>
       <circle cx="260" cy="362" r="132" stroke-dasharray="2 9"/>
     </g>
+    <g stroke="#07080d" stroke-width="1.2">
+      <circle cx="175" cy="410" r="5" fill="#e0b64e"/>
+      <circle cx="368" cy="285" r="6" fill="#b01860"/>
+      <circle cx="150" cy="300" r="4.5" fill="#2fc9d6"/>
+      <circle cx="326" cy="466" r="4" fill="#8c6bff"/>
+    </g>
     <!-- constellation lines between the bumper stars -->
-    <g stroke="#7f8fc9" stroke-width="1.2" opacity="0.45">
+    <g stroke="#7f8fc9" stroke-width="1.4" opacity="0.5">
       <line x1="190" y1="330" x2="330" y2="330"/>
       <line x1="190" y1="330" x2="260" y2="425"/>
       <line x1="330" y1="330" x2="260" y2="425"/>
-      <line x1="190" y1="330" x2="130" y2="255"/>
-      <line x1="330" y1="330" x2="392" y2="262"/>
+      <line x1="190" y1="330" x2="150" y2="300"/>
+      <line x1="330" y1="330" x2="368" y2="285"/>
+      <line x1="260" y1="425" x2="326" y2="466"/>
     </g>
 
-    <!-- the moondial: a brass half-dial with gnomon, above the constellation -->
+    <!-- the moondial: brass half-dial with gnomon, crowned by a phase arc -->
     <g id="art-moondial">
+      <g stroke="#07080d" stroke-width="1.2">
+        <circle cx="201" cy="194" r="6.5" fill="#2f2547"/>
+        <path d="M 216 169.5 a 6.5 6.5 0 0 0 0 13 a 4.8 6.5 0 0 1 0 -13 Z" fill="#aeb6c8" opacity="0.7"/>
+        <circle cx="216" cy="176" r="6.5" fill="none"/>
+        <path d="M 237 157.5 a 6.5 6.5 0 0 0 0 13 Z" fill="#aeb6c8" opacity="0.7"/>
+        <circle cx="237" cy="164" r="6.5" fill="none" stroke="#07080d"/>
+        <circle cx="260" cy="160" r="6.5" fill="#aeb6c8" opacity="0.85"/>
+        <path d="M 283 157.5 a 6.5 6.5 0 0 1 0 13 Z" fill="#aeb6c8" opacity="0.7"/>
+        <circle cx="283" cy="164" r="6.5" fill="none"/>
+        <path d="M 304 169.5 a 6.5 6.5 0 0 1 0 13 a 4.8 6.5 0 0 0 0 -13 Z" fill="#aeb6c8" opacity="0.7"/>
+        <circle cx="304" cy="176" r="6.5" fill="none"/>
+        <circle cx="319" cy="194" r="6.5" fill="#2f2547"/>
+      </g>
       <path d="M 205 228 A 55 55 0 0 1 315 228 Z" fill="#262a3e" stroke="#07080d" stroke-width="2"/>
       <path d="M 213 228 A 47 47 0 0 1 307 228" fill="none" stroke="#9c7c2c" stroke-width="3"/>
+      <path d="M 220 228 A 40 40 0 0 1 300 228" fill="none" stroke="#4a5680" stroke-width="1" stroke-dasharray="2 4"/>
       <g stroke="#e0b64e" stroke-width="2">
         <line x1="260" y1="181" x2="260" y2="192"/>
         <line x1="227" y1="195" x2="234" y2="203"/>
@@ -106,6 +230,12 @@
       <circle cx="360" cy="95" r="11" fill="#2f2547"/>
       <circle cx="360" cy="95" r="8" fill="#8c6bff" opacity="0.35"/>
     </g>
+    <!-- lane gleams -->
+    <g fill="#d7dce8" opacity="0.04">
+      <rect x="142" y="80" width="36" height="66" rx="10"/>
+      <rect x="242" y="80" width="36" height="66" rx="10"/>
+      <rect x="342" y="80" width="36" height="66" rx="10"/>
+    </g>
 
     <!-- comet icons pointing at the target bank -->
     <g id="art-comets" opacity="0.8">
@@ -124,27 +254,84 @@
       <path d="M 24 476 L 32.5 462 L 41 476"/>
       <path d="M 24 446 L 32.5 432 L 41 446"/>
     </g>
-    <!-- plunger lane arrows -->
+    <!-- left lane star trail -->
+    <g fill="#4a5680">
+      <circle cx="32.5" cy="300" r="1.6"/><circle cx="32.5" cy="330" r="1.6"/>
+      <circle cx="32.5" cy="360" r="1.6"/><circle cx="32.5" cy="520" r="1.6"/>
+    </g>
+  </g>
+
+  <!-- ═══════════════ art: observatory + wordmark + chrome ═══════════════ -->
+  <g id="art-lower">
+    <!-- wordmark -->
+    <g id="art-wordmark">
+      <path d="M 148 590 L 151 599 L 160 602 L 151 605 L 148 614 L 145 605 L 136 602 L 145 599 Z" fill="#8c6bff" opacity="0.8"/>
+      <path d="M 372 590 L 375 599 L 384 602 L 375 605 L 372 614 L 369 605 L 360 602 L 369 599 Z" fill="#8c6bff" opacity="0.8"/>
+      <text x="260" y="600" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="40" font-weight="800" letter-spacing="6"
+            fill="#4e37a8" opacity="0.5" filter="url(#glowSoft)">MOONDIAL</text>
+      <text x="260" y="596" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="40" font-weight="800" letter-spacing="6"
+            fill="url(#chromeText)" stroke="#07080d" stroke-width="2" paint-order="stroke">MOONDIAL</text>
+      <text x="260" y="596" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="40" font-weight="800" letter-spacing="6"
+            fill="none" stroke="#ff3e9a" stroke-width="0.8" opacity="0.9">MOONDIAL</text>
+      <text x="260" y="622" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="11" letter-spacing="5" fill="#7f8fc9">A · NIGHT · OBSERVATORY</text>
+    </g>
+
+    <!-- observatory dome silhouette on a hill, telescope to the stars -->
+    <g id="art-observatory">
+      <path d="M 148 796 Q 196 772 214 769 L 306 769 Q 328 773 372 796 Z"
+            fill="#12141f" stroke="#07080d" stroke-width="2"/>
+      <rect x="212" y="722" width="96" height="48" fill="#12141f" stroke="#07080d" stroke-width="2"/>
+      <path d="M 212 722 A 48 48 0 0 1 308 722 Z" fill="#12141f" stroke="#07080d" stroke-width="2"/>
+      <path d="M 215 706 A 45 45 0 0 1 258 674" fill="none" stroke="#7f8fc9" stroke-width="2" opacity="0.8"/>
+      <rect x="252" y="678" width="14" height="44" fill="#07080d"/>
+      <rect x="255" y="680" width="8" height="40" fill="#e0b64e" opacity="0.9" filter="url(#glowSoft)"/>
+      <g transform="rotate(-32 259 700)">
+        <rect x="252" y="636" width="14" height="52" rx="3" fill="url(#brassBar)" stroke="#07080d" stroke-width="1.5"/>
+      </g>
+      <g fill="#f4d27a">
+        <rect x="222" y="742" width="7" height="9" rx="1" opacity="0.85"/>
+        <rect x="290" y="742" width="7" height="9" rx="1" opacity="0.85"/>
+      </g>
+      <g fill="#4a5680">
+        <circle cx="220" cy="720" r="1.5"/><circle cx="240" cy="720" r="1.5"/>
+        <circle cx="280" cy="720" r="1.5"/><circle cx="300" cy="720" r="1.5"/>
+      </g>
+    </g>
+
+    <!-- outlane star inserts -->
+    <g stroke="#07080d" stroke-width="1">
+      <path d="M 100 862 L 103.5 872.5 L 114 876 L 103.5 879.5 L 100 890 L 96.5 879.5 L 86 876 L 96.5 872.5 Z" fill="#4e37a8"/>
+      <path d="M 420 862 L 423.5 872.5 L 434 876 L 423.5 879.5 L 420 890 L 416.5 879.5 L 406 876 L 416.5 872.5 Z" fill="#4e37a8"/>
+    </g>
+
+    <!-- apron band along the drain -->
+    <rect x="0" y="1036" width="575" height="14" fill="#262a3e" stroke="#07080d" stroke-width="1.5"/>
+    <line x1="0" y1="1039" x2="575" y2="1039" stroke="#9c7c2c" stroke-width="1.5"/>
+  </g>
+
+  <!-- ═══════════════ art: plunger lane ═══════════════ -->
+  <g id="art-lane">
+    <g fill="#4a5680">
+      <circle cx="547.5" cy="380" r="1.6"/><circle cx="547.5" cy="420" r="1.6"/>
+      <circle cx="547.5" cy="460" r="1.6"/><circle cx="547.5" cy="500" r="1.6"/>
+      <circle cx="547.5" cy="540" r="1.6"/><circle cx="547.5" cy="580" r="1.6"/>
+    </g>
     <g stroke="#e0b64e" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
       <path d="M 539 706 L 547.5 692 L 556 706"/>
       <path d="M 539 666 L 547.5 652 L 556 666"/>
     </g>
-
-    <!-- wordmark -->
-    <g id="art-wordmark">
-      <text x="260" y="632" text-anchor="middle" font-family="ui-monospace, monospace"
-            font-size="40" font-weight="800" letter-spacing="6"
-            fill="#4e37a8" opacity="0.5" filter="url(#glowSoft)">MOONDIAL</text>
-      <text x="260" y="628" text-anchor="middle" font-family="ui-monospace, monospace"
-            font-size="40" font-weight="800" letter-spacing="6"
-            fill="url(#chromeText)" stroke="#07080d" stroke-width="2" paint-order="stroke">MOONDIAL</text>
-      <text x="260" y="628" text-anchor="middle" font-family="ui-monospace, monospace"
-            font-size="40" font-weight="800" letter-spacing="6"
-            fill="none" stroke="#ff3e9a" stroke-width="0.8" opacity="0.9">MOONDIAL</text>
-      <text x="260" y="655" text-anchor="middle" font-family="ui-monospace, monospace"
-            font-size="11" letter-spacing="5" fill="#7f8fc9">A · NIGHT · OBSERVATORY</text>
+    <g font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#9c7c2c" text-anchor="middle">
+      <text x="547.5" y="760">L</text><text x="547.5" y="780">A</text>
+      <text x="547.5" y="800">U</text><text x="547.5" y="820">N</text>
+      <text x="547.5" y="840">C</text><text x="547.5" y="860">H</text>
     </g>
+  </g>
 
+  <g id="art-vignette">
     <rect x="0" y="0" width="575" height="1050" fill="url(#vignette)"/>
   </g>
 
@@ -165,6 +352,13 @@
     <path id="collision-wall-divider-right" d="M 305 74.3 L 305 150"/>
     <!-- drop-target bank housing -->
     <path id="collision-wall-bank-housing" d="M 520 490 L 503 498 L 503 622 L 520 630"/>
+  </g>
+
+  <!-- brass piping on top of the wall strokes (art; follows collision lines) -->
+  <g stroke="#9c7c2c" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+    <path d="M 0 800 L 178.4 940.6"/>
+    <path d="M 520 800 L 341.6 940.6"/>
+    <path d="M 65 550 L 65 260 L 68.0 226.1 L 76.8 193.3 L 91.1 162.5 L 110.6 134.7 L 134.7 110.6 L 162.5 91.1 L 193.3 76.8 L 226.1 68.0 L 260 65 L 293.9 68.0 L 326.7 76.8 L 357.5 91.1 L 385.3 110.6 L 409.4 134.7 L 520 300"/>
   </g>
 
   <!-- ═══════════════ sensors (invisible; zones only) ═══════════════ -->

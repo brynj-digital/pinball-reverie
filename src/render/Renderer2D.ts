@@ -7,6 +7,26 @@ import type {
   WorldSnapshot,
 } from "./Renderer";
 
+/** Load SVG text as an image with its intrinsic size forced to w×h px. */
+function loadSvgAt(
+  svgText: string,
+  w: number,
+  h: number,
+  onload: (img: HTMLImageElement) => void,
+): void {
+  const sized = svgText.replace(
+    /<svg([^>]*?)\swidth="[^"]*"\s+height="[^"]*"/,
+    `<svg$1 width="${w}" height="${h}"`,
+  );
+  const url = URL.createObjectURL(new Blob([sized], { type: "image/svg+xml" }));
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    onload(img);
+  };
+  img.src = url;
+}
+
 /**
  * Canvas-2D placeholder renderer for Milestones 0–3. Reads a WorldSnapshot;
  * never touches the physics world (plan §2 decoupling rule). Real playfield
@@ -16,9 +36,9 @@ export class Renderer2D implements Renderer {
   private ctx: CanvasRenderingContext2D;
   private table!: TableRenderData;
   private art?: HTMLImageElement;
-  private artReady = false;
+  private artScale = 0; // px per metre the current art raster was built for
+  private artPendingScale = 0;
   private ballArt?: HTMLImageElement;
-  private ballArtReady = false;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
@@ -26,16 +46,30 @@ export class Renderer2D implements Renderer {
 
   init(table: TableRenderData): void {
     this.table = table;
-    if (table.artUrl) {
-      this.art = new Image();
-      this.art.onload = () => (this.artReady = true);
-      this.art.src = table.artUrl;
+    if (table.ballSvgText) {
+      // one-time: 128 px is plenty for a ball that renders at ~40–90 px
+      loadSvgAt(table.ballSvgText, 128, 128, (img) => (this.ballArt = img));
     }
-    if (table.ballArtUrl) {
-      this.ballArt = new Image();
-      this.ballArt.onload = () => (this.ballArtReady = true);
-      this.ballArt.src = table.ballArtUrl;
-    }
+  }
+
+  /**
+   * (Re)rasterize the playfield SVG at the current display scale. SVG images
+   * rasterize at their intrinsic size, so the master's width/height attrs
+   * are rewritten to the target pixel size before loading — that keeps the
+   * art vector-crisp at any zoom / DPR. Rebuilds only on >15% scale change.
+   */
+  private ensureArt(pxPerMetre: number): void {
+    if (!this.table.artSvgText) return;
+    if (this.art && Math.abs(pxPerMetre - this.artScale) / pxPerMetre < 0.15) return;
+    if (this.artPendingScale === pxPerMetre) return;
+    this.artPendingScale = pxPerMetre;
+    const w = Math.ceil(this.table.width * pxPerMetre);
+    const h = Math.ceil(this.table.height * pxPerMetre);
+    loadSvgAt(this.table.artSvgText, w, h, (img) => {
+      this.art = img;
+      this.artScale = pxPerMetre;
+      this.artPendingScale = 0;
+    });
   }
 
   drawFrame(snap: WorldSnapshot, camera: Camera): void {
@@ -60,8 +94,9 @@ export class Renderer2D implements Renderer {
     ctx.lineCap = "round";
 
     // playfield art (the SVG master, walls included) — flat fallback until loaded
-    if (this.artReady) {
-      ctx.drawImage(this.art!, 0, 0, this.table.width, this.table.height);
+    this.ensureArt(s); // s is device px per metre (canvas is DPR-sized)
+    if (this.art) {
+      ctx.drawImage(this.art, 0, 0, this.table.width, this.table.height);
     } else {
       ctx.fillStyle = "#1b1e2c";
       ctx.fillRect(0, 0, this.table.width, this.table.height);
@@ -94,9 +129,9 @@ export class Renderer2D implements Renderer {
 
     // ball — SVG chrome art, procedural gradient until it loads
     const b = snap.ball;
-    if (this.ballArtReady) {
+    if (this.ballArt) {
       ctx.drawImage(
-        this.ballArt!,
+        this.ballArt,
         b.x - BALL_RADIUS,
         b.y - BALL_RADIUS,
         BALL_RADIUS * 2,
@@ -146,7 +181,7 @@ export class Renderer2D implements Renderer {
         ctx.shadowBlur = 0.035 * r.lit;
         ctx.fill();
         ctx.restore();
-      } else if (!this.artReady) {
+      } else if (!this.art) {
         ctx.beginPath();
         ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);
         ctx.fillStyle = "#2f2547";
