@@ -269,12 +269,17 @@ export class Game {
     requestAnimationFrame(this.frame);
   }
 
+  /** JS cost of the previous frame (update + draw-command issuance), ms. */
+  private jsMs = 0;
+
   private frame = (tMs: number): void => {
     const dt = this.lastTime ? Math.min((tMs - this.lastTime) / 1000, 0.1) : 0;
     this.lastTime = tMs;
     if (dt > 0) {
       this.fps += (1 / dt - this.fps) * 0.05;
+      const t0 = performance.now();
       this.update(dt);
+      this.jsMs = this.jsMs * 0.9 + (performance.now() - t0) * 0.1;
     }
     requestAnimationFrame(this.frame);
   };
@@ -610,6 +615,7 @@ export class Game {
       scoreLabelAge: this.scoring.lastLabelAge,
       plungerCharge: this.plungerCharge,
       fps: this.fps,
+      jsMs: this.jsMs,
       dmd: this.dmd.canvas,
       debugShapes: this.tuning.debugOverlay ? this.physics.collectDebugShapes() : undefined,
     };

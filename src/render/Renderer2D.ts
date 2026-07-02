@@ -147,6 +147,7 @@ export class Renderer2D implements Renderer {
     }
 
     this.drawElements(snap);
+    this.flushGlows(); // all element/lamp halos in one additive batch
     this.drawEffects();
     this.drawPlunger(snap.plungerCharge);
 
@@ -206,6 +207,7 @@ export class Renderer2D implements Renderer {
         );
       }
     }
+    this.flushGlows(); // trail ghosts, one additive batch under the ball
 
     // ball — stainless SVG art, procedural gradient until it loads
     ctx.save();
@@ -396,11 +398,16 @@ export class Renderer2D implements Renderer {
   }
 
   private glowSprites = new Map<string, HTMLCanvasElement>();
+  private glowQueue: { sprite: HTMLCanvasElement; x: number; y: number; r: number; a: number }[] =
+    [];
 
   /**
    * Additive radial halo (style guide §7: lamps glow additively). The
-   * gradient is baked once per color into a small sprite; per-frame cost is
-   * a single drawImage with globalAlpha — same output as a live gradient.
+   * gradient is baked once per color into a small sprite. Calls QUEUE the
+   * draw; flushGlows() paints the batch under a single composite-mode
+   * switch — per-glow save/restore + 'lighter' toggles were breaking GPU
+   * batching, the measured cause of rally frame drops. Additive blending is
+   * commutative, so batch order within a flush doesn't change the output.
    */
   private drawGlow(x: number, y: number, radius: number, rgb: string, alpha: number): void {
     if (alpha <= 0.01) return;
@@ -417,12 +424,20 @@ export class Renderer2D implements Renderer {
       g.fillRect(0, 0, 64, 64);
       this.glowSprites.set(rgb, sprite);
     }
+    this.glowQueue.push({ sprite, x, y, r: radius, a: alpha });
+  }
+
+  private flushGlows(): void {
+    if (this.glowQueue.length === 0) return;
     const { ctx } = this;
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(sprite, x - radius, y - radius, radius * 2, radius * 2);
+    for (const g of this.glowQueue) {
+      ctx.globalAlpha = g.a;
+      ctx.drawImage(g.sprite, g.x - g.r, g.y - g.r, g.r * 2, g.r * 2);
+    }
     ctx.restore();
+    this.glowQueue.length = 0;
   }
 
   /** Placeholder element art per the style guide's materials card. */
@@ -596,7 +611,7 @@ export class Renderer2D implements Renderer {
     ctx.fillStyle = "#8790b3";
     const speed = Math.hypot(snap.ball.vx, snap.ball.vy);
     ctx.fillText(
-      `${snap.fps.toFixed(0)} fps · worst ${worst.toFixed(0)}ms · ${slow} slow/2s   ball ${speed.toFixed(2)} m/s`,
+      `${snap.fps.toFixed(0)} fps · worst ${worst.toFixed(0)}ms · ${slow} slow/2s · js ${snap.jsMs.toFixed(1)}ms   ball ${speed.toFixed(2)} m/s`,
       10,
       18,
     );
