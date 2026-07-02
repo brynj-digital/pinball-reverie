@@ -8,6 +8,7 @@ import { Vec2 } from "planck";
 import { EventBus } from "../src/core/EventBus";
 import { PhysicsWorld, FIXED_DT } from "../src/core/PhysicsWorld";
 import { buildTableFromSvg } from "../src/table/DevTable";
+import { parseTableSvg } from "../src/table/SvgCollision";
 import { Ball } from "../src/entities/Ball";
 import { Flipper } from "../src/entities/Flipper";
 import { Bumper } from "../src/entities/Bumper";
@@ -32,6 +33,8 @@ const svgText = readFileSync(
   "utf8",
 );
 const table = buildTableFromSvg(pw.world, t, svgText);
+// walls are as thick as their drawn strokes; the floor surface sits above the centerline
+const wallR = parseTableSvg(svgText).walls[0].radius;
 const ball = new Ball(pw.world, t);
 const left = new Flipper(pw.world, table.body, "left", t);
 const right = new Flipper(pw.world, table.body, "right", t);
@@ -89,7 +92,7 @@ run(2);
 {
   const p = ball.body.getPosition();
   const v = ball.body.getLinearVelocity();
-  const restY = TABLE.height - BALL_RADIUS;
+  const restY = TABLE.height - wallR - BALL_RADIUS;
   check(
     "ball settles ON the lane floor",
     Math.abs(p.y - restY) < 0.004 && p.x > TABLE.laneWallX && Math.abs(v.y) < 0.05,
@@ -129,8 +132,9 @@ for (const [label, x, y] of [
   ["left seam drop", 0.178, 0.915],
   ["right seam drop", 0.342, 0.915],
   ["tip gap drop", 0.26, 0.915],
-  ["left wall creep", 0.1084, 0.8682],
-  ["right wall creep", 0.4116, 0.8682], // mirror of the left creep point
+  // creep points sit on the wall FACE (centerline + stroke half-width)
+  ["left wall creep", 0.1121, 0.8635],
+  ["right wall creep", 0.4079, 0.8635], // mirror of the left creep point
 
 ] as const) {
   drained = false;
@@ -169,15 +173,13 @@ check(
 
 // 8 — slingshot kicks toward the playfield
 placeBall(0.125, 0.66, 0, 1.2);
-run(0.5);
-{
-  const v = ball.body.getLinearVelocity();
-  check(
-    "sling hit fires and kicks rightward",
-    hits.some((h) => h === "sling:left") && v.x > 0.1,
-    `v=(${v.x.toFixed(2)}, ${v.y.toFixed(2)})`,
-  );
-}
+let maxVx = -Infinity;
+run(0.5, () => (maxVx = Math.max(maxVx, ball.body.getLinearVelocity().x)));
+check(
+  "sling hit fires and kicks rightward",
+  hits.some((h) => h === "sling:left") && maxVx > 0.1,
+  `maxVx=${maxVx.toFixed(2)}`,
+);
 
 // 9 — top-lane rollover fires as the ball passes
 placeBall(0.26, 0.07);

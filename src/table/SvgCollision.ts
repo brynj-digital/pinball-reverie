@@ -17,7 +17,17 @@
  */
 
 export interface ParsedTable {
-  walls: { name: string; pts: { x: number; y: number }[]; loop: boolean }[];
+  walls: {
+    name: string;
+    pts: { x: number; y: number }[];
+    loop: boolean;
+    /**
+     * Half the path's stroke-width: the physics chain gets this as its shape
+     * radius, so the collision surface IS the drawn stroke edge — without it
+     * the ball visually sinks half a wall-width into the art.
+     */
+    radius: number;
+  }[];
   sensors: { kind: string; id?: string; cx: number; cy: number; hw: number; hh: number }[];
   anchors: Map<string, { x: number; y: number }>;
 }
@@ -66,10 +76,13 @@ export function parseTableSvg(svgText: string): ParsedTable {
     if (!a.id?.startsWith("collision-") || !a.d) continue;
     const { pts, loop } = parsePathPoints(a.d);
     if (pts.length < 2) throw new Error(`collision path ${a.id} has <2 points`);
+    if (!a["stroke-width"])
+      throw new Error(`collision path ${a.id} needs an explicit stroke-width`);
     result.walls.push({
       name: a.id,
       pts,
       loop: loop || a.id.startsWith("collision-loop-"),
+      radius: (Number(a["stroke-width"]) / 2) * MM,
     });
   }
 

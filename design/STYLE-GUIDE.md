@@ -60,11 +60,17 @@ prefix; everything else is art. Curves are flattened to ≤1 mm chord error.
 
 | Prefix | Meaning | Geometry read |
 |---|---|---|
-| `collision-wall-<name>` | solid open chain | path polyline (centerline) |
-| `collision-loop-<name>` | solid closed chain | closed path polyline |
+| `collision-wall-<name>` | solid open chain | path polyline + stroke-width |
+| `collision-loop-<name>` | solid closed chain | closed path polyline + stroke-width |
 | `sensor-<kind>-<name>` | non-solid scoring zone | closed path → sensor fixture |
 | `anchor-<entity>[-<which>]` | placement point for a code-defined body | circle center |
 | `art-…` or unprefixed | visual only | ignored by parser |
+
+Every collision path carries an **explicit `stroke-width`**: the physics
+chain takes half of it as its shape radius, so the collision surface is the
+drawn stroke's *edge* on both sides — the visible wall and the physical wall
+are the same object, and the ball never sinks into the art. Author clearances
+face-to-face, not centerline-to-centerline.
 
 Sensor kinds: `drain`, `ramp-entry`, `ramp-exit`, `rollover`, `lane`,
 `kicker`, `spinner`, `target`. Required anchors per table:

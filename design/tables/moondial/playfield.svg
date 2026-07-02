@@ -339,19 +339,19 @@
   <g stroke="#7f8fc9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
     <!-- outer shell: left wall, r260 arc to apex (260,0), r315 arc over the
          plunger lane, right wall; Z closes the floor -->
-    <path id="collision-loop-shell" d="M 0 1050 L 0 260 L 6.5 202.1 L 25.7 147.2 L 56.7 97.9 L 97.9 56.7 L 147.2 25.7 L 202.1 6.5 L 260 0 L 330.1 7.9 L 396.7 31.2 L 456.4 68.7 L 506.3 118.6 L 543.3 178.3 L 567.2 244.9 L 575 315 L 575 1050 Z"/>
+    <path stroke-width="12" id="collision-loop-shell" d="M 0 1050 L 0 260 L 6.5 202.1 L 25.7 147.2 L 56.7 97.9 L 97.9 56.7 L 147.2 25.7 L 202.1 6.5 L 260 0 L 330.1 7.9 L 396.7 31.2 L 456.4 68.7 L 506.3 118.6 L 543.3 178.3 L 567.2 244.9 L 575 315 L 575 1050 Z"/>
     <!-- inlane funnels, each ending tangent to its flipper base circle -->
-    <path id="collision-wall-funnel-left" d="M 0 800 L 178.4 940.6 L 163 955 L 163 1050"/>
-    <path id="collision-wall-funnel-right" d="M 520 800 L 341.6 940.6 L 357 955 L 357 1050"/>
+    <path stroke-width="12" id="collision-wall-funnel-left" d="M 0 800 L 178.4 940.6 L 157 955 L 157 1050"/>
+    <path stroke-width="12" id="collision-wall-funnel-right" d="M 520 800 L 341.6 940.6 L 363 955 L 363 1050"/>
     <!-- plunger lane inner wall -->
-    <path id="collision-wall-lane" d="M 520 300 L 520 1050"/>
+    <path stroke-width="12" id="collision-wall-lane" d="M 520 300 L 520 1050"/>
     <!-- orbit inner wall: left lane, arc under the arch, tail to the lane wall top -->
-    <path id="collision-wall-orbit" d="M 65 550 L 65 260 L 68.0 226.1 L 76.8 193.3 L 91.1 162.5 L 110.6 134.7 L 134.7 110.6 L 162.5 91.1 L 193.3 76.8 L 226.1 68.0 L 260 65 L 293.9 68.0 L 326.7 76.8 L 357.5 91.1 L 385.3 110.6 L 409.4 134.7 L 520 300"/>
+    <path stroke-width="12" id="collision-wall-orbit" d="M 65 550 L 65 260 L 68.0 226.1 L 76.8 193.3 L 91.1 162.5 L 110.6 134.7 L 134.7 110.6 L 162.5 91.1 L 193.3 76.8 L 226.1 68.0 L 260 65 L 293.9 68.0 L 326.7 76.8 L 357.5 91.1 L 385.3 110.6 L 409.4 134.7 L 520 300"/>
     <!-- top-lane dividers, ending 4 mm below the orbit arc line -->
-    <path id="collision-wall-divider-left" d="M 215 74.3 L 215 150"/>
-    <path id="collision-wall-divider-right" d="M 305 74.3 L 305 150"/>
+    <path stroke-width="12" id="collision-wall-divider-left" d="M 215 74.3 L 215 150"/>
+    <path stroke-width="12" id="collision-wall-divider-right" d="M 305 74.3 L 305 150"/>
     <!-- drop-target bank housing -->
-    <path id="collision-wall-bank-housing" d="M 520 490 L 503 498 L 503 622 L 520 630"/>
+    <path stroke-width="12" id="collision-wall-bank-housing" d="M 520 490 L 503 498 L 503 622 L 520 630"/>
   </g>
 
   <!-- brass piping on top of the wall strokes (art; follows collision lines) -->

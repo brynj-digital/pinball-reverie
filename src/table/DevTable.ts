@@ -24,17 +24,20 @@ export function buildTableFromSvg(world: World, tuning: Tuning, svgText: string)
 
   const body = world.createBody(); // static, at origin — all coords in table space
 
-  const wallFixtures = parsed.walls.map((wall) =>
-    body.createFixture({
-      shape: new Chain(
-        wall.pts.map((p) => new Vec2(p.x, p.y)),
-        wall.loop,
-      ),
+  const wallFixtures = parsed.walls.map((wall) => {
+    const shape = new Chain(
+      wall.pts.map((p) => new Vec2(p.x, p.y)),
+      wall.loop,
+    );
+    // half the drawn stroke width — the collision surface is the stroke edge
+    shape.m_radius = wall.radius;
+    return body.createFixture({
+      shape,
       friction: tuning.wallFriction,
       restitution: tuning.wallRestitution,
       userData: { kind: "wall" } satisfies FixtureTag,
-    }),
-  );
+    });
+  });
 
   // Sensors, not solids, for every scoring zone (plan §4)
   for (const s of parsed.sensors) {
