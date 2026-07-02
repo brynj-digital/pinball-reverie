@@ -71,16 +71,26 @@ export class PhysicsWorld {
     this.postStep.push(fn);
   }
 
-  /** Advance by real dt, stepping the world in fixed increments. */
-  update(dt: number): void {
+  /**
+   * Advance by real dt, stepping the world in fixed increments.
+   *
+   * `beforeStep` runs before each step so the caller can snapshot the
+   * previous state; the return value is the accumulator fraction (0..1) —
+   * render bodies at lerp(prev, current, alpha) for judder-free motion.
+   * Frames consume 1–3 steps unevenly; without interpolation the ball (and
+   * the camera following it) advances in visibly irregular time quanta.
+   */
+  update(dt: number, beforeStep?: () => void): number {
     this.accumulator += Math.min(dt, 0.1); // cap: avoid spiral of death on tab refocus
     while (this.accumulator >= FIXED_DT) {
+      beforeStep?.();
       this.world.step(FIXED_DT, 8, 3);
       this.accumulator -= FIXED_DT;
     }
     const queued = this.postStep;
     this.postStep = [];
     for (const fn of queued) fn();
+    return this.accumulator / FIXED_DT;
   }
 
   private onBeginContact(contact: Contact): void {

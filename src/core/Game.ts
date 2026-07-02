@@ -107,6 +107,14 @@ export class Game {
   private pendingScore = 0;
   private initialsConfirm = false;
   private prevPlunger = false;
+  // previous-step state for render interpolation (see PhysicsWorld.update)
+  private prevBall: { x: number; y: number; angle: number } = {
+    x: TABLE.spawn.x,
+    y: TABLE.spawn.y,
+    angle: 0,
+  };
+  private prevFlipAngles = [0, 0];
+  private renderAlpha = 1;
   /** Baked Claude Design DMD scenes (loaded async; text scenes until ready). */
   private baked: { orbit?: Uint8Array[]; moon?: Uint8Array[] } = {};
   private audio = new AudioEngine();
@@ -315,7 +323,14 @@ export class Game {
     this.modes.update(dt);
     for (const [id, v] of this.rolloverLit) this.rolloverLit.set(id, Math.max(0, v - dt * 2));
 
-    this.physics.update(dt);
+    this.renderAlpha = this.physics.update(dt, () => {
+      const bp = this.ball.body.getPosition();
+      this.prevBall.x = bp.x;
+      this.prevBall.y = bp.y;
+      this.prevBall.angle = this.ball.body.getAngle();
+      this.prevFlipAngles[0] = this.flippers[0].body.getAngle();
+      this.prevFlipAngles[1] = this.flippers[1].body.getAngle();
+    });
 
     if (this.drainTimer > 0) {
       this.drainTimer -= dt;
@@ -326,7 +341,11 @@ export class Game {
     this.dmd.render();
 
     this.camera.viewH = Math.min(t.cameraViewH, TABLE.height);
-    this.camera.follow(this.ball.body.getPosition().y, dt);
+    const a = this.renderAlpha;
+    this.camera.follow(
+      this.prevBall.y + (this.ball.body.getPosition().y - this.prevBall.y) * a,
+      dt,
+    );
 
     this.renderer.drawFrame(this.snapshot(), this.camera);
   }
@@ -351,6 +370,10 @@ export class Game {
 
   private respawn(): void {
     this.ball.reset();
+    // don't lerp across the teleport
+    this.prevBall.x = TABLE.spawn.x;
+    this.prevBall.y = TABLE.spawn.y;
+    this.prevBall.angle = 0;
     this.drainTimer = 0;
     this.plungerCharge = 0;
     this.charging = false;
@@ -498,19 +521,26 @@ export class Game {
   private snapshot(): WorldSnapshot {
     const p = this.ball.body.getPosition();
     const v = this.ball.body.getLinearVelocity();
+    const a = this.renderAlpha;
+    const lerp = (from: number, to: number) => from + (to - from) * a;
     return {
       ball: {
-        x: p.x,
-        y: p.y,
-        angle: this.ball.body.getAngle(),
+        x: lerp(this.prevBall.x, p.x),
+        y: lerp(this.prevBall.y, p.y),
+        angle: lerp(this.prevBall.angle, this.ball.body.getAngle()),
         vx: v.x,
         vy: v.y,
         // fade out over the last 0.3 s of the drain fall
         alpha: this.drainTimer > 0 ? Math.min(1, this.drainTimer / 0.3) : 1,
       },
-      flippers: this.flippers.map((f) => {
+      flippers: this.flippers.map((f, i) => {
         const fp = f.body.getPosition();
-        return { x: fp.x, y: fp.y, angle: f.body.getAngle(), side: f.side };
+        return {
+          x: fp.x,
+          y: fp.y,
+          angle: lerp(this.prevFlipAngles[i], f.body.getAngle()),
+          side: f.side,
+        };
       }),
       elements: {
         bumpers: this.bumpers.map((b) => ({ ...b.def, flash: b.flash })),
