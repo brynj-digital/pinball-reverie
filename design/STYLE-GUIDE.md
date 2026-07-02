@@ -38,9 +38,15 @@ physically touches (flippers, kickers, rails).
 
 ## 3. Master units & scale
 
-- **Playfield master SVG: 1 user unit = 1 mm.** Playfield is `520 × 1050`
-  (`viewBox="0 0 520 1050"`), matching the physics table of 0.52 × 1.05 m.
-  The SVG→fixture parser divides by 1000 — no other scale factor anywhere.
+- **Playfield master SVG: 1 user unit = 1 mm.** The table master is
+  `575 × 1050` (`viewBox="0 0 575 1050"`), matching the physics table of
+  0.575 × 1.05 m. The SVG→fixture parser divides by 1000 — no other scale
+  factor anywhere.
+- **The launch lane lives outside the playfield** (Pinball Fantasies
+  convention): the playfield proper is `0..520` with every structural
+  element mirror-symmetric about `x = 260`; the plunger lane occupies
+  `520..575` and meets the playfield only through the orbit at the top.
+  Never let the lane push elements off-centre.
 - The ball is **27 mm** diameter. Draw at true scale; if a detail is
   illegible at 27 mm ball scale, simplify the detail, don't enlarge the part.
 - Line weights at master scale: wall guides **12 mm**, part outlines **2 mm**,
@@ -127,8 +133,9 @@ See [previews/materials.html](previews/materials.html).
 
 See [previews/layouts.html](previews/layouts.html).
 
-- **The table never stretches.** Native aspect 520:1050 at all times; the
-  camera scrolls vertically identically in every layout.
+- **The table never stretches.** Native aspect 575:1050 at all times (the
+  visible table includes the launch lane); the camera scrolls vertically
+  identically in every layout.
 - **Portrait:** DMD strip (4:1) full-width at top, table below at native
   aspect; touch zones: lower left/right halves = flippers, drag zone
   bottom-right = plunger.

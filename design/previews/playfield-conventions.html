@@ -35,12 +35,12 @@
         <g transform="scale(1)">
           <!-- art (dimmed) -->
           <path d="M 140 800 L 178.4 940.6 L 163 955 L 163 1050" fill="none" stroke="#4a5680" stroke-width="10" opacity="0.35"/>
-          <path d="M 400 800 L 340 942.1 L 357 955 L 357 1050" fill="none" stroke="#4a5680" stroke-width="10" opacity="0.35"/>
+          <path d="M 520 800 L 341.6 940.6 L 357 955 L 357 1050" fill="none" stroke="#4a5680" stroke-width="10" opacity="0.35"/>
           <!-- collision walls -->
           <path d="M 140 800 L 178.4 940.6 L 163 955 L 163 1050" fill="none" stroke="#3ddc84" stroke-width="2"/>
-          <path d="M 400 800 L 340 942.1 L 357 955 L 357 1050" fill="none" stroke="#3ddc84" stroke-width="2"/>
-          <!-- drain sensor -->
-          <rect x="163" y="1005" width="230" height="30" fill="none" stroke="#ff9f43" stroke-width="2" stroke-dasharray="6 4"/>
+          <path d="M 520 800 L 341.6 940.6 L 357 955 L 357 1050" fill="none" stroke="#3ddc84" stroke-width="2"/>
+          <!-- drain sensor (spans the full playfield 0..520, clipped here) -->
+          <rect x="0" y="1005" width="520" height="30" fill="none" stroke="#ff9f43" stroke-width="2" stroke-dasharray="6 4"/>
           <!-- anchors -->
           <circle cx="171" cy="950" r="5" fill="none" stroke="#2fc9d6" stroke-width="2"/>
           <line x1="164" y1="950" x2="178" y2="950" stroke="#2fc9d6" stroke-width="1"/>
@@ -72,8 +72,10 @@
   </div>
 
   <p class="spec">
-    <strong>Units:</strong> 1 SVG user unit = 1 mm; playfield viewBox <code>0 0 520 1050</code>;
-    the parser divides by 1000 — no other scale anywhere. Curves flatten to ≤1 mm chord error.<br/><br/>
+    <strong>Units:</strong> 1 SVG user unit = 1 mm; table viewBox <code>0 0 575 1050</code> —
+    playfield proper 0..520, mirror-symmetric about x&nbsp;=&nbsp;260, with the launch lane
+    outside it at 520..575 (Pinball Fantasies convention). The parser divides by 1000 —
+    no other scale anywhere. Curves flatten to ≤1 mm chord error.<br/><br/>
     <strong>Gap rules (from the physics):</strong> every gap between collision surfaces is
     &lt;13.5 mm (ball can't enter) or &gt;38 mm (passes freely) — between wedges the ball.
     Inlane guides end <em>tangent</em> to the flipper base circle (r 12 mm at the anchor), past its
