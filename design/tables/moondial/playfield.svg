@@ -130,9 +130,26 @@
       <circle cx="142" cy="505" r="58" fill="url(#moonGlow)"/>
       <circle cx="142" cy="505" r="41" fill="#565d6e" stroke="#07080d" stroke-width="2"/>
       <path d="M 142 464 a 41 41 0 0 0 0 82 a 30 41 0 0 1 0 -82 Z" fill="#aeb6c8" opacity="0.85"/>
-      <circle cx="158" cy="488" r="6" fill="#565d6e" opacity="0.8"/>
-      <circle cx="166" cy="516" r="4" fill="#565d6e" opacity="0.7"/>
-      <circle cx="150" cy="534" r="3" fill="#565d6e" opacity="0.6"/>
+      <!-- craters: steel-toned on the lit crescent, ink-toned on the shadow side -->
+      <g fill="#565d6e">
+        <circle cx="122" cy="486" r="5" opacity="0.7"/>
+        <circle cx="115" cy="504" r="2.6" opacity="0.55"/>
+        <circle cx="127" cy="521" r="3.6" opacity="0.6"/>
+        <circle cx="132" cy="472" r="2.2" opacity="0.5"/>
+        <circle cx="120" cy="533" r="2" opacity="0.45"/>
+      </g>
+      <g fill="#23262f">
+        <circle cx="158" cy="488" r="6" opacity="0.55"/>
+        <circle cx="166" cy="516" r="4" opacity="0.5"/>
+        <circle cx="150" cy="534" r="3" opacity="0.45"/>
+        <circle cx="152" cy="472" r="2.6" opacity="0.4"/>
+        <circle cx="171" cy="500" r="2.4" opacity="0.45"/>
+      </g>
+      <!-- crater rim highlights on the lit side -->
+      <g fill="none" stroke="#d7dce8" stroke-width="1" opacity="0.35">
+        <path d="M 117.5 483.5 a 5 5 0 0 1 7 1"/>
+        <path d="M 124 518.5 a 3.6 3.6 0 0 1 5 0.8"/>
+      </g>
     </g>
 
     <!-- ringed planet, mid-right field -->

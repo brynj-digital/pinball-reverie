@@ -12,7 +12,7 @@ export interface DmdScene {
 }
 
 export function fmtScore(n: number): string {
-  return n.toLocaleString("en-US").replace(/,/g, " ");
+  return n.toLocaleString("en-US"); // thousands commas; the 5×7 font has a ',' glyph
 }
 
 /** Idle scene during play: live score, ball number, multiplier. */
@@ -36,7 +36,7 @@ export class ScoreScene implements DmdScene {
       this.last = key;
       dmd.clear();
       dmd.centerText(line1, 5, 3);
-      dmd.centerText(line2, 20, 1);
+      dmd.centerText(line2, 20, 2);
     }
     return false;
   }
