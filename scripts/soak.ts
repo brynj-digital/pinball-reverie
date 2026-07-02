@@ -60,7 +60,15 @@ const nextToggle = [0, 0];
 let stillTime = 0;
 let drains = 0;
 let launches = 0;
-const stuck: { x: number; y: number; time: number }[] = [];
+const stuck: { x: number; y: number; time: number; kind: string }[] = [];
+
+// Kinetic-loop detector: sample the ball every 0.5 s; if the last 20 s of
+// samples all fit in a 0.2 m box in the upper field (y < 0.8 — flippers
+// can't reach there, so confinement means a self-sustaining bounce orbit
+// between kickers), flag it. Catches loops the zero-speed detector can't.
+const LOOP_SAMPLES = 40; // × 0.5 s = 20 s window
+const LOOP_BOX = 0.2;
+const loopBuf: { x: number; y: number }[] = [];
 
 for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
   const now = step * FIXED_DT;
@@ -95,7 +103,33 @@ for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
     drains++;
     ball.reset();
     stillTime = 0;
+    loopBuf.length = 0;
     continue;
+  }
+
+  if (step % Math.round(0.5 / FIXED_DT) === 0) {
+    if (p.y < 0.8 && p.x < TABLE.laneWallX) {
+      loopBuf.push({ x: p.x, y: p.y });
+      if (loopBuf.length > LOOP_SAMPLES) loopBuf.shift();
+      if (loopBuf.length === LOOP_SAMPLES) {
+        const xs = loopBuf.map((s) => s.x);
+        const ys = loopBuf.map((s) => s.y);
+        const w = Math.max(...xs) - Math.min(...xs);
+        const h = Math.max(...ys) - Math.min(...ys);
+        if (w < LOOP_BOX && h < LOOP_BOX) {
+          stuck.push({
+            x: (Math.max(...xs) + Math.min(...xs)) / 2,
+            y: (Math.max(...ys) + Math.min(...ys)) / 2,
+            time: now,
+            kind: "LOOP",
+          });
+          ball.reset();
+          loopBuf.length = 0;
+        }
+      }
+    } else {
+      loopBuf.length = 0;
+    }
   }
 
   // stuck = motionless outside the lane. No flipper-state condition: the
@@ -106,7 +140,7 @@ for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
   if (!inLane && speed < 0.015) {
     stillTime += FIXED_DT;
     if (stillTime >= STUCK_WINDOW) {
-      stuck.push({ x: p.x, y: p.y, time: now });
+      stuck.push({ x: p.x, y: p.y, time: now, kind: "STUCK" });
       ball.reset();
       stillTime = 0;
     }
@@ -119,6 +153,6 @@ console.log(
   `seed=${process.argv[2] ?? 1}: ${SIM_SECONDS}s sim, ${launches} launches, ${drains} drains, ${stuck.length} stuck`,
 );
 for (const s of stuck) {
-  console.log(`  STUCK at (${s.x.toFixed(4)}, ${s.y.toFixed(4)}) t=${s.time.toFixed(1)}s`);
+  console.log(`  ${s.kind} at (${s.x.toFixed(4)}, ${s.y.toFixed(4)}) t=${s.time.toFixed(1)}s`);
 }
 process.exit(stuck.length ? 1 : 0);

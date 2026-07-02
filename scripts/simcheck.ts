@@ -193,7 +193,24 @@ check("all three targets dropped + bank bonus", bankDone && bank.targets.every((
 run(1.5);
 check("bank resets after delay", bank.targets.every((x) => x.up));
 
-// 11 — orbit shot from the left lane: entry → spinner → exit scores the orbit
+// 11 — kinetic-loop trap: a ball dropped dead-centre onto the bumper nest
+// must not settle into a stable bounce orbit (perfectly radial kicks give a
+// vertical perpetual loop); it has to leave the upper field
+placeBall(0.26, 0.3);
+let escaped = false;
+run(30, () => {
+  if (ball.body.getPosition().y > 0.6) escaped = true;
+});
+{
+  const p = ball.body.getPosition();
+  check(
+    "bumper nest does not loop the ball forever",
+    escaped,
+    `after 30s pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+  );
+}
+
+// 12 — orbit shot from the left lane: entry → spinner → exit scores the orbit
 placeBall(0.0325, 0.53, 0, -2.3);
 run(3);
 check("spinner spins and ticks", spins > 0, `ticks=${spins}`);
