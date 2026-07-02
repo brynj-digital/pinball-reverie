@@ -20,6 +20,7 @@ import {
   InitialsScene,
   MessageScene,
   ScoreScene,
+  SequenceScene,
   fmtScore,
 } from "../render/dmd/DmdScene";
 import { SettingsPanel } from "../ui/SettingsPanel";
@@ -28,6 +29,11 @@ import { AudioEngine } from "../audio/AudioEngine";
 import { ChipMusic } from "../audio/ChipMusic";
 import orbitSceneSvg from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierSceneSvg from "../../design/dmd-scenes/multiplier.svg?raw";
+import savedSceneSvg from "../../design/dmd-scenes/saved.svg?raw";
+import tiltSceneSvg from "../../design/dmd-scenes/tilt.svg?raw";
+import gameoverSceneSvg from "../../design/dmd-scenes/gameover.svg?raw";
+import eclipseSceneSvg from "../../design/dmd-scenes/eclipse.svg?raw";
+import bankSceneSvg from "../../design/dmd-scenes/bank.svg?raw";
 import { buildTableFromSvg, type DevTable } from "../table/DevTable";
 // The playfield SVG is both physics source (→ SvgCollision) and art (the
 // renderer rasterizes the same text at display scale): one file, both jobs.
@@ -116,7 +122,9 @@ export class Game {
   private prevFlipAngles = [0, 0];
   private renderAlpha = 1;
   /** Baked Claude Design DMD scenes (loaded async; text scenes until ready). */
-  private baked: { orbit?: Uint8Array[]; moon?: Uint8Array[] } = {};
+  private baked: Partial<
+    Record<"orbit" | "moon" | "saved" | "tilt" | "gameover" | "eclipse" | "bank", Uint8Array[]>
+  > = {};
   private audio = new AudioEngine();
   private music = new ChipMusic(this.audio);
   private prevFlip = { left: false, right: false };
@@ -169,6 +177,11 @@ export class Game {
     this.dmdQueue = new DmdQueue(this.attractScene);
     void bakeDmdFrames(orbitSceneSvg, 8).then((f) => (this.baked.orbit = f));
     void bakeDmdFrames(multiplierSceneSvg, 6).then((f) => (this.baked.moon = f));
+    void bakeDmdFrames(savedSceneSvg, 7).then((f) => (this.baked.saved = f));
+    void bakeDmdFrames(tiltSceneSvg, 4).then((f) => (this.baked.tilt = f));
+    void bakeDmdFrames(gameoverSceneSvg, 8).then((f) => (this.baked.gameover = f));
+    void bakeDmdFrames(eclipseSceneSvg, 9).then((f) => (this.baked.eclipse = f));
+    void bakeDmdFrames(bankSceneSvg, 7).then((f) => (this.baked.bank = f));
 
     this.bus.on("sensor", ({ kind, id }) => {
       // Drain starts a short visible fall-out (ball keeps simulating, fades,
@@ -203,6 +216,8 @@ export class Game {
           new BakedDmdScene(this.baked.orbit, 11, `${label} ${fmtScore(points)}`),
           label === "ECLIPSE ORBIT" ? 2 : 1,
         );
+      } else if (label === "BANK BONUS" && this.baked.bank) {
+        this.dmdQueue.push(new BakedDmdScene(this.baked.bank, 11, `BANK ${fmtScore(points)}`));
       } else if (isOrbit || DMD_LABELS.has(label)) {
         this.dmdQueue.push(new MessageScene([[label, fmtScore(points)]], 1.3));
       }
@@ -214,7 +229,12 @@ export class Game {
       } else if (kind === "eclipseStart") {
         this.audio.sfx("bank");
         this.camera.shake(0.006);
-        this.dmdQueue.push(new MessageScene([["LUNAR ECLIPSE", "ALL SCORES ×2"]], 1.5, true), 3);
+        this.dmdQueue.push(
+          this.baked.eclipse
+            ? new BakedDmdScene(this.baked.eclipse, 8, "ALL SCORES ×2", 1.0)
+            : new MessageScene([["LUNAR ECLIPSE", "ALL SCORES ×2"]], 1.5, true),
+          3,
+        );
       } else if (kind === "eclipseEnd") {
         this.dmdQueue.push(new MessageScene([["ECLIPSE OVER"]], 1.2), 2);
       }
@@ -407,7 +427,12 @@ export class Game {
       this.saverUntil = -Infinity; // one save per ball
       this.respawn();
       this.audio.sfx("saved");
-      this.dmdQueue.push(new MessageScene([["BALL SAVED"]], 1.4, true), 2);
+      this.dmdQueue.push(
+        this.baked.saved
+          ? new BakedDmdScene(this.baked.saved, 10, "BALL SAVED", 0.5)
+          : new MessageScene([["BALL SAVED"]], 1.4, true),
+        2,
+      );
       return;
     }
     this.tilted = false;
@@ -434,9 +459,24 @@ export class Game {
         if (bonusPage.length) this.dmdQueue.push(new MessageScene(bonusPage, 1.8), 2);
       } else {
         this.phase = "gameOver";
-        const pages: string[][] = [...bonusPage, ["GAME OVER", fmtScore(this.scoring.total)]];
-        this.dmdQueue.push(new MessageScene(pages, 2.2), 3);
-        this.gameOverUntil = this.gameTime + pages.length * 2.2 + 0.3;
+        const parts = [];
+        let dur = 0.3;
+        if (bonusPage.length) {
+          parts.push(new MessageScene(bonusPage, 1.8));
+          dur += 1.8;
+        }
+        if (this.baked.gameover) {
+          // moonset scene, score as the top caption row
+          parts.push(
+            new BakedDmdScene(this.baked.gameover, 7, `GAME OVER  ${fmtScore(this.scoring.total)}`, 1.4, undefined, 1),
+          );
+          dur += 8 / 7 + 1.4;
+        } else {
+          parts.push(new MessageScene([["GAME OVER", fmtScore(this.scoring.total)]], 2.2));
+          dur += 2.2;
+        }
+        this.dmdQueue.push(new SequenceScene(parts), 3);
+        this.gameOverUntil = this.gameTime + dur;
       }
     } else {
       this.ballNum++;
@@ -510,7 +550,12 @@ export class Game {
       this.tilted = true;
       this.camera.shake(0.012);
       this.audio.sfx("tilt");
-      this.dmdQueue.push(new MessageScene([["TILT"]], 3.5, true), 3);
+      this.dmdQueue.push(
+        this.baked.tilt
+          ? new BakedDmdScene(this.baked.tilt, 9, undefined, 0, 3.5)
+          : new MessageScene([["TILT"]], 3.5, true),
+        3,
+      );
     } else if (this.tiltBob > TILT_LIMIT - 1) {
       this.audio.sfx("warning");
       this.dmdQueue.push(new MessageScene([["CAREFUL!"]], 0.8), 1);

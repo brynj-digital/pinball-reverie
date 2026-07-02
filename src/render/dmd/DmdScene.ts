@@ -90,18 +90,40 @@ export class BakedDmdScene implements DmdScene {
     private fps: number,
     private caption?: string,
     private holdS = 0.7,
+    /** If set, frames cycle for this many seconds instead of playing once. */
+    private loopForS?: number,
+    private captionY = 24,
   ) {}
 
   update(dt: number, dmd: DotMatrix): boolean {
     this.t += dt;
-    if (this.t >= this.frames.length / this.fps + this.holdS) return true;
-    const idx = Math.min(this.frames.length - 1, Math.floor(this.t * this.fps));
+    const total = this.loopForS ?? this.frames.length / this.fps + this.holdS;
+    if (this.t >= total) return true;
+    const raw = Math.floor(this.t * this.fps);
+    const idx = this.loopForS
+      ? raw % this.frames.length
+      : Math.min(this.frames.length - 1, raw);
     if (idx !== this.lastFrame) {
       this.lastFrame = idx;
       dmd.blit(this.frames[idx]);
-      if (this.caption) dmd.centerText(this.caption, 24, 2);
+      if (this.caption) dmd.centerText(this.caption, this.captionY, 2);
     }
     return false;
+  }
+}
+
+/** Play scenes back to back; finishes when the last one does. */
+export class SequenceScene implements DmdScene {
+  private i = 0;
+
+  constructor(private scenes: DmdScene[]) {}
+
+  update(dt: number, dmd: DotMatrix): boolean {
+    while (this.i < this.scenes.length) {
+      if (!this.scenes[this.i].update(dt, dmd)) return false;
+      this.i++;
+    }
+    return true;
   }
 }
 
