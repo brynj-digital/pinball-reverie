@@ -43,6 +43,7 @@ export class Renderer2D implements Renderer {
   private trail: { x: number; y: number }[] = [];
   private lastCharge = 0;
   private strikeAt = -Infinity; // performance.now()/1000 of the last release
+  private lastOx = 0; // table centering offset (device px), for panel layout
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
@@ -93,6 +94,7 @@ export class Renderer2D implements Renderer {
     // world transform: metres → pixels, camera scroll, table centred
     const s = h / camera.viewH;
     const ox = (w - s * this.table.width) / 2;
+    this.lastOx = ox;
     ctx.setTransform(s, 0, 0, s, ox, -camera.y * s);
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
@@ -216,6 +218,42 @@ export class Renderer2D implements Renderer {
 
   spawnEffect(_kind: EffectKind, _x: number, _y: number): void {
     // in-world juice lands in Milestone 5
+  }
+
+  /**
+   * Composite the DMD into the side panel (plan §4.5 landscape layout): the
+   * void left of the table if it's wide enough, else a compact strip under
+   * the fps readout. Steel bezel with a chrome top rim per the style guide.
+   */
+  private drawDmdPanel(dmd: HTMLCanvasElement): void {
+    const { ctx } = this;
+    const dpr = window.devicePixelRatio || 1;
+    const margin = this.lastOx / dpr; // void left of the table, CSS px
+    let w: number, x: number, y: number;
+    if (margin >= 240) {
+      w = Math.min(margin - 32, 560);
+      x = (margin - w) / 2;
+      y = 28;
+    } else {
+      // narrow window: compact strip under the fps readout
+      w = 264;
+      x = 10;
+      y = 30;
+    }
+    const h = w / 4;
+    ctx.fillStyle = "#2c3352";
+    ctx.strokeStyle = "#07080d";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(x - 8, y - 8, w + 16, h + 16, 6);
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = "#aeb6c8";
+    ctx.beginPath();
+    ctx.moveTo(x - 4, y - 8);
+    ctx.lineTo(x + w + 4, y - 8);
+    ctx.stroke();
+    ctx.drawImage(dmd, x, y, w, h);
   }
 
   /**
@@ -471,16 +509,19 @@ export class Renderer2D implements Renderer {
     ctx.fillStyle = "#8790b3";
     const speed = Math.hypot(snap.ball.vx, snap.ball.vy);
     ctx.fillText(`${snap.fps.toFixed(0)} fps   ball ${speed.toFixed(2)} m/s`, 10, 18);
-    ctx.fillText("Z / Shift — flippers · hold Space — plunger · R — reset ball", 10, ch - 12);
+    ctx.fillText(
+      "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · R — reset",
+      10,
+      ch - 12,
+    );
 
-    // score (the DMD takes this over in M4)
-    ctx.font = "16px ui-monospace, monospace";
-    ctx.fillStyle = "#d7dce8";
-    ctx.fillText(`SCORE ${snap.score.toLocaleString("en-US").replace(/,/g, " ")}`, 10, 42);
-    if (snap.scoreLabelAge < 1.2) {
-      ctx.font = "12px ui-monospace, monospace";
-      ctx.fillStyle = `rgba(255, 62, 154, ${Math.max(0, 1 - snap.scoreLabelAge / 1.2)})`;
-      ctx.fillText(snap.scoreLabel, 10, 60);
+    if (snap.dmd) {
+      this.drawDmdPanel(snap.dmd);
+    } else {
+      // pre-DMD fallback: plain score text
+      ctx.font = "16px ui-monospace, monospace";
+      ctx.fillStyle = "#d7dce8";
+      ctx.fillText(`SCORE ${snap.score.toLocaleString("en-US").replace(/,/g, " ")}`, 10, 42);
     }
 
     if (snap.plungerCharge > 0) {

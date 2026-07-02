@@ -10,6 +10,10 @@ import { Slingshot } from "../entities/Slingshot";
 import { DropTargetBank } from "../entities/DropTargetBank";
 import { Spinner } from "../entities/Spinner";
 import { Scoring } from "../game/Scoring";
+import { HighScores } from "../game/HighScores";
+import { DotMatrix } from "../render/dmd/DotMatrix";
+import { DmdQueue } from "../render/dmd/DmdQueue";
+import { AttractScene, MessageScene, ScoreScene, fmtScore } from "../render/dmd/DmdScene";
 import { buildTableFromSvg, type DevTable } from "../table/DevTable";
 // The playfield SVG is both physics source (→ SvgCollision) and art (the
 // renderer rasterizes the same text at display scale): one file, both jobs.
@@ -21,11 +25,19 @@ import { Renderer2D } from "../render/Renderer2D";
 import { TuningPanel } from "../debug/TuningPanel";
 import { loadTuning, type Tuning } from "../tuning";
 
+const BALLS_PER_GAME = 3;
+const BALL_SAVER_S = 8;
+const TILT_LIMIT = 3;
+/** Labels that earn their own DMD scene (bumper/sling spam does not). */
+const DMD_LABELS = new Set(["ORBIT", "BANK BONUS"]);
+
+type Phase = "attract" | "play" | "gameOver";
+
 /**
  * Main loop: fixed-timestep physics, snapshot handed to the renderer each
  * animation frame. Game never knows which Renderer implementation it drives
- * (plan §3). State machine (attract/play/ball-saver/game-over) lands in M4 —
- * for M1 there is one ball that respawns on drain.
+ * (plan §3). M4 state machine: attract → play (3 balls, ball-saver, tilt,
+ * moon-lane multipliers) → game over → attract, narrated by the DMD.
  */
 export class Game {
   private bus = new EventBus();
@@ -53,6 +65,22 @@ export class Game {
   private lastTime = 0;
   private fps = 60;
 
+  // ── M4 game flow ──
+  private highScores = new HighScores();
+  private dmd = new DotMatrix();
+  private dmdQueue: DmdQueue;
+  private scoreScene: ScoreScene;
+  private attractScene: AttractScene;
+  private phase: Phase = "attract";
+  private ballNum = 1;
+  private gameTime = 0;
+  private ballStarted = false; // first launch of the current ball arms the saver
+  private saverUntil = -Infinity;
+  private litMoons = new Set<string>();
+  private tiltBob = 0;
+  private tilted = false;
+  private gameOverUntil = 0;
+
   constructor(canvas: HTMLCanvasElement) {
     this.tuning = loadTuning();
     this.physics = new PhysicsWorld(this.bus, this.tuning);
@@ -74,7 +102,19 @@ export class Game {
     this.renderer.init(this.table.renderData);
     this.input = new Input();
     this.input.onReset(() => this.respawn());
+    this.input.onStart(() => {
+      if (this.phase === "attract") this.startGame();
+    });
+    this.input.onNudge((dir) => this.nudge(dir));
     this.panel = new TuningPanel(this.tuning);
+
+    this.scoreScene = new ScoreScene(() => ({
+      score: this.scoring.total,
+      ball: this.ballNum,
+      mult: this.scoring.multiplier,
+    }));
+    this.attractScene = new AttractScene(() => this.highScores.top);
+    this.dmdQueue = new DmdQueue(this.attractScene);
 
     this.bus.on("sensor", ({ kind, id }) => {
       // Drain starts a short visible fall-out (ball keeps simulating, fades,
@@ -82,7 +122,20 @@ export class Game {
       // fires — the sensor sits above the floor, mid-drop.
       if (kind === "drain" && this.drainTimer <= 0) this.drainTimer = 0.7;
       else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
-      else if (kind === "rollover" && id) this.rolloverLit.set(id, 1);
+      else if (kind === "rollover" && id) {
+        this.rolloverLit.set(id, 1);
+        this.onMoonLit(id);
+      }
+    });
+    this.bus.on("launch", () => {
+      if (this.phase === "play" && !this.ballStarted) {
+        this.ballStarted = true;
+        this.saverUntil = this.gameTime + BALL_SAVER_S;
+      }
+    });
+    this.bus.on("score", ({ label, points }) => {
+      if (DMD_LABELS.has(label))
+        this.dmdQueue.push(new MessageScene([[label, fmtScore(points)]], 1.3));
     });
     this.bus.on("hit", ({ kind, id }) => {
       if (kind === "bumper")
@@ -126,9 +179,18 @@ export class Game {
       }
     }
 
-    this.flippers[0].update(s.left || this.input.consumeTap("left"), t);
-    this.flippers[1].update(s.right || this.input.consumeTap("right"), t);
-    this.updatePlunger(dt, s.plunger, t);
+    this.gameTime += dt;
+    this.tiltBob = Math.max(0, this.tiltBob - dt / 1.2);
+    if (this.phase === "gameOver" && this.gameTime >= this.gameOverUntil) {
+      this.phase = "attract";
+      this.dmdQueue.setIdle(this.attractScene);
+    }
+
+    const flippersLive = !this.tilted;
+    this.flippers[0].update(flippersLive && (s.left || this.input.consumeTap("left")), t);
+    this.flippers[1].update(flippersLive && (s.right || this.input.consumeTap("right")), t);
+    if (this.phase === "play") this.updatePlunger(dt, s.plunger, t);
+    else if (this.phase === "attract" && s.plunger) this.startGame();
 
     for (const b of this.bumpers) b.update(dt);
     for (const sl of this.slings) sl.update(dt);
@@ -141,8 +203,11 @@ export class Game {
 
     if (this.drainTimer > 0) {
       this.drainTimer -= dt;
-      if (this.drainTimer <= 0) this.respawn();
+      if (this.drainTimer <= 0) this.onBallLost();
     }
+
+    this.dmdQueue.update(dt, this.dmd);
+    this.dmd.render();
 
     this.camera.viewH = Math.min(t.cameraViewH, TABLE.height);
     this.camera.follow(this.ball.body.getPosition().y, dt);
@@ -176,6 +241,87 @@ export class Game {
     this.bus.emit("ballSpawn", {});
   }
 
+  private startGame(): void {
+    this.scoring.reset();
+    this.phase = "play";
+    this.ballNum = 1;
+    this.ballStarted = false;
+    this.saverUntil = -Infinity;
+    this.litMoons.clear();
+    this.tilted = false;
+    this.tiltBob = 0;
+    this.respawn();
+    this.dmdQueue.clear();
+    this.dmdQueue.setIdle(this.scoreScene);
+    this.dmdQueue.push(new MessageScene([["BALL 1", "GOOD LUCK"]], 1.6));
+  }
+
+  /** End of the drain fall-out: saver, next ball, or game over. */
+  private onBallLost(): void {
+    if (this.phase !== "play") {
+      this.respawn();
+      return;
+    }
+    if (this.ballStarted && this.gameTime < this.saverUntil && !this.tilted) {
+      this.saverUntil = -Infinity; // one save per ball
+      this.respawn();
+      this.dmdQueue.push(new MessageScene([["BALL SAVED"]], 1.4, true), 2);
+      return;
+    }
+    this.tilted = false;
+    this.ballStarted = false;
+    this.saverUntil = -Infinity;
+    this.scoring.multiplier = 1;
+    this.litMoons.clear();
+    if (this.ballNum >= BALLS_PER_GAME) {
+      this.phase = "gameOver";
+      const pages: string[][] = [["GAME OVER", fmtScore(this.scoring.total)]];
+      if (this.highScores.submit(this.scoring.total)) pages.push(["NEW HIGH SCORE", "!"]);
+      this.dmdQueue.push(new MessageScene(pages, 2.2), 3);
+      this.gameOverUntil = this.gameTime + pages.length * 2.2 + 0.3;
+      this.respawn();
+    } else {
+      this.ballNum++;
+      this.respawn();
+      this.dmdQueue.push(new MessageScene([[`BALL ${this.ballNum}`]], 1.4), 2);
+    }
+  }
+
+  /** Moon lanes: light all three to raise the bonus multiplier (max ×5). */
+  private onMoonLit(id: string): void {
+    if (this.phase !== "play") return;
+    this.litMoons.add(id);
+    if (this.litMoons.size === 3) {
+      this.litMoons.clear();
+      if (this.scoring.multiplier < 5) {
+        this.scoring.multiplier++;
+        this.dmdQueue.push(
+          new MessageScene([[`MULTIPLIER ×${this.scoring.multiplier}`]], 1.4, true),
+          2,
+        );
+      }
+    }
+  }
+
+  /** Table nudge: brief impulse on the ball, tilt if abused (plan §4). */
+  private nudge(dir: "left" | "right" | "up"): void {
+    if (this.phase !== "play" || this.tilted || this.drainTimer > 0) return;
+    const imp =
+      dir === "left"
+        ? new Vec2(-0.02, -0.008)
+        : dir === "right"
+          ? new Vec2(0.02, -0.008)
+          : new Vec2(0, -0.024);
+    this.ball.body.applyLinearImpulse(imp, this.ball.body.getPosition(), true);
+    this.tiltBob += 1;
+    if (this.tiltBob > TILT_LIMIT) {
+      this.tilted = true;
+      this.dmdQueue.push(new MessageScene([["TILT"]], 3.5, true), 3);
+    } else if (this.tiltBob > TILT_LIMIT - 1) {
+      this.dmdQueue.push(new MessageScene([["CAREFUL!"]], 0.8), 1);
+    }
+  }
+
   private snapshot(): WorldSnapshot {
     const p = this.ball.body.getPosition();
     const v = this.ball.body.getLinearVelocity();
@@ -203,10 +349,12 @@ export class Game {
           hh: DROP_TARGETS.hh,
           up: t.up,
         })),
+        // moons stay lit while collected toward the multiplier; the decay
+        // map adds the brighter roll-over flash on top
         rollovers: ROLLOVERS.map((r) => ({
           x: r.x,
           y: r.y,
-          lit: this.rolloverLit.get(r.id) ?? 0,
+          lit: Math.max(this.rolloverLit.get(r.id) ?? 0, this.litMoons.has(r.id) ? 0.55 : 0),
         })),
         spinner: { ...SPINNER, angle: this.spinner.angle, spin: this.spinner.spin01 },
       },
@@ -215,6 +363,7 @@ export class Game {
       scoreLabelAge: this.scoring.lastLabelAge,
       plungerCharge: this.plungerCharge,
       fps: this.fps,
+      dmd: this.dmd.canvas,
       debugShapes: this.tuning.debugOverlay ? this.physics.collectDebugShapes() : undefined,
     };
   }

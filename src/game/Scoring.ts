@@ -19,7 +19,9 @@ const ORBIT_WINDOW = 3.5;
 
 export class Scoring {
   total = 0;
-  /** Last thing that scored, for the HUD (DMD takes over in M4). */
+  /** Bonus multiplier (set by Game when the moon lanes complete). */
+  multiplier = 1;
+  /** Last thing that scored, for the HUD label flash. */
   lastLabel = "";
   lastLabelAge = Infinity;
 
@@ -59,10 +61,20 @@ export class Scoring {
     }
   }
 
+  /** New game: zero everything. */
+  reset(): void {
+    this.total = 0;
+    this.multiplier = 1;
+    this.lastLabel = "";
+    this.lastLabelAge = Infinity;
+    this.entryAt = this.exitAt = -Infinity;
+  }
+
   private add(points: number, label: string): void {
-    this.total += points;
+    const p = points * this.multiplier;
+    this.total += p;
     this.lastLabel = label;
     this.lastLabelAge = 0;
-    this.bus.emit("score", { points, total: this.total, label });
+    this.bus.emit("score", { points: p, total: this.total, label });
   }
 }

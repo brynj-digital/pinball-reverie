@@ -21,12 +21,20 @@ const LEFT = ["ShiftLeft", "KeyZ"];
 const RIGHT = ["ShiftRight", "Slash"];
 const PLUNGER = ["Space", "ArrowDown"];
 const RESET = ["KeyR"];
+const START = ["Enter"];
+const NUDGES: Record<string, "left" | "right" | "up"> = {
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  ArrowUp: "up",
+};
 
 export class Input {
   readonly state: InputState = { left: false, right: false, plunger: false };
   private down = new Set<string>();
   private pulse = { left: false, right: false };
   private resetHandlers: (() => void)[] = [];
+  private startHandlers: (() => void)[] = [];
+  private nudgeHandlers: ((dir: "left" | "right" | "up") => void)[] = [];
 
   constructor(target: Window = window) {
     target.addEventListener("keydown", (e) => this.onKey(e, true));
@@ -39,6 +47,14 @@ export class Input {
 
   onReset(fn: () => void): void {
     this.resetHandlers.push(fn);
+  }
+
+  onStart(fn: () => void): void {
+    this.startHandlers.push(fn);
+  }
+
+  onNudge(fn: (dir: "left" | "right" | "up") => void): void {
+    this.nudgeHandlers.push(fn);
   }
 
   /** True if the flipper was tapped since the last poll, even sub-frame. Clears on read. */
@@ -68,6 +84,8 @@ export class Input {
     if (isNew && LEFT.includes(e.code)) this.pulse.left = true;
     if (isNew && RIGHT.includes(e.code)) this.pulse.right = true;
     if (isNew && RESET.includes(e.code)) this.resetHandlers.forEach((fn) => fn());
+    if (isNew && START.includes(e.code)) this.startHandlers.forEach((fn) => fn());
+    if (isNew && NUDGES[e.code]) this.nudgeHandlers.forEach((fn) => fn(NUDGES[e.code]));
 
     this.sync();
 

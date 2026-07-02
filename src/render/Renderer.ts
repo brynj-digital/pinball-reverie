@@ -61,6 +61,11 @@ export interface WorldSnapshot {
   scoreLabelAge: number;
   plungerCharge: number;
   fps: number;
+  /**
+   * The DMD's offscreen canvas (plan §5b): the DMD subsystem owns and paints
+   * it; renderers only composite it (2D blits it, 3D would texture-map it).
+   */
+  dmd?: HTMLCanvasElement;
   /** Present only when the debug overlay is enabled. */
   debugShapes?: DebugShape[];
 }
