@@ -167,6 +167,8 @@ export class Renderer2D implements Renderer {
     }
 
     // ball — stainless SVG art, procedural gradient until it loads
+    ctx.save();
+    ctx.globalAlpha = b.alpha;
     if (this.ballArt) {
       ctx.drawImage(
         this.ballArt,
@@ -205,6 +207,7 @@ export class Renderer2D implements Renderer {
       ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
       ctx.fill();
     }
+    ctx.restore(); // ball alpha
 
     if (snap.debugShapes) this.drawDebug(snap);
 

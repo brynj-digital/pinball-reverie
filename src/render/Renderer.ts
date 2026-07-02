@@ -26,6 +26,8 @@ export interface BallSnapshot {
   angle: number;
   vx: number;
   vy: number;
+  /** 1 in play; fades to 0 while the drained ball drops out. */
+  alpha: number;
 }
 
 export interface FlipperSnapshot {

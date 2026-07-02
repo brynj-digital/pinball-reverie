@@ -48,7 +48,8 @@ export class Game {
   private appliedTuningVersion = -1; // force one application on the first frame
   private plungerCharge = 0;
   private charging = false;
-  private pendingDrain = false;
+  /** >0 while the drained ball visibly falls out before respawning. */
+  private drainTimer = 0;
   private lastTime = 0;
   private fps = 60;
 
@@ -76,8 +77,10 @@ export class Game {
     this.panel = new TuningPanel(this.tuning);
 
     this.bus.on("sensor", ({ kind, id }) => {
-      // world is mid-step during contact callbacks — defer mutation to after update()
-      if (kind === "drain") this.pendingDrain = true;
+      // Drain starts a short visible fall-out (ball keeps simulating, fades,
+      // then respawns) instead of teleporting away the instant the sensor
+      // fires — the sensor sits above the floor, mid-drop.
+      if (kind === "drain" && this.drainTimer <= 0) this.drainTimer = 0.7;
       else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
       else if (kind === "rollover" && id) this.rolloverLit.set(id, 1);
     });
@@ -136,9 +139,9 @@ export class Game {
 
     this.physics.update(dt);
 
-    if (this.pendingDrain) {
-      this.pendingDrain = false;
-      this.respawn();
+    if (this.drainTimer > 0) {
+      this.drainTimer -= dt;
+      if (this.drainTimer <= 0) this.respawn();
     }
 
     this.camera.viewH = Math.min(t.cameraViewH, TABLE.height);
@@ -167,6 +170,7 @@ export class Game {
 
   private respawn(): void {
     this.ball.reset();
+    this.drainTimer = 0;
     this.plungerCharge = 0;
     this.charging = false;
     this.bus.emit("ballSpawn", {});
@@ -176,7 +180,15 @@ export class Game {
     const p = this.ball.body.getPosition();
     const v = this.ball.body.getLinearVelocity();
     return {
-      ball: { x: p.x, y: p.y, angle: this.ball.body.getAngle(), vx: v.x, vy: v.y },
+      ball: {
+        x: p.x,
+        y: p.y,
+        angle: this.ball.body.getAngle(),
+        vx: v.x,
+        vy: v.y,
+        // fade out over the last 0.3 s of the drain fall
+        alpha: this.drainTimer > 0 ? Math.min(1, this.drainTimer / 0.3) : 1,
+      },
       flippers: this.flippers.map((f) => {
         const fp = f.body.getPosition();
         return { x: fp.x, y: fp.y, angle: f.body.getAngle(), side: f.side };
