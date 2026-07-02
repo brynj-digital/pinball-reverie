@@ -3,10 +3,11 @@
  * elements and verifies core behaviours plus every known ball-trap scenario.
  * Run with `npm run simcheck`.
  */
+import { readFileSync } from "node:fs";
 import { Vec2 } from "planck";
 import { EventBus } from "../src/core/EventBus";
 import { PhysicsWorld, FIXED_DT } from "../src/core/PhysicsWorld";
-import { buildDevTable } from "../src/table/DevTable";
+import { buildTableFromSvg } from "../src/table/DevTable";
 import { Ball } from "../src/entities/Ball";
 import { Flipper } from "../src/entities/Flipper";
 import { Bumper } from "../src/entities/Bumper";
@@ -26,7 +27,11 @@ function check(name: string, ok: boolean, detail = ""): void {
 const t = { ...DEFAULT_TUNING };
 const bus = new EventBus();
 const pw = new PhysicsWorld(bus, t);
-const table = buildDevTable(pw.world, t);
+const svgText = readFileSync(
+  new URL("../design/tables/moondial/playfield.svg", import.meta.url),
+  "utf8",
+);
+const table = buildTableFromSvg(pw.world, t, svgText);
 const ball = new Ball(pw.world, t);
 const left = new Flipper(pw.world, table.body, "left", t);
 const right = new Flipper(pw.world, table.body, "right", t);

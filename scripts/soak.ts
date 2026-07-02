@@ -5,10 +5,11 @@
  * trap. Cradles don't count: flippers toggle within 1.5 s, well inside the
  * 2.5 s stuck window, so a cradled ball never stays motionless that long.
  */
+import { readFileSync } from "node:fs";
 import { Vec2 } from "planck";
 import { EventBus } from "../src/core/EventBus";
 import { PhysicsWorld, FIXED_DT } from "../src/core/PhysicsWorld";
-import { buildDevTable } from "../src/table/DevTable";
+import { buildTableFromSvg } from "../src/table/DevTable";
 import { Ball } from "../src/entities/Ball";
 import { Flipper } from "../src/entities/Flipper";
 import { Bumper } from "../src/entities/Bumper";
@@ -27,7 +28,11 @@ const rand = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffff
 const t = { ...DEFAULT_TUNING };
 const bus = new EventBus();
 const pw = new PhysicsWorld(bus, t);
-const table = buildDevTable(pw.world, t);
+const table = buildTableFromSvg(
+  pw.world,
+  t,
+  readFileSync(new URL("../design/tables/moondial/playfield.svg", import.meta.url), "utf8"),
+);
 const ball = new Ball(pw.world, t);
 const flippers = [
   new Flipper(pw.world, table.body, "left", t),

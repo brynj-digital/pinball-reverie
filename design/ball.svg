@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 27" width="27" height="27">
+  <!-- The ball: 27 mm chrome, style guide §7 — 3-stop radial toward the
+       top-left key light plus exactly one crisp highlight. -->
+  <defs>
+    <radialGradient id="ballChrome" cx="0.38" cy="0.35" r="0.85">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#565d6e"/>
+    </radialGradient>
+  </defs>
+  <circle cx="13.5" cy="13.5" r="13.2" fill="url(#ballChrome)" stroke="#07080d" stroke-width="0.5"/>
+  <circle cx="9.6" cy="9.2" r="2.3" fill="#ffffff"/>
+</svg>

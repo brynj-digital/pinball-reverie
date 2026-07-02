@@ -15,6 +15,10 @@ import type {
 export class Renderer2D implements Renderer {
   private ctx: CanvasRenderingContext2D;
   private table!: TableRenderData;
+  private art?: HTMLImageElement;
+  private artReady = false;
+  private ballArt?: HTMLImageElement;
+  private ballArtReady = false;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
@@ -22,6 +26,16 @@ export class Renderer2D implements Renderer {
 
   init(table: TableRenderData): void {
     this.table = table;
+    if (table.artUrl) {
+      this.art = new Image();
+      this.art.onload = () => (this.artReady = true);
+      this.art.src = table.artUrl;
+    }
+    if (table.ballArtUrl) {
+      this.ballArt = new Image();
+      this.ballArt.onload = () => (this.ballArtReady = true);
+      this.ballArt.src = table.ballArtUrl;
+    }
   }
 
   drawFrame(snap: WorldSnapshot, camera: Camera): void {
@@ -45,18 +59,12 @@ export class Renderer2D implements Renderer {
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
-    // playfield background
-    ctx.fillStyle = "#1b1e2c";
-    ctx.fillRect(0, 0, this.table.width, this.table.height);
-
-    // walls
-    ctx.strokeStyle = "#7f8fc9";
-    ctx.lineWidth = 0.008;
-    for (const line of this.table.polylines) {
-      ctx.beginPath();
-      line.pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
-      if (line.loop) ctx.closePath();
-      ctx.stroke();
+    // playfield art (the SVG master, walls included) — flat fallback until loaded
+    if (this.artReady) {
+      ctx.drawImage(this.art!, 0, 0, this.table.width, this.table.height);
+    } else {
+      ctx.fillStyle = "#1b1e2c";
+      ctx.fillRect(0, 0, this.table.width, this.table.height);
     }
 
     this.drawElements(snap);
@@ -84,23 +92,33 @@ export class Renderer2D implements Renderer {
       ctx.restore();
     }
 
-    // ball — shaded circle placeholder (SVG ball art comes at M3.5)
+    // ball — SVG chrome art, procedural gradient until it loads
     const b = snap.ball;
-    const grad = ctx.createRadialGradient(
-      b.x - BALL_RADIUS * 0.35,
-      b.y - BALL_RADIUS * 0.35,
-      BALL_RADIUS * 0.15,
-      b.x,
-      b.y,
-      BALL_RADIUS,
-    );
-    grad.addColorStop(0, "#ffffff");
-    grad.addColorStop(0.5, "#aeb6c8");
-    grad.addColorStop(1, "#565d6e");
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
-    ctx.fill();
+    if (this.ballArtReady) {
+      ctx.drawImage(
+        this.ballArt!,
+        b.x - BALL_RADIUS,
+        b.y - BALL_RADIUS,
+        BALL_RADIUS * 2,
+        BALL_RADIUS * 2,
+      );
+    } else {
+      const grad = ctx.createRadialGradient(
+        b.x - BALL_RADIUS * 0.35,
+        b.y - BALL_RADIUS * 0.35,
+        BALL_RADIUS * 0.15,
+        b.x,
+        b.y,
+        BALL_RADIUS,
+      );
+      grad.addColorStop(0, "#ffffff");
+      grad.addColorStop(0.5, "#aeb6c8");
+      grad.addColorStop(1, "#565d6e");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     if (snap.debugShapes) this.drawDebug(snap);
 
@@ -116,23 +134,27 @@ export class Renderer2D implements Renderer {
     const { ctx } = this;
     const el = snap.elements;
 
-    // rollover inserts — violet, halo when lit
+    // rollover inserts — the art carries the unlit moon-phase inserts;
+    // the renderer only adds the lit glow (or a plain insert pre-art)
     for (const r of el.rollovers) {
-      ctx.beginPath();
-      ctx.roundRect(r.x - 0.014, r.y - 0.009, 0.028, 0.018, 0.008);
-      ctx.fillStyle = r.lit > 0 ? "#8c6bff" : "#2f2547";
       if (r.lit > 0) {
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 0.012, 0, Math.PI * 2);
+        ctx.fillStyle = "#8c6bff";
         ctx.save();
         ctx.shadowColor = "#8c6bff";
-        ctx.shadowBlur = 0.03 * r.lit;
+        ctx.shadowBlur = 0.035 * r.lit;
         ctx.fill();
         ctx.restore();
-      } else {
+      } else if (!this.artReady) {
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);
+        ctx.fillStyle = "#2f2547";
         ctx.fill();
+        ctx.lineWidth = 0.002;
+        ctx.strokeStyle = "#07080d";
+        ctx.stroke();
       }
-      ctx.lineWidth = 0.002;
-      ctx.strokeStyle = "#07080d";
-      ctx.stroke();
     }
 
     // spinner — bar whose projected thickness fakes rotation about the lane axis

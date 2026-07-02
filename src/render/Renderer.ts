@@ -3,13 +3,16 @@
  * Renderer2D can be swapped for Renderer3D without touching game logic.
  * Pure types — no planck, no DOM imports.
  */
-import type { FlipperSide, Polyline } from "../table/geometry";
+import type { FlipperSide } from "../table/geometry";
 import type { Camera } from "../core/Camera";
 
 export interface TableRenderData {
   width: number;
   height: number;
-  polylines: Polyline[];
+  /** URL of the playfield art SVG (drawn as the base layer when loaded). */
+  artUrl?: string;
+  /** URL of the ball art SVG. */
+  ballArtUrl?: string;
 }
 
 export interface BallSnapshot {

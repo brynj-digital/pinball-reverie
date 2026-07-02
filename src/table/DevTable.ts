@@ -2,14 +2,8 @@ import { Body, Box, Chain, Fixture, Vec2, World } from "planck";
 import type { Tuning } from "../tuning";
 import type { FixtureTag } from "../core/PhysicsWorld";
 import type { TableRenderData } from "../render/Renderer";
-import {
-  ORBIT_SENSORS,
-  ROLLOVERS,
-  ROLLOVER_SENSOR,
-  SPINNER,
-  TABLE,
-  wallPolylines,
-} from "./geometry";
+import { parseTableSvg } from "./SvgCollision";
+import { BUMPERS, FLIPPER, TABLE } from "./geometry";
 
 export interface DevTable {
   body: Body;
@@ -18,19 +12,23 @@ export interface DevTable {
 }
 
 /**
- * Builds the Milestone-1 placeholder table: static wall chains from
- * geometry.ts plus the drain sensor. Replaced by the SVG→fixture parser at
- * milestone 3.5 (plan §5e).
+ * Builds the table's static physics from the playfield SVG (plan §5e: the
+ * SVG is the single source of truth for shape). Walls become chain fixtures,
+ * sensor rects become sensor fixtures routed to the EventBus, and anchors
+ * are validated against the code-side entity constants so art and physics
+ * can't silently drift.
  */
-export function buildDevTable(world: World, tuning: Tuning): DevTable {
-  const body = world.createBody(); // static, at origin — all coords in table space
-  const polylines = wallPolylines();
+export function buildTableFromSvg(world: World, tuning: Tuning, svgText: string): DevTable {
+  const parsed = parseTableSvg(svgText);
+  validateAnchors(parsed.anchors);
 
-  const wallFixtures = polylines.map((line) =>
+  const body = world.createBody(); // static, at origin — all coords in table space
+
+  const wallFixtures = parsed.walls.map((wall) =>
     body.createFixture({
       shape: new Chain(
-        line.pts.map((p) => new Vec2(p.x, p.y)),
-        line.loop,
+        wall.pts.map((p) => new Vec2(p.x, p.y)),
+        wall.loop,
       ),
       friction: tuning.wallFriction,
       restitution: tuning.wallRestitution,
@@ -38,28 +36,36 @@ export function buildDevTable(world: World, tuning: Tuning): DevTable {
     }),
   );
 
-  // Sensors, not solids, for every scoring zone (plan §4) — all routed to
-  // the EventBus by PhysicsWorld's contact listener.
-  const sensor = (cx: number, cy: number, hw: number, hh: number, tag: FixtureTag) =>
+  // Sensors, not solids, for every scoring zone (plan §4)
+  for (const s of parsed.sensors) {
     body.createFixture({
-      shape: new Box(hw, hh, new Vec2(cx, cy), 0),
+      shape: new Box(s.hw, s.hh, new Vec2(s.cx, s.cy), 0),
       isSensor: true,
-      userData: tag,
+      userData: { kind: s.kind, id: s.id } satisfies FixtureTag,
     });
-
-  const d = TABLE.drain;
-  sensor(d.cx, d.cy, d.hw, d.hh, { kind: "drain" });
-  for (const r of ROLLOVERS)
-    sensor(r.x, r.y, ROLLOVER_SENSOR.hw, ROLLOVER_SENSOR.hh, { kind: "rollover", id: r.id });
-  sensor(SPINNER.x, SPINNER.y, SPINNER.halfW, 0.006, { kind: "spinner" });
-  const oe = ORBIT_SENSORS.entry;
-  sensor(oe.x, oe.y, oe.hw, oe.hh, { kind: "ramp-entry" });
-  const ox = ORBIT_SENSORS.exit;
-  sensor(ox.x, ox.y, ox.hw, ox.hh, { kind: "ramp-exit" });
+  }
 
   return {
     body,
-    renderData: { width: TABLE.width, height: TABLE.height, polylines },
+    renderData: { width: TABLE.width, height: TABLE.height },
     wallFixtures,
   };
+}
+
+/** Art and physics agree on placement or we fail loudly at load time. */
+function validateAnchors(anchors: Map<string, { x: number; y: number }>): void {
+  const expect: [string, { x: number; y: number }][] = [
+    ["flipper-left", FLIPPER.pivotL],
+    ["flipper-right", FLIPPER.pivotR],
+    ["spawn", TABLE.spawn],
+    ...BUMPERS.map((b): [string, { x: number; y: number }] => [`bumper-${b.id}`, b]),
+  ];
+  for (const [name, pos] of expect) {
+    const a = anchors.get(name);
+    if (!a) throw new Error(`playfield SVG is missing anchor-${name}`);
+    if (Math.hypot(a.x - pos.x, a.y - pos.y) > 0.001)
+      throw new Error(
+        `anchor-${name} at (${a.x}, ${a.y}) disagrees with code constant (${pos.x}, ${pos.y})`,
+      );
+  }
 }

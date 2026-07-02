@@ -10,7 +10,12 @@ import { Slingshot } from "../entities/Slingshot";
 import { DropTargetBank } from "../entities/DropTargetBank";
 import { Spinner } from "../entities/Spinner";
 import { Scoring } from "../game/Scoring";
-import { buildDevTable, type DevTable } from "../table/DevTable";
+import { buildTableFromSvg, type DevTable } from "../table/DevTable";
+// The playfield SVG is both physics source (raw text → SvgCollision) and art
+// (asset URL → renderer base layer): one file, both jobs (plan §5e).
+import playfieldSvgRaw from "../../design/tables/moondial/playfield.svg?raw";
+import playfieldSvgUrl from "../../design/tables/moondial/playfield.svg";
+import ballSvgUrl from "../../design/ball.svg";
 import { BUMPERS, DROP_TARGETS, ROLLOVERS, SLINGS, SPINNER, TABLE } from "../table/geometry";
 import type { Renderer, WorldSnapshot } from "../render/Renderer";
 import { Renderer2D } from "../render/Renderer2D";
@@ -49,7 +54,9 @@ export class Game {
   constructor(canvas: HTMLCanvasElement) {
     this.tuning = loadTuning();
     this.physics = new PhysicsWorld(this.bus, this.tuning);
-    this.table = buildDevTable(this.physics.world, this.tuning);
+    this.table = buildTableFromSvg(this.physics.world, this.tuning, playfieldSvgRaw);
+    this.table.renderData.artUrl = playfieldSvgUrl;
+    this.table.renderData.ballArtUrl = ballSvgUrl;
     this.ball = new Ball(this.physics.world, this.tuning);
     this.flippers = [
       new Flipper(this.physics.world, this.table.body, "left", this.tuning),

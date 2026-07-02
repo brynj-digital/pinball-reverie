@@ -1,13 +1,16 @@
 /**
- * Placeholder table geometry for Milestone 1, in metres with y pointing DOWN
+ * Entity constants for the Moondial table, in metres with y pointing DOWN
  * the table (matches screen space; gravity is +y).
  *
- * Hand-authored only because no Claude Design playfield SVG exists yet — once
- * milestone 3.5 lands, collision geometry is derived from named SVG layers
- * (plan §5e) and this file is replaced by the SVG parser's output.
+ * As of milestone 3.5 the table SHAPE (walls + sensors) lives in the
+ * playfield SVG (design/tables/moondial/playfield.svg) and is parsed by
+ * SvgCollision.ts — never hand-author collision here that duplicates drawn
+ * geometry (plan §5e). This module keeps only what the code-defined dynamic
+ * entities need (flippers, bumpers, slings, targets, spinner), and those
+ * placements are cross-checked against the SVG's anchor-* markers at load.
  *
- * This module is pure data/math (no planck, no DOM) so the physics build,
- * the renderer and the headless simcheck can all share it.
+ * Pure data/math (no planck, no DOM) so physics, renderer and the headless
+ * simcheck can all share it.
  */
 export interface Pt {
   x: number;
@@ -32,8 +35,6 @@ export const TABLE = {
   /** y where the plunger lane's inner wall ends (orbit tail joins here). */
   laneTopY: 0.3,
   spawn: { x: 0.5475, y: 1.0 },
-  /** Drain sensor box: spans the playfield only, never the plunger lane. */
-  drain: { cx: 0.26, cy: 1.02, hw: 0.26, hh: 0.015 },
 } as const;
 
 export const FLIPPER = {
@@ -135,27 +136,15 @@ export interface RolloverDef {
   x: number;
   y: number;
 }
-/** Top-lane rollovers (sensor rects 30 × 20 mm). */
+/** Top-lane rollover insert positions (sensors live in the SVG). */
 export const ROLLOVERS: readonly RolloverDef[] = [
   { id: "1", x: 0.16, y: 0.115 },
   { id: "2", x: 0.26, y: 0.115 },
   { id: "3", x: 0.36, y: 0.115 },
 ];
-export const ROLLOVER_SENSOR = { hw: 0.015, hh: 0.01 } as const;
 
-/** Spinner bar across the orbit's left lane. */
+/** Spinner bar across the orbit's left lane (its trip sensor lives in the SVG). */
 export const SPINNER = { x: ORBIT.laneX / 2, y: 0.4, halfW: ORBIT.laneX / 2 } as const;
-
-/** Orbit entry (bottom of the left lane) and exit (right arch channel) sensors. */
-export const ORBIT_SENSORS = {
-  entry: { x: ORBIT.laneX / 2, y: 0.5, hw: 0.03, hh: 0.008 },
-  exit: { x: 0.46, y: 0.135, hw: 0.018, hh: 0.018 },
-} as const;
-
-/** y of the inner orbit arc at a given x (for butting the lane dividers into it). */
-function orbitArcY(x: number): number {
-  return ARCH.cy - Math.sqrt(ORBIT.r * ORBIT.r - (x - ARCH.cx) ** 2);
-}
 
 /**
  * Flipper bat polygon in local body space, pivot at origin, CCW winding.
@@ -177,122 +166,19 @@ export function flipperVerts(side: FlipperSide): Pt[] {
   return left.map((p) => ({ x: -p.x, y: p.y })).reverse();
 }
 
-export interface Polyline {
-  pts: Pt[];
-  loop: boolean;
-}
-
-/** All static wall chains: outer shell (with rounded arch top), funnels, plunger lane. */
-export function wallPolylines(): Polyline[] {
-  const { width, height, laneWallX, laneTopY } = TABLE;
-
-  // Outer shell: left wall, r-0.26 quarter-arc to the apex, then the larger
-  // r-0.315 quarter-arc down over the plunger lane, right wall. Both arcs
-  // pass through (0.26, 0) with a horizontal tangent — no kink at the apex.
-  const outer: Pt[] = [
-    { x: 0, y: height },
-    { x: 0, y: ARCH.cy },
-  ];
-  const N = 7;
-  for (let i = 1; i <= N; i++) {
-    const th = Math.PI - (i * (Math.PI / 2)) / N; // 180° → 90°
-    outer.push({ x: ARCH.cx + ARCH.r * Math.cos(th), y: ARCH.cy - ARCH.r * Math.sin(th) });
-  }
-  for (let i = 1; i <= N; i++) {
-    const th = Math.PI / 2 - (i * (Math.PI / 2)) / N; // 90° → 0°
-    outer.push({
-      x: ARCH_RIGHT.cx + ARCH_RIGHT.r * Math.cos(th),
-      y: ARCH_RIGHT.cy - ARCH_RIGHT.r * Math.sin(th),
-    });
-  }
-  outer.push({ x: width, y: height }); // loop closure adds the floor
-
-  return [
-    { pts: outer, loop: true },
-    // Funnel walls guiding the ball onto the flippers; the vertical tails
-    // form the outlane channels down to the drain.
-    //
-    // Each wall ends exactly TANGENT to the flipper's base circle, past its
-    // apex, so wall → base → bat face is one slope-continuous descent. This
-    // is the load-bearing property: end the wall short and there's a pocket;
-    // bury it below the circle's crown and a slow ball stalls against the
-    // hump it can't climb (drop tests pass — the ball arrives with speed —
-    // but a creeping ball sticks). Only tangency has no pocket AND no hump.
-    // After the tangent point the wall dives inside the circle and down to
-    // the floor; the overlap is harmless because the circle's contact
-    // normals pass through the pivot — zero torque on the flipper.
-    {
-      pts: [
-        { x: 0, y: 0.8 },
-        { x: 0.1784, y: 0.9406 }, // tangent to left base circle
-        { x: 0.163, y: 0.955 }, // buried inside the circle
-        { x: 0.163, y: height },
-      ],
-      loop: false,
-    },
-    // exact mirror of the left funnel now that the lane sits outside
-    {
-      pts: [
-        { x: TABLE.playfieldW, y: 0.8 },
-        { x: 0.3416, y: 0.9406 }, // tangent to right base circle
-        { x: 0.357, y: 0.955 }, // buried inside the circle
-        { x: 0.357, y: height },
-      ],
-      loop: false,
-    },
-    // plunger lane wall
-    {
-      pts: [
-        { x: laneWallX, y: laneTopY },
-        { x: laneWallX, y: height },
-      ],
-      loop: false,
-    },
-    // Orbit inner wall: left lane up, arc around under the arch, then a tail
-    // down to the plunger-lane wall top — so a launched ball rides the whole
-    // orbit and exits down the left lane past the spinner.
-    { pts: orbitInnerWall(), loop: false },
-    // Top-lane dividers, ending 4 mm BELOW the inner arc line (a 4 mm gap is
-    // under the ball-radius rule; ending ABOVE the line pokes a tip into the
-    // orbit channel that pockets a slow orbiting ball — soak-verified trap)
-    { pts: laneDivider(0.215), loop: false },
-    { pts: laneDivider(0.305), loop: false },
-    // Drop-target bank housing: a back wall 4 mm behind the target faces'
-    // rear, joined to the lane wall above and below. When targets are down
-    // the exposed recess is only ~12 mm deep (< ball radius), so the ball
-    // can never get behind the bank — an open pocket there traps it against
-    // the lower seal (soak-verified trap).
-    {
-      pts: [
-        { x: laneWallX, y: 0.49 },
-        { x: DROP_TARGETS.x + DROP_TARGETS.hw + 0.004, y: 0.498 },
-        { x: DROP_TARGETS.x + DROP_TARGETS.hw + 0.004, y: 0.622 },
-        { x: laneWallX, y: 0.63 },
-      ],
-      loop: false,
-    },
-  ];
-}
-
-function orbitInnerWall(): Pt[] {
-  const pts: Pt[] = [
-    { x: ORBIT.laneX, y: ORBIT.laneBottomY },
-    { x: ORBIT.laneX, y: ARCH.cy }, // = arc point at 180°
-  ];
-  const N = 14; // 180° → tail angle
-  const a0 = Math.PI;
-  const a1 = (ORBIT.tailAngleDeg * Math.PI) / 180;
-  for (let i = 1; i <= N; i++) {
-    const a = a0 + (i * (a1 - a0)) / N;
-    pts.push({ x: ARCH.cx + ORBIT.r * Math.cos(a), y: ARCH.cy - ORBIT.r * Math.sin(a) });
-  }
-  pts.push({ x: TABLE.laneWallX, y: TABLE.laneTopY });
-  return pts;
-}
-
-function laneDivider(x: number): Pt[] {
-  return [
-    { x, y: orbitArcY(x) + 0.004 }, // +y = below the arc line, out of the channel
-    { x, y: 0.15 },
-  ];
-}
+/*
+ * Wall and sensor shapes were removed from this file at milestone 3.5 —
+ * they now live in design/tables/moondial/playfield.svg as named
+ * "collision-" and "sensor-" prefixed layers. The trap rules travelled too:
+ *
+ *  - inlane guides end TANGENT to the flipper base circle, past its apex
+ *    (short = pocket; below the crown = a creeping ball stalls on the hump)
+ *  - every gap < 13.5 mm or > 38 mm; 13.5–38 mm wedges the ball
+ *  - lane dividers end 4 mm BELOW the orbit arc line (a tip poking into the
+ *    channel pockets a slow orbiting ball)
+ *  - the drop-target bank is fully housed: back wall 4 mm behind the
+ *    targets so the open recess is shallower than the ball radius
+ *
+ * These are also recorded in design/STYLE-GUIDE.md §4. Run `npm run
+ * simcheck` and `npm run soak` after ANY change to the playfield SVG.
+ */

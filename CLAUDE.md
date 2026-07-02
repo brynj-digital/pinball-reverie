@@ -8,7 +8,7 @@ Milestones 0–1 scaffolded: Vite + TypeScript + Planck.js, with a Canvas-2D pla
 
 The global style guide (plan §5a, milestone 0.5) lives at `design/STYLE-GUIDE.md` with tokens in `design/tokens.css` and rendered specimens in `design/previews/` — these are the editable masters, synced to the Claude Design project "Pinball Reverie — game design system". **All art must inherit from it** (palette tokens, 1 SVG unit = 1 mm, collision/sensor/anchor layer naming, ball-gap rules); amend the guide before introducing any new color or convention.
 
-Commands: `npm run dev` (Vite dev server), `npm run build` (typecheck + bundle), `npm run simcheck` (headless physics smoke test — run after any physics change), `npm run soak [seed]` (randomized 10-min play sim that flags ball traps). Table geometry for M1 is hand-authored in `src/table/geometry.ts` as a placeholder; it is replaced by SVG-derived collision at milestone 3.5.
+Commands: `npm run dev` (Vite dev server), `npm run build` (typecheck + bundle), `npm run simcheck` (headless physics smoke test — run after any physics or playfield-SVG change), `npm run soak [seed]` (randomized 10-min play sim that flags ball traps). Milestone 3.5 is done: table 1 is **Moondial** (night-observatory theme) and its shape truth is `design/tables/moondial/playfield.svg` — collision walls, sensors, and anchors are parsed from named layers by `src/table/SvgCollision.ts` (the visible wall strokes ARE the collision paths); `src/table/geometry.ts` keeps only dynamic-entity constants, cross-checked against the SVG's `anchor-*` markers at load. Run simcheck + soak after ANY edit to the playfield SVG.
 
 ## What this is
 
