@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <!-- MOONDIAL backglass (plan §8 M7): shown in the landscape side panel
+       above the DMD (§4.5). Style guide throughout: chrome-horizon wordmark,
+       full moon over the observatory, deco frame, token palette. -->
+  <defs>
+    <linearGradient id="bgSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12141f"/>
+      <stop offset="0.55" stop-color="#1b1e2c"/>
+      <stop offset="1" stop-color="#262a3e"/>
+    </linearGradient>
+    <radialGradient id="bgMoonGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#8c6bff" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#8c6bff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bgChrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <filter id="bgGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="300" height="360" fill="url(#bgSky)"/>
+
+  <!-- starfield -->
+  <g fill="#d7dce8">
+    <circle cx="34" cy="40" r="1.2" opacity="0.5"/><circle cx="78" cy="24" r="0.9" opacity="0.4"/>
+    <circle cx="126" cy="48" r="1.4" opacity="0.55"/><circle cx="210" cy="30" r="1.0" opacity="0.45"/>
+    <circle cx="258" cy="52" r="1.3" opacity="0.5"/><circle cx="42" cy="112" r="1.0" opacity="0.4"/>
+    <circle cx="262" cy="120" r="1.1" opacity="0.45"/><circle cx="30" cy="190" r="1.2" opacity="0.45"/>
+    <circle cx="272" cy="196" r="1.0" opacity="0.4"/><circle cx="58" cy="252" r="0.9" opacity="0.35"/>
+    <circle cx="244" cy="258" r="1.1" opacity="0.4"/><circle cx="150" cy="20" r="1.0" opacity="0.45"/>
+    <path d="M 60 74 L 62.5 81.5 L 70 84 L 62.5 86.5 L 60 94 L 57.5 86.5 L 50 84 L 57.5 81.5 Z" opacity="0.65"/>
+    <path d="M 240 84 L 242 90 L 248 92 L 242 94 L 240 100 L 238 94 L 232 92 L 238 90 Z" opacity="0.55"/>
+  </g>
+
+  <!-- full moon over the dome -->
+  <circle cx="150" cy="120" r="72" fill="url(#bgMoonGlow)"/>
+  <circle cx="150" cy="120" r="46" fill="#aeb6c8" stroke="#07080d" stroke-width="2.5"/>
+  <circle cx="134" cy="104" r="9" fill="#565d6e" opacity="0.7"/>
+  <circle cx="166" cy="130" r="6" fill="#565d6e" opacity="0.6"/>
+  <circle cx="146" cy="142" r="4.5" fill="#565d6e" opacity="0.55"/>
+  <circle cx="170" cy="102" r="4" fill="#565d6e" opacity="0.5"/>
+
+  <!-- observatory silhouette on a hill -->
+  <path d="M 30 250 Q 90 224 128 220 L 172 220 Q 210 224 270 250 L 270 262 L 30 262 Z"
+        fill="#12141f" stroke="#07080d" stroke-width="2"/>
+  <rect x="118" y="190" width="64" height="32" fill="#12141f" stroke="#07080d" stroke-width="2"/>
+  <path d="M 118 190 A 32 32 0 0 1 182 190 Z" fill="#12141f" stroke="#07080d" stroke-width="2"/>
+  <path d="M 120 179 A 30 30 0 0 1 148 158" fill="none" stroke="#7f8fc9" stroke-width="1.6" opacity="0.8"/>
+  <rect x="146" y="162" width="9" height="28" fill="#07080d"/>
+  <rect x="148" y="164" width="5" height="24" fill="#e0b64e" opacity="0.7"/>
+  <g transform="rotate(-30 150 176)">
+    <rect x="145.5" y="140" width="9" height="34" rx="2" fill="#23262f" stroke="#07080d" stroke-width="1.2"/>
+  </g>
+  <g fill="#f4d27a"><rect x="126" y="204" width="5" height="6" rx="1"/><rect x="169" y="204" width="5" height="6" rx="1"/></g>
+
+  <!-- wordmark -->
+  <g filter="url(#bgGlow)">
+    <text x="150" y="300" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="34" font-weight="800" letter-spacing="4" fill="#4e37a8" opacity="0.55">MOONDIAL</text>
+  </g>
+  <text x="150" y="297" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="34" font-weight="800" letter-spacing="4"
+        fill="url(#bgChrome)" stroke="#07080d" stroke-width="1.8" paint-order="stroke">MOONDIAL</text>
+  <text x="150" y="297" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="34" font-weight="800" letter-spacing="4"
+        fill="none" stroke="#ff3e9a" stroke-width="0.7" opacity="0.9">MOONDIAL</text>
+  <text x="150" y="320" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="10" letter-spacing="4" fill="#7f8fc9">A · NIGHT · OBSERVATORY</text>
+  <text x="150" y="344" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="9" letter-spacing="3" fill="#4a5680">PINBALL · REVERIE</text>
+
+  <!-- deco frame -->
+  <g fill="none" stroke="#2c3352" stroke-width="2">
+    <rect x="6" y="6" width="288" height="348" rx="8"/>
+    <rect x="12" y="12" width="276" height="336" rx="5" stroke="#9c7c2c" stroke-width="1"/>
+  </g>
+  <g fill="#8c6bff">
+    <path d="M 150 2 L 154 8 L 150 14 L 146 8 Z"/>
+    <path d="M 150 346 L 154 352 L 150 358 L 146 352 Z" opacity="0.8"/>
+  </g>
+</svg>

@@ -16,6 +16,7 @@ import { Slingshot } from "../src/entities/Slingshot";
 import { DropTargetBank } from "../src/entities/DropTargetBank";
 import { Spinner } from "../src/entities/Spinner";
 import { Scoring } from "../src/game/Scoring";
+import { Modes } from "../src/game/Modes";
 import {
   TABLE,
   FLIPPER,
@@ -51,6 +52,7 @@ const slings = SLINGS.map((d) => new Slingshot(pw.world, d));
 const bank = new DropTargetBank(pw.world, pw, bus);
 const spinner = new Spinner(bus);
 const scoring = new Scoring(bus);
+const modes = new Modes(bus, scoring);
 left.update(false, t);
 right.update(false, t);
 
@@ -83,6 +85,7 @@ function run(seconds: number, each?: () => void): void {
     bank.update(FIXED_DT);
     spinner.update(FIXED_DT);
     scoring.update(FIXED_DT);
+    modes.update(FIXED_DT);
     for (const s of slings) s.update(FIXED_DT);
     for (const b of bumpers) b.update(FIXED_DT);
     each?.();
@@ -229,6 +232,39 @@ check(
   sensors.includes("ramp-entry") && sensors.includes("ramp-exit"),
 );
 check("orbit combo scores", labels.includes("ORBIT"), `score=${scoring.total}`);
+
+// 13 — the Moondial ruleset, driven with synthetic events (rules logic is
+// physics-independent): orbit combos escalate, 2 banks + 3 orbits light the
+// eclipse, the next orbit starts it, eclipse doubles scoring and pays orbit
+// jackpots. Expected: 2×5000 + 2500 + 5000 + 10000 + 10000 + 100×2 + 25000×2.
+placeBall(0.5475, 0.95); // park on the plunger saddle, away from all sensors
+run(1.5);
+scoring.reset();
+modes.resetGame();
+const modeEvents: string[] = [];
+bus.on("mode", ({ kind }) => modeEvents.push(kind));
+const syntheticOrbit = () => {
+  bus.emit("sensor", { kind: "ramp-entry" });
+  run(0.1);
+  bus.emit("sensor", { kind: "ramp-exit" });
+  run(0.1);
+};
+bus.emit("bankComplete", {});
+bus.emit("bankComplete", {});
+syntheticOrbit();
+syntheticOrbit();
+syntheticOrbit();
+check("eclipse lights after 2 banks + 3 orbits", modeEvents.includes("eclipseReady"));
+syntheticOrbit(); // starts the eclipse
+check("eclipse starts on the next orbit", modeEvents.includes("eclipseStart") && modes.eclipseActive);
+bus.emit("hit", { kind: "bumper", id: "1" });
+syntheticOrbit(); // eclipse orbit jackpot
+check("ruleset totals are exact", scoring.total === 87700, `total=${scoring.total}`);
+run(26); // let the eclipse expire
+check(
+  "eclipse ends after its duration",
+  modeEvents.includes("eclipseEnd") && !modes.eclipseActive && scoring.eclipseFactor === 1,
+);
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

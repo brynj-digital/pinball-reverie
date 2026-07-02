@@ -10,6 +10,7 @@ import { Slingshot } from "../entities/Slingshot";
 import { DropTargetBank } from "../entities/DropTargetBank";
 import { Spinner } from "../entities/Spinner";
 import { Scoring } from "../game/Scoring";
+import { Modes } from "../game/Modes";
 import { HighScores } from "../game/HighScores";
 import { DotMatrix } from "../render/dmd/DotMatrix";
 import { DmdQueue } from "../render/dmd/DmdQueue";
@@ -29,6 +30,7 @@ import { buildTableFromSvg, type DevTable } from "../table/DevTable";
 // The playfield SVG is both physics source (→ SvgCollision) and art (the
 // renderer rasterizes the same text at display scale): one file, both jobs.
 import playfieldSvgRaw from "../../design/tables/moondial/playfield.svg?raw";
+import backglassSvgRaw from "../../design/tables/moondial/backglass.svg?raw";
 import ballSvgRaw from "../../design/ball.svg?raw";
 import { BUMPERS, DROP_TARGETS, ROLLOVERS, SLINGS, SPINNER, TABLE } from "../table/geometry";
 import type { Renderer, WorldSnapshot } from "../render/Renderer";
@@ -62,6 +64,7 @@ export class Game {
   private targetBank: DropTargetBank;
   private spinner: Spinner;
   private scoring: Scoring;
+  private modes: Modes;
   private rolloverLit = new Map<string, number>();
   private camera: Camera;
   private renderer: Renderer;
@@ -103,6 +106,7 @@ export class Game {
     this.table = buildTableFromSvg(this.physics.world, this.tuning, playfieldSvgRaw);
     this.table.renderData.artSvgText = playfieldSvgRaw;
     this.table.renderData.ballSvgText = ballSvgRaw;
+    this.table.renderData.backglassSvgText = backglassSvgRaw;
     this.ball = new Ball(this.physics.world, this.tuning);
     this.flippers = [
       new Flipper(this.physics.world, this.table.body, "left", this.tuning),
@@ -113,6 +117,7 @@ export class Game {
     this.targetBank = new DropTargetBank(this.physics.world, this.physics, this.bus);
     this.spinner = new Spinner(this.bus);
     this.scoring = new Scoring(this.bus);
+    this.modes = new Modes(this.bus, this.scoring);
     this.camera = new Camera(TABLE.width, TABLE.height, this.tuning.cameraViewH);
     this.renderer = new Renderer2D(canvas);
     this.renderer.init(this.table.renderData);
@@ -162,10 +167,26 @@ export class Game {
       }
     });
     this.bus.on("score", ({ label, points }) => {
-      if (label === "ORBIT" && this.baked.orbit) {
-        this.dmdQueue.push(new BakedDmdScene(this.baked.orbit, 11, `ORBIT ${fmtScore(points)}`));
-      } else if (DMD_LABELS.has(label)) {
+      const isOrbit = label.startsWith("ORBIT") || label === "ECLIPSE ORBIT";
+      if (isOrbit && this.baked.orbit) {
+        this.dmdQueue.push(
+          new BakedDmdScene(this.baked.orbit, 11, `${label} ${fmtScore(points)}`),
+          label === "ECLIPSE ORBIT" ? 2 : 1,
+        );
+      } else if (isOrbit || DMD_LABELS.has(label)) {
         this.dmdQueue.push(new MessageScene([[label, fmtScore(points)]], 1.3));
+      }
+    });
+    this.bus.on("mode", ({ kind }) => {
+      if (kind === "eclipseReady") {
+        this.audio.sfx("multiplier");
+        this.dmdQueue.push(new MessageScene([["ECLIPSE IS LIT", "SHOOT THE ORBIT"]], 1.6, true), 2);
+      } else if (kind === "eclipseStart") {
+        this.audio.sfx("bank");
+        this.camera.shake(0.006);
+        this.dmdQueue.push(new MessageScene([["LUNAR ECLIPSE", "ALL SCORES ×2"]], 1.5, true), 3);
+      } else if (kind === "eclipseEnd") {
+        this.dmdQueue.push(new MessageScene([["ECLIPSE OVER"]], 1.2), 2);
       }
     });
     this.bus.on("hit", ({ kind, id }) => {
@@ -248,6 +269,7 @@ export class Game {
     this.targetBank.update(dt);
     this.spinner.update(dt);
     this.scoring.update(dt);
+    this.modes.update(dt);
     for (const [id, v] of this.rolloverLit) this.rolloverLit.set(id, Math.max(0, v - dt * 2));
 
     this.physics.update(dt);
@@ -296,6 +318,7 @@ export class Game {
     this.audio.sfx("start");
     this.music.start();
     this.scoring.reset();
+    this.modes.resetGame();
     this.phase = "play";
     this.ballNum = 1;
     this.ballStarted = false;
@@ -325,13 +348,16 @@ export class Game {
     this.tilted = false;
     this.ballStarted = false;
     this.saverUntil = -Infinity;
+    const bonus = this.scoring.collectBonus();
+    this.modes.endBall();
     this.scoring.multiplier = 1;
     this.litMoons.clear();
+    const bonusPage: string[][] = bonus > 0 ? [["BONUS", fmtScore(bonus)]] : [];
     if (this.ballNum >= BALLS_PER_GAME) {
       this.phase = "gameOver";
       this.music.stop();
       this.audio.sfx("gameOver");
-      const pages: string[][] = [["GAME OVER", fmtScore(this.scoring.total)]];
+      const pages: string[][] = [...bonusPage, ["GAME OVER", fmtScore(this.scoring.total)]];
       if (this.highScores.submit(this.scoring.total)) pages.push(["NEW HIGH SCORE", "!"]);
       this.dmdQueue.push(new MessageScene(pages, 2.2), 3);
       this.gameOverUntil = this.gameTime + pages.length * 2.2 + 0.3;
@@ -339,7 +365,7 @@ export class Game {
     } else {
       this.ballNum++;
       this.respawn();
-      this.dmdQueue.push(new MessageScene([[`BALL ${this.ballNum}`]], 1.4), 2);
+      this.dmdQueue.push(new MessageScene([...bonusPage, [`BALL ${this.ballNum}`]], 1.6), 2);
     }
   }
 

@@ -39,6 +39,7 @@ export class Renderer2D implements Renderer {
   private artScale = 0; // px per metre the current art raster was built for
   private artPendingScale = 0;
   private ballArt?: HTMLImageElement;
+  private backglass?: HTMLImageElement;
   /** Recent ball positions for the speed-scaled motion trail. */
   private trail: { x: number; y: number }[] = [];
   private lastCharge = 0;
@@ -54,6 +55,9 @@ export class Renderer2D implements Renderer {
     if (table.ballSvgText) {
       // one-time: 128 px is plenty for a ball that renders at ~40–90 px
       loadSvgAt(table.ballSvgText, 128, 128, (img) => (this.ballArt = img));
+    }
+    if (table.backglassSvgText) {
+      loadSvgAt(table.backglassSvgText, 600, 720, (img) => (this.backglass = img));
     }
   }
 
@@ -284,6 +288,16 @@ export class Renderer2D implements Renderer {
     ctx.lineTo(x + w + 4, y - 8);
     ctx.stroke();
     ctx.drawImage(dmd, x, y, w, h);
+
+    // backglass art below the DMD when the panel is wide enough (§4.5)
+    if (this.backglass && margin >= 240) {
+      const bw = w;
+      const bh = bw * 1.2;
+      const by = y + h + 22;
+      const avail = this.canvas.height / dpr - by - 30;
+      const scale = Math.min(1, avail / bh);
+      if (scale > 0.4) ctx.drawImage(this.backglass, x, by, bw * scale, bh * scale);
+    }
   }
 
   /**

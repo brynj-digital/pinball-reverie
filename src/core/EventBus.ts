@@ -11,6 +11,8 @@ export interface GameEvents {
   spinnerTick: Record<string, never>;
   /** All targets in a bank dropped. */
   bankComplete: Record<string, never>;
+  /** Mode progression (Modes.ts): eclipse lit / started / ended. */
+  mode: { kind: "eclipseReady" | "eclipseStart" | "eclipseEnd" };
   /** Score changed; label describes what scored (drives HUD, later the DMD). */
   score: { points: number; total: number; label: string };
   launch: { power: number };

@@ -18,6 +18,8 @@ export interface TableRenderData {
   artSvgText?: string;
   /** Raw SVG text of the ball art. */
   ballSvgText?: string;
+  /** Raw SVG text of the backglass (drawn in the side panel under the DMD). */
+  backglassSvgText?: string;
 }
 
 export interface BallSnapshot {

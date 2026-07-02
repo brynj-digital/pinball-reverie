@@ -1,0 +1,28 @@
+{
+  "comment": "Moondial rules metadata (plan §5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/Modes.ts.",
+  "points": {
+    "bumper": 100,
+    "sling": 50,
+    "rollover": 500,
+    "spinnerTick": 100,
+    "target": 500,
+    "bankComplete": 5000,
+    "orbit": 2500
+  },
+  "bonusUnits": {
+    "rollover": 500,
+    "target": 250,
+    "spinnerTick": 10
+  },
+  "orbitCombo": {
+    "windowS": 10,
+    "maxStep": 3
+  },
+  "eclipse": {
+    "banksRequired": 2,
+    "orbitsRequired": 3,
+    "durationS": 25,
+    "orbitValue": 25000,
+    "scoreFactor": 2
+  }
+}
