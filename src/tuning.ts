@@ -46,7 +46,7 @@ export const DEFAULT_TUNING: Tuning = {
   flipperUpSpeed: 30,
   flipperDownSpeed: 8,
   plungerMinSpeed: 0.8,
-  plungerMaxSpeed: 2.6,
+  plungerMaxSpeed: 2.0,
   plungerChargeTime: 1.1,
   bumperKick: 0.09, // Δv ≈ 1.1 m/s on an 80 g ball
   slingKick: 0.11,
