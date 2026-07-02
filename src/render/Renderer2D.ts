@@ -45,9 +45,14 @@ export class Renderer2D implements Renderer {
   private lastCharge = 0;
   private strikeAt = -Infinity; // performance.now()/1000 of the last release
   private lastOx = 0; // table centering offset (device px), for panel layout
+  // frame-time diagnostics for the HUD (worst frame + slow count, trailing 2s)
+  private frameTimes: number[] = [];
+  private lastFrameAt = 0;
 
   constructor(private canvas: HTMLCanvasElement) {
-    this.ctx = canvas.getContext("2d")!;
+    // alpha:false — the frame is fully painted every time, so an opaque
+    // canvas lets the compositor skip blending it with the page
+    this.ctx = canvas.getContext("2d", { alpha: false })!;
   }
 
   init(table: TableRenderData): void {
@@ -91,22 +96,43 @@ export class Renderer2D implements Renderer {
       canvas.height = h;
     }
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = "#0c0d14";
-    ctx.fillRect(0, 0, w, h);
-
     // world transform: metres → pixels, camera scroll + shake, table centred
     const s = h / camera.viewH;
     const ox = (w - s * this.table.width) / 2;
     this.lastOx = ox;
+
+    // Background: the art column is opaque, so only the side margins need
+    // the void fill — a full-canvas fill would repaint ~2× the pixels.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "#0c0d14";
+    if (ox > 0) {
+      ctx.fillRect(0, 0, Math.ceil(ox), h);
+      ctx.fillRect(Math.floor(ox + s * this.table.width), 0, Math.ceil(ox) + 1, h);
+    }
+
     ctx.setTransform(s, 0, 0, s, ox + camera.shakeX * s, -(camera.y + camera.shakeY) * s);
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
-    // playfield art (the SVG master, walls included) — flat fallback until loaded
+    // Playfield art — draw only the visible slice (the table is ~1.9 screens
+    // tall; blitting all of it rasterized ~45% wasted pixels every frame).
     this.ensureArt(s); // s is device px per metre (canvas is DPR-sized)
     if (this.art) {
-      ctx.drawImage(this.art, 0, 0, this.table.width, this.table.height);
+      const pad = 0.03 + Math.abs(camera.shakeY); // slack for shake + rounding
+      const top = Math.max(0, camera.y - pad);
+      const bot = Math.min(this.table.height, camera.y + camera.viewH + pad);
+      const pxPerM = this.art.height / this.table.height;
+      ctx.drawImage(
+        this.art,
+        0,
+        top * pxPerM,
+        this.art.width,
+        (bot - top) * pxPerM,
+        0,
+        top,
+        this.table.width,
+        bot - top,
+      );
     } else {
       ctx.fillStyle = "#1b1e2c";
       ctx.fillRect(0, 0, this.table.width, this.table.height);
@@ -549,10 +575,23 @@ export class Renderer2D implements Renderer {
     const cw = w / dpr;
     const ch = h / dpr;
 
+    const now = performance.now();
+    if (this.lastFrameAt) {
+      this.frameTimes.push(now - this.lastFrameAt);
+      if (this.frameTimes.length > 120) this.frameTimes.shift();
+    }
+    this.lastFrameAt = now;
+    const worst = this.frameTimes.length ? Math.max(...this.frameTimes) : 0;
+    const slow = this.frameTimes.filter((d) => d > 20).length;
+
     ctx.font = "12px ui-monospace, monospace";
     ctx.fillStyle = "#8790b3";
     const speed = Math.hypot(snap.ball.vx, snap.ball.vy);
-    ctx.fillText(`${snap.fps.toFixed(0)} fps   ball ${speed.toFixed(2)} m/s`, 10, 18);
+    ctx.fillText(
+      `${snap.fps.toFixed(0)} fps · worst ${worst.toFixed(0)}ms · ${slow} slow/2s   ball ${speed.toFixed(2)} m/s`,
+      10,
+      18,
+    );
     ctx.fillText(
       "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · Esc — settings",
       10,

@@ -17,27 +17,29 @@ export function fmtScore(n: number): string {
 
 /** Idle scene during play: live score, ball number, multiplier. */
 export class ScoreScene implements DmdScene {
-  private last = "";
+  private lastScore = -1;
+  private lastBall = -1;
+  private lastMult = -1;
 
   constructor(
     private read: () => { score: number; ball: number; mult: number },
   ) {}
 
   invalidate(): void {
-    this.last = "";
+    this.lastScore = -1;
   }
 
   update(_dt: number, dmd: DotMatrix): boolean {
     const s = this.read();
-    const line1 = fmtScore(s.score);
-    const line2 = `BALL ${s.ball}${s.mult > 1 ? `  ×${s.mult}` : ""}`;
-    const key = `${line1}|${line2}`;
-    if (key !== this.last) {
-      this.last = key;
-      dmd.clear();
-      dmd.centerText(line1, 5, 3);
-      dmd.centerText(line2, 20, 2);
-    }
+    // numeric comparison first — no per-frame string formatting when idle
+    if (s.score === this.lastScore && s.ball === this.lastBall && s.mult === this.lastMult)
+      return false;
+    this.lastScore = s.score;
+    this.lastBall = s.ball;
+    this.lastMult = s.mult;
+    dmd.clear();
+    dmd.centerText(fmtScore(s.score), 5, 3);
+    dmd.centerText(`BALL ${s.ball}${s.mult > 1 ? `  ×${s.mult}` : ""}`, 20, 2);
     return false;
   }
 }
