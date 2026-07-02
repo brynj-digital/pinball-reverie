@@ -177,7 +177,6 @@ export class Game {
       if (kind === "drain" && this.drainTimer <= 0) {
         this.drainTimer = 0.7;
         this.renderer.spawnEffect("drain", 0.26, 1.0);
-        this.camera.shake(0.003);
         this.audio.sfx("drain");
       } else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
       else if (kind === "rollover" && id) {
@@ -190,7 +189,7 @@ export class Game {
     this.bus.on("bankComplete", () => this.audio.sfx("bank"));
     this.bus.on("launch", () => {
       this.renderer.spawnEffect("launch", TABLE.spawn.x, TABLE.spawn.y);
-      this.camera.shake(0.002);
+      this.camera.shake(0.0012); // the plunger release thumps the cabinet, barely
       this.audio.sfx("launch");
       if (this.phase === "play" && !this.ballStarted) {
         this.ballStarted = true;
@@ -221,11 +220,13 @@ export class Game {
       }
     });
     this.bus.on("hit", ({ kind, id }) => {
+      // Element hits get flash + glow + sfx but NO camera shake: shake means
+      // "the cabinet moved", which only player nudges and the tilt do — a
+      // ball striking a bumper doesn't move a real machine.
       if (kind === "bumper") {
         const b = this.bumpers.find((b) => b.def.id === id);
         b?.kick(this.ball, this.physics, this.tuning.bumperKick);
         if (b) this.renderer.spawnEffect("flash", b.def.x, b.def.y);
-        this.camera.shake(0.0028);
         this.audio.sfx("bumper");
       } else if (kind === "sling") {
         const sl = this.slings.find((s) => s.def.id === id);
@@ -235,12 +236,10 @@ export class Game {
             { x: 0, y: 0 },
           );
           this.renderer.spawnEffect("flash", c.x, c.y);
-          this.camera.shake(0.0022);
           this.audio.sfx("sling");
         }
       } else if (kind === "target") {
         this.targetBank.onHit(id);
-        this.camera.shake(0.0015);
         this.audio.sfx("target");
       }
     });
