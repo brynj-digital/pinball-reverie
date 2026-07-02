@@ -288,10 +288,14 @@
       <path d="M 212 722 A 48 48 0 0 1 308 722 Z" fill="#12141f" stroke="#07080d" stroke-width="2"/>
       <path d="M 215 706 A 45 45 0 0 1 258 674" fill="none" stroke="#7f8fc9" stroke-width="2" opacity="0.8"/>
       <rect x="252" y="678" width="14" height="44" fill="#07080d"/>
-      <rect x="255" y="680" width="8" height="40" fill="#e0b64e" opacity="0.9" filter="url(#glowSoft)"/>
-      <g transform="rotate(-32 259 700)">
-        <rect x="252" y="636" width="14" height="52" rx="3" fill="url(#brassBar)" stroke="#07080d" stroke-width="1.5"/>
+      <!-- telescope barrel: pivot at its BASE, inside the slit, so it
+           emerges through the opening rather than floating above it -->
+      <g transform="rotate(-28 259 698)">
+        <rect x="251.5" y="646" width="15" height="52" rx="3" fill="url(#brassBar)" stroke="#07080d" stroke-width="1.5"/>
+        <rect x="249.5" y="641" width="19" height="9" rx="3.5" fill="#9c7c2c" stroke="#07080d" stroke-width="1.5"/>
       </g>
+      <!-- warm light spilling from the open slit below the barrel -->
+      <rect x="254.5" y="702" width="9" height="18" fill="#e0b64e" opacity="0.6"/>
       <g fill="#f4d27a">
         <rect x="222" y="742" width="7" height="9" rx="1" opacity="0.85"/>
         <rect x="290" y="742" width="7" height="9" rx="1" opacity="0.85"/>
