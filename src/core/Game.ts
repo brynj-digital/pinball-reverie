@@ -21,6 +21,8 @@ import {
   fmtScore,
 } from "../render/dmd/DmdScene";
 import { bakeDmdFrames } from "../render/dmd/bake";
+import { AudioEngine } from "../audio/AudioEngine";
+import { ChipMusic } from "../audio/ChipMusic";
 import orbitSceneSvg from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierSceneSvg from "../../design/dmd-scenes/multiplier.svg?raw";
 import { buildTableFromSvg, type DevTable } from "../table/DevTable";
@@ -91,6 +93,9 @@ export class Game {
   private gameOverUntil = 0;
   /** Baked Claude Design DMD scenes (loaded async; text scenes until ready). */
   private baked: { orbit?: Uint8Array[]; moon?: Uint8Array[] } = {};
+  private audio = new AudioEngine();
+  private music = new ChipMusic(this.audio);
+  private prevFlip = { left: false, right: false };
 
   constructor(canvas: HTMLCanvasElement) {
     this.tuning = loadTuning();
@@ -137,15 +142,20 @@ export class Game {
         this.drainTimer = 0.7;
         this.renderer.spawnEffect("drain", 0.26, 1.0);
         this.camera.shake(0.003);
+        this.audio.sfx("drain");
       } else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
       else if (kind === "rollover" && id) {
         this.rolloverLit.set(id, 1);
+        this.audio.sfx("rollover");
         this.onMoonLit(id);
       }
     });
+    this.bus.on("spinnerTick", () => this.audio.sfx("spinnerTick"));
+    this.bus.on("bankComplete", () => this.audio.sfx("bank"));
     this.bus.on("launch", () => {
       this.renderer.spawnEffect("launch", TABLE.spawn.x, TABLE.spawn.y);
       this.camera.shake(0.002);
+      this.audio.sfx("launch");
       if (this.phase === "play" && !this.ballStarted) {
         this.ballStarted = true;
         this.saverUntil = this.gameTime + BALL_SAVER_S;
@@ -164,6 +174,7 @@ export class Game {
         b?.kick(this.ball, this.physics, this.tuning.bumperKick);
         if (b) this.renderer.spawnEffect("flash", b.def.x, b.def.y);
         this.camera.shake(0.0028);
+        this.audio.sfx("bumper");
       } else if (kind === "sling") {
         const sl = this.slings.find((s) => s.def.id === id);
         if (sl?.kick(this.ball, this.physics, this.tuning.slingKick)) {
@@ -173,10 +184,12 @@ export class Game {
           );
           this.renderer.spawnEffect("flash", c.x, c.y);
           this.camera.shake(0.0022);
+          this.audio.sfx("sling");
         }
       } else if (kind === "target") {
         this.targetBank.onHit(id);
         this.camera.shake(0.0015);
+        this.audio.sfx("target");
       }
     });
   }
@@ -199,9 +212,10 @@ export class Game {
     const t = this.tuning;
     const s = this.input.state;
 
-    // live tuning → physics, only when a slider actually moved
+    // live tuning → physics/audio, only when a slider actually moved
     if (this.panel.version !== this.appliedTuningVersion) {
       this.appliedTuningVersion = this.panel.version;
+      this.audio.setVolumes(t.sfxVolume, t.musicVolume);
       this.physics.setSlope(t);
       this.ball.applyTuning(t);
       for (const f of this.table.wallFixtures) {
@@ -218,8 +232,14 @@ export class Game {
     }
 
     const flippersLive = !this.tilted;
-    this.flippers[0].update(flippersLive && (s.left || this.input.consumeTap("left")), t);
-    this.flippers[1].update(flippersLive && (s.right || this.input.consumeTap("right")), t);
+    const flipL = flippersLive && (s.left || this.input.consumeTap("left"));
+    const flipR = flippersLive && (s.right || this.input.consumeTap("right"));
+    if (flipL && !this.prevFlip.left) this.audio.sfx("flipper");
+    if (flipR && !this.prevFlip.right) this.audio.sfx("flipper");
+    this.prevFlip.left = flipL;
+    this.prevFlip.right = flipR;
+    this.flippers[0].update(flipL, t);
+    this.flippers[1].update(flipR, t);
     if (this.phase === "play") this.updatePlunger(dt, s.plunger, t);
     else if (this.phase === "attract" && s.plunger) this.startGame();
 
@@ -273,6 +293,8 @@ export class Game {
   }
 
   private startGame(): void {
+    this.audio.sfx("start");
+    this.music.start();
     this.scoring.reset();
     this.phase = "play";
     this.ballNum = 1;
@@ -296,6 +318,7 @@ export class Game {
     if (this.ballStarted && this.gameTime < this.saverUntil && !this.tilted) {
       this.saverUntil = -Infinity; // one save per ball
       this.respawn();
+      this.audio.sfx("saved");
       this.dmdQueue.push(new MessageScene([["BALL SAVED"]], 1.4, true), 2);
       return;
     }
@@ -306,6 +329,8 @@ export class Game {
     this.litMoons.clear();
     if (this.ballNum >= BALLS_PER_GAME) {
       this.phase = "gameOver";
+      this.music.stop();
+      this.audio.sfx("gameOver");
       const pages: string[][] = [["GAME OVER", fmtScore(this.scoring.total)]];
       if (this.highScores.submit(this.scoring.total)) pages.push(["NEW HIGH SCORE", "!"]);
       this.dmdQueue.push(new MessageScene(pages, 2.2), 3);
@@ -326,6 +351,7 @@ export class Game {
       this.litMoons.clear();
       if (this.scoring.multiplier < 5) {
         this.scoring.multiplier++;
+        this.audio.sfx("multiplier");
         const caption = `MULTIPLIER ×${this.scoring.multiplier}`;
         this.dmdQueue.push(
           this.baked.moon
@@ -352,8 +378,10 @@ export class Game {
     if (this.tiltBob > TILT_LIMIT) {
       this.tilted = true;
       this.camera.shake(0.012);
+      this.audio.sfx("tilt");
       this.dmdQueue.push(new MessageScene([["TILT"]], 3.5, true), 3);
     } else if (this.tiltBob > TILT_LIMIT - 1) {
+      this.audio.sfx("warning");
       this.dmdQueue.push(new MessageScene([["CAREFUL!"]], 0.8), 1);
     }
   }

@@ -21,6 +21,8 @@ const SLIDERS: SliderDef[] = [
   { key: "bumperKick", label: "bumper kick (N·s)", min: 0.02, max: 0.25, step: 0.005 },
   { key: "slingKick", label: "sling kick (N·s)", min: 0.02, max: 0.25, step: 0.005 },
   { key: "cameraViewH", label: "camera view height (m)", min: 0.3, max: 1.05, step: 0.01 },
+  { key: "sfxVolume", label: "sfx volume", min: 0, max: 1, step: 0.05 },
+  { key: "musicVolume", label: "music volume", min: 0, max: 1, step: 0.05 },
 ];
 
 /**

@@ -28,6 +28,8 @@ export interface Tuning {
   slingKick: number;
   /** Visible playfield height in metres (camera zoom). */
   cameraViewH: number;
+  sfxVolume: number;
+  musicVolume: number;
   debugOverlay: boolean;
 }
 
@@ -49,6 +51,8 @@ export const DEFAULT_TUNING: Tuning = {
   bumperKick: 0.09, // Δv ≈ 1.1 m/s on an 80 g ball
   slingKick: 0.11,
   cameraViewH: 0.75,
+  sfxVolume: 0.5,
+  musicVolume: 0.25,
   debugOverlay: true,
 };
 
