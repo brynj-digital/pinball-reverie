@@ -17,10 +17,12 @@ import { DmdQueue } from "../render/dmd/DmdQueue";
 import {
   AttractScene,
   BakedDmdScene,
+  InitialsScene,
   MessageScene,
   ScoreScene,
   fmtScore,
 } from "../render/dmd/DmdScene";
+import { SettingsPanel } from "../ui/SettingsPanel";
 import { bakeDmdFrames } from "../render/dmd/bake";
 import { AudioEngine } from "../audio/AudioEngine";
 import { ChipMusic } from "../audio/ChipMusic";
@@ -44,7 +46,8 @@ const TILT_LIMIT = 3;
 /** Labels that earn their own DMD scene (bumper/sling spam does not). */
 const DMD_LABELS = new Set(["ORBIT", "BANK BONUS"]);
 
-type Phase = "attract" | "play" | "gameOver";
+type Phase = "attract" | "play" | "initials" | "gameOver";
+const INITIALS_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 
 /**
  * Main loop: fixed-timestep physics, snapshot handed to the renderer each
@@ -94,6 +97,16 @@ export class Game {
   private tiltBob = 0;
   private tilted = false;
   private gameOverUntil = 0;
+  private settings: SettingsPanel;
+  private paused = false;
+  private attractT = 0;
+  // high-score initials entry state (phase "initials")
+  private initialsScene: InitialsScene;
+  private initialsLetters = ["A", "A", "A"];
+  private initialsSlot = 0;
+  private pendingScore = 0;
+  private initialsConfirm = false;
+  private prevPlunger = false;
   /** Baked Claude Design DMD scenes (loaded async; text scenes until ready). */
   private baked: { orbit?: Uint8Array[]; moon?: Uint8Array[] } = {};
   private audio = new AudioEngine();
@@ -125,9 +138,14 @@ export class Game {
     this.input.onReset(() => this.respawn());
     this.input.onStart(() => {
       if (this.phase === "attract") this.startGame();
+      else if (this.phase === "initials") this.initialsConfirm = true;
     });
     this.input.onNudge((dir) => this.nudge(dir));
     this.panel = new TuningPanel(this.tuning);
+    this.settings = new SettingsPanel(this.tuning, this.panel, this.input, (open) => {
+      this.paused = open;
+    });
+    this.input.onEscape(() => this.settings.toggle());
 
     this.scoreScene = new ScoreScene(() => ({
       score: this.scoring.total,
@@ -135,6 +153,11 @@ export class Game {
       mult: this.scoring.multiplier,
     }));
     this.attractScene = new AttractScene(() => this.highScores.top);
+    this.initialsScene = new InitialsScene(() => ({
+      letters: this.initialsLetters,
+      slot: this.initialsSlot,
+      score: this.pendingScore,
+    }));
     this.dmdQueue = new DmdQueue(this.attractScene);
     void bakeDmdFrames(orbitSceneSvg, 8).then((f) => (this.baked.orbit = f));
     void bakeDmdFrames(multiplierSceneSvg, 6).then((f) => (this.baked.moon = f));
@@ -245,6 +268,12 @@ export class Game {
       }
     }
 
+    // settings open: freeze the game but keep drawing it
+    if (this.paused) {
+      this.renderer.drawFrame(this.snapshot(), this.camera);
+      return;
+    }
+
     this.gameTime += dt;
     this.tiltBob = Math.max(0, this.tiltBob - dt / 1.2);
     if (this.phase === "gameOver" && this.gameTime >= this.gameOverUntil) {
@@ -252,7 +281,21 @@ export class Game {
       this.dmdQueue.setIdle(this.attractScene);
     }
 
-    const flippersLive = !this.tilted;
+    if (this.phase === "initials") this.updateInitials(s.plunger);
+    this.prevPlunger = s.plunger;
+
+    // attract lamp show: moons, bumpers and slings pulse in slow waves
+    if (this.phase === "attract") {
+      this.attractT += dt;
+      const tt = this.attractT;
+      ROLLOVERS.forEach((r, i) =>
+        this.rolloverLit.set(r.id, Math.max(0, Math.sin(tt * 2.2 - i * 1.4)) * 0.9),
+      );
+      this.bumpers.forEach((b, i) => (b.flash = Math.max(0, Math.sin(tt * 1.6 + i * 2.1)) * 0.5));
+      this.slings.forEach((sl, i) => (sl.flash = Math.max(0, Math.sin(tt * 1.1 + i * Math.PI)) * 0.35));
+    }
+
+    const flippersLive = !this.tilted && this.phase !== "initials";
     const flipL = flippersLive && (s.left || this.input.consumeTap("left"));
     const flipR = flippersLive && (s.right || this.input.consumeTap("right"));
     if (flipL && !this.prevFlip.left) this.audio.sfx("flipper");
@@ -354,18 +397,58 @@ export class Game {
     this.litMoons.clear();
     const bonusPage: string[][] = bonus > 0 ? [["BONUS", fmtScore(bonus)]] : [];
     if (this.ballNum >= BALLS_PER_GAME) {
-      this.phase = "gameOver";
       this.music.stop();
       this.audio.sfx("gameOver");
-      const pages: string[][] = [...bonusPage, ["GAME OVER", fmtScore(this.scoring.total)]];
-      if (this.highScores.submit(this.scoring.total)) pages.push(["NEW HIGH SCORE", "!"]);
-      this.dmdQueue.push(new MessageScene(pages, 2.2), 3);
-      this.gameOverUntil = this.gameTime + pages.length * 2.2 + 0.3;
       this.respawn();
+      if (this.highScores.qualifies(this.scoring.total)) {
+        // collect initials before recording; InitialsScene renders the entry
+        this.phase = "initials";
+        this.pendingScore = this.scoring.total;
+        this.initialsLetters = ["A", "A", "A"];
+        this.initialsSlot = 0;
+        this.initialsConfirm = false;
+        this.dmdQueue.clear();
+        this.dmdQueue.setIdle(this.initialsScene);
+        if (bonusPage.length) this.dmdQueue.push(new MessageScene(bonusPage, 1.8), 2);
+      } else {
+        this.phase = "gameOver";
+        const pages: string[][] = [...bonusPage, ["GAME OVER", fmtScore(this.scoring.total)]];
+        this.dmdQueue.push(new MessageScene(pages, 2.2), 3);
+        this.gameOverUntil = this.gameTime + pages.length * 2.2 + 0.3;
+      }
     } else {
       this.ballNum++;
       this.respawn();
       this.dmdQueue.push(new MessageScene([...bonusPage, [`BALL ${this.ballNum}`]], 1.6), 2);
+    }
+  }
+
+  /** Initials entry: flipper taps cycle the letter, plunger/start confirms. */
+  private updateInitials(plungerHeld: boolean): void {
+    const cycle = (dir: number) => {
+      const cur = INITIALS_CHARS.indexOf(this.initialsLetters[this.initialsSlot]);
+      const next = (cur + dir + INITIALS_CHARS.length) % INITIALS_CHARS.length;
+      this.initialsLetters[this.initialsSlot] = INITIALS_CHARS[next];
+      this.audio.sfx("rollover");
+    };
+    if (this.input.consumeTap("left")) cycle(-1);
+    if (this.input.consumeTap("right")) cycle(1);
+
+    const confirm = this.initialsConfirm || (plungerHeld && !this.prevPlunger);
+    this.initialsConfirm = false;
+    if (!confirm) return;
+    this.audio.sfx("target");
+    this.initialsSlot++;
+    if (this.initialsSlot > 2) {
+      const initials = this.initialsLetters.join("");
+      this.highScores.add(initials, this.pendingScore);
+      this.audio.sfx("bank");
+      this.phase = "gameOver";
+      this.dmdQueue.push(
+        new MessageScene([["HIGH SCORE", `${initials}  ${fmtScore(this.pendingScore)}`]], 2.4),
+        3,
+      );
+      this.gameOverUntil = this.gameTime + 2.7;
     }
   }
 

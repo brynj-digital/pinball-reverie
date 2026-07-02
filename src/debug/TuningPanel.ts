@@ -33,6 +33,12 @@ export class TuningPanel {
   /** Bumped on every user change; Game re-applies tuning only when it moves. */
   version = 0;
 
+  /** Another UI (e.g. SettingsPanel) changed the shared tuning object. */
+  notifyExternal(): void {
+    this.version++;
+    this.refreshers.forEach((fn) => fn());
+  }
+
   private root: HTMLDivElement;
   private refreshers: (() => void)[] = [];
 

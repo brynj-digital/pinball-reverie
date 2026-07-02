@@ -1,6 +1,7 @@
 /**
  * Keyboard → game-command mapping layer (plan §4.5). Game polls `state`;
- * touch and gamepad backends can later write to the same structure.
+ * touch and gamepad backends can later write to the same structure. All
+ * game keys are remappable (SettingsPanel); bindings persist in localStorage.
  *
  * Hardened against the ways browsers lose keyups, all of which present as a
  * "stuck" flipper:
@@ -10,6 +11,8 @@
  * - All keys are released on window blur / tab switch.
  * - A tap faster than one frame (keydown+keyup between two polls) is latched
  *   in `pulse` so it still produces a flip.
+ * - Chrome on Windows marks the second Shift's keydown repeat=true (repeat is
+ *   derived from the key VALUE), so edges come from the pressed-key set.
  */
 export interface InputState {
   left: boolean;
@@ -17,26 +20,74 @@ export interface InputState {
   plunger: boolean;
 }
 
-const LEFT = ["ShiftLeft", "KeyZ"];
-const RIGHT = ["ShiftRight", "Slash"];
-const PLUNGER = ["Space", "ArrowDown"];
-const RESET = ["KeyR"];
-const START = ["Enter"];
-const NUDGES: Record<string, "left" | "right" | "up"> = {
-  ArrowLeft: "left",
-  ArrowRight: "right",
-  ArrowUp: "up",
+export type BindableAction =
+  | "left"
+  | "right"
+  | "plunger"
+  | "start"
+  | "nudgeLeft"
+  | "nudgeRight"
+  | "nudgeUp"
+  | "reset";
+
+export type Bindings = Record<BindableAction, string[]>;
+
+export const ACTION_LABELS: Record<BindableAction, string> = {
+  left: "Left flipper",
+  right: "Right flipper",
+  plunger: "Plunger",
+  start: "Start game",
+  nudgeLeft: "Nudge left",
+  nudgeRight: "Nudge right",
+  nudgeUp: "Nudge up",
+  reset: "Reset ball",
 };
+
+export const DEFAULT_BINDINGS: Bindings = {
+  left: ["ShiftLeft", "KeyZ"],
+  right: ["ShiftRight", "Slash"],
+  plunger: ["Space", "ArrowDown"],
+  start: ["Enter"],
+  nudgeLeft: ["ArrowLeft"],
+  nudgeRight: ["ArrowRight"],
+  nudgeUp: ["ArrowUp"],
+  reset: ["KeyR"],
+};
+
+const STORAGE_KEY = "pinball-bindings-v1";
+
+/** Human-readable key name for the settings UI. */
+export function prettyCode(code: string): string {
+  const MAP: Record<string, string> = {
+    ShiftLeft: "L·Shift",
+    ShiftRight: "R·Shift",
+    ArrowLeft: "←",
+    ArrowRight: "→",
+    ArrowUp: "↑",
+    ArrowDown: "↓",
+    Slash: "/",
+    Space: "Space",
+    Enter: "Enter",
+  };
+  if (MAP[code]) return MAP[code];
+  if (code.startsWith("Key")) return code.slice(3);
+  if (code.startsWith("Digit")) return code.slice(5);
+  return code;
+}
 
 export class Input {
   readonly state: InputState = { left: false, right: false, plunger: false };
+  bindings: Bindings;
+
   private down = new Set<string>();
   private pulse = { left: false, right: false };
   private resetHandlers: (() => void)[] = [];
   private startHandlers: (() => void)[] = [];
   private nudgeHandlers: ((dir: "left" | "right" | "up") => void)[] = [];
+  private escapeHandlers: (() => void)[] = [];
 
   constructor(target: Window = window) {
+    this.bindings = loadBindings();
     target.addEventListener("keydown", (e) => this.onKey(e, true));
     target.addEventListener("keyup", (e) => this.onKey(e, false));
     target.addEventListener("blur", () => {
@@ -57,6 +108,11 @@ export class Input {
     this.nudgeHandlers.push(fn);
   }
 
+  /** Escape is fixed (opens settings) and not rebindable. */
+  onEscape(fn: () => void): void {
+    this.escapeHandlers.push(fn);
+  }
+
   /** True if the flipper was tapped since the last poll, even sub-frame. Clears on read. */
   consumeTap(side: "left" | "right"): boolean {
     const was = this.pulse[side];
@@ -64,12 +120,31 @@ export class Input {
     return was;
   }
 
+  /** Replace an action's binding with a single key. */
+  rebind(action: BindableAction, code: string): void {
+    this.bindings[action] = [code];
+    saveBindings(this.bindings);
+  }
+
+  resetBindings(): void {
+    this.bindings = structuredClone(DEFAULT_BINDINGS);
+    saveBindings(this.bindings);
+  }
+
+  label(action: BindableAction): string {
+    return this.bindings[action].map(prettyCode).join(" / ");
+  }
+
+  private is(action: BindableAction, code: string): boolean {
+    return this.bindings[action].includes(code);
+  }
+
   private onKey(e: KeyboardEvent, isDown: boolean): void {
-    // Do NOT trust e.repeat: Chrome on Windows derives it from the key VALUE,
-    // so pressing the second Shift while the first is held arrives as
-    // repeat=true and an early return would drop it (one flipper up → the
-    // other Shift dead). A Set makes real repeats harmless; edges are
-    // detected from membership instead.
+    if (e.code === "Escape") {
+      if (isDown && !e.repeat) this.escapeHandlers.forEach((fn) => fn());
+      return;
+    }
+
     const isNew = isDown && !this.down.has(e.code);
     if (isDown) this.down.add(e.code);
     else this.down.delete(e.code);
@@ -81,11 +156,15 @@ export class Input {
       this.down.delete("ShiftRight");
     }
 
-    if (isNew && LEFT.includes(e.code)) this.pulse.left = true;
-    if (isNew && RIGHT.includes(e.code)) this.pulse.right = true;
-    if (isNew && RESET.includes(e.code)) this.resetHandlers.forEach((fn) => fn());
-    if (isNew && START.includes(e.code)) this.startHandlers.forEach((fn) => fn());
-    if (isNew && NUDGES[e.code]) this.nudgeHandlers.forEach((fn) => fn(NUDGES[e.code]));
+    if (isNew) {
+      if (this.is("left", e.code)) this.pulse.left = true;
+      if (this.is("right", e.code)) this.pulse.right = true;
+      if (this.is("reset", e.code)) this.resetHandlers.forEach((fn) => fn());
+      if (this.is("start", e.code)) this.startHandlers.forEach((fn) => fn());
+      if (this.is("nudgeLeft", e.code)) this.nudgeHandlers.forEach((fn) => fn("left"));
+      if (this.is("nudgeRight", e.code)) this.nudgeHandlers.forEach((fn) => fn("right"));
+      if (this.is("nudgeUp", e.code)) this.nudgeHandlers.forEach((fn) => fn("up"));
+    }
 
     this.sync();
 
@@ -94,8 +173,28 @@ export class Input {
   }
 
   private sync(): void {
-    this.state.left = LEFT.some((c) => this.down.has(c));
-    this.state.right = RIGHT.some((c) => this.down.has(c));
-    this.state.plunger = PLUNGER.some((c) => this.down.has(c));
+    this.state.left = this.bindings.left.some((c) => this.down.has(c));
+    this.state.right = this.bindings.right.some((c) => this.down.has(c));
+    this.state.plunger = this.bindings.plunger.some((c) => this.down.has(c));
+  }
+}
+
+function loadBindings(): Bindings {
+  try {
+    if (typeof localStorage !== "undefined") {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return { ...structuredClone(DEFAULT_BINDINGS), ...JSON.parse(raw) };
+    }
+  } catch {
+    // fall through to defaults
+  }
+  return structuredClone(DEFAULT_BINDINGS);
+}
+
+function saveBindings(b: Bindings): void {
+  try {
+    if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(b));
+  } catch {
+    // best-effort
   }
 }

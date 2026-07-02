@@ -108,7 +108,7 @@ export class AttractScene implements DmdScene {
   private t = 0;
   private drawnPage = -1;
 
-  constructor(private topScore: () => number) {}
+  constructor(private top: () => { initials: string; score: number } | undefined) {}
 
   invalidate(): void {
     this.drawnPage = -1;
@@ -116,10 +116,11 @@ export class AttractScene implements DmdScene {
 
   update(dt: number, dmd: DotMatrix): boolean {
     this.t += dt;
+    const top = this.top();
     const pages: string[][] = [
       ["MOONDIAL", "PINBALL REVERIE"],
       ["PRESS ENTER", "TO PLAY"],
-      ["HIGH SCORE", fmtScore(this.topScore())],
+      ["HIGH SCORE", top ? `${top.initials}  ${fmtScore(top.score)}` : fmtScore(0)],
     ];
     const page = Math.floor(this.t / 2.4) % pages.length;
     if (page !== this.drawnPage) {
@@ -127,6 +128,40 @@ export class AttractScene implements DmdScene {
       dmd.clear();
       dmd.centerText(pages[page][0], 4, 3);
       dmd.centerText(pages[page][1], 19, 2);
+    }
+    return false;
+  }
+}
+
+/**
+ * High-score initials entry: flippers cycle the letter, plunger/start
+ * confirms it. Game owns the entry state; this renders it. Never finishes —
+ * Game leaves the phase when the third letter confirms.
+ */
+export class InitialsScene implements DmdScene {
+  private t = 0;
+  private last = "";
+
+  constructor(
+    private read: () => { letters: string[]; slot: number; score: number },
+  ) {}
+
+  invalidate(): void {
+    this.last = "";
+  }
+
+  update(dt: number, dmd: DotMatrix): boolean {
+    this.t += dt;
+    const s = this.read();
+    const blinkOn = Math.floor(this.t / 0.28) % 2 === 0;
+    const shown = s.letters.map((ch, i) => (i === s.slot && !blinkOn ? " " : ch)).join(" ");
+    const key = `${shown}|${s.slot}`;
+    if (key !== this.last) {
+      this.last = key;
+      dmd.clear();
+      dmd.centerText("ENTER INITIALS", 1, 2);
+      dmd.centerText(shown, 12, 3);
+      dmd.centerText(`FLIPPERS·PLUNGER  ${fmtScore(s.score)}`, 24, 1);
     }
     return false;
   }

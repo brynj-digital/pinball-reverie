@@ -554,7 +554,7 @@ export class Renderer2D implements Renderer {
     const speed = Math.hypot(snap.ball.vx, snap.ball.vy);
     ctx.fillText(`${snap.fps.toFixed(0)} fps   ball ${speed.toFixed(2)} m/s`, 10, 18);
     ctx.fillText(
-      "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · R — reset",
+      "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · Esc — settings",
       10,
       ch - 12,
     );
