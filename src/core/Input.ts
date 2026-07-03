@@ -122,6 +122,12 @@ export class Input {
 
   /** Replace an action's binding with a single key. */
   rebind(action: BindableAction, code: string): void {
+    // a key drives exactly one action: scrub it from every other binding
+    // list, or the old owner keeps firing alongside the new one (persisted)
+    for (const other of Object.keys(this.bindings) as BindableAction[]) {
+      if (other !== action)
+        this.bindings[other] = this.bindings[other].filter((c) => c !== code);
+    }
     this.bindings[action] = [code];
     saveBindings(this.bindings);
   }

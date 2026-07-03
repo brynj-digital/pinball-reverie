@@ -90,7 +90,10 @@ export class DotMatrix {
   }
 
   centerText(str: string, y: number, level: number): void {
-    this.text(str, Math.floor((DMD_COLS - (str.length * GLYPH_W - 1)) / 2), y, level);
+    // clamp: an over-wide line degrades to left-aligned (clipped right only)
+    // instead of a negative x that chops BOTH ends
+    const x = Math.max(0, Math.floor((DMD_COLS - (str.length * GLYPH_W - 1)) / 2));
+    this.text(str, x, y, level);
   }
 
   /** Repaint the offscreen canvas if the grid changed since the last call. */

@@ -85,6 +85,9 @@ export class Game {
   private charging = false;
   /** >0 while the drained ball visibly falls out before respawning. */
   private drainTimer = 0;
+  /** Saver verdict captured the instant the drain sensor fires — the 0.7 s
+   * fall-out must not eat the tail of the saver window. */
+  private drainSaverEligible = false;
   private lastTime = 0;
   private fps = 60;
 
@@ -151,8 +154,14 @@ export class Game {
     this.renderer = new Renderer2D(canvas);
     this.renderer.init(this.table.renderData);
     this.input = new Input();
-    this.input.onReset(() => this.respawn());
+    this.input.onReset(() => {
+      // mid-drain the respawn would zero drainTimer and skip onBallLost —
+      // a free ball; also inert while paused or outside play/attract
+      if (this.paused || this.drainTimer > 0) return;
+      if (this.phase === "play" || this.phase === "attract") this.respawn();
+    });
     this.input.onStart(() => {
+      if (this.paused) return;
       if (this.phase === "attract") this.startGame();
       else if (this.phase === "initials") this.initialsConfirm = true;
     });
@@ -189,6 +198,11 @@ export class Game {
       // fires — the sensor sits above the floor, mid-drop.
       if (kind === "drain" && this.drainTimer <= 0) {
         this.drainTimer = 0.7;
+        this.drainSaverEligible =
+          this.phase === "play" &&
+          this.ballStarted &&
+          this.gameTime < this.saverUntil &&
+          !this.tilted;
         this.renderer.spawnEffect("drain", 0.26, 1.0);
         this.audio.sfx("drain");
       } else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
@@ -300,8 +314,11 @@ export class Game {
       }
     }
 
-    // settings open: freeze the game but keep drawing it
+    // settings open: freeze the game but keep drawing it; drain any tap
+    // pulses so keys pressed behind the overlay don't fire on resume
     if (this.paused) {
+      this.input.consumeTap("left");
+      this.input.consumeTap("right");
       this.renderer.drawFrame(this.snapshot(), this.camera);
       return;
     }
@@ -327,9 +344,13 @@ export class Game {
       this.slings.forEach((sl, i) => (sl.flash = Math.max(0, Math.sin(tt * 1.1 + i * Math.PI)) * 0.35));
     }
 
+    // consume taps unconditionally — short-circuiting past consumeTap while
+    // tilted would leave the pulse latched to fire as a phantom flip later
+    const tapL = this.input.consumeTap("left");
+    const tapR = this.input.consumeTap("right");
     const flippersLive = !this.tilted && this.phase !== "initials";
-    const flipL = flippersLive && (s.left || this.input.consumeTap("left"));
-    const flipR = flippersLive && (s.right || this.input.consumeTap("right"));
+    const flipL = flippersLive && (s.left || tapL);
+    const flipR = flippersLive && (s.right || tapR);
     if (flipL && !this.prevFlip.left) this.audio.sfx("flipper");
     if (flipR && !this.prevFlip.right) this.audio.sfx("flipper");
     this.prevFlip.left = flipL;
@@ -414,6 +435,7 @@ export class Game {
     this.ballStarted = false;
     this.saverUntil = -Infinity;
     this.litMoons.clear();
+    this.rolloverLit.clear(); // attract lamp show must not bleed into ball 1
     this.tilted = false;
     this.tiltBob = 0;
     this.respawn();
@@ -425,10 +447,12 @@ export class Game {
   /** End of the drain fall-out: saver, next ball, or game over. */
   private onBallLost(): void {
     if (this.phase !== "play") {
+      this.drainSaverEligible = false;
       this.respawn();
       return;
     }
-    if (this.ballStarted && this.gameTime < this.saverUntil && !this.tilted) {
+    if (this.drainSaverEligible) {
+      this.drainSaverEligible = false;
       this.saverUntil = -Infinity; // one save per ball
       this.respawn();
       this.audio.sfx("saved");
@@ -440,10 +464,15 @@ export class Game {
       );
       return;
     }
+    const wasTilted = this.tilted;
     this.tilted = false;
+    this.scoring.muted = false;
     this.ballStarted = false;
     this.saverUntil = -Infinity;
-    const bonus = this.scoring.collectBonus();
+    // TILT forfeits the end-of-ball bonus (real-machine rule)
+    let bonus = 0;
+    if (wasTilted) this.scoring.forfeitBonus();
+    else bonus = this.scoring.collectBonus();
     this.modes.endBall();
     this.scoring.multiplier = 1;
     this.litMoons.clear();
@@ -521,7 +550,7 @@ export class Game {
 
   /** Moon lanes: light all three to raise the bonus multiplier (max ×5). */
   private onMoonLit(id: string): void {
-    if (this.phase !== "play") return;
+    if (this.phase !== "play" || this.tilted) return;
     this.litMoons.add(id);
     if (this.litMoons.size === 3) {
       this.litMoons.clear();
@@ -541,7 +570,7 @@ export class Game {
 
   /** Table nudge: brief impulse on the ball, tilt if abused (plan §4). */
   private nudge(dir: "left" | "right" | "up"): void {
-    if (this.phase !== "play" || this.tilted || this.drainTimer > 0) return;
+    if (this.paused || this.phase !== "play" || this.tilted || this.drainTimer > 0) return;
     const imp =
       dir === "left"
         ? new Vec2(-0.02, -0.008)
@@ -553,6 +582,7 @@ export class Game {
     this.tiltBob += 1;
     if (this.tiltBob > TILT_LIMIT) {
       this.tilted = true;
+      this.scoring.muted = true; // a tilted ball scores nothing until it drains
       this.camera.shake(0.012);
       this.audio.sfx("tilt");
       this.dmdQueue.push(

@@ -88,7 +88,9 @@ for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
   const speed = Math.hypot(v.x, v.y);
   const inLane = p.x > TABLE.laneWallX && p.y > TABLE.laneTopY;
   if (inLane && speed < 0.05 && p.y > 0.95) {
-    ball.body.setLinearVelocity(new Vec2(0, -(1.2 + rand() * 1.4)));
+    // sample the real plunger range so the soak covers what players can do
+    const launch = t.plungerMinSpeed + rand() * (t.plungerMaxSpeed - t.plungerMinSpeed);
+    ball.body.setLinearVelocity(new Vec2(0, -launch));
     launches++;
   }
 

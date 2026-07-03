@@ -13,6 +13,8 @@ export class Scoring {
   multiplier = 1;
   /** ×2 while Lunar Eclipse runs (set by Modes). */
   eclipseFactor = 1;
+  /** True while TILTED: a tilted ball scores nothing and accrues no bonus. */
+  muted = false;
   bonusUnits = 0;
   /** Last thing that scored, for the HUD label flash. */
   lastLabel = "";
@@ -22,6 +24,7 @@ export class Scoring {
     const P = rules.points;
     const U = rules.bonusUnits;
     bus.on("hit", ({ kind, id }) => {
+      if (this.muted) return;
       if (kind === "bumper") this.award(P.bumper, `BUMPER ${id}`);
       else if (kind === "sling") this.award(P.sling, "SLING");
       else if (kind === "target") {
@@ -30,12 +33,14 @@ export class Scoring {
       }
     });
     bus.on("sensor", ({ kind }) => {
+      if (this.muted) return;
       if (kind === "rollover") {
         this.award(P.rollover, "LANE");
         this.bonusUnits += U.rollover;
       }
     });
     bus.on("spinnerTick", () => {
+      if (this.muted) return;
       this.award(P.spinnerTick, "SPINNER");
       this.bonusUnits += U.spinnerTick;
     });
@@ -47,11 +52,17 @@ export class Scoring {
   }
 
   award(points: number, label: string): void {
+    if (this.muted) return; // also blocks Modes-driven awards (orbits) on a tilted ball
     const p = Math.round(points * this.multiplier * this.eclipseFactor);
     this.total += p;
     this.lastLabel = label;
     this.lastLabelAge = 0;
     this.bus.emit("score", { points: p, total: this.total, label });
+  }
+
+  /** TILT forfeits the accrued bonus (real-machine rule). */
+  forfeitBonus(): void {
+    this.bonusUnits = 0;
   }
 
   /** End-of-ball bonus: units × multiplier, added to the total. */
@@ -70,6 +81,7 @@ export class Scoring {
     this.total = 0;
     this.multiplier = 1;
     this.eclipseFactor = 1;
+    this.muted = false;
     this.bonusUnits = 0;
     this.lastLabel = "";
     this.lastLabelAge = Infinity;

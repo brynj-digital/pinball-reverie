@@ -31,6 +31,9 @@ export class Spinner {
     const before = Math.floor(this.angle / Math.PI);
     this.angle += this.angularVel * dt;
     this.angularVel *= Math.exp(-dt * 1.6); // friction spin-down
-    if (Math.floor(this.angle / Math.PI) !== before) this.bus.emit("spinnerTick", {});
+    // one tick per half-turn actually crossed — a slow or hitched frame can
+    // span several, and a boolean check would undercount on slow machines
+    const crossings = Math.abs(Math.floor(this.angle / Math.PI) - before);
+    for (let i = 0; i < crossings; i++) this.bus.emit("spinnerTick", {});
   }
 }

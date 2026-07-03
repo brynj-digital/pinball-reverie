@@ -13,16 +13,24 @@ function loadSvgAt(
   w: number,
   h: number,
   onload: (img: HTMLImageElement) => void,
+  label = "svg",
 ): void {
-  const sized = svgText.replace(
-    /<svg([^>]*?)\swidth="[^"]*"\s+height="[^"]*"/,
-    `<svg$1 width="${w}" height="${h}"`,
-  );
+  // strip any existing root width/height (any order/spacing), then inject
+  // ours — a single adjacency-dependent regex silently no-ops on reordered
+  // attributes and the art rasterizes blurry at intrinsic size
+  const sized = svgText
+    .replace(/(<svg[^>]*?)\s+width="[^"]*"/, "$1")
+    .replace(/(<svg[^>]*?)\s+height="[^"]*"/, "$1")
+    .replace(/<svg/, `<svg width="${w}" height="${h}"`);
   const url = URL.createObjectURL(new Blob([sized], { type: "image/svg+xml" }));
   const img = new Image();
   img.onload = () => {
     URL.revokeObjectURL(url);
     onload(img);
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url); // don't leak the blob URL on failure
+    console.error(`Renderer2D: ${label} image failed to load — using fallback rendering`);
   };
   img.src = url;
 }
@@ -59,10 +67,10 @@ export class Renderer2D implements Renderer {
     this.table = table;
     if (table.ballSvgText) {
       // one-time: 128 px is plenty for a ball that renders at ~40–90 px
-      loadSvgAt(table.ballSvgText, 128, 128, (img) => (this.ballArt = img));
+      loadSvgAt(table.ballSvgText, 128, 128, (img) => (this.ballArt = img), "ball");
     }
     if (table.backglassSvgText) {
-      loadSvgAt(table.backglassSvgText, 600, 720, (img) => (this.backglass = img));
+      loadSvgAt(table.backglassSvgText, 600, 720, (img) => (this.backglass = img), "backglass");
     }
   }
 
@@ -79,11 +87,19 @@ export class Renderer2D implements Renderer {
     this.artPendingScale = pxPerMetre;
     const w = Math.ceil(this.table.width * pxPerMetre);
     const h = Math.ceil(this.table.height * pxPerMetre);
-    loadSvgAt(this.table.artSvgText, w, h, (img) => {
-      this.art = img;
-      this.artScale = pxPerMetre;
-      this.artPendingScale = 0;
-    });
+    // on failure loadSvgAt logs and artPendingScale stays set, intentionally
+    // blocking a same-scale retry loop; a zoom/resize retries at a new scale
+    loadSvgAt(
+      this.table.artSvgText,
+      w,
+      h,
+      (img) => {
+        this.art = img;
+        this.artScale = pxPerMetre;
+        this.artPendingScale = 0;
+      },
+      "playfield",
+    );
   }
 
   private dprEff = 1; // native DPR × renderScale, shared with HUD/panel layout

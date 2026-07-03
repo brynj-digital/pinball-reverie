@@ -28,6 +28,8 @@ export class SettingsPanel {
   private root: HTMLDivElement;
   private capturing?: BindableAction;
   private keyButtons = new Map<BindableAction, HTMLButtonElement>();
+  /** Re-reads slider values from the shared tuning object on open. */
+  private valueRefreshers: (() => void)[] = [];
 
   constructor(
     private tuning: Tuning,
@@ -107,7 +109,12 @@ export class SettingsPanel {
     this.open = !this.open;
     this.capturing = undefined;
     this.root.style.display = this.open ? "flex" : "none";
-    if (this.open) this.refreshKeys();
+    if (this.open) {
+      this.refreshKeys();
+      // sliders share the tuning object with the debug TuningPanel — re-read
+      // on open, or a stale slider nudge writes old values back over changes
+      this.valueRefreshers.forEach((fn) => fn());
+    }
     this.onOpenChange(this.open);
   }
 
@@ -130,6 +137,7 @@ export class SettingsPanel {
     input.max = "1";
     input.step = "0.05";
     input.value = String(this.tuning[key]);
+    this.valueRefreshers.push(() => (input.value = String(this.tuning[key])));
     input.oninput = () => {
       this.tuning[key] = parseFloat(input.value);
       saveTuning(this.tuning);
