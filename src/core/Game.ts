@@ -41,7 +41,7 @@ import playfieldSvgRaw from "../../design/tables/moondial/playfield.svg?raw";
 import backglassSvgRaw from "../../design/tables/moondial/backglass.svg?raw";
 import ballSvgRaw from "../../design/ball.svg?raw";
 import { BUMPERS, DROP_TARGETS, ROLLOVERS, SLINGS, SPINNER, TABLE } from "../table/geometry";
-import type { RenderMode, Renderer, WorldSnapshot } from "../render/Renderer";
+import type { RenderMode, Renderer, View3D, WorldSnapshot } from "../render/Renderer";
 import { Renderer2D } from "../render/Renderer2D";
 import { TuningPanel } from "../debug/TuningPanel";
 import { loadTuning, type Tuning } from "../tuning";
@@ -64,6 +64,17 @@ function loadRenderMode(): RenderMode {
     return localStorage.getItem(RENDER_MODE_KEY) === "3d" ? "3d" : "2d";
   } catch {
     return "2d";
+  }
+}
+
+/** 3D camera style (tilted chase vs top-down classic), persisted like it. */
+const VIEW3D_KEY = "pinball-3d-view-v1";
+
+function loadView3D(): View3D {
+  try {
+    return localStorage.getItem(VIEW3D_KEY) === "flat" ? "flat" : "tilted";
+  } catch {
+    return "tilted";
   }
 }
 
@@ -90,6 +101,7 @@ export class Game {
   private camera: Camera;
   private renderer: Renderer;
   private renderMode: RenderMode = loadRenderMode();
+  private view3d: View3D = loadView3D();
   private renderSwapBusy = false;
   private input: Input;
 
@@ -194,6 +206,18 @@ export class Game {
       {
         get: () => this.renderMode,
         set: (mode) => this.applyRenderMode(mode),
+      },
+      {
+        get: () => this.view3d,
+        set: (view) => {
+          this.view3d = view;
+          this.renderer.setView3D?.(view);
+          try {
+            localStorage.setItem(VIEW3D_KEY, view);
+          } catch {
+            // storage unavailable — the view just won't persist
+          }
+        },
       },
     );
     this.input.onEscape(() => this.settings.toggle());
@@ -332,6 +356,7 @@ export class Game {
       this.canvas = fresh;
       this.renderer = make(fresh);
       this.renderer.init(this.table.renderData);
+      this.renderer.setView3D?.(this.view3d);
       old.dispose?.();
       this.renderMode = mode;
       try {

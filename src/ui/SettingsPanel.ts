@@ -1,6 +1,6 @@
 import { saveTuning, type Tuning } from "../tuning";
 import { TuningPanel } from "../debug/TuningPanel";
-import type { RenderMode } from "../render/Renderer";
+import type { RenderMode, View3D } from "../render/Renderer";
 import {
   ACTION_LABELS,
   Input,
@@ -38,6 +38,7 @@ export class SettingsPanel {
     private input: Input,
     private onOpenChange: (open: boolean) => void,
     private renderMode: { get: () => RenderMode; set: (mode: RenderMode) => Promise<void> },
+    private view3d: { get: () => View3D; set: (view: View3D) => void },
   ) {
     this.root = document.createElement("div");
     this.root.className = "settings-overlay";
@@ -56,6 +57,7 @@ export class SettingsPanel {
     // performance option: fewer pixels to paint at the cost of sharpness
     card.appendChild(this.sliderRow("Render scale", "renderScale", 0.5));
     card.appendChild(this.rendererRow());
+    card.appendChild(this.view3dRow());
 
     const keysTitle = document.createElement("h3");
     keysTitle.textContent = "Keys";
@@ -138,6 +140,25 @@ export class SettingsPanel {
     btn.onclick = async () => {
       btn.textContent = "SWITCHING…"; // 3D loads as its own chunk
       await this.renderMode.set(this.renderMode.get() === "3d" ? "2d" : "3d");
+      label();
+    };
+    this.valueRefreshers.push(label);
+    row.append(span, btn);
+    return row;
+  }
+
+  /** Camera style within 3D mode: tilted chase or top-down classic view. */
+  private view3dRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "key-row";
+    const span = document.createElement("span");
+    span.textContent = "3D camera";
+    const btn = document.createElement("button");
+    const label = () =>
+      (btn.textContent = this.view3d.get() === "flat" ? "TOP-DOWN" : "TILTED");
+    label();
+    btn.onclick = () => {
+      this.view3d.set(this.view3d.get() === "flat" ? "tilted" : "flat");
       label();
     };
     this.valueRefreshers.push(label);

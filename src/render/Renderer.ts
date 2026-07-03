@@ -82,10 +82,16 @@ export type EffectKind = "flash" | "launch" | "drain";
 /** Which Renderer implementation drives the game (player-facing toggle). */
 export type RenderMode = "2d" | "3d";
 
+/** 3D camera style: tilted perspective chase, or top-down orthographic
+ * "classic view" (WebGL-drawn flat look). Ignored by the 2D renderer. */
+export type View3D = "tilted" | "flat";
+
 export interface Renderer {
   init(table: TableRenderData): void;
   drawFrame(snap: WorldSnapshot, camera: Camera): void;
   spawnEffect(kind: EffectKind, x: number, y: number): void;
+  /** Camera style for renderers that have one (Renderer3D). */
+  setView3D?(view: View3D): void;
   /** Release GPU/DOM resources when the renderer is swapped out. */
   dispose?(): void;
 }

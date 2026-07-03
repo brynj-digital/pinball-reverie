@@ -8,6 +8,7 @@ import type {
   EffectKind,
   Renderer,
   TableRenderData,
+  View3D,
   WorldSnapshot,
 } from "./Renderer";
 
@@ -50,6 +51,10 @@ export class Renderer3D implements Renderer {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
   private cam3 = new THREE.PerspectiveCamera(38, 1, 0.05, 6);
+  /** Top-down orthographic camera for the "flat" classic view. */
+  private camFlat = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 3);
+  private view: View3D = "tilted";
+  private fog = new THREE.FogExp2(PALETTE.bg, 0.22);
   private pmrem?: THREE.PMREMGenerator;
   private table!: TableRenderData;
 
@@ -91,10 +96,15 @@ export class Renderer3D implements Renderer {
     this.renderer.toneMappingExposure = 1.1;
   }
 
+  setView3D(view: View3D): void {
+    this.view = view;
+  }
+
   init(table: TableRenderData): void {
     this.table = table;
     this.scene.background = new THREE.Color(PALETTE.bg);
-    this.scene.fog = new THREE.FogExp2(PALETTE.bg, 0.22);
+    this.scene.fog = this.fog;
+    this.camFlat.up.set(0, 0, -1); // screen-up is up-table when looking down
 
     // metallic reflections for the ball and rails
     this.pmrem = new THREE.PMREMGenerator(this.renderer);
@@ -419,17 +429,34 @@ export class Renderer3D implements Renderer {
       fx.mat.opacity = 0.85 * (1 - k);
     }
 
-    // tilted chase camera mirroring the 2D scroll window [camera.y, +viewH]
     const cx = this.table.width / 2;
-    const focusZ = camera.y + camera.viewH * 0.52;
-    this.cam3.position.set(
-      cx + camera.shakeX,
-      camera.viewH * 1.0 + camera.shakeY,
-      focusZ + camera.viewH * 0.78,
-    );
-    this.cam3.lookAt(cx, 0, focusZ - camera.viewH * 0.08);
-
-    this.renderer.render(this.scene, this.cam3);
+    if (this.view === "flat") {
+      // top-down ortho framing the exact 2D scroll window [camera.y, +viewH];
+      // fog off — depth is uniform straight down, it would only wash the art
+      this.scene.fog = null;
+      const halfH = camera.viewH / 2;
+      const halfW = halfH * (this.lastW / Math.max(1, this.lastH));
+      this.camFlat.left = -halfW;
+      this.camFlat.right = halfW;
+      this.camFlat.top = halfH;
+      this.camFlat.bottom = -halfH;
+      this.camFlat.updateProjectionMatrix();
+      const cz = camera.y + halfH + camera.shakeY;
+      this.camFlat.position.set(cx + camera.shakeX, 1.2, cz);
+      this.camFlat.lookAt(cx + camera.shakeX, 0, cz);
+      this.renderer.render(this.scene, this.camFlat);
+    } else {
+      // tilted chase camera mirroring the 2D scroll window [camera.y, +viewH]
+      this.scene.fog = this.fog;
+      const focusZ = camera.y + camera.viewH * 0.52;
+      this.cam3.position.set(
+        cx + camera.shakeX,
+        camera.viewH * 1.0 + camera.shakeY,
+        focusZ + camera.viewH * 0.78,
+      );
+      this.cam3.lookAt(cx, 0, focusZ - camera.viewH * 0.08);
+      this.renderer.render(this.scene, this.cam3);
+    }
 
     // DOM chrome updates (throttled; the DMD canvas repaints itself)
     if (snap.dmd && !this.dmdMounted && this.panelEl) {
