@@ -1,5 +1,6 @@
 import { saveTuning, type Tuning } from "../tuning";
 import { TuningPanel } from "../debug/TuningPanel";
+import type { RenderMode } from "../render/Renderer";
 import {
   ACTION_LABELS,
   Input,
@@ -36,6 +37,7 @@ export class SettingsPanel {
     private tuningPanel: TuningPanel,
     private input: Input,
     private onOpenChange: (open: boolean) => void,
+    private renderMode: { get: () => RenderMode; set: (mode: RenderMode) => Promise<void> },
   ) {
     this.root = document.createElement("div");
     this.root.className = "settings-overlay";
@@ -53,6 +55,7 @@ export class SettingsPanel {
     card.appendChild(this.sliderRow("Music volume", "musicVolume", 0));
     // performance option: fewer pixels to paint at the cost of sharpness
     card.appendChild(this.sliderRow("Render scale", "renderScale", 0.5));
+    card.appendChild(this.rendererRow());
 
     const keysTitle = document.createElement("h3");
     keysTitle.textContent = "Keys";
@@ -120,6 +123,26 @@ export class SettingsPanel {
 
   private refreshKeys(): void {
     for (const [action, btn] of this.keyButtons) btn.textContent = this.input.label(action);
+  }
+
+  /** 2D ↔ 3D renderer toggle (milestone 9: both behind the Renderer seam). */
+  private rendererRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "key-row";
+    const span = document.createElement("span");
+    span.textContent = "Renderer";
+    const btn = document.createElement("button");
+    const label = () =>
+      (btn.textContent = this.renderMode.get() === "3d" ? "3D (BETA)" : "2D CLASSIC");
+    label();
+    btn.onclick = async () => {
+      btn.textContent = "SWITCHING…"; // 3D loads as its own chunk
+      await this.renderMode.set(this.renderMode.get() === "3d" ? "2d" : "3d");
+      label();
+    };
+    this.valueRefreshers.push(label);
+    row.append(span, btn);
+    return row;
   }
 
   private sliderRow(

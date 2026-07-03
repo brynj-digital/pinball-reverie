@@ -95,6 +95,39 @@ body {
   display: none;
 }
 
+/* 3D renderer chrome: DMD + backglass live in the DOM instead of the canvas */
+.panel3d {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 272px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.panel3d canvas,
+.panel3d img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #2c3352;
+  border-radius: 6px;
+  background: #0f0805;
+}
+
+.hud3d {
+  position: fixed;
+  left: 12px;
+  bottom: 10px;
+  z-index: 5;
+  color: #4a5680;
+  font-size: 12px;
+  pointer-events: none;
+}
+
 .settings-overlay {
   position: fixed;
   inset: 0;

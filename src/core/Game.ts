@@ -41,7 +41,7 @@ import playfieldSvgRaw from "../../design/tables/moondial/playfield.svg?raw";
 import backglassSvgRaw from "../../design/tables/moondial/backglass.svg?raw";
 import ballSvgRaw from "../../design/ball.svg?raw";
 import { BUMPERS, DROP_TARGETS, ROLLOVERS, SLINGS, SPINNER, TABLE } from "../table/geometry";
-import type { Renderer, WorldSnapshot } from "../render/Renderer";
+import type { RenderMode, Renderer, WorldSnapshot } from "../render/Renderer";
 import { Renderer2D } from "../render/Renderer2D";
 import { TuningPanel } from "../debug/TuningPanel";
 import { loadTuning, type Tuning } from "../tuning";
@@ -54,6 +54,18 @@ const DMD_LABELS = new Set(["ORBIT", "BANK BONUS"]);
 
 type Phase = "attract" | "play" | "initials" | "gameOver";
 const INITIALS_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+
+/** Persisted separately from Tuning: a display mode, not physics feel —
+ * the tuning panel's reset-to-defaults must not flip the renderer. */
+const RENDER_MODE_KEY = "pinball-render-mode-v1";
+
+function loadRenderMode(): RenderMode {
+  try {
+    return localStorage.getItem(RENDER_MODE_KEY) === "3d" ? "3d" : "2d";
+  } catch {
+    return "2d";
+  }
+}
 
 /**
  * Main loop: fixed-timestep physics, snapshot handed to the renderer each
@@ -77,6 +89,8 @@ export class Game {
   private rolloverLit = new Map<string, number>();
   private camera: Camera;
   private renderer: Renderer;
+  private renderMode: RenderMode = loadRenderMode();
+  private renderSwapBusy = false;
   private input: Input;
 
   private panel: TuningPanel;
@@ -132,7 +146,7 @@ export class Game {
   private music = new ChipMusic(this.audio);
   private prevFlip = { left: false, right: false };
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(private canvas: HTMLCanvasElement) {
     this.tuning = loadTuning();
     this.physics = new PhysicsWorld(this.bus, this.tuning);
     this.table = buildTableFromSvg(this.physics.world, this.tuning, playfieldSvgRaw);
@@ -151,8 +165,11 @@ export class Game {
     this.scoring = new Scoring(this.bus);
     this.modes = new Modes(this.bus, this.scoring);
     this.camera = new Camera(TABLE.width, TABLE.height, this.tuning.cameraViewH);
+    // always boot on the 2D renderer (synchronous); if 3D was persisted the
+    // swap kicks off immediately and lands once its chunk loads
     this.renderer = new Renderer2D(canvas);
     this.renderer.init(this.table.renderData);
+    if (this.renderMode === "3d") void this.applyRenderMode("3d", true);
     this.input = new Input();
     this.input.onReset(() => {
       // mid-drain the respawn would zero drainTimer and skip onBallLost —
@@ -167,9 +184,18 @@ export class Game {
     });
     this.input.onNudge((dir) => this.nudge(dir));
     this.panel = new TuningPanel(this.tuning);
-    this.settings = new SettingsPanel(this.tuning, this.panel, this.input, (open) => {
-      this.paused = open;
-    });
+    this.settings = new SettingsPanel(
+      this.tuning,
+      this.panel,
+      this.input,
+      (open) => {
+        this.paused = open;
+      },
+      {
+        get: () => this.renderMode,
+        set: (mode) => this.applyRenderMode(mode),
+      },
+    );
     this.input.onEscape(() => this.settings.toggle());
 
     this.scoreScene = new ScoreScene(() => ({
@@ -281,6 +307,43 @@ export class Game {
 
   start(): void {
     requestAnimationFrame(this.frame);
+  }
+
+  /**
+   * Swap renderer implementations behind the seam (plan §7). A 2D and a
+   * WebGL context can't share one canvas, so the canvas is replaced too.
+   * Renderer3D loads as its own chunk — 2D players never download three.js.
+   */
+  private async applyRenderMode(mode: RenderMode, force = false): Promise<void> {
+    if (this.renderSwapBusy || (mode === this.renderMode && !force)) return;
+    this.renderSwapBusy = true;
+    try {
+      let make: (c: HTMLCanvasElement) => Renderer;
+      if (mode === "3d") {
+        const { Renderer3D } = await import("../render/Renderer3D");
+        make = (c) => new Renderer3D(c);
+      } else {
+        make = (c) => new Renderer2D(c);
+      }
+      const old = this.renderer;
+      const fresh = document.createElement("canvas");
+      fresh.id = this.canvas.id;
+      this.canvas.replaceWith(fresh);
+      this.canvas = fresh;
+      this.renderer = make(fresh);
+      this.renderer.init(this.table.renderData);
+      old.dispose?.();
+      this.renderMode = mode;
+      try {
+        localStorage.setItem(RENDER_MODE_KEY, mode);
+      } catch {
+        // storage unavailable — the mode just won't persist
+      }
+    } catch (err) {
+      console.error("renderer swap failed, staying on current mode", err);
+    } finally {
+      this.renderSwapBusy = false;
+    }
   }
 
   /** JS cost of the previous frame (update + draw-command issuance), ms. */

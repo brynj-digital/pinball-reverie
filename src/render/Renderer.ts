@@ -79,8 +79,13 @@ export interface WorldSnapshot {
 /** In-world juice effects (plan §5d): impact ring, launch puff, drain pulse. */
 export type EffectKind = "flash" | "launch" | "drain";
 
+/** Which Renderer implementation drives the game (player-facing toggle). */
+export type RenderMode = "2d" | "3d";
+
 export interface Renderer {
   init(table: TableRenderData): void;
   drawFrame(snap: WorldSnapshot, camera: Camera): void;
   spawnEffect(kind: EffectKind, x: number, y: number): void;
+  /** Release GPU/DOM resources when the renderer is swapped out. */
+  dispose?(): void;
 }
