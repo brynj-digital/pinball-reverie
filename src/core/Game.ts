@@ -576,6 +576,7 @@ export class Game {
         this.initialsLetters = ["A", "A", "A"];
         this.initialsSlot = 0;
         this.initialsConfirm = false;
+        this.input.setTextCapture(true);
         this.dmdQueue.clear();
         this.dmdQueue.setIdle(this.initialsScene);
         if (bonusPage.length) this.dmdQueue.push(new MessageScene(bonusPage, 1.8), 2);
@@ -607,7 +608,10 @@ export class Game {
     }
   }
 
-  /** Initials entry: flipper taps cycle the letter, plunger/start confirms. */
+  /**
+   * Initials entry: flipper taps cycle the letter, plunger/start confirms —
+   * or just type A–Z directly (Backspace steps back a slot).
+   */
   private updateInitials(plungerHeld: boolean): void {
     const cycle = (dir: number) => {
       const cur = INITIALS_CHARS.indexOf(this.initialsLetters[this.initialsSlot]);
@@ -618,15 +622,34 @@ export class Game {
     if (this.input.consumeTap("left")) cycle(-1);
     if (this.input.consumeTap("right")) cycle(1);
 
+    for (let ch = this.input.consumeTyped(); ch; ch = this.input.consumeTyped()) {
+      if (ch === "\b") {
+        if (this.initialsSlot > 0) {
+          this.initialsSlot--;
+          this.audio.sfx("rollover");
+        }
+        continue;
+      }
+      this.initialsLetters[this.initialsSlot] = ch;
+      this.audio.sfx("target");
+      this.advanceInitialsSlot();
+      if (this.phase !== "initials") return;
+    }
+
     const confirm = this.initialsConfirm || (plungerHeld && !this.prevPlunger);
     this.initialsConfirm = false;
     if (!confirm) return;
     this.audio.sfx("target");
+    this.advanceInitialsSlot();
+  }
+
+  private advanceInitialsSlot(): void {
     this.initialsSlot++;
     if (this.initialsSlot > 2) {
       const initials = this.initialsLetters.join("");
       this.highScores.add(initials, this.pendingScore);
       this.audio.sfx("bank");
+      this.input.setTextCapture(false);
       this.phase = "gameOver";
       this.dmdQueue.push(
         new MessageScene([["HIGH SCORE", `${initials}  ${fmtScore(this.pendingScore)}`]], 2.4),

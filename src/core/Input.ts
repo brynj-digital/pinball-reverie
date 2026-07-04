@@ -81,6 +81,8 @@ export class Input {
 
   private down = new Set<string>();
   private pulse = { left: false, right: false };
+  private capturingText = false;
+  private typed: string[] = [];
   private resetHandlers: (() => void)[] = [];
   private startHandlers: (() => void)[] = [];
   private nudgeHandlers: ((dir: "left" | "right" | "up") => void)[] = [];
@@ -111,6 +113,21 @@ export class Input {
   /** Escape is fixed (opens settings) and not rebindable. */
   onEscape(fn: () => void): void {
     this.escapeHandlers.push(fn);
+  }
+
+  /**
+   * While on, letter keys and Backspace are queued as typed text (read via
+   * consumeTyped) instead of firing the actions they're bound to — Z and R
+   * would otherwise flip and reset mid-entry. Everything else keeps working.
+   */
+  setTextCapture(on: boolean): void {
+    this.capturingText = on;
+    this.typed = [];
+  }
+
+  /** Next typed character ("A"–"Z", or "\b" for Backspace). Clears on read. */
+  consumeTyped(): string | null {
+    return this.typed.shift() ?? null;
   }
 
   /** True if the flipper was tapped since the last poll, even sub-frame. Clears on read. */
@@ -160,6 +177,19 @@ export class Input {
     if (!e.shiftKey) {
       this.down.delete("ShiftLeft");
       this.down.delete("ShiftRight");
+    }
+
+    if (isNew && this.capturingText) {
+      if (/^Key[A-Z]$/.test(e.code)) {
+        this.typed.push(e.code.slice(3));
+        this.sync();
+        return;
+      }
+      if (e.code === "Backspace") {
+        this.typed.push("\b");
+        this.sync();
+        return;
+      }
     }
 
     if (isNew) {

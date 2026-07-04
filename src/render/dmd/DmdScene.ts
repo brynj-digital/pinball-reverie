@@ -179,10 +179,11 @@ export class InitialsScene implements DmdScene {
     const s = this.read();
     const blinkOn = Math.floor(this.t / 0.28) % 2 === 0;
     const shown = s.letters.map((ch, i) => (i === s.slot && !blinkOn ? " " : ch)).join(" ");
-    // footer alternates hint / score — combined they overflow the 21-glyph
+    // footer cycles hints / score — combined they overflow the 21-glyph
     // display width for any qualifying score and would clip
+    const page = Math.floor(this.t / 1.6) % 3;
     const footer =
-      Math.floor(this.t / 1.6) % 2 === 0 ? "FLIPPERS·PLUNGER" : fmtScore(s.score);
+      page === 0 ? "FLIPPERS·PLUNGER" : page === 1 ? "OR TYPE A-Z" : fmtScore(s.score);
     const key = `${shown}|${s.slot}|${footer}`;
     if (key !== this.last) {
       this.last = key;
