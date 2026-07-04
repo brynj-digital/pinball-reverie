@@ -43,10 +43,14 @@ physically touches (flippers, kickers, rails).
   0.575 × 1.05 m. The SVG→fixture parser divides by 1000 — no other scale
   factor anywhere.
 - **The launch lane lives outside the playfield** (Pinball Fantasies
-  convention): the playfield proper is `0..520` with every structural
-  element mirror-symmetric about `x = 260`; the plunger lane occupies
+  convention): the playfield proper is `0..520`; the plunger lane occupies
   `520..575` and meets the playfield only through the orbit at the top.
-  Never let the lane push elements off-centre.
+  The outer envelope, flipper pair, and drain stay centred on `x = 260`,
+  and the lane must never push the layout off-centre. Interior structure
+  may be asymmetric when the shot design calls for it — Moondial is
+  mirror-symmetric; Tidebreaker deliberately is not. *(Amended 2026-07-05
+  for table 2; the original rule read "every structural element
+  mirror-symmetric about x = 260".)*
 - The ball is **27 mm** diameter. Draw at true scale; if a detail is
   illegible at 27 mm ball scale, simplify the detail, don't enlarge the part.
 - Line weights at master scale: wall guides **12 mm**, part outlines **2 mm**,
@@ -90,6 +94,26 @@ Two invariants from the physics work (see `src/table/geometry.ts`):
 2. **Inlane guides end tangent to the flipper base circle** (r 12 mm around
    the flipper anchor), past its apex — never short of it (pocket) and never
    below the crown (a creeping ball stalls on the hump).
+
+### Layers & height (added 2026-07-05 for table 2, Tidebreaker — parser support lands with M10)
+
+Physics stays planar (plan §7); "height" is a collision-filter and render
+trick, never a Z-axis in the physics world.
+
+- A collision path may carry **`data-layer`** (integer, default `0`): `0`
+  main playfield, `1` raised (ramps, decks, habitrails), `-1` subway. A
+  fixture collides with the ball only while the ball is on the same layer.
+- **`sensor-ramp-entry-<name>` / `sensor-ramp-exit-<name>`** switch the
+  ball's layer; the entry sensor carries **`data-to-layer`**.
+- A ramp or subway with vertical travel pairs with a
+  **`height-profile-<name>`** polyline carrying **`data-height-from`** /
+  **`data-height-to`** (mm relative to the playfield surface, negative =
+  below). Renderers project the ball onto the profile to derive its display
+  height; physics never reads it.
+- A raised-deck flipper is placed by **`anchor-flipper-upper`**.
+- The two invariants above apply **per layer**: gaps are measured between
+  surfaces the ball can touch on the same layer, and simcheck/soak must be
+  able to flag a ball trapped in a subway or on a deck.
 
 ## 5. Type
 
