@@ -13,6 +13,9 @@ const ORBIT_PAIR_WINDOW = 3.5;
  * - LUNAR ECLIPSE: complete the comet bank banksRequired times AND shoot
  *   orbitsRequired orbits to light it; the next orbit starts the mode —
  *   durationS seconds of ×scoreFactor scoring with orbitValue orbit jackpots.
+ * - TELESCOPE: each scoop capture awards the next sighting in the telescope
+ *   list (wrapping); the last sighting also spots one orbit toward lighting
+ *   the eclipse. Progression persists across balls, resets per game.
  * - Combos and any running eclipse end with the ball.
  */
 export class Modes {
@@ -23,6 +26,7 @@ export class Modes {
   private lastOrbitAt = -Infinity;
   private banks = 0;
   private orbits = 0;
+  private sightingIdx = 0;
   eclipseReady = false;
   private eclipseUntil = -Infinity;
   private eclipseWasActive = false;
@@ -34,6 +38,7 @@ export class Modes {
     bus.on("sensor", ({ kind }) => {
       if (kind === "ramp-entry") this.orbitEnd("entry");
       else if (kind === "ramp-exit") this.orbitEnd("exit");
+      else if (kind === "kicker") this.onTelescope();
     });
     bus.on("bankComplete", () => {
       this.banks++;
@@ -76,7 +81,24 @@ export class Modes {
     this.endBall();
     this.banks = 0;
     this.orbits = 0;
+    this.sightingIdx = 0;
     this.eclipseReady = false;
+  }
+
+  /** Telescope scoop capture: award the next sighting in the logbook. */
+  private onTelescope(): void {
+    if (this.scoring.muted) return; // tilted: no sighting, no progression
+    const T = rules.telescope;
+    const s = T.sightings[this.sightingIdx];
+    const spotted = T.lastSpotsOrbit && this.sightingIdx === T.sightings.length - 1;
+    this.sightingIdx = (this.sightingIdx + 1) % T.sightings.length;
+    const points = this.scoring.award(s.points, s.name);
+    this.scoring.bonusUnits += T.bonusUnit;
+    if (spotted && !this.eclipseReady && !this.eclipseActive) {
+      this.orbits++;
+      this.checkReady();
+    }
+    this.bus.emit("telescope", { name: s.name, points, spotted });
   }
 
   private orbitEnd(end: "entry" | "exit"): void {

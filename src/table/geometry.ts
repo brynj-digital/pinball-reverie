@@ -167,6 +167,22 @@ export const ROLLOVERS: readonly RolloverDef[] = [
 export const SPINNER = { x: ORBIT.laneX / 2, y: 0.4, halfW: ORBIT.laneX / 2 } as const;
 
 /**
+ * Telescope kickout scoop under the orbit tail (hood + trip sensor live in
+ * the SVG). The kicker eases a captured ball to `hold`, keeps it during the
+ * DMD observation, then ejects along `eject` (unit vector aimed to land on
+ * the mid left flipper; speed is tuning.kickerEject). Geometry never traps:
+ * the scoop mouth opens down-left, so without the hold logic gravity always
+ * returns the ball to play.
+ */
+export const KICKER = {
+  id: "telescope",
+  hold: { x: 0.487, y: 0.368 },
+  eject: { x: -0.5, y: 0.87 },
+  /** Post-eject window during which the sensor won't re-capture. */
+  cooldownS: 0.4,
+} as const;
+
+/**
  * Flipper bat polygon in local body space, pivot at origin, CCW winding.
  * Left extends +x; right is the x-mirror. The back edge sits on the base
  * circle's chord (x = 0, |y| = baseRadius) so bat + base form one convex

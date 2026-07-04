@@ -9,6 +9,7 @@ import { Bumper } from "../entities/Bumper";
 import { Slingshot } from "../entities/Slingshot";
 import { DropTargetBank } from "../entities/DropTargetBank";
 import { Spinner } from "../entities/Spinner";
+import { Kicker } from "../entities/Kicker";
 import { Scoring } from "../game/Scoring";
 import { Modes } from "../game/Modes";
 import { HighScores } from "../game/HighScores";
@@ -34,13 +35,15 @@ import tiltSceneSvg from "../../design/dmd-scenes/tilt.svg?raw";
 import gameoverSceneSvg from "../../design/dmd-scenes/gameover.svg?raw";
 import eclipseSceneSvg from "../../design/dmd-scenes/eclipse.svg?raw";
 import bankSceneSvg from "../../design/dmd-scenes/bank.svg?raw";
+import telescopeSceneSvg from "../../design/dmd-scenes/telescope.svg?raw";
+import rules from "../../design/tables/moondial/rules.json";
 import { buildTableFromSvg, type DevTable } from "../table/DevTable";
 // The playfield SVG is both physics source (→ SvgCollision) and art (the
 // renderer rasterizes the same text at display scale): one file, both jobs.
 import playfieldSvgRaw from "../../design/tables/moondial/playfield.svg?raw";
 import backglassSvgRaw from "../../design/tables/moondial/backglass.svg?raw";
 import ballSvgRaw from "../../design/ball.svg?raw";
-import { BUMPERS, DROP_TARGETS, ROLLOVERS, SLINGS, SPINNER, TABLE } from "../table/geometry";
+import { BUMPERS, DROP_TARGETS, KICKER, ROLLOVERS, SLINGS, SPINNER, TABLE } from "../table/geometry";
 import type { RenderMode, Renderer, View3D, WorldSnapshot } from "../render/Renderer";
 import { Renderer2D } from "../render/Renderer2D";
 import { TuningPanel } from "../debug/TuningPanel";
@@ -95,6 +98,7 @@ export class Game {
   private slings: Slingshot[];
   private targetBank: DropTargetBank;
   private spinner: Spinner;
+  private kicker: Kicker;
   private scoring: Scoring;
   private modes: Modes;
   private rolloverLit = new Map<string, number>();
@@ -152,7 +156,10 @@ export class Game {
   private renderAlpha = 1;
   /** Baked Claude Design DMD scenes (loaded async; text scenes until ready). */
   private baked: Partial<
-    Record<"orbit" | "moon" | "saved" | "tilt" | "gameover" | "eclipse" | "bank", Uint8Array[]>
+    Record<
+      "orbit" | "moon" | "saved" | "tilt" | "gameover" | "eclipse" | "bank" | "telescope",
+      Uint8Array[]
+    >
   > = {};
   private audio = new AudioEngine();
   private music = new ChipMusic(this.audio);
@@ -174,6 +181,12 @@ export class Game {
     this.slings = SLINGS.map((def) => new Slingshot(this.physics.world, def));
     this.targetBank = new DropTargetBank(this.physics.world, this.physics, this.bus);
     this.spinner = new Spinner(this.bus);
+    this.kicker = new Kicker(rules.telescope.holdS);
+    this.kicker.onEject = () => {
+      this.renderer.spawnEffect("flash", KICKER.hold.x, KICKER.hold.y);
+      this.camera.shake(0.0012); // the eject solenoid thumps the cabinet, like the plunger
+      this.audio.sfx("kickout");
+    };
     this.scoring = new Scoring(this.bus);
     this.modes = new Modes(this.bus, this.scoring);
     this.camera = new Camera(TABLE.width, TABLE.height, this.tuning.cameraViewH);
@@ -241,6 +254,7 @@ export class Game {
     void bakeDmdFrames(gameoverSceneSvg, 8).then((f) => (this.baked.gameover = f));
     void bakeDmdFrames(eclipseSceneSvg, 9).then((f) => (this.baked.eclipse = f));
     void bakeDmdFrames(bankSceneSvg, 7).then((f) => (this.baked.bank = f));
+    void bakeDmdFrames(telescopeSceneSvg, 8).then((f) => (this.baked.telescope = f));
 
     this.bus.on("sensor", ({ kind, id }) => {
       // Drain starts a short visible fall-out (ball keeps simulating, fades,
@@ -256,7 +270,9 @@ export class Game {
         this.renderer.spawnEffect("drain", 0.26, 1.0);
         this.audio.sfx("drain");
       } else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
-      else if (kind === "rollover" && id) {
+      else if (kind === "kicker") {
+        if (this.kicker.capture()) this.audio.sfx("scoop");
+      } else if (kind === "rollover" && id) {
         this.rolloverLit.set(id, 1);
         this.audio.sfx("rollover");
         this.onMoonLit(id);
@@ -285,6 +301,17 @@ export class Game {
       } else if (isOrbit || DMD_LABELS.has(label)) {
         this.dmdQueue.push(new MessageScene([[label, fmtScore(points)]], 1.3));
       }
+    });
+    this.bus.on("telescope", ({ name, points, spotted }) => {
+      // the ball sits captive in the scoop while this plays — the one moment
+      // the player is guaranteed to be watching the DMD
+      const reveal = this.baked.telescope
+        ? new BakedDmdScene(this.baked.telescope, 8, `${name} ${fmtScore(points)}`)
+        : new MessageScene([[name, fmtScore(points)]], 1.6, true);
+      this.dmdQueue.push(
+        spotted ? new SequenceScene([reveal, new MessageScene([["ORBIT SPOTTED"]], 1.0)]) : reveal,
+        2,
+      );
     });
     this.bus.on("mode", ({ kind }) => {
       if (kind === "eclipseReady") {
@@ -450,6 +477,9 @@ export class Game {
 
     for (const b of this.bumpers) b.update(dt);
     for (const sl of this.slings) sl.update(dt);
+    this.kicker.update(dt, this.ball, t);
+    // a scoop hold must not eat the ball-saver window (-Infinity stays put)
+    if (this.kicker.holding) this.saverUntil += dt;
     this.targetBank.update(dt);
     this.spinner.update(dt);
     this.scoring.update(dt);
@@ -502,6 +532,7 @@ export class Game {
   }
 
   private respawn(): void {
+    this.kicker.cancel(this.ball); // never leave a respawned ball gravity-less
     this.ball.reset();
     // don't lerp across the teleport
     this.prevBall.x = TABLE.spawn.x;

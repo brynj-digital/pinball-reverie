@@ -3,7 +3,7 @@ import type { Tuning } from "../tuning";
 import type { FixtureTag } from "../core/PhysicsWorld";
 import type { TableRenderData } from "../render/Renderer";
 import { parseTableSvg } from "./SvgCollision";
-import { BUMPERS, FLIPPER, TABLE } from "./geometry";
+import { BUMPERS, FLIPPER, KICKER, TABLE } from "./geometry";
 
 export interface DevTable {
   body: Body;
@@ -61,6 +61,7 @@ function validateAnchors(anchors: Map<string, { x: number; y: number }>): void {
     ["flipper-left", FLIPPER.pivotL],
     ["flipper-right", FLIPPER.pivotR],
     ["spawn", TABLE.spawn],
+    [`kicker-${KICKER.id}`, KICKER.hold],
     ...BUMPERS.map((b): [string, { x: number; y: number }] => [`bumper-${b.id}`, b]),
   ];
   for (const [name, pos] of expect) {

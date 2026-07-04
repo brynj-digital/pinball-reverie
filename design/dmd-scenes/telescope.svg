@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- MOONDIAL DMD scene: TELESCOPE — the eyepiece iris opens on a star
+       field, the crosshair settles, and the sighting flares as a four-point
+       star. 8 frames of 128x32, baked to 4-level dot frames at load (style
+       guide 6). Bake levels by luminance: #fff=3, #888=2, #666=1, black=0.
+       Art stays in rows 0..22; the caption row (sighting name + points)
+       renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <g transform="translate(0,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="3" fill="none" stroke="#666" stroke-width="1.4"/>
+  </g>
+  <g transform="translate(128,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="6" fill="none" stroke="#888" stroke-width="1.4"/>
+    <circle cx="64" cy="11" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(256,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="9" fill="none" stroke="#888" stroke-width="1.4"/>
+    <g stroke="#666" stroke-width="1.2">
+      <line x1="64" y1="2" x2="64" y2="5"/><line x1="64" y1="17" x2="64" y2="20"/>
+      <line x1="55" y1="11" x2="58" y2="11"/><line x1="70" y1="11" x2="73" y2="11"/>
+    </g>
+    <circle cx="64" cy="11" r="1.2" fill="#666"/>
+  </g>
+  <g transform="translate(384,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="11" fill="none" stroke="#fff" stroke-width="1.4"/>
+    <g stroke="#888" stroke-width="1.2">
+      <line x1="64" y1="0" x2="64" y2="4"/><line x1="64" y1="18" x2="64" y2="22"/>
+      <line x1="53" y1="11" x2="57" y2="11"/><line x1="71" y1="11" x2="75" y2="11"/>
+    </g>
+    <circle cx="64" cy="11" r="1.4" fill="#888"/>
+  </g>
+  <g transform="translate(512,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="11" fill="none" stroke="#888" stroke-width="1.4"/>
+    <polygon points="64,7 64.9,10.1 68,11 64.9,11.9 64,15 63.1,11.9 60,11 63.1,10.1" fill="#fff"/>
+  </g>
+  <g transform="translate(640,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="11" fill="none" stroke="#666" stroke-width="1.4"/>
+    <polygon points="64,4 65.5,9.5 71,11 65.5,12.5 64,18 62.5,12.5 57,11 62.5,9.5" fill="#fff"/>
+    <circle cx="56" cy="4" r="1" fill="#888"/><circle cx="73" cy="17" r="1" fill="#888"/>
+  </g>
+  <g transform="translate(768,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="13" fill="none" stroke="#888" stroke-width="1.4"/>
+    <polygon points="64,1 66.2,8.8 74,11 66.2,13.2 64,21 61.8,13.2 54,11 61.8,8.8" fill="#fff"/>
+    <circle cx="52" cy="3" r="1.2" fill="#888"/><circle cx="77" cy="18" r="1.2" fill="#888"/>
+    <circle cx="76" cy="4" r="1" fill="#666"/><circle cx="51" cy="18" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(896,0)">
+    <circle cx="20" cy="5" r="0.9" fill="#666"/><circle cx="105" cy="8" r="0.9" fill="#666"/>
+    <circle cx="40" cy="26" r="0.9" fill="#666"/><circle cx="90" cy="24" r="0.9" fill="#666"/>
+    <circle cx="64" cy="11" r="11" fill="none" stroke="#666" stroke-width="1.4"/>
+    <polygon points="64,4 65.5,9.5 71,11 65.5,12.5 64,18 62.5,12.5 57,11 62.5,9.5" fill="#888"/>
+    <circle cx="52" cy="3" r="1" fill="#666"/><circle cx="77" cy="18" r="1" fill="#666"/>
+  </g>
+</svg>

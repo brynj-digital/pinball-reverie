@@ -13,6 +13,8 @@ export interface GameEvents {
   bankComplete: Record<string, never>;
   /** Mode progression (Modes.ts): eclipse lit / started / ended. */
   mode: { kind: "eclipseReady" | "eclipseStart" | "eclipseEnd" };
+  /** Telescope scoop sighting awarded (points already multiplied). */
+  telescope: { name: string; points: number; spotted: boolean };
   /** Score changed; label describes what scored (drives HUD, later the DMD). */
   score: { points: number; total: number; label: string };
   launch: { power: number };

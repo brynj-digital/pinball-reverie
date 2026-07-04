@@ -16,8 +16,10 @@ import { Bumper } from "../src/entities/Bumper";
 import { Slingshot } from "../src/entities/Slingshot";
 import { DropTargetBank } from "../src/entities/DropTargetBank";
 import { Spinner } from "../src/entities/Spinner";
+import { Kicker } from "../src/entities/Kicker";
 import { BUMPERS, SLINGS, TABLE } from "../src/table/geometry";
 import { DEFAULT_TUNING } from "../src/tuning";
+import rules from "../design/tables/moondial/rules.json";
 
 const SIM_SECONDS = 600;
 const STUCK_WINDOW = 2.5; // s of near-zero speed with flippers at rest
@@ -43,11 +45,14 @@ const bumpers = BUMPERS.map((d) => new Bumper(pw.world, d));
 const slings = SLINGS.map((d) => new Slingshot(pw.world, d));
 const bank = new DropTargetBank(pw.world, pw, bus);
 const spinner = new Spinner(bus);
+// hold (2.0 s) stays under STUCK_WINDOW, so a scoop visit never reads as a trap
+const kicker = new Kicker(rules.telescope.holdS);
 
 let drainFlag = false;
 bus.on("sensor", ({ kind }) => {
   if (kind === "drain") drainFlag = true;
   if (kind === "spinner") spinner.trip(ball.body.getLinearVelocity().y);
+  if (kind === "kicker") kicker.capture();
 });
 bus.on("hit", ({ kind, id }) => {
   if (kind === "bumper") bumpers.find((b) => b.def.id === id)?.kick(ball, pw, t.bumperKick);
@@ -96,6 +101,7 @@ for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
 
   pw.update(FIXED_DT); // flushes post-step queue (kicks, target drops/resets)
   bank.update(FIXED_DT);
+  kicker.update(FIXED_DT, ball, t);
   spinner.update(FIXED_DT);
   for (const s of slings) s.update(FIXED_DT);
   for (const b of bumpers) b.update(FIXED_DT);
@@ -103,6 +109,7 @@ for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
   if (drainFlag) {
     drainFlag = false;
     drains++;
+    kicker.cancel(ball);
     ball.reset();
     stillTime = 0;
     loopBuf.length = 0;
@@ -125,6 +132,7 @@ for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
             time: now,
             kind: "LOOP",
           });
+          kicker.cancel(ball);
           ball.reset();
           loopBuf.length = 0;
         }
@@ -143,6 +151,7 @@ for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
     stillTime += FIXED_DT;
     if (stillTime >= STUCK_WINDOW) {
       stuck.push({ x: p.x, y: p.y, time: now, kind: "STUCK" });
+      kicker.cancel(ball);
       ball.reset();
       stillTime = 0;
     }

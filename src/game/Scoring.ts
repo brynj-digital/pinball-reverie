@@ -51,13 +51,15 @@ export class Scoring {
     this.lastLabelAge += dt;
   }
 
-  award(points: number, label: string): void {
-    if (this.muted) return; // also blocks Modes-driven awards (orbits) on a tilted ball
+  /** Returns the multiplied points actually added (0 while muted). */
+  award(points: number, label: string): number {
+    if (this.muted) return 0; // also blocks Modes-driven awards (orbits) on a tilted ball
     const p = Math.round(points * this.multiplier * this.eclipseFactor);
     this.total += p;
     this.lastLabel = label;
     this.lastLabelAge = 0;
     this.bus.emit("score", { points: p, total: this.total, label });
+    return p;
   }
 
   /** TILT forfeits the accrued bonus (real-machine rule). */

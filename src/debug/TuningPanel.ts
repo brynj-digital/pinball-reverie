@@ -20,6 +20,7 @@ const SLIDERS: SliderDef[] = [
   { key: "plungerMaxSpeed", label: "plunger max speed (m/s)", min: 1, max: 4, step: 0.05 },
   { key: "bumperKick", label: "bumper kick (N·s)", min: 0.02, max: 0.25, step: 0.005 },
   { key: "slingKick", label: "sling kick (N·s)", min: 0.02, max: 0.25, step: 0.005 },
+  { key: "kickerEject", label: "scoop eject speed (m/s)", min: 0.6, max: 3, step: 0.05 },
   { key: "cameraViewH", label: "camera view height (m)", min: 0.3, max: 1.05, step: 0.01 },
   { key: "sfxVolume", label: "sfx volume", min: 0, max: 1, step: 0.05 },
   { key: "musicVolume", label: "music volume", min: 0, max: 1, step: 0.05 },

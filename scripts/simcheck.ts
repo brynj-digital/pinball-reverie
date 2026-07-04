@@ -15,6 +15,7 @@ import { Bumper } from "../src/entities/Bumper";
 import { Slingshot } from "../src/entities/Slingshot";
 import { DropTargetBank } from "../src/entities/DropTargetBank";
 import { Spinner } from "../src/entities/Spinner";
+import { Kicker } from "../src/entities/Kicker";
 import { Scoring } from "../src/game/Scoring";
 import { Modes } from "../src/game/Modes";
 import {
@@ -25,8 +26,10 @@ import {
   BUMPERS,
   SLINGS,
   DROP_TARGETS,
+  KICKER,
 } from "../src/table/geometry";
 import { DEFAULT_TUNING } from "../src/tuning";
+import rules from "../design/tables/moondial/rules.json";
 
 let failures = 0;
 function check(name: string, ok: boolean, detail = ""): void {
@@ -51,6 +54,7 @@ const bumpers = BUMPERS.map((d) => new Bumper(pw.world, d));
 const slings = SLINGS.map((d) => new Slingshot(pw.world, d));
 const bank = new DropTargetBank(pw.world, pw, bus);
 const spinner = new Spinner(bus);
+const kicker = new Kicker(rules.telescope.holdS);
 const scoring = new Scoring(bus);
 const modes = new Modes(bus, scoring);
 left.update(false, t);
@@ -67,6 +71,12 @@ bus.on("sensor", ({ kind, id }) => {
   sensors.push(id ? `${kind}:${id}` : kind);
   if (kind === "drain") drained = true;
   if (kind === "spinner") spinner.trip(ball.body.getLinearVelocity().y);
+  if (kind === "kicker") {
+    // capture only a physically-present ball — test 15 emits synthetic
+    // kicker events with the ball parked at the plunger saddle
+    const p = ball.body.getPosition();
+    if (Math.hypot(p.x - KICKER.hold.x, p.y - KICKER.hold.y) < 0.06) kicker.capture();
+  }
 });
 bus.on("hit", ({ kind, id }) => {
   hits.push(`${kind}:${id}`);
@@ -83,6 +93,7 @@ function run(seconds: number, each?: () => void): void {
   for (let i = 0; i < steps; i++) {
     pw.update(FIXED_DT); // also flushes the post-step queue (kicks, target drops)
     bank.update(FIXED_DT);
+    kicker.update(FIXED_DT, ball, t);
     spinner.update(FIXED_DT);
     scoring.update(FIXED_DT);
     modes.update(FIXED_DT);
@@ -233,6 +244,56 @@ check(
 );
 check("orbit combo scores", labels.includes("ORBIT"), `score=${scoring.total}`);
 
+// 12b — telescope scoop: a shot up the right channel is captured at the
+// hold anchor, held for the observation, then kicked out to the left flipper
+drained = false;
+placeBall(0.42, 0.55, 0.55, -1.1);
+let captured = false;
+run(1, () => {
+  if (kicker.holding) captured = true;
+});
+check(
+  "scoop shot is captured and held",
+  captured && kicker.holding && sensors.includes("kicker:telescope"),
+);
+run(0.5);
+{
+  const p = ball.body.getPosition();
+  const v = ball.body.getLinearVelocity();
+  check(
+    "held ball rests at the telescope anchor",
+    kicker.holding &&
+      Math.hypot(p.x - KICKER.hold.x, p.y - KICKER.hold.y) < 0.01 &&
+      Math.hypot(v.x, v.y) < 0.02,
+    `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+  );
+}
+let ejectX = NaN;
+run(3, () => {
+  const p = ball.body.getPosition();
+  if (Number.isNaN(ejectX) && p.y >= 0.95) ejectX = p.x;
+});
+check(
+  "kickout feeds the left flipper",
+  !kicker.holding && ejectX > 0.05 && ejectX < 0.26,
+  `crossed y=0.95 at x=${Number.isNaN(ejectX) ? "never" : ejectX.toFixed(3)}`,
+);
+
+// 12c — the scoop pocket must not trap an uncaptured ball: dead-dropped in
+// the mouth below the sensor, gravity alone must return it to play. The fall
+// clips the right sling, which kicks it back up — allow time to drain out.
+drained = false;
+placeBall(0.48, 0.43);
+run(10);
+check("scoop mouth does not trap a dead ball", drained);
+
+// 12d — the wedge where the scoop hood meets the lane wall under the orbit
+// tail must shed a ball dropped into it (rolls left off the hood, drains)
+drained = false;
+placeBall(0.5, 0.295);
+run(5);
+check("orbit-tail / scoop-hood corner does not trap", drained);
+
 // 13 — the Moondial ruleset, driven with synthetic events (rules logic is
 // physics-independent): orbit combos escalate, 2 banks + 3 orbits light the
 // eclipse, the next orbit starts it, eclipse doubles scoring and pays orbit
@@ -264,6 +325,49 @@ run(26); // let the eclipse expire
 check(
   "eclipse ends after its duration",
   modeEvents.includes("eclipseEnd") && !modes.eclipseActive && scoring.eclipseFactor === 1,
+);
+
+// 15 — telescope sightings (synthetic kicker events; the ball stays parked
+// at the saddle, so the physical kicker's distance guard skips capture):
+// awards escalate in rules order, wrap, and the last sighting spots an
+// orbit. Expected: 2×5000 banks + 2500 + 5000 orbits + 5000 + 10000 + 15000
+// + 25000 + 5000 sightings = 77,500.
+scoring.reset();
+modes.resetGame();
+const sightingsSeen: string[] = [];
+let orbitSpotted = false;
+bus.on("telescope", ({ name, spotted }) => {
+  sightingsSeen.push(name);
+  if (spotted) orbitSpotted = true;
+});
+bus.emit("bankComplete", {});
+bus.emit("bankComplete", {});
+syntheticOrbit();
+syntheticOrbit(); // 2 banks + 2 orbits: the eclipse needs one more orbit
+const visit = () => {
+  bus.emit("sensor", { kind: "kicker", id: "telescope" });
+  run(0.1);
+};
+visit(); // COMET 5,000
+visit(); // METEOR SHOWER 10,000
+visit(); // NEBULA 15,000
+check(
+  "sightings escalate in rules order",
+  sightingsSeen.join(",") === "COMET,METEOR SHOWER,NEBULA",
+);
+check("eclipse not lit before the last sighting", !modes.eclipseReady);
+visit(); // SUPERNOVA 25,000 — spots the 3rd orbit
+check("last sighting spots an orbit and lights the eclipse", orbitSpotted && modes.eclipseReady);
+visit(); // wraps back to COMET
+check(
+  "sighting list wraps and totals are exact",
+  sightingsSeen[4] === "COMET" && scoring.total === 77500,
+  `total=${scoring.total}`,
+);
+check(
+  "telescope visits accrue bonus units",
+  scoring.bonusUnits === 5 * rules.telescope.bonusUnit,
+  `units=${scoring.bonusUnits}`,
 );
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
