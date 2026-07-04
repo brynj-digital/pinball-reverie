@@ -92,6 +92,12 @@ const BRIDGE: Section = {
   arp: false, leadVol: 0.26, crash: false, swing: 0,
 };
 
+/**
+ * Contrast comes from the harmony (the E-major turn) and the pump bass, not
+ * the production: lead stays in the song's pulse family and drums sit at
+ * "half" so the section reads as a step between the sparse bridge and the
+ * full-energy solo rather than a spike.
+ */
 // prettier-ignore
 const MIDDLE_EIGHT: Section = {
   chords: ["F", "C", "Dm", "Am", "F", "C", "E", "E"],
@@ -101,8 +107,8 @@ const MIDDLE_EIGHT: Section = {
     72, -1, 74, -1, 76, -1, 77, -1,   79, -1, -1, -1, 76, -1, 72, -1,
     71, -1, 68, -1, 71, -1, 74, -1,   76, -1, -1, -1, -1, -1,  0,  0,
   ],
-  leadStep: 2, wave: "sawtooth", drums: "full", bass: "pump",
-  arp: true, leadVol: 0.17, crash: true, swing: 0,
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "pump",
+  arp: true, leadVol: 0.25, crash: false, swing: 0,
 };
 
 /**
