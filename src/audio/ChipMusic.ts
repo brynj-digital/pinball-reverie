@@ -81,22 +81,28 @@ const CHORUS: Section = {
   arp: true, leadVol: 0.24, crash: true, swing: 0,
 };
 
+/**
+ * The breather. Melody sits in the same octave as the verse/chorus — the
+ * softness comes from the triangle timbre and sparse backing, not from
+ * dropping register. Triangle has almost no harmonics, so its leadVol runs
+ * hotter than the pulse sections to sound level with them.
+ */
 // prettier-ignore
 const BRIDGE: Section = {
   chords: ["Dm", "Em", "F", "G"],
   lead: [
-    62, -1, -1, -1, 65, -1, 64, -1,   64, -1, -1, -1,  0,  0, 59, -1,
-    60, -1, 64, -1, 65, -1, 67, -1,   67, -1, -1, -1, -1, -1, -1, -1,
+    74, -1, -1, -1, 77, -1, 76, -1,   76, -1, -1, -1,  0,  0, 71, -1,
+    72, -1, 76, -1, 77, -1, 79, -1,   79, -1, -1, -1, -1, -1, -1, -1,
   ],
   leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
-  arp: false, leadVol: 0.26, crash: false, swing: 0,
+  arp: false, leadVol: 0.32, crash: false, swing: 0,
 };
 
 /**
- * Contrast comes from the harmony (the E-major turn) and the pump bass, not
- * the production: lead stays in the song's pulse family and drums sit at
- * "half" so the section reads as a step between the sparse bridge and the
- * full-energy solo rather than a spike.
+ * Full-energy lift, but the contrast comes from the harmony (the E-major
+ * turn) and the pump bass — the lead stays in the song's pulse family
+ * (square, not saw) so it reads as the same instrument, and the solo after
+ * it still has somewhere to go.
  */
 // prettier-ignore
 const MIDDLE_EIGHT: Section = {
@@ -107,8 +113,8 @@ const MIDDLE_EIGHT: Section = {
     72, -1, 74, -1, 76, -1, 77, -1,   79, -1, -1, -1, 76, -1, 72, -1,
     71, -1, 68, -1, 71, -1, 74, -1,   76, -1, -1, -1, -1, -1,  0,  0,
   ],
-  leadStep: 2, wave: "pulse25", drums: "half", bass: "pump",
-  arp: true, leadVol: 0.25, crash: false, swing: 0,
+  leadStep: 2, wave: "square", drums: "full", bass: "pump",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
 };
 
 /**
