@@ -446,7 +446,7 @@ export class Renderer2D implements Renderer {
         ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(140, 107, 255, ${0.4 + 0.6 * r.lit})`;
         ctx.fill();
-        this.drawGlow(r.x, r.y, 0.032, "140, 107, 255", r.lit);
+        this.drawGlow(r.x, r.y, 0.026, "140, 107, 255", r.lit);
       } else if (!this.art) {
         ctx.beginPath();
         ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);

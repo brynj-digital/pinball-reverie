@@ -240,18 +240,18 @@
 
     <!-- moon-phase inserts in the top lanes (rollovers light these) -->
     <g id="art-inserts-moons" stroke="#07080d" stroke-width="1.5">
-      <circle cx="160" cy="95" r="11" fill="#2f2547"/>
-      <path d="M 160 84 a 11 11 0 0 0 0 22 a 8.5 11 0 0 1 0 -22 Z" fill="#8c6bff" opacity="0.35"/>
-      <circle cx="260" cy="95" r="11" fill="#2f2547"/>
-      <path d="M 260 84 a 11 11 0 0 0 0 22 Z" fill="#8c6bff" opacity="0.35"/>
-      <circle cx="360" cy="95" r="11" fill="#2f2547"/>
-      <circle cx="360" cy="95" r="8" fill="#8c6bff" opacity="0.35"/>
+      <circle cx="160" cy="88" r="11" fill="#2f2547"/>
+      <path d="M 160 77 a 11 11 0 0 0 0 22 a 8.5 11 0 0 1 0 -22 Z" fill="#8c6bff" opacity="0.35"/>
+      <circle cx="260" cy="88" r="11" fill="#2f2547"/>
+      <path d="M 260 77 a 11 11 0 0 0 0 22 Z" fill="#8c6bff" opacity="0.35"/>
+      <circle cx="360" cy="88" r="11" fill="#2f2547"/>
+      <circle cx="360" cy="88" r="8" fill="#8c6bff" opacity="0.35"/>
     </g>
     <!-- lane gleams -->
     <g fill="#d7dce8" opacity="0.04">
-      <rect x="142" y="80" width="36" height="66" rx="10"/>
-      <rect x="242" y="80" width="36" height="66" rx="10"/>
-      <rect x="342" y="80" width="36" height="66" rx="10"/>
+      <rect x="142" y="74" width="36" height="72" rx="10"/>
+      <rect x="242" y="74" width="36" height="72" rx="10"/>
+      <rect x="342" y="74" width="36" height="72" rx="10"/>
     </g>
 
     <!-- mini-comets streaking into the target bank: tapered two-tone tails

@@ -361,7 +361,7 @@ export class Renderer3D implements Renderer {
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
-      const glow = new THREE.Mesh(new THREE.CircleGeometry(0.017, 24), glowMat);
+      const glow = new THREE.Mesh(new THREE.CircleGeometry(0.014, 24), glowMat);
       glow.geometry.rotateX(-Math.PI / 2);
       glow.position.set(r.x, 0.0012, r.y);
       this.rolloverMats.push(mat);

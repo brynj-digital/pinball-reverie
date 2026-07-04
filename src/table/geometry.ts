@@ -152,11 +152,15 @@ export interface RolloverDef {
   x: number;
   y: number;
 }
-/** Top-lane rollover insert positions (sensors live in the SVG). */
+/**
+ * Top-lane lit-lamp indicator positions (sensors live in the SVG; these sit
+ * inside the sensor rects, just below the printed moon-phase inserts so the
+ * glow doesn't wash over the phase art).
+ */
 export const ROLLOVERS: readonly RolloverDef[] = [
-  { id: "1", x: 0.16, y: 0.115 },
-  { id: "2", x: 0.26, y: 0.115 },
-  { id: "3", x: 0.36, y: 0.115 },
+  { id: "1", x: 0.16, y: 0.12 },
+  { id: "2", x: 0.26, y: 0.12 },
+  { id: "3", x: 0.36, y: 0.12 },
 ];
 
 /** Spinner bar across the orbit's left lane (its trip sensor lives in the SVG). */
