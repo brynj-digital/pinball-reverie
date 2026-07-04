@@ -140,11 +140,24 @@ export class Renderer3D implements Renderer {
   private buildPlayfield(): void {
     const geo = new THREE.PlaneGeometry(this.table.width, this.table.height);
     geo.rotateX(-Math.PI / 2); // face up; texture top edge lands at z=0
-    const mat = new THREE.MeshStandardMaterial({ color: 0x232438, roughness: 0.85 });
+    // UNLIT and un-tonemapped: the art must display exactly as authored, like
+    // the 2D renderer shows it — through a lit material it becomes albedo and
+    // scene lighting multiplies the whole palette brighter than the masters
+    const mat = new THREE.MeshBasicMaterial({ color: 0x232438 });
+    mat.toneMapped = false;
     const plane = new THREE.Mesh(geo, mat);
     plane.position.set(this.table.width / 2, 0, this.table.height / 2);
-    plane.receiveShadow = true;
     this.scene.add(plane);
+
+    // basic materials can't receive shadows — a transparent shadow catcher
+    // just above the art keeps the ball/flipper shadows
+    const catcher = new THREE.Mesh(
+      geo.clone(),
+      new THREE.ShadowMaterial({ opacity: 0.3 }),
+    );
+    catcher.position.set(this.table.width / 2, 0.0004, this.table.height / 2);
+    catcher.receiveShadow = true;
+    this.scene.add(catcher);
 
     if (this.table.artSvgText) {
       // the same SVG the 2D renderer draws, rasterized once as the plane map
