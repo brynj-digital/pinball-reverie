@@ -67,6 +67,7 @@ export class Renderer3D implements Renderer {
   private slingMats: THREE.MeshStandardMaterial[] = [];
   private targetMeshes: THREE.Mesh[] = [];
   private rolloverMats: THREE.MeshStandardMaterial[] = [];
+  private rolloverGlowMats: THREE.MeshBasicMaterial[] = [];
   private spinnerMesh?: THREE.Mesh;
   private plungerRod?: THREE.Mesh;
   private built = false;
@@ -118,10 +119,12 @@ export class Renderer3D implements Renderer {
   }
 
   private buildLights(): void {
-    this.scene.add(new THREE.HemisphereLight(0x8899cc, 0x14101f, 0.55));
-    const key = new THREE.DirectionalLight(0xfff2dd, 1.7);
-    key.position.set(0.9, 1.5, 0.15);
-    key.target.position.set(TABLE.width / 2, 0, TABLE.height / 2);
+    this.scene.add(new THREE.HemisphereLight(0x8899cc, 0x14101f, 0.8));
+    // key light overhead from the player's side, like cabinet GI — the old
+    // top-of-table grazing angle blew out the arch rails and upper lamps
+    const key = new THREE.DirectionalLight(0xfff2dd, 1.15);
+    key.position.set(0.55, 1.6, 1.5);
+    key.target.position.set(TABLE.width / 2, 0, TABLE.height * 0.45);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     const sc = key.shadow.camera;
@@ -167,9 +170,10 @@ export class Renderer3D implements Renderer {
   private buildWalls(): void {
     if (!this.table.artSvgText) return;
     const railMat = new THREE.MeshStandardMaterial({
-      color: PALETTE.rail,
+      color: 0xaebcd0,
       metalness: 0.9,
-      roughness: 0.28,
+      roughness: 0.38,
+      envMapIntensity: 0.55, // full env reflections read white-hot on the arch
     });
     for (const wall of parseTableSvg(this.table.artSvgText).walls) {
       for (const [h, r] of [
@@ -335,8 +339,21 @@ export class Renderer3D implements Renderer {
       const ring = new THREE.Mesh(new THREE.TorusGeometry(0.009, 0.0018, 10, 24), mat);
       ring.geometry.rotateX(Math.PI / 2); // lie flat
       ring.position.set(r.x, 0.002, r.y);
+      // lamp-insert glow under the ring: an additive disc, like the 2D art's
+      // soft radial lamp bloom — the bare torus alone read as an unlit decal
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: PALETTE.rollover,
+        transparent: true,
+        opacity: 0.1,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const glow = new THREE.Mesh(new THREE.CircleGeometry(0.017, 24), glowMat);
+      glow.geometry.rotateX(-Math.PI / 2);
+      glow.position.set(r.x, 0.0012, r.y);
       this.rolloverMats.push(mat);
-      this.scene.add(ring);
+      this.rolloverGlowMats.push(glowMat);
+      this.scene.add(ring, glow);
     }
 
     const sp = snap.elements.spinner;
@@ -410,6 +427,7 @@ export class Renderer3D implements Renderer {
     });
     snap.elements.rollovers.forEach((r, i) => {
       this.rolloverMats[i].emissiveIntensity = 0.25 + r.lit * 2.2;
+      this.rolloverGlowMats[i].opacity = 0.1 + r.lit * 0.5;
     });
     this.spinnerMesh!.rotation.x = snap.elements.spinner.angle;
     this.plungerRod!.position.z =
@@ -446,15 +464,19 @@ export class Renderer3D implements Renderer {
       this.camFlat.lookAt(cx + camera.shakeX, 0, cz);
       this.renderer.render(this.scene, this.camFlat);
     } else {
-      // tilted chase camera mirroring the 2D scroll window [camera.y, +viewH]
+      // tilted chase camera mirroring the 2D scroll window [camera.y, +viewH].
+      // Framing solved against the frustum: with fov 38 these factors put the
+      // bottom screen edge at ≈ window bottom + 0.04 m and the top edge just
+      // above the window top — the old factors over-covered the top and cut
+      // the flipper/drain area off the bottom of the screen.
       this.scene.fog = this.fog;
-      const focusZ = camera.y + camera.viewH * 0.52;
+      const focusZ = camera.y + camera.viewH * 0.62;
       this.cam3.position.set(
         cx + camera.shakeX,
-        camera.viewH * 1.0 + camera.shakeY,
-        focusZ + camera.viewH * 0.78,
+        camera.viewH * 1.13 + camera.shakeY,
+        focusZ + camera.viewH * 0.69,
       );
-      this.cam3.lookAt(cx, 0, focusZ - camera.viewH * 0.08);
+      this.cam3.lookAt(cx, 0, focusZ);
       this.renderer.render(this.scene, this.cam3);
     }
 
