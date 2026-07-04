@@ -56,6 +56,7 @@ export class Renderer3D implements Renderer {
   private view: View3D = "tilted";
   private fog = new THREE.FogExp2(PALETTE.bg, 0.22);
   private pmrem?: THREE.PMREMGenerator;
+  private envTex?: THREE.Texture;
   private table!: TableRenderData;
 
   private ballMesh?: THREE.Mesh;
@@ -107,9 +108,12 @@ export class Renderer3D implements Renderer {
     this.scene.fog = this.fog;
     this.camFlat.up.set(0, 0, -1); // screen-up is up-table when looking down
 
-    // metallic reflections for the ball and rails
+    // metallic reflections for the ball and rails ONLY — assigned per-material,
+    // never as scene.environment: RoomEnvironment is strongly HDR (emissive
+    // panels at 17–100×) and as an IBL it out-shines the scene lights on every
+    // diffuse element, washing the palette no matter how the lights are tuned
     this.pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.scene.environment = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.envTex = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
     this.buildLights();
     this.buildPlayfield();
@@ -119,10 +123,14 @@ export class Renderer3D implements Renderer {
   }
 
   private buildLights(): void {
-    this.scene.add(new THREE.HemisphereLight(0x8899cc, 0x14101f, 0.8));
+    // these are the ONLY lights on the elements (no env IBL — see init()), so
+    // total irradiance on up-facing surfaces stays near 1.0: the playfield art
+    // is unlit, and any overexposure here reads as washed-out elements sitting
+    // on correctly-saturated art (hemi + key·cosθ ≈ 0.25 + 0.7)
+    this.scene.add(new THREE.HemisphereLight(0x8899cc, 0x14101f, 0.4));
     // key light overhead from the player's side, like cabinet GI — the old
     // top-of-table grazing angle blew out the arch rails and upper lamps
-    const key = new THREE.DirectionalLight(0xfff2dd, 1.15);
+    const key = new THREE.DirectionalLight(0xfff2dd, 0.9);
     key.position.set(0.55, 1.6, 1.5);
     key.target.position.set(TABLE.width / 2, 0, TABLE.height * 0.45);
     key.castShadow = true;
@@ -186,6 +194,7 @@ export class Renderer3D implements Renderer {
       color: 0xaebcd0,
       metalness: 0.9,
       roughness: 0.38,
+      envMap: this.envTex,
       envMapIntensity: 0.55, // full env reflections read white-hot on the arch
     });
     for (const wall of parseTableSvg(this.table.artSvgText).walls) {
@@ -228,6 +237,8 @@ export class Renderer3D implements Renderer {
       color: 0x9aa5b8,
       metalness: 0.85,
       roughness: 0.35,
+      envMap: this.envTex,
+      envMapIntensity: 0.55,
     });
     const rod = new THREE.CylinderGeometry(0.0035, 0.0035, 0.05, 10);
     rod.rotateX(Math.PI / 2); // lie along z (down the lane)
@@ -269,16 +280,19 @@ export class Renderer3D implements Renderer {
       metalness: 1,
       roughness: 0.12,
       transparent: true,
+      envMap: this.envTex,
     });
     this.ballMesh = new THREE.Mesh(new THREE.SphereGeometry(BALL_RADIUS, 32, 24), this.ballMat);
     this.ballMesh.castShadow = true;
     this.scene.add(this.ballMesh);
     this.prevBallPos.set(snap.ball.x, BALL_RADIUS, snap.ball.y);
 
+    // element materials get NO envMap — see init(); they're lit by the scene
+    // lights alone so their albedo reads at authored saturation
     const flipMat = new THREE.MeshStandardMaterial({
       color: PALETTE.flipper,
-      metalness: 0.55,
-      roughness: 0.4,
+      metalness: 0.3,
+      roughness: 0.45,
     });
     this.flipperMeshes = snap.flippers.map((f) => {
       const mesh = extrudeFlat(flipperVerts(f.side), 0.016, flipMat);
@@ -288,6 +302,14 @@ export class Renderer3D implements Renderer {
       return mesh;
     });
 
+    // rim ring matches the rail chrome so bumpers share the table's metal
+    const bumperRimMat = new THREE.MeshStandardMaterial({
+      color: 0xbdc9dc,
+      metalness: 0.9,
+      roughness: 0.35,
+      envMap: this.envTex,
+      envMapIntensity: 0.55,
+    });
     for (const b of snap.elements.bumpers) {
       const body = new THREE.Mesh(
         new THREE.CylinderGeometry(b.r * 0.92, b.r, 0.026, 24),
@@ -301,13 +323,22 @@ export class Renderer3D implements Renderer {
         emissiveIntensity: 0.35,
         roughness: 0.4,
       });
-      const cap = new THREE.Mesh(new THREE.CylinderGeometry(b.r * 0.7, b.r * 0.7, 0.006, 24), glowMat);
-      cap.position.set(b.x, 0.029, b.y);
+      // domed cap + chrome rim: the old flat disc showed the tilted camera
+      // nothing but a featureless top face and read as a 2D decal
+      const cap = new THREE.Mesh(
+        new THREE.SphereGeometry(b.r * 0.72, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+        glowMat,
+      );
+      cap.scale.y = 0.5;
+      cap.position.set(b.x, 0.026, b.y);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(b.r * 0.92, 0.002, 10, 28), bumperRimMat);
+      rim.geometry.rotateX(Math.PI / 2);
+      rim.position.set(b.x, 0.026, b.y);
       const light = new THREE.PointLight(PALETTE.bumperGlow, 0, 0.16);
       light.position.set(b.x, 0.05, b.y);
       this.bumperGlowMats.push(glowMat);
       this.bumperLights.push(light);
-      this.scene.add(body, cap, light);
+      this.scene.add(body, cap, rim, light);
     }
 
     for (const s of snap.elements.slings) {
@@ -372,7 +403,13 @@ export class Renderer3D implements Renderer {
     const sp = snap.elements.spinner;
     this.spinnerMesh = new THREE.Mesh(
       new THREE.BoxGeometry(sp.halfW * 2 - 0.004, 0.0016, 0.02),
-      new THREE.MeshStandardMaterial({ color: 0xd8dee9, metalness: 0.85, roughness: 0.3 }),
+      new THREE.MeshStandardMaterial({
+        color: 0xd8dee9,
+        metalness: 0.85,
+        roughness: 0.3,
+        envMap: this.envTex,
+        envMapIntensity: 0.55,
+      }),
     );
     this.spinnerMesh.position.set(sp.x, BALL_RADIUS, sp.y);
     this.scene.add(this.spinnerMesh);
@@ -547,8 +584,20 @@ function extrudeFlat(
   mat: THREE.Material,
 ): THREE.Mesh {
   const shape = new THREE.Shape(pts.map((p) => new THREE.Vector2(p.x, p.y)));
-  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false });
+  // bevelled edges catch the key light — an unbevelled extrusion's flat top
+  // shades uniformly and reads as a 2D sticker. bevelOffset cancels bevelSize
+  // so the widest cross-section stays on the physics outline, and the depth
+  // is trimmed so total height still equals `depth` (bevel adds to both ends)
+  const bevel = Math.min(0.0025, depth * 0.2);
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: depth - 2 * bevel,
+    bevelEnabled: true,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelOffset: -bevel,
+    bevelSegments: 2,
+  });
   geo.rotateX(Math.PI / 2); // (x, y, 0) → (x, 0, y); extrusion ends up below…
-  geo.translate(0, depth, 0); // …so lift the solid back onto the floor
+  geo.translate(0, depth - bevel, 0); // …so lift the solid back onto the floor
   return new THREE.Mesh(geo, mat);
 }
