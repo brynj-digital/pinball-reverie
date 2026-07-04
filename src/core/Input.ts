@@ -116,16 +116,17 @@ export class Input {
   }
 
   /**
-   * While on, letter keys and Backspace are queued as typed text (read via
-   * consumeTyped) instead of firing the actions they're bound to — Z and R
-   * would otherwise flip and reset mid-entry. Everything else keeps working.
+   * While on, letter keys, Backspace, and the left/right arrows are queued as
+   * typed text (read via consumeTyped) instead of firing the actions they're
+   * bound to — Z and R would otherwise flip and reset mid-entry. Everything
+   * else keeps working.
    */
   setTextCapture(on: boolean): void {
     this.capturingText = on;
     this.typed = [];
   }
 
-  /** Next typed character ("A"–"Z", or "\b" for Backspace). Clears on read. */
+  /** Next typed character ("A"–"Z", "\b" for Backspace, "←"/"→" for the arrows). Clears on read. */
   consumeTyped(): string | null {
     return this.typed.shift() ?? null;
   }
@@ -187,6 +188,13 @@ export class Input {
       }
       if (e.code === "Backspace") {
         this.typed.push("\b");
+        this.sync();
+        return;
+      }
+      // slot navigation — captured so a nudge binding on the arrows (the
+      // default) can't fire while entering initials
+      if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+        this.typed.push(e.code === "ArrowLeft" ? "←" : "→");
         this.sync();
         return;
       }

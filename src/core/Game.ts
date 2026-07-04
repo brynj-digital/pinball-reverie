@@ -641,7 +641,8 @@ export class Game {
 
   /**
    * Initials entry: flipper taps cycle the letter, plunger/start confirms —
-   * or just type A–Z directly (Backspace steps back a slot).
+   * or just type A–Z directly (arrow keys move between slots, Backspace
+   * steps back one).
    */
   private updateInitials(plungerHeld: boolean): void {
     const cycle = (dir: number) => {
@@ -657,6 +658,14 @@ export class Game {
       if (ch === "\b") {
         if (this.initialsSlot > 0) {
           this.initialsSlot--;
+          this.audio.sfx("rollover");
+        }
+        continue;
+      }
+      if (ch === "←" || ch === "→") {
+        const to = this.initialsSlot + (ch === "←" ? -1 : 1);
+        if (to >= 0 && to <= 2) {
+          this.initialsSlot = to;
           this.audio.sfx("rollover");
         }
         continue;
