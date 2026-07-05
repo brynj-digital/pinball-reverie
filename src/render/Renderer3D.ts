@@ -28,6 +28,29 @@ import type {
  */
 
 /** Physics metres → scene units 1:1; (x, yDown) → (x, h, z=yDown). */
+
+/** Chaikin corner-cutting (2 passes): rounds polyline elbows for smooth
+ * tubes/ribbons while staying within ~2 mm of the authored line. */
+function chaikin<T extends { x: number; y: number; h?: number }>(pts: T[], closed = false): T[] {
+  let out = pts;
+  for (let pass = 0; pass < 2; pass++) {
+    if (out.length < 3) return out;
+    const next: T[] = closed ? [] : [out[0]];
+    const n = closed ? out.length : out.length - 1;
+    for (let i = 0; i < n; i++) {
+      const a = out[i];
+      const b = out[(i + 1) % out.length];
+      next.push(
+        { ...a, x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25, h: (a.h ?? 0) * 0.75 + (b.h ?? 0) * 0.25 },
+        { ...a, x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75, h: (a.h ?? 0) * 0.25 + (b.h ?? 0) * 0.75 },
+      );
+    }
+    if (!closed) next.push(out[out.length - 1]);
+    out = next;
+  }
+  return out;
+}
+
 const RAIL_LOW = 0.011; // lower rail centre height (ball equator-ish)
 const RAIL_HIGH = 0.024; // upper rail — walls read taller than the ball
 const PALETTE = {
@@ -297,19 +320,20 @@ export class Renderer3D implements Renderer {
               [RAIL_LOW, 0.0026],
               [RAIL_HIGH, 0.0018],
             ];
+      const smooth = chaikin(wall.pts, wall.loop);
       for (const [h, r] of radii) {
         const path = new THREE.CurvePath<THREE.Vector3>();
         const at = (p: { x: number; y: number }) =>
           new THREE.Vector3(p.x, h + elevation(p, wall.layer), p.y);
-        for (let i = 0; i < wall.pts.length - 1; i++) {
-          path.add(new THREE.LineCurve3(at(wall.pts[i]), at(wall.pts[i + 1])));
+        for (let i = 0; i < smooth.length - 1; i++) {
+          path.add(new THREE.LineCurve3(at(smooth[i]), at(smooth[i + 1])));
         }
         if (wall.loop) {
-          path.add(new THREE.LineCurve3(at(wall.pts[wall.pts.length - 1]), at(wall.pts[0])));
+          path.add(new THREE.LineCurve3(at(smooth[smooth.length - 1]), at(smooth[0])));
         }
         const geo = new THREE.TubeGeometry(
           path,
-          Math.max(8, wall.pts.length * 2),
+          Math.max(8, smooth.length * 2),
           r,
           10,
           wall.loop,
@@ -356,6 +380,9 @@ export class Renderer3D implements Renderer {
         });
       }
       if (run.length < 2) continue;
+      const smoothRun = chaikin(run);
+      run.length = 0;
+      run.push(...smoothRun);
       const hw = Math.max(0.012, surf.halfWidth - 0.0025);
       const nx: number[] = [];
       const ny: number[] = [];
