@@ -177,6 +177,14 @@ sensors; entry and exit are geometry.
   finish the profile at ≥ 12 mm over a clear landing zone and let the ball
   drop; a rail that descends to ground level through live field traffic
   genuinely blocks it (it is physically there now).
+- **Every climb gets a BACK** (added after M11 play): where the bed sits
+  below ball height (local h < 28 mm) its underside is solid — a ball
+  dropping in behind the ramp must deflect, not fall through the throat.
+  Author a `collision-wall-<name>-back` across the channel at the h ≈ 28
+  point, spanning rail to rail, with **`data-z-max="22"`** (walls accept
+  explicit `data-z-min`/`data-z-max` bands): ground balls bounce off it,
+  riders pass above. Check its end caps against neighbouring furniture for
+  the §4 gap bands.
 - Rails crossing over field furniture keep the local surface height at
   least ~7 mm above that furniture's top (ball tops clear rails at
   local-height − 1 mm).

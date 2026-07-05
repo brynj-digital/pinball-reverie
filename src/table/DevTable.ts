@@ -54,6 +54,8 @@ export function buildTableFromSvg(
         kind: "wall",
         zAll: wall.zAll,
         surfaceName: wall.surfaceName,
+        zMin: wall.zMin,
+        zMax: wall.zMax,
       } satisfies FixtureTag,
     });
   });

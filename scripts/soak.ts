@@ -157,7 +157,8 @@ for (const tableId of tables) {
       () => ball.height.applyForces(ball.body),
       () => {
         const bp = ball.body.getPosition();
-        ball.height.step(FIXED_DT, bp.x, bp.y);
+        const bv = ball.body.getLinearVelocity();
+        ball.height.step(FIXED_DT, bp.x, bp.y, Math.hypot(bv.x, bv.y));
       },
     );
     bank.update(FIXED_DT);

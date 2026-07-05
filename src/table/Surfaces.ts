@@ -144,8 +144,17 @@ export class HeightState {
     body.applyForceToCenter({ x: -m * G_NORMAL * gx, y: -m * G_NORMAL * gy } as never, true);
   }
 
-  /** Resolve support + integrate z from the new position (after world.step). */
-  step(dt: number, x: number, y: number): void {
+  /** Resolve support + integrate z from the new position (after world.step).
+   * Pass the planar speed so the field→surface attach window scales with
+   * travel per step — a fast shot must not step clean over a ramp mouth. */
+  step(dt: number, x: number, y: number, speed = 0): void {
+    this.attachTol = ATTACH_TOL + speed * dt * 0.5;
+    this.stepInner(dt, x, y);
+  }
+
+  private attachTol = ATTACH_TOL;
+
+  private stepInner(dt: number, x: number, y: number): void {
     if (this.transitDepth !== null) {
       this.z = this.transitDepth;
       return;
@@ -180,7 +189,7 @@ export class HeightState {
     // on the field: roll onto any surface whose local height meets the ball
     for (const s of this.surfaces) {
       const h = surfaceHeightAt(s, x, y);
-      if (h !== null && h <= this.z + ATTACH_TOL) {
+      if (h !== null && h <= this.z + this.attachTol) {
         this.setState(s, false, null, h);
         return;
       }
@@ -222,7 +231,7 @@ export class HeightState {
  * wall — the cabinet glass) always collide.
  */
 export function contactApplies(
-  tag: { zAll?: boolean; surfaceName?: string },
+  tag: { zAll?: boolean; surfaceName?: string; zMin?: number; zMax?: number },
   surfaces: readonly Surface[],
   x: number,
   y: number,
@@ -235,6 +244,10 @@ export function contactApplies(
     const h = s ? surfaceHeightAt(s, x, y) : null;
     if (h === null) return false; // rail far from its own footprint: ignore
     return ballZ < h + RAIL_TOP && ballTop > h - RAIL_BOTTOM;
+  }
+  // explicit band (a ramp's back wall): riders pass above, ground balls hit
+  if (tag.zMin !== undefined || tag.zMax !== undefined) {
+    return ballZ < (tag.zMax ?? FIELD_BAND_TOP) && ballTop > (tag.zMin ?? -0.005);
   }
   return ballZ < FIELD_BAND_TOP && ballTop > -0.005;
 }

@@ -136,7 +136,8 @@ function buildRig(id: TableId) {
         () => ball.height.applyForces(ball.body),
         () => {
           const p = ball.body.getPosition();
-          ball.height.step(FIXED_DT, p.x, p.y);
+          const v = ball.body.getLinearVelocity();
+          ball.height.step(FIXED_DT, p.x, p.y, Math.hypot(v.x, v.y));
         },
       );
       bank.update(FIXED_DT);
@@ -539,6 +540,16 @@ function tidebreakerSuite(): void {
     `layer=${ball.layer}`,
   );
 
+  // 8c — a ball dropping in behind the winch ramp deflects off its back
+  placeBall(0.42, 0.22, 0, 0.9);
+  let winchBreach = false;
+  run(10, () => {
+    const p = ball.body.getPosition();
+    if (ball.layer === 0 && p.x > 0.34 && p.x < 0.40 && p.y > 0.36 && p.y < 0.64)
+      winchBreach = true;
+  });
+  check("ramp back deflects a ball falling in behind it", !winchBreach);
+
   // 9 — the Current scores (left-lane shot up around the arch)
   state.labels.length = 0;
   placeBall(0.0325, 0.53, 0, -2.3);
@@ -779,6 +790,26 @@ function midwaySuite(): void {
     `landed x=${Number.isNaN(landedX) ? "never" : landedX.toFixed(3)}`,
   );
   check("inlane feeds through to the drain (flippers down)", state.drained, `layer=${ball.layer}`);
+
+  // 8a2 — a fast shot must still board (the attach window scales with speed)
+  state.sensors.length = 0;
+  placeBall(0.163, 0.75, 0, -3.2);
+  let fastRide = false;
+  run(3, () => {
+    if (ball.layer === 1) fastRide = true;
+  });
+  check("fast coaster shot still boards", fastRide);
+
+  // 8a3 — a ball dropping in BEHIND the ramp deflects off its solid back:
+  // it must never pass down through the throat at ground level
+  placeBall(0.163, 0.54, 0, 0.9);
+  let throatBreach = false;
+  run(10, () => {
+    const p = ball.body.getPosition();
+    if (ball.layer === 0 && p.x > 0.147 && p.x < 0.179 && p.y > 0.62 && p.y < 0.7)
+      throatBreach = true;
+  });
+  check("ramp back deflects a ball falling in behind it", !throatBreach);
 
   // 8b — a weak coaster shot stalls on the lift hill and rolls back out of
   // the mouth to layer 0

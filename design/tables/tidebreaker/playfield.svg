@@ -350,6 +350,9 @@
       <path data-width="12" id="collision-wall-bell-hood" d="M 316 460 L 314.3 453.7 L 311.8 444.9 L 308 437 L 302.6 431.3 L 296 426.6 L 289 423 L 281.9 420.5 L 274.4 419.1 L 267 419 L 259.3 420.5 L 251.7 423.3 L 245 427 L 239.5 432.3 L 235 438.6 L 232 443"/>
       <!-- airlock housing: recess brackets off the orbit wall -->
       <path data-width="12" id="collision-wall-bank-housing" d="M 65 415 L 82 423 L 82 547 L 65 555"/>
+      <!-- ramp BACK (M11): the winch bed's underside is solid below ball
+           height — balls falling in behind the ramp deflect off it. -->
+      <path data-width="12" data-z-max="22" id="collision-wall-winch-back" d="M 390.3 270.9 L 443.8 248.4"/>
       <!-- plunger saddle: the ball rests here, above the animated spring -->
       <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>

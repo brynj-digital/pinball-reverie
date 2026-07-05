@@ -61,6 +61,10 @@ export interface ParsedTable {
     surfaceName?: string;
     /** Full-height wall (shell / lane wall — the cabinet glass). */
     zAll?: boolean;
+    /** Explicit band (m): e.g. a ramp's BACK wall across its throat —
+     * blocks ground balls, clears the riders passing above it. */
+    zMin?: number;
+    zMax?: number;
   }[];
   sensors: {
     kind: string;
@@ -136,6 +140,8 @@ export function parseTableSvg(svgText: string): ParsedTable {
         layer: a["data-surface"] ? 1 : 0,
         surfaceName: a["data-surface"],
         zAll: a["data-z"] === "all" || undefined,
+        zMin: a["data-z-min"] !== undefined ? Number(a["data-z-min"]) * MM : undefined,
+        zMax: a["data-z-max"] !== undefined ? Number(a["data-z-max"]) * MM : undefined,
       });
     } else if (a.id.startsWith("height-profile-")) {
       const { pts } = parsePathPoints(a.d);

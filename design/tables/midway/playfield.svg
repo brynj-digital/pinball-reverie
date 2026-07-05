@@ -564,6 +564,11 @@
       <path data-width="12" id="collision-wall-booth-hood" d="M 323.7 451.6 L 322 442 L 323.7 432.4 L 328.6 424 L 336 417.8 L 345.1 414.4 L 354.9 414.4 L 364 417.8 L 371.4 424 L 376.3 432.4 L 378 442 L 376.3 451.6"/>
       <!-- drop tower housing: recess brackets off the lane wall -->
       <path data-width="12" id="collision-wall-tower-housing" d="M 520 460 L 503 468 L 503 592 L 520 600"/>
+      <!-- ramp BACKS (M11): where a bed drops below ball height its back
+           is solid — a ball falling in behind the ramp deflects off it and
+           dribbles out the mouth. Riders pass above the band. -->
+      <path data-width="12" data-z-max="22" id="collision-wall-coaster-back" d="M 137 588.8 L 189 588.8"/>
+      <path data-width="12" data-z-max="22" id="collision-wall-striker-back" d="M 258.2 198.2 L 278.6 150.4"/>
       <!-- plunger saddle: the ball rests here, above the animated spring -->
       <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>

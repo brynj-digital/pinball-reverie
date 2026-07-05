@@ -561,7 +561,8 @@ export class Game {
       },
       () => {
         const bp = this.ball.body.getPosition();
-        this.ball.height.step(FIXED_DT, bp.x, bp.y);
+        const bv = this.ball.body.getLinearVelocity();
+        this.ball.height.step(FIXED_DT, bp.x, bp.y, Math.hypot(bv.x, bv.y));
       },
     );
 
