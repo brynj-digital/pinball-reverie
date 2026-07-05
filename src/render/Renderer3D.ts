@@ -29,23 +29,38 @@ import type {
 
 /** Physics metres → scene units 1:1; (x, yDown) → (x, h, z=yDown). */
 
-/** Chaikin corner-cutting (2 passes): rounds polyline elbows for smooth
- * tubes/ribbons while staying within ~2 mm of the authored line. */
-function chaikin<T extends { x: number; y: number; h?: number }>(pts: T[], closed = false): T[] {
+/** Fixed-distance corner rounding (two passes, 8 mm then 4 mm): rounds
+ * polyline elbows for smooth tubes/ribbons while leaving long straights
+ * perfectly straight — raw Chaikin cuts 25% of each segment, which turned
+ * the shell's 790 mm bottom straights into giant chamfer arcs. */
+function roundElbows<T extends { x: number; y: number; h?: number }>(
+  pts: T[],
+  closed = false,
+): T[] {
   let out = pts;
-  for (let pass = 0; pass < 2; pass++) {
+  for (const cut of [0.008, 0.004]) {
     if (out.length < 3) return out;
-    const next: T[] = closed ? [] : [out[0]];
-    const n = closed ? out.length : out.length - 1;
-    for (let i = 0; i < n; i++) {
-      const a = out[i];
-      const b = out[(i + 1) % out.length];
-      next.push(
-        { ...a, x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25, h: (a.h ?? 0) * 0.75 + (b.h ?? 0) * 0.25 },
-        { ...a, x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75, h: (a.h ?? 0) * 0.25 + (b.h ?? 0) * 0.75 },
-      );
+    const next: T[] = [];
+    const n = out.length;
+    const lerp = (a: T, b: T, t: number): T => ({
+      ...a,
+      x: a.x + (b.x - a.x) * t,
+      y: a.y + (b.y - a.y) * t,
+      h: (a.h ?? 0) + ((b.h ?? 0) - (a.h ?? 0)) * t,
+    });
+    const corner = (a: T, b: T, c: T) => {
+      const l1 = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+      const l2 = Math.hypot(c.x - b.x, c.y - b.y) || 1;
+      next.push(lerp(b, a, Math.min(cut, l1 * 0.4) / l1));
+      next.push(lerp(b, c, Math.min(cut, l2 * 0.4) / l2));
+    };
+    if (closed) {
+      for (let i = 0; i < n; i++) corner(out[(i - 1 + n) % n], out[i], out[(i + 1) % n]);
+    } else {
+      next.push(out[0]);
+      for (let i = 1; i < n - 1; i++) corner(out[i - 1], out[i], out[i + 1]);
+      next.push(out[n - 1]);
     }
-    if (!closed) next.push(out[out.length - 1]);
     out = next;
   }
   return out;
@@ -320,7 +335,7 @@ export class Renderer3D implements Renderer {
               [RAIL_LOW, 0.0026],
               [RAIL_HIGH, 0.0018],
             ];
-      const smooth = chaikin(wall.pts, wall.loop);
+      const smooth = roundElbows(wall.pts, wall.loop);
       for (const [h, r] of radii) {
         const path = new THREE.CurvePath<THREE.Vector3>();
         const at = (p: { x: number; y: number }) =>
@@ -380,7 +395,7 @@ export class Renderer3D implements Renderer {
         });
       }
       if (run.length < 2) continue;
-      const smoothRun = chaikin(run);
+      const smoothRun = roundElbows(run);
       run.length = 0;
       run.push(...smoothRun);
       const hw = Math.max(0.012, surf.halfWidth - 0.0025);
