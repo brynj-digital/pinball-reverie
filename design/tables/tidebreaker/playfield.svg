@@ -350,9 +350,6 @@
       <path data-width="12" id="collision-wall-bell-hood" d="M 316 460 L 314.3 453.7 L 311.8 444.9 L 308 437 L 302.6 431.3 L 296 426.6 L 289 423 L 281.9 420.5 L 274.4 419.1 L 267 419 L 259.3 420.5 L 251.7 423.3 L 245 427 L 239.5 432.3 L 235 438.6 L 232 443"/>
       <!-- airlock housing: recess brackets off the orbit wall -->
       <path data-width="12" id="collision-wall-bank-housing" d="M 65 415 L 82 423 L 82 547 L 65 555"/>
-      <!-- ramp BACK (M11): the winch bed's underside is solid below ball
-           height — balls falling in behind the ramp deflect off it. -->
-      <path data-width="12" data-z-max="22" id="collision-wall-winch-back" d="M 390.3 270.9 L 443.8 248.4"/>
       <!-- plunger saddle: the ball rests here, above the animated spring -->
       <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>
@@ -370,6 +367,17 @@
   <!-- field walls: layered VERDIGRIS rails, kept dark so the lit ball and
        the chrome upper level pop against them (abyss-500/300 per
        STYLE-GUIDE §2; 12 mm body is the physical width) -->
+  <!-- ramp BACK (M11): the winch bed's solid underside, drawn as shadowed
+       understructure so it doesn't read as a gate. Riders pass above. -->
+  <defs>
+    <g id="collision-backs" fill="none">
+      <path data-width="12" data-z-max="22" id="collision-wall-winch-back" d="M 390.3 270.9 L 443.8 248.4"/>
+    </g>
+  </defs>
+  <g id="art-ramp-backs" fill="none" stroke-linecap="round">
+    <g stroke="#07080d" stroke-width="12" opacity="0.85"><use href="#collision-backs"/></g>
+    <g stroke="#143641" stroke-width="5" opacity="0.6"><use href="#collision-backs"/></g>
+  </g>
   <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <g stroke="#07080d" stroke-width="16"><use href="#collision-paths"/></g>
     <g stroke="#143641" stroke-width="12"><use href="#collision-paths"/></g>

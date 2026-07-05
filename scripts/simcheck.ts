@@ -740,7 +740,7 @@ function midwaySuite(): void {
     ["coaster mouth drop (layer 0)", 0.163, 0.69],
     ["mallet catch drop", 0.452, 0.25],
     ["drop right of the mallet pivot", 0.49, 0.2],
-    ["striker mouth downward drop", 0.47, 0.24],
+    ["striker mouth downward drop", 0.45, 0.24],
   ] as const) {
     state.drained = false;
     placeBall(x, y);
@@ -829,6 +829,17 @@ function midwaySuite(): void {
   run(3);
   check("Sky Ride entry+exit both fire", state.sensors.includes("ramp-entry") && state.sensors.includes("ramp-exit"));
   check("Sky Ride scores", state.labels.includes("SKY RIDE"), `score=${rig.scoring.total}`);
+
+  // 9b — the Sky Ride delivers the ball onto the mallet (the loop's
+  // descending arm is a sealed guide down to the bat)
+  state.drained = false;
+  placeBall(0.0325, 0.53, 0, -2.3);
+  let malletFed = false;
+  run(6, () => {
+    const p = ball.body.getPosition();
+    if (p.x > 0.4 && p.x < 0.515 && p.y > 0.24 && p.y < 0.36) malletFed = true;
+  });
+  check("Sky Ride return is delivered onto the mallet", malletFed);
 
   // 10 — ghost train: shot through the turnstile spinner is captured and
   // carried under the field, out past the wheel

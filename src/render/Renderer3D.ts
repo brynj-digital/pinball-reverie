@@ -4,7 +4,7 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import type { Camera } from "../core/Camera";
-import { BALL_RADIUS, flipperVerts } from "../table/geometry";
+import { BALL_RADIUS, FLIPPER, type FlipperSide, type Pt } from "../table/geometry";
 import { heightAt, parseTableSvg } from "../table/SvgCollision";
 import { loadSvgAt, splitElevatedOverlay } from "./svgImage";
 import type {
@@ -32,7 +32,6 @@ const RAIL_HIGH = 0.024; // upper rail — walls read taller than the ball
 const PALETTE = {
   bg: 0x0c0d14,
   rail: 0xbdc9dc,
-  flipper: 0xd9a94a,
   bumper: 0x123339,
   bumperGlow: 0x35e0d6,
   sling: 0xd9b24a,
@@ -425,14 +424,16 @@ export class Renderer3D implements Renderer {
     this.scene.add(this.ballGlow);
 
     // element materials get NO envMap — see init(); they're lit by the scene
-    // lights alone so their albedo reads at authored saturation
-    const flipMat = new THREE.MeshStandardMaterial({
-      color: PALETTE.flipper,
-      metalness: 0.3,
-      roughness: 0.45,
-    });
+    // lights alone so their albedo reads at authored saturation.
+    // Brass gradient runs base→tip like the 2D bat, so each side mirrors it.
+    const flipTex = { left: brassTexture("u"), right: brassTexture("u-rev") };
     this.flipperMeshes = snap.flippers.map((f) => {
-      const mesh = extrudeFlat(flipperVerts(f.side), 0.016, flipMat);
+      const mat = new THREE.MeshStandardMaterial({
+        map: flipTex[f.side],
+        metalness: 0.3,
+        roughness: 0.45,
+      });
+      const mesh = extrudeFlat(flipperShapePts(f.side), 0.016, mat);
       mesh.position.set(f.x, 0.002, f.y);
       mesh.castShadow = true;
       this.scene.add(mesh);
@@ -480,15 +481,17 @@ export class Renderer3D implements Renderer {
       this.scene.add(body, cap, rim, light);
     }
 
+    const slingTex = brassTexture("v");
     for (const s of snap.elements.slings) {
       const mat = new THREE.MeshStandardMaterial({
-        color: PALETTE.sling,
+        map: slingTex,
         emissive: PALETTE.sling,
         emissiveIntensity: 0,
         metalness: 0.3,
         roughness: 0.5,
       });
-      const mesh = extrudeFlat(s.verts, 0.018, mat);
+      // rubber-ring corners — the raw physics triangle is razor-sharp
+      const mesh = extrudeFlat(roundCorners(s.verts, 0.005), 0.018, mat);
       mesh.position.y = 0.001;
       mesh.castShadow = true;
       this.slingMats.push(mat);
@@ -853,7 +856,106 @@ function extrudeFlat(
     bevelOffset: -bevel,
     bevelSegments: 2,
   });
+  // planar-map UVs from the shape's bbox (top-down projection, before the
+  // rotate) so a gradient map spans the part edge-to-edge; the extrude's own
+  // UVs mix cap (shape-space) and wall (depth-space) coordinates and a
+  // gradient sampled through them tears at the cap/wall seam
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const p of pts) {
+    minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+    minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+  }
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  const uv = geo.attributes.uv as THREE.BufferAttribute;
+  for (let i = 0; i < uv.count; i++) {
+    uv.setXY(
+      i,
+      (pos.getX(i) - minX) / (maxX - minX || 1),
+      (pos.getY(i) - minY) / (maxY - minY || 1),
+    );
+  }
   geo.rotateX(Math.PI / 2); // (x, y, 0) → (x, 0, y); extrusion ends up below…
   geo.translate(0, depth - bevel, 0); // …so lift the solid back onto the floor
   return new THREE.Mesh(geo, mat);
+}
+
+/**
+ * Flipper bat outline for rendering: the convex hull of the round base (the
+ * physics base-circle fixture the old mesh omitted — its absence is why the
+ * pivot end looked chopped off) and a rounded tip. Stays inside the physics
+ * silhouette: base radius is the fixture's, tip circle is inset so it rounds
+ * within the trapezoid's x ≤ length, |y| ≤ tip half-width envelope.
+ */
+function flipperShapePts(side: FlipperSide): Pt[] {
+  const r = FLIPPER.baseRadius;
+  const tipR = 0.007; // flipperVerts' tip half-width
+  const cx = FLIPPER.length - tipR;
+  const th = Math.acos((r - tipR) / cx); // common-tangent contact angle
+  const pts: Pt[] = [];
+  const arc = (cx0: number, rad: number, a0: number, a1: number, n: number) => {
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + ((a1 - a0) * i) / n;
+      pts.push({ x: cx0 + rad * Math.cos(a), y: rad * Math.sin(a) });
+    }
+  };
+  arc(0, r, th, 2 * Math.PI - th, 24); // back of the base, the long way round
+  arc(cx, tipR, -th, th, 10); // rounded tip; tangent lines join the arcs
+  if (side === "left") return pts;
+  return pts.map((p) => ({ x: -p.x, y: p.y })).reverse();
+}
+
+/** Round each polygon corner with a quadratic arc of ~radius (clamped so
+ * short edges keep some straight run). Render-side only — physics keeps the
+ * sharp verts; the rounding stays inside them, never wider. */
+function roundCorners(pts: readonly Pt[], radius: number, steps = 6): Pt[] {
+  const n = pts.length;
+  const out: Pt[] = [];
+  for (let i = 0; i < n; i++) {
+    const prev = pts[(i + n - 1) % n];
+    const cur = pts[i];
+    const next = pts[(i + 1) % n];
+    const la = Math.hypot(prev.x - cur.x, prev.y - cur.y);
+    const lb = Math.hypot(next.x - cur.x, next.y - cur.y);
+    const rr = Math.min(radius, 0.35 * la, 0.35 * lb);
+    const ax = cur.x + ((prev.x - cur.x) / la) * rr;
+    const ay = cur.y + ((prev.y - cur.y) / la) * rr;
+    const bx = cur.x + ((next.x - cur.x) / lb) * rr;
+    const by = cur.y + ((next.y - cur.y) / lb) * rr;
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps;
+      const u = 1 - t;
+      out.push({
+        x: u * u * ax + 2 * u * t * cur.x + t * t * bx,
+        y: u * u * ay + 2 * u * t * cur.y + t * t * by,
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * The 2D renderer's approved brass ramp (#f4d27a → #e0b64e → #9c7c2c) baked
+ * to a small gradient texture. extrudeFlat planar-maps UVs over the shape's
+ * bbox, so "u" runs along its x extent (flipper base→tip; "u-rev" for the
+ * mirrored right bat) and "v" down its y extent (sling top→bottom, matching
+ * the 2D fill's light-from-up-table read).
+ */
+function brassTexture(dir: "u" | "u-rev" | "v"): THREE.CanvasTexture {
+  const cnv = document.createElement("canvas");
+  cnv.width = cnv.height = 64;
+  const ctx = cnv.getContext("2d")!;
+  const grad =
+    dir === "u"
+      ? ctx.createLinearGradient(0, 0, 64, 0)
+      : dir === "u-rev"
+        ? ctx.createLinearGradient(64, 0, 0, 0)
+        : ctx.createLinearGradient(0, 64, 0, 0); // v = 0 is the canvas bottom
+  grad.addColorStop(0, "#f4d27a");
+  grad.addColorStop(dir === "v" ? 0.5 : 0.55, "#e0b64e");
+  grad.addColorStop(1, "#9c7c2c");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 64, 64);
+  const tex = new THREE.CanvasTexture(cnv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }

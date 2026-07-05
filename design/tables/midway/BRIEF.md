@@ -5,13 +5,14 @@
 this brief remains the design intent. Table id: `midway`. Deltas from the
 concept, found during clearance-solving and simcheck/soak:
 
-- **The Sky Ride return is speed-sorted, not guaranteed.** The orbit's
-  right tail is deliberately open (no wall from the arch down to the lane
-  top): fast loops hug the shell and return to the queue — the chairlift
-  brings you back to the gate — while softer descents ride the mallet
-  guide down onto the bat. The soft-plunge skill shot works exactly as
-  designed; the "loop always feeds the mallet" line from the concept
-  became "the loop feeds the mallet when you take pace off it."
+- **Every Sky Ride loop feeds the mallet** (reworked after play found the
+  original speed-sorted return starved the feature). An **arch catcher**
+  sealed to the shell (height band ≤16 mm) deflects ALL descending loop
+  returns inward, down the orbit tail and onto the bat; the ascending
+  plunge clears it by launching off a **jump wedge** at the top of the
+  queue (a small `skyjump` surface, 0→28 mm) and flying over — a real
+  pinball jump ramp. A stalled plunge rolls back to the saddle; the flow
+  loop is right flipper → Sky Ride → mallet → striker → P-A-R-K lanes.
 - **The striker lane grew an entry throat.** A swing from mid-bat launches
   the ball up-left *past* the curled mouth over the bat root, so the lane
   has a chain of small up-only entry zones (`striker-in` at the root curl,

@@ -492,6 +492,12 @@
 
   <!-- ═══════════════ art: plunger lane (the queue) ═══════════════ -->
   <g id="art-lane">
+    <!-- the jump wedge: chrome launch ramp over the catcher -->
+    <g stroke-linecap="round">
+      <path d="M 530 310 L 530 262 M 565 310 L 565 262" stroke="#07080d" stroke-width="5" fill="none"/>
+      <path d="M 530 310 L 530 262 M 565 310 L 565 262" stroke="#aeb6c8" stroke-width="3" fill="none"/>
+      <path d="M 531 300 L 564 300 M 531 286 L 564 286 M 531 272 L 564 272" stroke="#aeb6c8" stroke-width="2" fill="none" opacity="0.9"/>
+    </g>
     <!-- turnstile at the gate end -->
     <g stroke="#8a4d9e" stroke-width="2.5" fill="none">
       <line x1="536" y1="420" x2="559" y2="420"/>
@@ -544,9 +550,14 @@
       <!-- the Sky Ride: orbit inner wall; unlike the other tables its right
            tail stays open — descending chairs feed the mallet or the queue -->
       <path data-width="12" id="collision-wall-orbit" d="M 65 550 L 65 260 L 66.5 236.2 L 70.8 212.8 L 78 190.1 L 87.8 168.5 L 100.3 148.2 L 115.1 129.5 L 132.1 112.8 L 151 98.3 L 171.5 86.3 L 193.3 76.8 L 216.1 70 L 239.6 66.1 L 263.4 65 L 287.1 66.9 L 310.5 71.6 L 333 79.2 L 354.5 89.4 L 374.6 102.2 L 393 117.4 L 409.4 134.7"/>
-      <!-- mallet guide: continues the orbit tail down onto the bat — a
-           soft-cresting ball rides this straight to the mallet (skill shot) -->
-      <path data-width="12" id="collision-wall-mallet-guide" d="M 409.4 134.7 L 425 158 L 437 185 L 445 215 L 448 245"/>
+      <!-- orbit tail: the Sky Ride's descending inner arm, guiding traffic
+           down toward the mallet; the delivery gap past its end is a free
+           pass (≥38 mm) onto the bat -->
+      <path data-width="12" id="collision-wall-orbit-tail" d="M 409.4 134.7 L 430 165 L 448 200 L 455 225"/>
+      <!-- arch catcher: sealed to the shell — EVERY descending loop return
+           is deflected inward and delivered onto the mallet. The ascending
+           plunge flies OVER it off the lane's jump wedge (band ≤16). -->
+      <path data-width="12" data-z-max="16" id="collision-wall-arch-catcher" d="M 552 214 L 500 258"/>
       <!-- P-A-R-K lane dividers, starting 4 mm below the orbit arc line -->
       <path data-width="12" id="collision-wall-divider-1" d="M 190 82 L 190 150"/>
       <path data-width="12" id="collision-wall-divider-2" d="M 260 69 L 260 150"/>
@@ -564,11 +575,6 @@
       <path data-width="12" id="collision-wall-booth-hood" d="M 323.7 451.6 L 322 442 L 323.7 432.4 L 328.6 424 L 336 417.8 L 345.1 414.4 L 354.9 414.4 L 364 417.8 L 371.4 424 L 376.3 432.4 L 378 442 L 376.3 451.6"/>
       <!-- drop tower housing: recess brackets off the lane wall -->
       <path data-width="12" id="collision-wall-tower-housing" d="M 520 460 L 503 468 L 503 592 L 520 600"/>
-      <!-- ramp BACKS (M11): where a bed drops below ball height its back
-           is solid — a ball falling in behind the ramp deflects off it and
-           dribbles out the mouth. Riders pass above the band. -->
-      <path data-width="12" data-z-max="22" id="collision-wall-coaster-back" d="M 137 588.8 L 189 588.8"/>
-      <path data-width="12" data-z-max="22" id="collision-wall-striker-back" d="M 258.2 198.2 L 278.6 150.4"/>
       <!-- plunger saddle: the ball rests here, above the animated spring -->
       <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>
@@ -589,6 +595,19 @@
   <!-- field walls: layered DUSK PLUM rails, kept dark so the lit ball and
        the chrome upper level pop against them (carnival-500/300 per
        STYLE-GUIDE §2; 12 mm body is the physical width) -->
+  <!-- ramp BACKS (M11): where a bed drops below ball height its back is
+       solid — drawn as shadowed understructure, NOT as a rail, so it reads
+       as the ramp's underside rather than a gate. Riders pass above. -->
+  <defs>
+    <g id="collision-backs" fill="none">
+      <path data-width="12" data-z-max="22" id="collision-wall-coaster-back" d="M 137 588.8 L 189 588.8"/>
+      <path data-width="12" data-z-max="22" id="collision-wall-striker-back" d="M 258.2 198.2 L 278.6 150.4"/>
+    </g>
+  </defs>
+  <g id="art-ramp-backs" fill="none" stroke-linecap="round">
+    <g stroke="#07080d" stroke-width="12" opacity="0.85"><use href="#collision-backs"/></g>
+    <g stroke="#45215a" stroke-width="5" opacity="0.6"><use href="#collision-backs"/></g>
+  </g>
   <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <g stroke="#07080d" stroke-width="16"><use href="#collision-paths"/></g>
     <g stroke="#45215a" stroke-width="12"><use href="#collision-paths"/></g>
@@ -651,6 +670,12 @@
           d="M 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396"/>
     <path id="height-profile-coaster-d" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="38" data-height-to="34"
           d="M 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560"/>
+    <!-- the queue's jump wedge: the plunge launches off it, clearing the
+         arch catcher; a stalled plunge rolls back to the saddle -->
+    <path id="height-profile-skyjump-a" data-layer="1" data-surface="skyjump" data-surface-width="44"
+          data-height-from="0" data-height-to="28" d="M 547.5 310 L 547.5 262"/>
+    <path id="height-profile-skyjump-b" data-layer="1" data-surface="skyjump" data-surface-width="44"
+          data-height-from="28" data-height-to="28" d="M 547.5 262 L 546 205"/>
     <!-- high striker: the tower climb to the bell -->
     <path id="height-profile-striker" data-layer="1" data-surface="striker" data-surface-width="52" data-height-from="0" data-height-to="55"
           d="M 455 255 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
