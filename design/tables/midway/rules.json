@@ -1,0 +1,68 @@
+{
+  "comment": "Midnight Midway rules metadata (plan §5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/midway.ts. Design truth: design/tables/midway/BRIEF.md.",
+  "points": {
+    "bumper": 100,
+    "sling": 50,
+    "rollover": 500,
+    "spinnerTick": 100,
+    "target": 500,
+    "bankComplete": 5000,
+    "orbit": 3000
+  },
+  "bonusUnits": {
+    "rollover": 500,
+    "target": 250,
+    "spinnerTick": 10
+  },
+  "skyRideCombo": {
+    "comment": "The Sky Ride (full orbit): repeat loops inside the window escalate ×2 per step; a 3-chain punches the ride pass.",
+    "windowS": 10,
+    "maxStep": 3,
+    "passChain": 3
+  },
+  "coaster": {
+    "comment": "Completing the full coaster circuit (drop-off sensor into the right inlane).",
+    "points": 3000,
+    "bonusUnit": 250
+  },
+  "ghostTrain": {
+    "comment": "Ghost-train subway transit under the field, out past the wheel.",
+    "points": 2500,
+    "bonusUnit": 500
+  },
+  "striker": {
+    "comment": "High striker: the mallet (upper flipper) swings the ball up the wire lane; a→b transit time grades the swing. DING loads a gondola; STRONG or better punches the ride pass.",
+    "dingS": 0.16,
+    "strongS": 0.26,
+    "fairS": 0.5,
+    "points": { "ding": 10000, "strong": 5000, "fair": 2000, "weak": 500 },
+    "bonusUnit": 250
+  },
+  "prizeBooth": {
+    "comment": "Kickout scoop, lit by dropping the tower (bank complete): each capture awards the next prize (wrapping); the PANDA also loads a gondola. Every capture lights the chicken exit.",
+    "holdS": 2.0,
+    "bonusUnit": 500,
+    "lastLoadsGondola": true,
+    "prizes": [
+      { "name": "PAPER HAT", "points": 5000 },
+      { "name": "GOLDFISH", "points": 10000 },
+      { "name": "TEDDY BEAR", "points": 15000 },
+      { "name": "GIANT PANDA", "points": 25000 }
+    ]
+  },
+  "ferrisWheel": {
+    "comment": "Bonus multiplier: P-A-R-K completions and striker DINGs each load a gondola; a full wheel turns, stepping the multiplier, and the ring resets.",
+    "gondolas": 5,
+    "maxMultiplier": 6
+  },
+  "ridePass": {
+    "comment": "Wizard qualifier: punch all five rides — coaster circuit, ghost-train transit, drop-tower cycle, Sky Ride chain, striker STRONG+. Punches persist across balls.",
+    "rides": ["coaster", "ghost", "tower", "skyride", "striker"]
+  },
+  "fireworks": {
+    "comment": "Wizard mode: a full ride pass lights the booth; the next booth shot starts it — all switches ×2, coaster circuits pay jackpot.",
+    "durationS": 30,
+    "coasterJackpot": 25000,
+    "scoreFactor": 2
+  }
+}

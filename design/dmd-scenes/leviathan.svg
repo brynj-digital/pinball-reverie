@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1152 32" width="1152" height="32">
+  <!-- TIDEBREAKER DMD scene: LEVIATHAN — through the dive-bell porthole,
+       something vast passes: ridges of a tail, then one eye, opening. Never
+       the whole creature. 9 frames of 128x32 (style guide §6): #fff=3,
+       #888=2, #666=1, black=0. Art rows 0..22; caption from row 24. -->
+  <rect width="1152" height="32" fill="#000"/>
+  <!-- constant porthole ring, centred -->
+  <g transform="translate(0,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#666" stroke-width="1.4"/>
+    <circle cx="30" cy="5" r="0.9" fill="#666"/><circle cx="98" cy="17" r="0.9" fill="#666"/>
+  </g>
+  <g transform="translate(128,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#666" stroke-width="1.4"/>
+    <path d="M 54 16 q 5 -4 10 0" fill="none" stroke="#666" stroke-width="1.4"/>
+    <circle cx="30" cy="5" r="0.9" fill="#666"/>
+  </g>
+  <g transform="translate(256,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#888" stroke-width="1.4"/>
+    <path d="M 55 17 L 59 11 L 63 17 L 67 10 L 71 17" fill="none" stroke="#888" stroke-width="1.4"/>
+  </g>
+  <g transform="translate(384,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#888" stroke-width="1.4"/>
+    <path d="M 55 15 L 60 7 L 65 15 L 70 6 L 74 14" fill="none" stroke="#fff" stroke-width="1.4"/>
+    <path d="M 55 18 L 73 18" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(512,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#888" stroke-width="1.4"/>
+    <path d="M 56 16 L 62 9 L 68 16" fill="none" stroke="#888" stroke-width="1.4"/>
+    <path d="M 54 18 L 74 18" stroke="#888" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(640,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="64" cy="11" rx="8" ry="7" fill="#666"/>
+  </g>
+  <g transform="translate(768,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#888" stroke-width="1.4"/>
+    <ellipse cx="64" cy="11" rx="8" ry="7" fill="#666"/>
+    <ellipse cx="64" cy="11" rx="4" ry="5" fill="#888"/>
+  </g>
+  <g transform="translate(896,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#fff" stroke-width="1.4"/>
+    <ellipse cx="64" cy="11" rx="8" ry="7" fill="#888"/>
+    <ellipse cx="64" cy="11" rx="4" ry="5" fill="#fff"/>
+    <ellipse cx="64" cy="11" rx="1.4" ry="4" fill="#000"/>
+  </g>
+  <g transform="translate(1024,0)">
+    <circle cx="64" cy="11" r="10" fill="none" stroke="#fff" stroke-width="1.4"/>
+    <ellipse cx="64" cy="11" rx="8" ry="7" fill="#fff"/>
+    <ellipse cx="64" cy="11" rx="2" ry="5" fill="#000"/>
+    <g stroke="#888" stroke-width="1.2">
+      <line x1="48" y1="4" x2="52" y2="7"/><line x1="80" y1="4" x2="76" y2="7"/>
+      <line x1="48" y1="18" x2="52" y2="15"/><line x1="80" y1="18" x2="76" y2="15"/>
+    </g>
+  </g>
+</svg>

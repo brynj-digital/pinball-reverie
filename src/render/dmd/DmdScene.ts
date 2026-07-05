@@ -132,7 +132,12 @@ export class AttractScene implements DmdScene {
   private t = 0;
   private drawnPage = -1;
 
-  constructor(private top: () => { initials: string; score: number } | undefined) {}
+  constructor(
+    private top: () => { initials: string; score: number } | undefined,
+    private title = "PINBALL REVERIE",
+    /** >1 adds the table-select teaser page (flippers browse in attract). */
+    private tableCount = 1,
+  ) {}
 
   invalidate(): void {
     this.drawnPage = -1;
@@ -142,8 +147,11 @@ export class AttractScene implements DmdScene {
     this.t += dt;
     const top = this.top();
     const pages: string[][] = [
-      ["MOONDIAL", "PINBALL REVERIE"],
+      [this.title, "PINBALL REVERIE"],
       ["PRESS ENTER", "TO PLAY"],
+      ...(this.tableCount > 1
+        ? [[`${this.tableCount} TABLES`, "FLIPPERS TO BROWSE"]]
+        : []),
       ["HIGH SCORE", top ? `${top.initials}  ${fmtScore(top.score)}` : fmtScore(0)],
     ];
     const page = Math.floor(this.t / 2.4) % pages.length;

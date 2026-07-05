@@ -1,0 +1,354 @@
+import type { TableLogic, TableLogicCtx } from "./TableLogic";
+import { BakedDmdScene, MessageScene, fmtScore } from "../render/dmd/DmdScene";
+import rules from "../../design/tables/midway/rules.json";
+
+/** Entry→exit (either direction) within this window counts as a Sky Ride loop. */
+const SKYRIDE_PAIR_WINDOW = 3.5;
+/** A striker swing older than this can't claim a WEAK on roll-back. */
+const SWING_WINDOW = 3;
+
+/**
+ * The Midnight Midway ruleset (design truth in the table's BRIEF.md),
+ * values from the table's rules JSON:
+ *
+ * - SKY RIDE: full orbit loops; consecutive loops inside skyRideCombo.windowS
+ *   escalate ×2 per step; a passChain-deep chain punches the ride pass.
+ * - P-A-R-K: completing the lanes loads a ferris-wheel gondola and lights
+ *   the HAND STAMP kickback (left outlane, one save).
+ * - FERRIS WHEEL: gondolas (P-A-R-K completions, striker DINGs, the PANDA)
+ *   fill the ring; a full wheel turns — bonus multiplier steps, ring resets.
+ * - COASTER: a full circuit (drop-off sensor) pays coaster points and
+ *   punches the pass; during FIREWORKS it pays the jackpot instead.
+ * - HIGH STRIKER: the mallet's shot. Timing gates a→b grade the swing
+ *   (DING / STRONG / FAIR); a roll-back without reaching b is WEAK. DING
+ *   loads a gondola; STRONG or better punches the pass.
+ * - GHOST TRAIN: the under-field subway; each transit punches the pass.
+ * - DROP TOWER: bank complete lights the PRIZE BOOTH and punches the pass.
+ * - PRIZE BOOTH: each lit capture awards the next prize (wrapping); every
+ *   capture lights the CHICKEN EXIT (right-outlane subway to the queue).
+ * - FIREWORKS FINALE: punch all five rides to light the booth for the
+ *   finale; shooting it starts durationS of ×scoreFactor scoring with
+ *   coasterJackpot circuits.
+ * - Combos, a live swing and a running finale die with the ball; gondolas,
+ *   wheel turns, pass punches and lit states persist, reset per game.
+ */
+export class MidwayLogic implements TableLogic {
+  private now = 0;
+  private entryAt = -Infinity;
+  private exitAt = -Infinity;
+  private comboStep = 0;
+  private lastLoopAt = -Infinity;
+  private litLanes = new Set<string>();
+  private gondolas = 0;
+  private wheelTurns = 0;
+  private prizeIdx = 0;
+  private boothLit = false;
+  private chickenLit = false;
+  private stampLit = false;
+  private pass = new Set<string>();
+  fireworksReady = false;
+  private fireworksUntil = -Infinity;
+  private fireworksWasActive = false;
+  // striker swing state
+  private swingActive = false;
+  private swingScored = false;
+  private aAt = -Infinity;
+
+  constructor(private ctx: TableLogicCtx) {
+    ctx.bus.on("sensor", ({ kind, id }) => {
+      if (kind === "ramp-entry") this.loopEnd("entry");
+      else if (kind === "ramp-exit") this.loopEnd("exit");
+      else if (kind === "layer") {
+        if (id === "coaster-out") this.onCoaster();
+        else if (id === "striker-in") this.onSwingStart();
+        else if (id === "striker-back") this.onSwingBack();
+      } else if (kind === "lane") {
+        if (id === "striker-a") this.onStrikerA();
+        else if (id === "striker-b") this.onStrikerB();
+      }
+    });
+    ctx.bus.on("bankComplete", () => {
+      if (this.ctx.scoring.muted) return;
+      this.boothLit = true;
+      this.punch("tower");
+      this.ctx.push(new MessageScene([["TOWER DROPPED", "PRIZE BOOTH LIT"]], 1.4), 2);
+    });
+  }
+
+  get fireworksActive(): boolean {
+    return this.now < this.fireworksUntil;
+  }
+
+  update(dt: number): void {
+    this.now += dt;
+    if (this.fireworksWasActive && !this.fireworksActive) {
+      this.fireworksWasActive = false;
+      this.ctx.scoring.eclipseFactor = 1;
+      this.ctx.bus.emit("mode", { kind: "fireworksEnd" });
+      this.ctx.push(new MessageScene([["THE SMOKE CLEARS", "GOODNIGHT"]], 1.5), 2);
+    }
+  }
+
+  endBall(): void {
+    this.comboStep = 0;
+    this.lastLoopAt = -Infinity;
+    this.entryAt = this.exitAt = -Infinity;
+    this.litLanes.clear();
+    this.swingActive = false;
+    this.swingScored = false;
+    this.aAt = -Infinity;
+    if (this.fireworksActive) {
+      this.fireworksUntil = -Infinity;
+      this.fireworksWasActive = false;
+      this.ctx.scoring.eclipseFactor = 1;
+      this.ctx.bus.emit("mode", { kind: "fireworksEnd" });
+    }
+  }
+
+  resetGame(): void {
+    this.endBall();
+    this.gondolas = 0;
+    this.wheelTurns = 0;
+    this.prizeIdx = 0;
+    this.boothLit = false;
+    this.chickenLit = false;
+    this.stampLit = false;
+    this.pass.clear();
+    this.fireworksReady = false;
+  }
+
+  /** P-A-R-K lanes: all four load a gondola + light the hand stamp. */
+  onRollover(id: string): void {
+    this.litLanes.add(id);
+    if (this.litLanes.size === 4) {
+      this.litLanes.clear();
+      this.stampLit = true;
+      this.ctx.sfx("multiplier");
+      this.loadGondola("P-A-R-K");
+    }
+  }
+
+  laneLit(id: string): number {
+    return this.litLanes.has(id) ? 0.55 : 0;
+  }
+
+  /** Gondola inserts g1..g5: lit while loaded on the current ring. */
+  lamp(id: string): number {
+    const n = Number(id.replace(/\D/g, ""));
+    return n > 0 && n <= this.gondolas ? 1 : 0;
+  }
+
+  kickerLit(id: string): boolean {
+    if (id === "booth") return this.boothLit || this.fireworksReady;
+    if (id === "stamp") return this.stampLit;
+    if (id === "chicken") return this.chickenLit;
+    return true; // the ghost train always takes riders
+  }
+
+  /** Game confirmed a kicker/subway capture (awards live here, not on the
+   * raw sensor, so a cooldown re-trigger can't double-award). */
+  onCapture(id: string): void {
+    if (id === "booth") this.onBooth();
+    else if (id === "ghost") {
+      if (this.ctx.scoring.muted) return;
+      this.ctx.scoring.award(rules.ghostTrain.points, "GHOST TRAIN");
+      this.ctx.scoring.bonusUnits += rules.ghostTrain.bonusUnit;
+      this.punch("ghost");
+      const frames = this.ctx.baked("ghost");
+      this.ctx.push(
+        frames
+          ? new BakedDmdScene(frames, 9, `GHOST TRAIN ${fmtScore(rules.ghostTrain.points)}`)
+          : new MessageScene([["GHOST TRAIN"]], 1.0),
+      );
+    } else if (id === "stamp") {
+      this.stampLit = false;
+      this.ctx.push(new MessageScene([["HAND STAMP", "BACK IN THE PARK"]], 1.2), 2);
+    } else if (id === "chicken") {
+      this.chickenLit = false;
+      this.ctx.push(new MessageScene([["CHICKEN EXIT", "BACK TO THE QUEUE"]], 1.2), 2);
+    }
+  }
+
+  /** Prize booth capture: the finale if it's lit, else the next prize. */
+  private onBooth(): void {
+    if (this.ctx.scoring.muted) return; // tilted: no prizes, no progression
+    if (this.fireworksReady) {
+      this.startFireworks();
+      return;
+    }
+    this.boothLit = false;
+    const B = rules.prizeBooth;
+    const prize = B.prizes[this.prizeIdx];
+    const last = this.prizeIdx === B.prizes.length - 1;
+    this.prizeIdx = (this.prizeIdx + 1) % B.prizes.length;
+    const points = this.ctx.scoring.award(prize.points, prize.name);
+    this.ctx.scoring.bonusUnits += B.bonusUnit;
+    this.chickenLit = true;
+    this.ctx.bus.emit("telescope", { name: prize.name, points, spotted: last });
+    // the ball sits captive under the canopy while this plays
+    const frames = this.ctx.baked("wheel");
+    const reveal = frames
+      ? new BakedDmdScene(frames, 8, `${prize.name} ${fmtScore(points)}`)
+      : new MessageScene([[prize.name, fmtScore(points)]], 1.6, true);
+    this.ctx.push(reveal, 2);
+    if (last && B.lastLoadsGondola) this.loadGondola(prize.name);
+  }
+
+  /** Full coaster circuit (drop-off sensor into the right inlane). */
+  private onCoaster(): void {
+    if (this.ctx.scoring.muted) return;
+    const jackpot = this.fireworksActive;
+    const points = jackpot ? rules.fireworks.coasterJackpot : rules.coaster.points;
+    this.ctx.scoring.award(points, jackpot ? "COASTER JACKPOT" : "COASTER");
+    this.ctx.scoring.bonusUnits += rules.coaster.bonusUnit;
+    this.punch("coaster");
+    const frames = this.ctx.baked("coaster");
+    this.ctx.push(
+      frames
+        ? new BakedDmdScene(frames, 10, `${jackpot ? "JACKPOT" : "COASTER"} ${fmtScore(points)}`)
+        : new MessageScene([[jackpot ? "COASTER JACKPOT" : "COASTER", fmtScore(points)]], 1.2),
+      jackpot ? 2 : 1,
+    );
+  }
+
+  // ── the high striker ──
+
+  private onSwingStart(): void {
+    this.swingActive = true;
+    this.swingScored = false;
+    this.aAt = -Infinity;
+  }
+
+  private onStrikerA(): void {
+    // first upward crossing only — the roll-back re-cross must not re-arm
+    if (this.swingActive && this.aAt === -Infinity) this.aAt = this.now;
+  }
+
+  private onStrikerB(): void {
+    if (!this.swingActive || this.swingScored || this.aAt === -Infinity) return;
+    this.swingScored = true;
+    const dt = this.now - this.aAt;
+    const S = rules.striker;
+    const tier =
+      dt < S.dingS ? "DING" : dt < S.strongS ? "STRONG" : "FAIR";
+    const points = tier === "DING" ? S.points.ding : tier === "STRONG" ? S.points.strong : S.points.fair;
+    if (this.ctx.scoring.muted) return;
+    this.ctx.scoring.award(points, tier === "DING" ? "DING!" : `${tier} SWING`);
+    this.ctx.scoring.bonusUnits += S.bonusUnit;
+    this.ctx.sfx(tier === "DING" ? "bank" : "target");
+    this.ctx.bus.emit("mode", { kind: `striker${tier}` });
+    if (tier !== "FAIR") this.punch("striker");
+    const frames = this.ctx.baked("striker");
+    this.ctx.push(
+      frames
+        ? new BakedDmdScene(frames, 12, `${tier === "DING" ? "DING!" : tier} ${fmtScore(points)}`)
+        : new MessageScene([[tier === "DING" ? "DING!" : `${tier} SWING`, fmtScore(points)]], 1.2),
+      2,
+    );
+    if (tier === "DING") this.loadGondola("DING");
+  }
+
+  /** Roll-back out of the striker lane: a swing that never rang anything. */
+  private onSwingBack(): void {
+    if (this.swingActive && !this.swingScored && this.now - this.aAt < SWING_WINDOW) {
+      if (!this.ctx.scoring.muted) {
+        this.ctx.scoring.award(rules.striker.points.weak, "WEAK SWING");
+        this.ctx.push(new MessageScene([["WEAK SWING", "PUT YOUR BACK IN IT"]], 1.0));
+      }
+    }
+    this.swingActive = false;
+    this.swingScored = false;
+    this.aAt = -Infinity;
+  }
+
+  // ── the ferris wheel ──
+
+  private loadGondola(source: string): void {
+    this.gondolas++;
+    const W = rules.ferrisWheel;
+    if (this.gondolas < W.gondolas) {
+      this.ctx.push(
+        new MessageScene([[source, `GONDOLA ${this.gondolas} OF ${W.gondolas}`]], 1.2),
+        1,
+      );
+      return;
+    }
+    this.gondolas = 0;
+    this.wheelTurns++;
+    this.ctx.scoring.multiplier = Math.min(this.wheelTurns + 1, W.maxMultiplier);
+    this.ctx.sfx("multiplier");
+    const caption = `WHEEL TURNS  X${this.ctx.scoring.multiplier}`;
+    const frames = this.ctx.baked("wheel");
+    this.ctx.push(
+      frames ? new BakedDmdScene(frames, 8, caption) : new MessageScene([[caption]], 1.4, true),
+      2,
+    );
+  }
+
+  // ── the sky ride ──
+
+  private loopEnd(end: "entry" | "exit"): void {
+    const otherAt = end === "entry" ? this.exitAt : this.entryAt;
+    if (this.now - otherAt < SKYRIDE_PAIR_WINDOW) {
+      this.entryAt = this.exitAt = -Infinity; // consume the pair
+      this.onSkyRide();
+    } else if (end === "entry") {
+      this.entryAt = this.now;
+    } else {
+      this.exitAt = this.now;
+    }
+  }
+
+  private onSkyRide(): void {
+    const combo = rules.skyRideCombo;
+    this.comboStep =
+      this.now - this.lastLoopAt < combo.windowS ? Math.min(combo.maxStep, this.comboStep + 1) : 1;
+    this.lastLoopAt = this.now;
+    if (this.comboStep >= combo.passChain) this.punch("skyride");
+    const factor = 2 ** (this.comboStep - 1);
+    const points = rules.points.orbit * factor;
+    const label = factor > 1 ? `SKY RIDE X${factor}` : "SKY RIDE";
+    if (this.ctx.scoring.award(points, label) > 0) {
+      this.ctx.push(new MessageScene([[label, fmtScore(points)]], 1.2), 1);
+    }
+  }
+
+  // ── the ride pass + fireworks finale ──
+
+  private punch(ride: string): void {
+    if (this.pass.has(ride) || this.fireworksReady || this.fireworksActive) return;
+    this.pass.add(ride);
+    this.ctx.push(
+      new MessageScene([["RIDE PASS", `${this.pass.size} OF ${rules.ridePass.rides.length} PUNCHED`]], 1.1),
+      1,
+    );
+    if (this.pass.size >= rules.ridePass.rides.length) {
+      this.fireworksReady = true;
+      this.ctx.bus.emit("mode", { kind: "fireworksReady" });
+      this.ctx.sfx("multiplier");
+      this.ctx.push(new MessageScene([["A PERFECT DAY", "SHOOT THE PRIZE BOOTH"]], 1.6, true), 2);
+    }
+  }
+
+  private startFireworks(): void {
+    this.fireworksReady = false;
+    this.pass.clear();
+    this.fireworksUntil = this.now + rules.fireworks.durationS;
+    this.fireworksWasActive = true;
+    this.ctx.scoring.eclipseFactor = rules.fireworks.scoreFactor;
+    this.ctx.bus.emit("mode", { kind: "fireworksStart" });
+    this.ctx.sfx("bank");
+    this.ctx.shake(0.006);
+    const frames = this.ctx.baked("fireworks");
+    this.ctx.push(
+      frames
+        ? new BakedDmdScene(frames, 8, `ALL SCORES X${rules.fireworks.scoreFactor}`, 1.0)
+        : new MessageScene(
+            [["FIREWORKS FINALE", `ALL SCORES X${rules.fireworks.scoreFactor}`]],
+            1.5,
+            true,
+          ),
+      3,
+    );
+  }
+}

@@ -10,8 +10,9 @@ import { Slingshot } from "../entities/Slingshot";
 import { DropTargetBank } from "../entities/DropTargetBank";
 import { Spinner } from "../entities/Spinner";
 import { Kicker } from "../entities/Kicker";
+import { Subway } from "../entities/Subway";
 import { Scoring } from "../game/Scoring";
-import { Modes } from "../game/Modes";
+import type { TableLogic } from "../game/TableLogic";
 import { HighScores } from "../game/HighScores";
 import { DotMatrix } from "../render/dmd/DotMatrix";
 import { DmdQueue } from "../render/dmd/DmdQueue";
@@ -25,25 +26,19 @@ import {
   fmtScore,
 } from "../render/dmd/DmdScene";
 import { SettingsPanel } from "../ui/SettingsPanel";
+import { TableSelect } from "../ui/TableSelect";
+import { TABLE_ORDER, saveTableId } from "../table/specs";
 import { bakeDmdFrames } from "../render/dmd/bake";
 import { AudioEngine } from "../audio/AudioEngine";
 import { ChipMusic } from "../audio/ChipMusic";
-import orbitSceneSvg from "../../design/dmd-scenes/orbit.svg?raw";
-import multiplierSceneSvg from "../../design/dmd-scenes/multiplier.svg?raw";
 import savedSceneSvg from "../../design/dmd-scenes/saved.svg?raw";
 import tiltSceneSvg from "../../design/dmd-scenes/tilt.svg?raw";
 import gameoverSceneSvg from "../../design/dmd-scenes/gameover.svg?raw";
-import eclipseSceneSvg from "../../design/dmd-scenes/eclipse.svg?raw";
-import bankSceneSvg from "../../design/dmd-scenes/bank.svg?raw";
-import telescopeSceneSvg from "../../design/dmd-scenes/telescope.svg?raw";
-import rules from "../../design/tables/moondial/rules.json";
 import { buildTableFromSvg, type DevTable } from "../table/DevTable";
-// The playfield SVG is both physics source (→ SvgCollision) and art (the
-// renderer rasterizes the same text at display scale): one file, both jobs.
-import playfieldSvgRaw from "../../design/tables/moondial/playfield.svg?raw";
-import backglassSvgRaw from "../../design/tables/moondial/backglass.svg?raw";
 import ballSvgRaw from "../../design/ball.svg?raw";
-import { BUMPERS, DROP_TARGETS, KICKER, ROLLOVERS, SLINGS, SPINNER, TABLE } from "../table/geometry";
+import type { TableSpec } from "../table/specs";
+import type { TableAssets } from "../table/assets";
+import { heightAt } from "../table/SvgCollision";
 import type { RenderMode, Renderer, View3D, WorldSnapshot } from "../render/Renderer";
 import { Renderer2D } from "../render/Renderer2D";
 import { TuningPanel } from "../debug/TuningPanel";
@@ -52,8 +47,6 @@ import { loadTuning, type Tuning } from "../tuning";
 const BALLS_PER_GAME = 3;
 const BALL_SAVER_S = 8;
 const TILT_LIMIT = 3;
-/** Labels that earn their own DMD scene (bumper/sling spam does not). */
-const DMD_LABELS = new Set(["ORBIT", "BANK BONUS"]);
 
 type Phase = "attract" | "play" | "initials" | "gameOver";
 const INITIALS_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
@@ -84,8 +77,10 @@ function loadView3D(): View3D {
 /**
  * Main loop: fixed-timestep physics, snapshot handed to the renderer each
  * animation frame. Game never knows which Renderer implementation it drives
- * (plan §3). M4 state machine: attract → play (3 balls, ball-saver, tilt,
- * moon-lane multipliers) → game over → attract, narrated by the DMD.
+ * (plan §3), and since M10 it never knows which TABLE it runs either: the
+ * TableSpec supplies geometry + scoring + a TableLogic (modes, lanes,
+ * per-table DMD narration); Game runs the universal machine — attract →
+ * 3-ball play (ball-saver, nudge/tilt, initials, high scores) → game over.
  */
 export class Game {
   private bus = new EventBus();
@@ -98,9 +93,10 @@ export class Game {
   private slings: Slingshot[];
   private targetBank: DropTargetBank;
   private spinner: Spinner;
-  private kicker: Kicker;
+  private kickers: Kicker[];
+  private subways: Subway[];
   private scoring: Scoring;
-  private modes: Modes;
+  private logic: TableLogic;
   private rolloverLit = new Map<string, number>();
   private camera: Camera;
   private renderer: Renderer;
@@ -122,7 +118,7 @@ export class Game {
   private fps = 60;
 
   // ── M4 game flow ──
-  private highScores = new HighScores();
+  private highScores: HighScores;
   private dmd = new DotMatrix();
   private dmdQueue: DmdQueue;
   private scoreScene: ScoreScene;
@@ -132,11 +128,11 @@ export class Game {
   private gameTime = 0;
   private ballStarted = false; // first launch of the current ball arms the saver
   private saverUntil = -Infinity;
-  private litMoons = new Set<string>();
   private tiltBob = 0;
   private tilted = false;
   private gameOverUntil = 0;
   private settings: SettingsPanel;
+  private tableSelect: TableSelect;
   private paused = false;
   private attractT = 0;
   // high-score initials entry state (phase "initials")
@@ -147,49 +143,77 @@ export class Game {
   private initialsConfirm = false;
   private prevPlunger = false;
   // previous-step state for render interpolation (see PhysicsWorld.update)
-  private prevBall: { x: number; y: number; angle: number } = {
-    x: TABLE.spawn.x,
-    y: TABLE.spawn.y,
-    angle: 0,
-  };
-  private prevFlipAngles = [0, 0];
+  private prevBall: { x: number; y: number; angle: number };
+  private prevFlipAngles: number[] = [];
   private renderAlpha = 1;
-  /** Baked Claude Design DMD scenes (loaded async; text scenes until ready). */
-  private baked: Partial<
-    Record<
-      "orbit" | "moon" | "saved" | "tilt" | "gameover" | "eclipse" | "bank" | "telescope",
-      Uint8Array[]
-    >
-  > = {};
+  /** Baked DMD frames: shared machine scenes + the table's own (assets). */
+  private baked = new Map<string, Uint8Array[]>();
   private audio = new AudioEngine();
-  private music = new ChipMusic(this.audio);
-  private prevFlip = { left: false, right: false };
+  private music: ChipMusic;
+  private prevFlip = { left: false, right: false, upper: false };
+  /** Seconds a layer-1 ball has spent away from any rail (safety reset). */
+  private offRailT = 0;
 
-  constructor(private canvas: HTMLCanvasElement) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private spec: TableSpec,
+    assets: TableAssets,
+  ) {
+    const g = spec.geometry;
     this.tuning = loadTuning();
+    this.highScores = new HighScores(spec.highScoreKey);
+    this.music = new ChipMusic(this.audio, assets.song);
     this.physics = new PhysicsWorld(this.bus, this.tuning);
-    this.table = buildTableFromSvg(this.physics.world, this.tuning, playfieldSvgRaw);
-    this.table.renderData.artSvgText = playfieldSvgRaw;
+    this.table = buildTableFromSvg(this.physics.world, this.tuning, assets.playfieldSvg, g);
+    this.table.renderData.artSvgText = assets.playfieldSvg;
+    this.table.renderData.theme = spec.theme;
     this.table.renderData.ballSvgText = ballSvgRaw;
-    this.table.renderData.backglassSvgText = backglassSvgRaw;
-    this.ball = new Ball(this.physics.world, this.tuning);
+    this.table.renderData.backglassSvgText = assets.backglassSvg;
+    this.ball = new Ball(this.physics.world, this.tuning, g.table.spawn);
+    this.prevBall = { x: g.table.spawn.x, y: g.table.spawn.y, angle: 0 };
     this.flippers = [
-      new Flipper(this.physics.world, this.table.body, "left", this.tuning),
-      new Flipper(this.physics.world, this.table.body, "right", this.tuning),
+      new Flipper(this.physics.world, this.table.body, "left", this.tuning, g.flippers.left),
+      new Flipper(this.physics.world, this.table.body, "right", this.tuning, g.flippers.right),
     ];
-    this.bumpers = BUMPERS.map((def) => new Bumper(this.physics.world, def));
-    this.slings = SLINGS.map((def) => new Slingshot(this.physics.world, def));
-    this.targetBank = new DropTargetBank(this.physics.world, this.physics, this.bus);
+    // optional upper (third) flipper — Midway's mallet; index 2 by convention
+    if (g.flippers.upper)
+      this.flippers.push(
+        new Flipper(this.physics.world, this.table.body, g.flippers.upper.side, this.tuning, g.flippers.upper),
+      );
+    this.prevFlipAngles = this.flippers.map((f) => f.body.getAngle());
+    this.bumpers = g.bumpers.map((def) => new Bumper(this.physics.world, def));
+    this.slings = g.slings.map((def) => new Slingshot(this.physics.world, def));
+    this.targetBank = new DropTargetBank(this.physics.world, this.physics, this.bus, g.dropTargets);
     this.spinner = new Spinner(this.bus);
-    this.kicker = new Kicker(rules.telescope.holdS);
-    this.kicker.onEject = () => {
-      this.renderer.spawnEffect("flash", KICKER.hold.x, KICKER.hold.y);
-      this.camera.shake(0.0012); // the eject solenoid thumps the cabinet, like the plunger
-      this.audio.sfx("kickout");
-    };
-    this.scoring = new Scoring(this.bus);
-    this.modes = new Modes(this.bus, this.scoring);
-    this.camera = new Camera(TABLE.width, TABLE.height, this.tuning.cameraViewH);
+    this.kickers = g.kickers.map((def) => {
+      const k = new Kicker(def);
+      k.onEject = () => {
+        this.renderer.spawnEffect("flash", def.hold.x, def.hold.y);
+        this.camera.shake(0.0012); // the eject solenoid thumps the cabinet, like the plunger
+        this.audio.sfx("kickout");
+      };
+      return k;
+    });
+    this.subways = g.subways.map((def) => {
+      const path = this.table.profiles.find((p) => p.name === def.id)!;
+      const s = new Subway(def, path);
+      const exit = path.pts[path.pts.length - 1];
+      s.onEject = () => {
+        this.renderer.spawnEffect("flash", exit.x, exit.y);
+        this.audio.sfx("kickout");
+      };
+      return s;
+    });
+    this.scoring = new Scoring(this.bus, spec.scoring);
+    this.logic = spec.createLogic({
+      bus: this.bus,
+      scoring: this.scoring,
+      sfx: (name) => this.audio.sfx(name),
+      shake: (mag) => this.camera.shake(mag),
+      push: (scene, prio) => this.dmdQueue.push(scene, prio),
+      baked: (key) => this.baked.get(key),
+    });
+    this.camera = new Camera(g.table.width, g.table.height, this.tuning.cameraViewH);
     // always boot on the 2D renderer (synchronous); if 3D was persisted the
     // swap kicks off immediately and lands once its chunk loads
     this.renderer = new Renderer2D(canvas);
@@ -204,10 +228,19 @@ export class Game {
     });
     this.input.onStart(() => {
       if (this.paused) return;
-      if (this.phase === "attract") this.startGame();
-      else if (this.phase === "initials") this.initialsConfirm = true;
+      if (this.phase === "attract") {
+        if (this.tableSelect.open) this.tableSelect.confirm();
+        else this.startGame();
+      } else if (this.phase === "initials") this.initialsConfirm = true;
     });
-    this.input.onNudge((dir) => this.nudge(dir));
+    this.input.onNudge((dir) => {
+      // arrows double as browse keys while the table select is up
+      if (this.phase === "attract" && this.tableSelect.open) {
+        if (dir !== "up") this.tableSelect.cycle(dir === "left" ? -1 : 1);
+        return;
+      }
+      this.nudge(dir);
+    });
     this.panel = new TuningPanel(this.tuning);
     this.settings = new SettingsPanel(
       this.tuning,
@@ -232,102 +265,89 @@ export class Game {
           }
         },
       },
+      spec.id,
     );
-    this.input.onEscape(() => this.settings.toggle());
+    // Table select (M10): attract-phase browsing of the backglass cards.
+    // Confirming the installed table just starts the game; confirming the
+    // other one persists + reloads — same contract as the settings row.
+    this.tableSelect = new TableSelect(
+      spec.id,
+      () => this.startGame(),
+      (id) => {
+        saveTableId(id);
+        location.reload();
+      },
+      (name) => this.audio.sfx(name),
+    );
+    this.input.onEscape(() => {
+      if (this.tableSelect.open) this.tableSelect.hide();
+      else this.settings.toggle();
+    });
 
     this.scoreScene = new ScoreScene(() => ({
       score: this.scoring.total,
       ball: this.ballNum,
       mult: this.scoring.multiplier,
     }));
-    this.attractScene = new AttractScene(() => this.highScores.top);
+    this.attractScene = new AttractScene(() => this.highScores.top, spec.name, TABLE_ORDER.length);
     this.initialsScene = new InitialsScene(() => ({
       letters: this.initialsLetters,
       slot: this.initialsSlot,
       score: this.pendingScore,
     }));
     this.dmdQueue = new DmdQueue(this.attractScene);
-    void bakeDmdFrames(orbitSceneSvg, 8).then((f) => (this.baked.orbit = f));
-    void bakeDmdFrames(multiplierSceneSvg, 6).then((f) => (this.baked.moon = f));
-    void bakeDmdFrames(savedSceneSvg, 7).then((f) => (this.baked.saved = f));
-    void bakeDmdFrames(tiltSceneSvg, 4).then((f) => (this.baked.tilt = f));
-    void bakeDmdFrames(gameoverSceneSvg, 8).then((f) => (this.baked.gameover = f));
-    void bakeDmdFrames(eclipseSceneSvg, 9).then((f) => (this.baked.eclipse = f));
-    void bakeDmdFrames(bankSceneSvg, 7).then((f) => (this.baked.bank = f));
-    void bakeDmdFrames(telescopeSceneSvg, 8).then((f) => (this.baked.telescope = f));
+    const bake = (key: string, svg: string, frames: number) =>
+      void bakeDmdFrames(svg, frames).then((f) => this.baked.set(key, f));
+    bake("saved", savedSceneSvg, 7);
+    bake("tilt", tiltSceneSvg, 4);
+    bake("gameover", gameoverSceneSvg, 8);
+    for (const [key, scene] of Object.entries(assets.dmdScenes)) bake(key, scene.svg, scene.frames);
 
-    this.bus.on("sensor", ({ kind, id }) => {
+    this.bus.on("sensor", ({ kind, id, toLayer, upOnly, bounds }) => {
+      // Layer-switch sensors (M10): deferred to post-step (the world is
+      // locked during the contact) and re-validated at application — the
+      // guard rules live in Ball.queueLayerSwitch, shared with the sims.
+      this.ball.queueLayerSwitch(this.physics, { toLayer, upOnly, bounds });
       // Drain starts a short visible fall-out (ball keeps simulating, fades,
       // then respawns) instead of teleporting away the instant the sensor
-      // fires — the sensor sits above the floor, mid-drop.
-      if (kind === "drain" && this.drainTimer <= 0) {
-        this.drainTimer = 0.7;
-        this.drainSaverEligible =
-          this.phase === "play" &&
-          this.ballStarted &&
-          this.gameTime < this.saverUntil &&
-          !this.tilted;
-        this.renderer.spawnEffect("drain", 0.26, 1.0);
-        this.audio.sfx("drain");
+      // fires — the sensor sits above the floor, mid-drop. A captive ball is
+      // exempt: outlane-saving subways (Tidebreaker's gutter, Midway's
+      // chicken exit) legitimately carry the ball through the drain zone.
+      if (
+        kind === "drain" &&
+        this.drainTimer <= 0 &&
+        !this.kickers.some((k) => k.holding) &&
+        !this.subways.some((s) => s.active)
+      ) {
+        this.startDrain();
       } else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
-      else if (kind === "kicker") {
-        if (this.kicker.capture()) this.audio.sfx("scoop");
+      else if (kind === "kicker" && id) {
+        const k = this.kickers.find((k) => k.def.id === id);
+        if (k && this.logic.kickerLit(id) && k.capture()) {
+          this.audio.sfx("scoop");
+          this.logic.onCapture?.(id);
+        }
+      } else if (kind === "subway" && id) {
+        const s = this.subways.find((s) => s.def.id === id);
+        if (s && this.logic.kickerLit(id) && s.capture()) {
+          this.audio.sfx("scoop");
+          this.logic.onCapture?.(id);
+        }
       } else if (kind === "rollover" && id) {
         this.rolloverLit.set(id, 1);
         this.audio.sfx("rollover");
-        this.onMoonLit(id);
+        if (this.phase === "play" && !this.tilted) this.logic.onRollover(id);
       }
     });
     this.bus.on("spinnerTick", () => this.audio.sfx("spinnerTick"));
     this.bus.on("bankComplete", () => this.audio.sfx("bank"));
     this.bus.on("launch", () => {
-      this.renderer.spawnEffect("launch", TABLE.spawn.x, TABLE.spawn.y);
+      this.renderer.spawnEffect("launch", g.table.spawn.x, g.table.spawn.y);
       this.camera.shake(0.0012); // the plunger release thumps the cabinet, barely
       this.audio.sfx("launch");
       if (this.phase === "play" && !this.ballStarted) {
         this.ballStarted = true;
         this.saverUntil = this.gameTime + BALL_SAVER_S;
-      }
-    });
-    this.bus.on("score", ({ label, points }) => {
-      const isOrbit = label.startsWith("ORBIT") || label === "ECLIPSE ORBIT";
-      if (isOrbit && this.baked.orbit) {
-        this.dmdQueue.push(
-          new BakedDmdScene(this.baked.orbit, 11, `${label} ${fmtScore(points)}`),
-          label === "ECLIPSE ORBIT" ? 2 : 1,
-        );
-      } else if (label === "BANK BONUS" && this.baked.bank) {
-        this.dmdQueue.push(new BakedDmdScene(this.baked.bank, 11, `BANK ${fmtScore(points)}`));
-      } else if (isOrbit || DMD_LABELS.has(label)) {
-        this.dmdQueue.push(new MessageScene([[label, fmtScore(points)]], 1.3));
-      }
-    });
-    this.bus.on("telescope", ({ name, points, spotted }) => {
-      // the ball sits captive in the scoop while this plays — the one moment
-      // the player is guaranteed to be watching the DMD
-      const reveal = this.baked.telescope
-        ? new BakedDmdScene(this.baked.telescope, 8, `${name} ${fmtScore(points)}`)
-        : new MessageScene([[name, fmtScore(points)]], 1.6, true);
-      this.dmdQueue.push(
-        spotted ? new SequenceScene([reveal, new MessageScene([["ORBIT SPOTTED"]], 1.0)]) : reveal,
-        2,
-      );
-    });
-    this.bus.on("mode", ({ kind }) => {
-      if (kind === "eclipseReady") {
-        this.audio.sfx("multiplier");
-        this.dmdQueue.push(new MessageScene([["ECLIPSE IS LIT", "SHOOT THE ORBIT"]], 1.6, true), 2);
-      } else if (kind === "eclipseStart") {
-        this.audio.sfx("bank");
-        this.camera.shake(0.006);
-        this.dmdQueue.push(
-          this.baked.eclipse
-            ? new BakedDmdScene(this.baked.eclipse, 8, "ALL SCORES ×2", 1.0)
-            : new MessageScene([["LUNAR ECLIPSE", "ALL SCORES ×2"]], 1.5, true),
-          3,
-        );
-      } else if (kind === "eclipseEnd") {
-        this.dmdQueue.push(new MessageScene([["ECLIPSE OVER"]], 1.2), 2);
       }
     });
     this.bus.on("hit", ({ kind, id }) => {
@@ -416,6 +436,7 @@ export class Game {
   private update(dt: number): void {
     const t = this.tuning;
     const s = this.input.state;
+    const g = this.spec.geometry;
 
     // live tuning → physics/audio, only when a slider actually moved
     if (this.panel.version !== this.appliedTuningVersion) {
@@ -445,14 +466,15 @@ export class Game {
       this.dmdQueue.setIdle(this.attractScene);
     }
 
+    const plungerEdge = s.plunger && !this.prevPlunger;
     if (this.phase === "initials") this.updateInitials(s.plunger);
     this.prevPlunger = s.plunger;
 
-    // attract lamp show: moons, bumpers and slings pulse in slow waves
+    // attract lamp show: lanes, bumpers and slings pulse in slow waves
     if (this.phase === "attract") {
       this.attractT += dt;
       const tt = this.attractT;
-      ROLLOVERS.forEach((r, i) =>
+      g.rollovers.forEach((r, i) =>
         this.rolloverLit.set(r.id, Math.max(0, Math.sin(tt * 2.2 - i * 1.4)) * 0.9),
       );
       this.bumpers.forEach((b, i) => (b.flash = Math.max(0, Math.sin(tt * 1.6 + i * 2.1)) * 0.5));
@@ -463,27 +485,53 @@ export class Game {
     // tilted would leave the pulse latched to fire as a phantom flip later
     const tapL = this.input.consumeTap("left");
     const tapR = this.input.consumeTap("right");
-    const flippersLive = !this.tilted && this.phase !== "initials";
+    const tapU = this.input.consumeTap("upper");
+    // attract table select: the first flipper press opens the backglass
+    // browser, further presses move the focus; flippers stay down while open
+    if (this.phase === "attract" && (tapL || tapR)) {
+      if (!this.tableSelect.open) this.tableSelect.show();
+      else {
+        if (tapL) this.tableSelect.cycle(-1);
+        if (tapR) this.tableSelect.cycle(1);
+      }
+    }
+    const browsing = this.phase === "attract" && this.tableSelect.open;
+    const flippersLive = !this.tilted && this.phase !== "initials" && !browsing;
     const flipL = flippersLive && (s.left || tapL);
     const flipR = flippersLive && (s.right || tapR);
+    const flipU = flippersLive && (s.upper || tapU);
     if (flipL && !this.prevFlip.left) this.audio.sfx("flipper");
     if (flipR && !this.prevFlip.right) this.audio.sfx("flipper");
+    if (this.flippers[2] && flipU && !this.prevFlip.upper) this.audio.sfx("flipper");
     this.prevFlip.left = flipL;
     this.prevFlip.right = flipR;
+    this.prevFlip.upper = flipU;
     this.flippers[0].update(flipL, t);
     this.flippers[1].update(flipR, t);
+    this.flippers[2]?.update(flipU, t);
     if (this.phase === "play") this.updatePlunger(dt, s.plunger, t);
-    else if (this.phase === "attract" && s.plunger) this.startGame();
+    else if (this.phase === "attract" && s.plunger) {
+      if (!browsing) this.startGame();
+      else if (plungerEdge) this.tableSelect.confirm();
+    }
 
     for (const b of this.bumpers) b.update(dt);
     for (const sl of this.slings) sl.update(dt);
-    this.kicker.update(dt, this.ball, t);
-    // a scoop hold must not eat the ball-saver window (-Infinity stays put)
-    if (this.kicker.holding) this.saverUntil += dt;
+    let ballCaptive = false;
+    for (const k of this.kickers) {
+      k.update(dt, this.ball, t);
+      if (k.holding) ballCaptive = true;
+    }
+    for (const sub of this.subways) {
+      sub.update(dt, this.ball);
+      if (sub.active) ballCaptive = true;
+    }
+    // a captive ball must not eat the ball-saver window (-Infinity stays put)
+    if (ballCaptive) this.saverUntil += dt;
     this.targetBank.update(dt);
     this.spinner.update(dt);
     this.scoring.update(dt);
-    this.modes.update(dt);
+    this.logic.update(dt);
     for (const [id, v] of this.rolloverLit) this.rolloverLit.set(id, Math.max(0, v - dt * 2));
 
     this.renderAlpha = this.physics.update(dt, () => {
@@ -491,9 +539,41 @@ export class Game {
       this.prevBall.x = bp.x;
       this.prevBall.y = bp.y;
       this.prevBall.angle = this.ball.body.getAngle();
-      this.prevFlipAngles[0] = this.flippers[0].body.getAngle();
-      this.prevFlipAngles[1] = this.flippers[1].body.getAngle();
+      for (let i = 0; i < this.flippers.length; i++)
+        this.prevFlipAngles[i] = this.flippers[i].body.getAngle();
     });
+
+    // Safety net (M10): a raised ball that somehow left its rail geometry
+    // (glitch, nudge mid-transition) would float over the field colliding
+    // with nothing — after half a second off-rail, ground it. A layer-1
+    // ball STALLED for over a second is equally wrong (resting on the
+    // outside of the wireform): a real rail ball always keeps rolling.
+    if (this.ball.layer === 1 && !ballCaptive) {
+      const bp = this.ball.body.getPosition();
+      const bv = this.ball.body.getLinearVelocity();
+      const h = heightAt(this.table.profiles, 1, bp.x, bp.y, 0.06);
+      const stalled = Math.hypot(bv.x, bv.y) < 0.05;
+      this.offRailT = h === 0 || stalled ? this.offRailT + dt : 0;
+      if (this.offRailT > (stalled ? 1.0 : 0.5)) {
+        this.offRailT = 0;
+        this.ball.setLayer(0);
+      }
+    } else {
+      this.offRailT = 0;
+    }
+
+    // Out-of-bounds net (M10): no legitimate route leads off the table, so
+    // a ball outside the envelope is always an escapee (e.g. a mis-layered
+    // ball that ghosted through the layer-0 shell). It can never reach the
+    // drain sensor out there — count it as a drain instead of soft-locking.
+    if (this.drainTimer <= 0 && !ballCaptive) {
+      const bp = this.ball.body.getPosition();
+      const m = 0.03;
+      if (bp.x < -m || bp.x > g.table.width + m || bp.y < -m || bp.y > g.table.height + m) {
+        this.ball.setLayer(0);
+        this.startDrain();
+      }
+    }
 
     if (this.drainTimer > 0) {
       this.drainTimer -= dt;
@@ -503,7 +583,7 @@ export class Game {
     this.dmdQueue.update(dt, this.dmd);
     this.dmd.render();
 
-    this.camera.viewH = Math.min(t.cameraViewH, TABLE.height);
+    this.camera.viewH = Math.min(t.cameraViewH, g.table.height);
     const a = this.renderAlpha;
     this.camera.follow(
       this.prevBall.y + (this.ball.body.getPosition().y - this.prevBall.y) * a,
@@ -514,8 +594,9 @@ export class Game {
   }
 
   private updatePlunger(dt: number, held: boolean, t: Tuning): void {
+    const g = this.spec.geometry.table;
     const p = this.ball.body.getPosition();
-    const inLane = p.x > TABLE.laneWallX && p.y > TABLE.laneTopY;
+    const inLane = p.x > g.laneWallX && p.y > g.laneTopY;
 
     if (held && inLane) {
       this.charging = true;
@@ -531,12 +612,25 @@ export class Game {
     }
   }
 
+  /** Begin the visible drain fall-out; onBallLost runs when it ends. Shared
+   * by the drain sensor and the out-of-bounds net. */
+  private startDrain(): void {
+    this.drainTimer = 0.7;
+    this.drainSaverEligible =
+      this.phase === "play" && this.ballStarted && this.gameTime < this.saverUntil && !this.tilted;
+    this.renderer.spawnEffect("drain", 0.26, 1.0);
+    this.audio.sfx("drain");
+  }
+
   private respawn(): void {
-    this.kicker.cancel(this.ball); // never leave a respawned ball gravity-less
+    // never leave a respawned ball gravity-less or mid-transit
+    for (const k of this.kickers) k.cancel(this.ball);
+    for (const sub of this.subways) sub.cancel(this.ball);
     this.ball.reset();
     // don't lerp across the teleport
-    this.prevBall.x = TABLE.spawn.x;
-    this.prevBall.y = TABLE.spawn.y;
+    const spawn = this.spec.geometry.table.spawn;
+    this.prevBall.x = spawn.x;
+    this.prevBall.y = spawn.y;
     this.prevBall.angle = 0;
     this.drainTimer = 0;
     this.plungerCharge = 0;
@@ -545,15 +639,15 @@ export class Game {
   }
 
   private startGame(): void {
+    this.tableSelect.hide();
     this.audio.sfx("start");
     this.music.start();
     this.scoring.reset();
-    this.modes.resetGame();
+    this.logic.resetGame();
     this.phase = "play";
     this.ballNum = 1;
     this.ballStarted = false;
     this.saverUntil = -Infinity;
-    this.litMoons.clear();
     this.rolloverLit.clear(); // attract lamp show must not bleed into ball 1
     this.tilted = false;
     this.tiltBob = 0;
@@ -575,9 +669,10 @@ export class Game {
       this.saverUntil = -Infinity; // one save per ball
       this.respawn();
       this.audio.sfx("saved");
+      const savedFrames = this.baked.get("saved");
       this.dmdQueue.push(
-        this.baked.saved
-          ? new BakedDmdScene(this.baked.saved, 10, "BALL SAVED", 0.5)
+        savedFrames
+          ? new BakedDmdScene(savedFrames, 10, "BALL SAVED", 0.5)
           : new MessageScene([["BALL SAVED"]], 1.4, true),
         2,
       );
@@ -592,9 +687,8 @@ export class Game {
     let bonus = 0;
     if (wasTilted) this.scoring.forfeitBonus();
     else bonus = this.scoring.collectBonus();
-    this.modes.endBall();
+    this.logic.endBall();
     this.scoring.multiplier = 1;
-    this.litMoons.clear();
     const bonusPage: string[][] = bonus > 0 ? [["BONUS", fmtScore(bonus)]] : [];
     if (this.ballNum >= BALLS_PER_GAME) {
       this.music.stop();
@@ -619,10 +713,11 @@ export class Game {
           parts.push(new MessageScene(bonusPage, 1.8));
           dur += 1.8;
         }
-        if (this.baked.gameover) {
+        const goFrames = this.baked.get("gameover");
+        if (goFrames) {
           // moonset scene, score as the top caption row
           parts.push(
-            new BakedDmdScene(this.baked.gameover, 7, `GAME OVER  ${fmtScore(this.scoring.total)}`, 1.4, undefined, 1),
+            new BakedDmdScene(goFrames, 7, `GAME OVER  ${fmtScore(this.scoring.total)}`, 1.4, undefined, 1),
           );
           dur += 8 / 7 + 1.4;
         } else {
@@ -641,8 +736,7 @@ export class Game {
 
   /**
    * Initials entry: flipper taps cycle the letter, plunger/start confirms —
-   * or just type A–Z directly (arrow keys move between slots, Backspace
-   * steps back one).
+   * or just type A–Z directly (Backspace steps back a slot).
    */
   private updateInitials(plungerHeld: boolean): void {
     const cycle = (dir: number) => {
@@ -658,14 +752,6 @@ export class Game {
       if (ch === "\b") {
         if (this.initialsSlot > 0) {
           this.initialsSlot--;
-          this.audio.sfx("rollover");
-        }
-        continue;
-      }
-      if (ch === "←" || ch === "→") {
-        const to = this.initialsSlot + (ch === "←" ? -1 : 1);
-        if (to >= 0 && to <= 2) {
-          this.initialsSlot = to;
           this.audio.sfx("rollover");
         }
         continue;
@@ -699,26 +785,6 @@ export class Game {
     }
   }
 
-  /** Moon lanes: light all three to raise the bonus multiplier (max ×5). */
-  private onMoonLit(id: string): void {
-    if (this.phase !== "play" || this.tilted) return;
-    this.litMoons.add(id);
-    if (this.litMoons.size === 3) {
-      this.litMoons.clear();
-      if (this.scoring.multiplier < 5) {
-        this.scoring.multiplier++;
-        this.audio.sfx("multiplier");
-        const caption = `MULTIPLIER ×${this.scoring.multiplier}`;
-        this.dmdQueue.push(
-          this.baked.moon
-            ? new BakedDmdScene(this.baked.moon, 9, caption)
-            : new MessageScene([[caption]], 1.4, true),
-          2,
-        );
-      }
-    }
-  }
-
   /** Table nudge: brief impulse on the ball, tilt if abused (plan §4). */
   private nudge(dir: "left" | "right" | "up"): void {
     if (this.paused || this.phase !== "play" || this.tilted || this.drainTimer > 0) return;
@@ -736,9 +802,10 @@ export class Game {
       this.scoring.muted = true; // a tilted ball scores nothing until it drains
       this.camera.shake(0.012);
       this.audio.sfx("tilt");
+      const tiltFrames = this.baked.get("tilt");
       this.dmdQueue.push(
-        this.baked.tilt
-          ? new BakedDmdScene(this.baked.tilt, 9, undefined, 0, 3.5)
+        tiltFrames
+          ? new BakedDmdScene(tiltFrames, 9, undefined, 0, 3.5)
           : new MessageScene([["TILT"]], 3.5, true),
         3,
       );
@@ -749,19 +816,24 @@ export class Game {
   }
 
   private snapshot(): WorldSnapshot {
+    const g = this.spec.geometry;
     const p = this.ball.body.getPosition();
     const v = this.ball.body.getLinearVelocity();
     const a = this.renderAlpha;
     const lerp = (from: number, to: number) => from + (to - from) * a;
+    const bx = lerp(this.prevBall.x, p.x);
+    const by = lerp(this.prevBall.y, p.y);
     return {
       ball: {
-        x: lerp(this.prevBall.x, p.x),
-        y: lerp(this.prevBall.y, p.y),
+        x: bx,
+        y: by,
         angle: lerp(this.prevBall.angle, this.ball.body.getAngle()),
         vx: v.x,
         vy: v.y,
         // fade out over the last 0.3 s of the drain fall
         alpha: this.drainTimer > 0 ? Math.min(1, this.drainTimer / 0.3) : 1,
+        h: heightAt(this.table.profiles, this.ball.layer, bx, by),
+        layer: this.ball.layer,
       },
       flippers: this.flippers.map((f, i) => {
         const fp = f.body.getPosition();
@@ -776,20 +848,29 @@ export class Game {
         bumpers: this.bumpers.map((b) => ({ ...b.def, flash: b.flash })),
         slings: this.slings.map((s) => ({ verts: s.def.verts, flash: s.flash })),
         targets: this.targetBank.targets.map((t) => ({
-          x: DROP_TARGETS.x,
+          x: t.x,
           y: t.y,
-          hw: DROP_TARGETS.hw,
-          hh: DROP_TARGETS.hh,
+          hw: g.dropTargets.hw,
+          hh: g.dropTargets.hh,
           up: t.up,
         })),
-        // moons stay lit while collected toward the multiplier; the decay
+        // lanes stay lit while collected toward the multiplier; the decay
         // map adds the brighter roll-over flash on top
-        rollovers: ROLLOVERS.map((r) => ({
+        rollovers: g.rollovers.map((r) => ({
           x: r.x,
           y: r.y,
-          lit: Math.max(this.rolloverLit.get(r.id) ?? 0, this.litMoons.has(r.id) ? 0.55 : 0),
+          lit: Math.max(this.rolloverLit.get(r.id) ?? 0, this.logic.laneLit(r.id)),
         })),
-        spinner: { ...SPINNER, angle: this.spinner.angle, spin: this.spinner.spin01 },
+        lamps: g.lamps.map((l, i) => ({
+          x: l.x,
+          y: l.y,
+          rgb: l.rgb,
+          lit:
+            this.phase === "attract"
+              ? Math.max(0, Math.sin(this.attractT * 1.8 - i * 0.9)) * 0.8
+              : this.logic.lamp(l.id),
+        })),
+        spinner: { ...g.spinner, angle: this.spinner.angle, spin: this.spinner.spin01 },
       },
       score: this.scoring.total,
       scoreLabel: this.scoring.lastLabel,

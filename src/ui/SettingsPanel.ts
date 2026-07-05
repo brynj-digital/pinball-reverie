@@ -1,6 +1,7 @@
 import { saveTuning, type Tuning } from "../tuning";
 import { TuningPanel } from "../debug/TuningPanel";
 import type { RenderMode, View3D } from "../render/Renderer";
+import { TABLE_ORDER, TABLE_SPECS, saveTableId, type TableId } from "../table/specs";
 import {
   ACTION_LABELS,
   Input,
@@ -10,6 +11,7 @@ import {
 const ACTIONS: BindableAction[] = [
   "left",
   "right",
+  "upper",
   "plunger",
   "start",
   "nudgeLeft",
@@ -39,6 +41,7 @@ export class SettingsPanel {
     private onOpenChange: (open: boolean) => void,
     private renderMode: { get: () => RenderMode; set: (mode: RenderMode) => Promise<void> },
     private view3d: { get: () => View3D; set: (view: View3D) => void },
+    private tableId: TableId,
   ) {
     this.root = document.createElement("div");
     this.root.className = "settings-overlay";
@@ -56,6 +59,7 @@ export class SettingsPanel {
     card.appendChild(this.sliderRow("Music volume", "musicVolume", 0));
     // performance option: fewer pixels to paint at the cost of sharpness
     card.appendChild(this.sliderRow("Render scale", "renderScale", 0.5));
+    card.appendChild(this.tableRow());
     card.appendChild(this.rendererRow());
     card.appendChild(this.view3dRow());
 
@@ -125,6 +129,28 @@ export class SettingsPanel {
 
   private refreshKeys(): void {
     for (const [action, btn] of this.keyButtons) btn.textContent = this.input.label(action);
+  }
+
+  /**
+   * Table select (M10): cycles the registry. Persists the id and reloads —
+   * a table swap replaces physics/art/rules/logic/music wholesale, so a
+   * clean boot is the honest implementation (see main.ts).
+   */
+  private tableRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "key-row";
+    const span = document.createElement("span");
+    span.textContent = "Table";
+    const btn = document.createElement("button");
+    btn.textContent = TABLE_SPECS[this.tableId].name;
+    btn.onclick = () => {
+      const next = TABLE_ORDER[(TABLE_ORDER.indexOf(this.tableId) + 1) % TABLE_ORDER.length];
+      saveTableId(next);
+      btn.textContent = `${TABLE_SPECS[next].name}…`;
+      location.reload();
+    };
+    row.append(span, btn);
+    return row;
   }
 
   /** 2D ↔ 3D renderer toggle (milestone 9: both behind the Renderer seam). */

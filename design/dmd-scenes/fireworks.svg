@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- MIDNIGHT MIDWAY DMD scene: FIREWORKS FINALE — three bursts over the
+       park skyline; also the attract-loop closer. 8 frames of 128x32
+       (style guide §6): #fff=3, #888=2, #666=1, black=0. Art rows 0..22;
+       caption from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <!-- constant: skyline — wheel left, coaster hump right, tents between -->
+  <g id="sky" fill="none">
+    <circle cx="24" cy="15" r="6" stroke="#666" stroke-width="1"/>
+    <path d="M 40 21 L 48 17 L 56 21 M 60 21 L 68 17 L 76 21" stroke="#666" stroke-width="1"/>
+    <path d="M 84 21 L 96 13 L 108 18 L 118 15" stroke="#666" stroke-width="1"/>
+    <line x1="4" y1="21" x2="124" y2="21" stroke="#666" stroke-width="1"/>
+  </g>
+  <use href="#sky" x="0"/><use href="#sky" x="128"/><use href="#sky" x="256"/>
+  <use href="#sky" x="384"/><use href="#sky" x="512"/><use href="#sky" x="640"/>
+  <use href="#sky" x="768"/><use href="#sky" x="896"/>
+  <!-- f0: first shell rises -->
+  <line x1="192" y1="18" x2="194" y2="10" stroke="#888" stroke-width="1"/>
+  <!-- f1: burst one -->
+  <g stroke="#fff" stroke-width="1">
+    <line x1="322" y1="8" x2="322" y2="3"/><line x1="322" y1="8" x2="327" y2="5"/>
+    <line x1="322" y1="8" x2="327" y2="11"/><line x1="322" y1="8" x2="317" y2="11"/>
+    <line x1="322" y1="8" x2="317" y2="5"/><line x1="322" y1="8" x2="322" y2="13"/>
+  </g>
+  <!-- f2: one fades, shell two rises -->
+  <g>
+    <g stroke="#666" stroke-width="1">
+      <line x1="450" y1="6" x2="450" y2="2"/><line x1="450" y1="6" x2="455" y2="4"/>
+      <line x1="450" y1="6" x2="445" y2="4"/><line x1="450" y1="6" x2="450" y2="10"/>
+    </g>
+    <line x1="484" y1="17" x2="486" y2="8" stroke="#888" stroke-width="1"/>
+  </g>
+  <!-- f3: burst two, bigger -->
+  <g stroke="#fff" stroke-width="1.2">
+    <line x1="614" y1="7" x2="614" y2="1"/><line x1="614" y1="7" x2="620" y2="3"/>
+    <line x1="614" y1="7" x2="621" y2="8"/><line x1="614" y1="7" x2="619" y2="12"/>
+    <line x1="614" y1="7" x2="609" y2="12"/><line x1="614" y1="7" x2="607" y2="8"/>
+    <line x1="614" y1="7" x2="608" y2="3"/>
+  </g>
+  <!-- f4: double burst -->
+  <g>
+    <g stroke="#888" stroke-width="1">
+      <line x1="726" y1="9" x2="726" y2="4"/><line x1="726" y1="9" x2="731" y2="6"/>
+      <line x1="726" y1="9" x2="731" y2="12"/><line x1="726" y1="9" x2="721" y2="12"/><line x1="726" y1="9" x2="721" y2="6"/>
+    </g>
+    <g stroke="#fff" stroke-width="1">
+      <line x1="756" y1="5" x2="756" y2="1"/><line x1="756" y1="5" x2="760" y2="3"/>
+      <line x1="756" y1="5" x2="760" y2="8"/><line x1="756" y1="5" x2="752" y2="8"/><line x1="756" y1="5" x2="752" y2="3"/>
+    </g>
+  </g>
+  <!-- f6: the grand one, whole sky -->
+  <g stroke="#fff" stroke-width="1.2">
+    <line x1="832" y1="8" x2="832" y2="1"/><line x1="832" y1="8" x2="839" y2="3"/>
+    <line x1="832" y1="8" x2="841" y2="9"/><line x1="832" y1="8" x2="838" y2="14"/>
+    <line x1="832" y1="8" x2="826" y2="14"/><line x1="832" y1="8" x2="823" y2="9"/>
+    <line x1="832" y1="8" x2="825" y2="3"/>
+  </g>
+  <g stroke="#888" stroke-width="1">
+    <line x1="800" y1="6" x2="800" y2="2"/><line x1="800" y1="6" x2="804" y2="4"/><line x1="800" y1="6" x2="796" y2="4"/>
+  </g>
+  <!-- f7: embers drifting down over the dark park -->
+  <g fill="#666">
+    <circle cx="1014" cy="6" r="1"/><circle cx="1000" cy="10" r="1"/>
+    <circle cx="985" cy="5" r="1"/><circle cx="970" cy="12" r="1"/>
+  </g>
+</svg>

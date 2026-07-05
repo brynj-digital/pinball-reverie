@@ -1,5 +1,4 @@
-/** Top-5 high scores with initials, in localStorage. */
-const KEY = "pinball-highscores-v2";
+/** Top-5 high scores with initials, in localStorage — one list per table. */
 const MAX = 5;
 
 export interface ScoreEntry {
@@ -10,14 +9,14 @@ export interface ScoreEntry {
 export class HighScores {
   private scores: ScoreEntry[] = [];
 
-  constructor() {
+  constructor(private key: string) {
     try {
       if (typeof localStorage !== "undefined") {
-        const raw = localStorage.getItem(KEY);
+        const raw = localStorage.getItem(this.key);
         if (raw) {
           this.scores = (JSON.parse(raw) as ScoreEntry[]).slice(0, MAX);
-        } else {
-          // migrate the pre-initials v1 format (plain numbers)
+        } else if (this.key === "pinball-highscores-v2") {
+          // migrate the pre-initials v1 format (plain numbers, Moondial era)
           const old = localStorage.getItem("pinball-highscores-v1");
           if (old)
             this.scores = (JSON.parse(old) as number[])
@@ -44,7 +43,7 @@ export class HighScores {
     this.scores.sort((a, b) => b.score - a.score);
     this.scores = this.scores.slice(0, MAX);
     try {
-      if (typeof localStorage !== "undefined") localStorage.setItem(KEY, JSON.stringify(this.scores));
+      if (typeof localStorage !== "undefined") localStorage.setItem(this.key, JSON.stringify(this.scores));
     } catch {
       // persistence is best-effort
     }

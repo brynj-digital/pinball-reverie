@@ -20,6 +20,10 @@ export interface TableRenderData {
   ballSvgText?: string;
   /** Raw SVG text of the backglass (drawn in the side panel under the DMD). */
   backglassSvgText?: string;
+  /** Plunger assembly placement (per-table; drawn by the renderer). */
+  plunger: { x: number; saddleY: number; tipRestY: number; pull: number; baseY: number };
+  /** Per-table 3D material tints (wall art colors live in the SVG). */
+  theme?: { rail3d: number; rail3dElevated: number };
 }
 
 export interface BallSnapshot {
@@ -30,6 +34,11 @@ export interface BallSnapshot {
   vy: number;
   /** 1 in play; fades to 0 while the drained ball drops out. */
   alpha: number;
+  /** Display height above the playfield (m; negative = subway). Render-only
+   * — physics stays planar (plan §7). */
+  h: number;
+  /** Collision layer (0 field, 1 raised, -1 subway) for draw styling. */
+  layer: number;
 }
 
 export interface FlipperSnapshot {
@@ -40,8 +49,8 @@ export interface FlipperSnapshot {
 }
 
 export type DebugShape =
-  | { type: "circle"; x: number; y: number; r: number; sensor: boolean }
-  | { type: "poly"; pts: { x: number; y: number }[]; closed: boolean; sensor: boolean };
+  | { type: "circle"; x: number; y: number; r: number; sensor: boolean; layer?: number }
+  | { type: "poly"; pts: { x: number; y: number }[]; closed: boolean; sensor: boolean; layer?: number };
 
 export interface ElementsSnapshot {
   /** flash: 1 → 0 after a hit. */
@@ -50,6 +59,8 @@ export interface ElementsSnapshot {
   targets: { x: number; y: number; hw: number; hh: number; up: boolean }[];
   /** lit: 1 → 0 after the ball rolls over. */
   rollovers: { x: number; y: number; lit: number }[];
+  /** Extra insert lamps (e.g. depth gauge); rgb feeds the additive glow. */
+  lamps: { x: number; y: number; rgb: string; lit: number }[];
   spinner: { x: number; y: number; halfW: number; angle: number; spin: number };
 }
 

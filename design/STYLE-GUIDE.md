@@ -36,6 +36,57 @@ Accent discipline: violet is the signature hue (logo glow, premium inserts);
 magenta and cyan are feature colors; brass is reserved for things the ball
 physically touches (flippers, kickers, rails).
 
+Per-table field variants (added 2026-07-05): a table may cast the field
+family toward its theme — Tidebreaker uses the **abyss** ramp
+(`--abyss-700/800/900`, blue-green) with cyan as its feature color;
+Midnight Midway uses the **carnival** ramp (`--carnival-700/800/900`, warm
+plum dusk) with magenta as its feature color. Any new variant adds its
+tokens here first, keeps `--ink`/steel/chrome/brass unchanged, and stays
+within the §1 saturation discipline.
+
+**Marquee bulb** (added 2026-07-05 for table 3): `--bulb-200/400`, an
+incandescent white-gold reserved for bulb strings, ride marquees and
+chase-lamp rows — tiny lit points, never area fills, so the §1 neon budget
+holds. It is not brass (brass stays ball-touch only) and not DMD amber
+(display glass only).
+
+**Midway runs the accent budget hot** (amended 2026-07-05, per the table 3
+brief and direction): a funfair at night is *loud* — Midnight Midway may
+push accents to ~15–20% of the composition and use the whole neon family
+at once (pennant bunting, balloons, painted gondola cars, letter-coloured
+inserts, candy stripes, `--alert-400` on beacons/barber posts). The
+discipline that survives: saturation lives in MANY SMALL SHAPES and lit
+points over the dark plum field — never large saturated area fills — so
+lamps and the ball still pop. Moondial and Tidebreaker keep the ≤10% rule.
+
+**Elevated structure may be an OPEN WIREFORM** (amended 2026-07-05, table
+3): where a glass bed would cross busy field art (Midway's coaster and
+striker cut across half the park), the elevated run may drop the bed and
+read as slim chrome wires with cross-ties and air between — plus a LIGHT
+glass tint (~0.09, ≤30 mm): near-invisible on the dark field but it tints
+the bright ball passing underneath, the depth cue the open wires alone
+can't give. The layer cue that must survive is the
+compositing split (over the ball on the field, under it when raised) plus
+the opaque chrome; Tidebreaker's edge-hugging ramp keeps its full glass
+bed.
+
+**Walls and rails are themed per table, not global** (amended 2026-07-05):
+each table's shell/wall restroke palette comes from its field variant —
+Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
+(`--abyss-500/300`), Midnight Midway layers dusk plum
+(`--carnival-500/300`) — always over a 16 mm ink base with a `chrome-200`
+core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
+structure reads as glass between chrome** on every table: the edge wires
+are OPAQUE bright chrome, and only the ramp BED between them — a wide
+pale-cyan wash along the height profiles — is semi-transparent (~0.19
+combined), like translucent ramp plastic. Renderers composite the
+`art-rails-elevated` group separately — over the ball on the main field
+(the ball shows through the bed, disappears behind the wires), under it on
+the raised layer — so which level the ball is on is always unambiguous.
+The 3D renderer builds the same split: opaque chrome tubes plus a
+translucent bed ribbon riding each layer-1 height profile
+(`TableSpec.theme` keeps the tints per-table).
+
 ## 3. Master units & scale
 
 - **Playfield master SVG: 1 user unit = 1 mm.** The table master is
@@ -103,14 +154,27 @@ trick, never a Z-axis in the physics world.
 - A collision path may carry **`data-layer`** (integer, default `0`): `0`
   main playfield, `1` raised (ramps, decks, habitrails), `-1` subway. A
   fixture collides with the ball only while the ball is on the same layer.
-- **`sensor-ramp-entry-<name>` / `sensor-ramp-exit-<name>`** switch the
-  ball's layer; the entry sensor carries **`data-to-layer`**.
+- **`sensor-layer-<name>`** sensors switch the ball's layer via
+  **`data-to-layer`** (ramp mouths pair an entry switch with a roll-back
+  restore). **`data-up-only`** restricts a switch to an upward-moving ball —
+  required on open-field ramp entries, or strays drifting sideways across
+  the zone become ghosts on the wrong layer.
+- **Switch-to-raised zones keep their edges a full ball radius (13.5 mm)
+  clear of the target layer's wall faces** (added 2026-07-05, Midway soak):
+  a ball switched while overlapping a wall of its new layer is embedded,
+  and the solver may eject it *outside* the channel — a ghost that sails
+  over the field. Prefer several small zones centred on the channel line
+  over one large rect: a missed switch is harmless (the ball just stays on
+  its layer), an embedded one is not. Diagonal channels especially — an
+  axis-aligned rect can't hug a diagonal interior.
 - A ramp or subway with vertical travel pairs with a
   **`height-profile-<name>`** polyline carrying **`data-height-from`** /
   **`data-height-to`** (mm relative to the playfield surface, negative =
   below). Renderers project the ball onto the profile to derive its display
   height; physics never reads it.
-- A raised-deck flipper is placed by **`anchor-flipper-upper`**.
+- An upper (third) flipper is placed by **`anchor-flipper-upper`** — on a
+  raised deck or on the main field (Midway's mallet is a main-layer upper
+  flipper); its side/pivot lives in the table's defs like the lower pair.
 - The two invariants above apply **per layer**: gaps are measured between
   surfaces the ball can touch on the same layer, and simcheck/soak must be
   able to flag a ball trapped in a subway or on a deck.
@@ -177,6 +241,12 @@ See [previews/layouts.html](previews/layouts.html).
   table logo + DMD; right panel carries score, ball number, bonus, and tilt
   lamps. Panels are `--field-700` cards on `--void` with steel rules.
 - Surplus space is always `--void` with the standard vignette.
+- **Table select (added 2026-07-05, M10):** the backglass IS the table's
+  selection card — the attract-mode table browser shows one backglass per
+  registered table on a `--field-700` card; the focused card carries an
+  brass (`--brass-400`) ring, unfocused cabinets sit dim. No dedicated
+  select-screen art: a new table becomes selectable by shipping its
+  backglass. Chrome text follows §5; hints in steel.
 
 ## 9. Per-asset checklist
 

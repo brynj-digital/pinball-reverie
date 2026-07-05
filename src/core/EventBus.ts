@@ -4,16 +4,22 @@
  */
 export interface GameEvents {
   /** The ball touched a sensor fixture; kind/id come from the fixture tag. */
-  sensor: { kind: string; id?: string };
+  sensor: {
+    kind: string;
+    id?: string;
+    toLayer?: number;
+    upOnly?: boolean;
+    bounds?: { cx: number; cy: number; hw: number; hh: number };
+  };
   /** The ball struck a solid scoring element (bumper, sling, drop target). */
   hit: { kind: string; id: string };
   /** One spinner rotation tick while it's spinning down. */
   spinnerTick: Record<string, never>;
   /** All targets in a bank dropped. */
   bankComplete: Record<string, never>;
-  /** Mode progression (Modes.ts): eclipse lit / started / ended. */
-  mode: { kind: "eclipseReady" | "eclipseStart" | "eclipseEnd" };
-  /** Telescope scoop sighting awarded (points already multiplied). */
+  /** Mode progression (per-table TableLogic): kind strings are table-owned. */
+  mode: { kind: string };
+  /** Kicker award ladder step (Moondial sightings, Tidebreaker hauls). */
   telescope: { name: string; points: number; spotted: boolean };
   /** Score changed; label describes what scored (drives HUD, later the DMD). */
   score: { points: number; total: number; label: string };

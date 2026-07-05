@@ -32,14 +32,48 @@ Settings.maxLinearCorrection = 0.01;
 /** Physics steps at a fixed 1/120 s regardless of frame rate (plan §4). */
 export const FIXED_DT = 1 / 120;
 
+/** World-space rect of a sensor zone (Ball.queueLayerSwitch re-validation). */
+export interface SensorBounds {
+  cx: number;
+  cy: number;
+  hw: number;
+  hh: number;
+}
+
 /**
  * userData attached to every fixture so contacts can be routed to events.
- * Sensor kinds: drain, rollover, ramp-entry, ramp-exit, spinner.
- * Solid element kinds (emit `hit`): bumper, sling, target.
+ * Sensor kinds: drain, rollover, ramp-entry, ramp-exit, spinner, kicker,
+ * subway, layer. Solid element kinds (emit `hit`): bumper, sling, target.
  */
 export interface FixtureTag {
   kind: string;
   id?: string;
+  /** Layer-switch sensors: crossing moves the ball to this layer (M10). */
+  toLayer?: number;
+  /** Layer switch applies only while the ball moves up-table. */
+  upOnly?: boolean;
+  /** Layer-switch sensors: the zone rect, for re-validation at switch time. */
+  bounds?: SensorBounds;
+}
+
+/**
+ * Collision-layer filter bits (M10; STYLE-GUIDE §4 "Layers & height").
+ * Layer-0 fixtures keep planck's default category 0x1; only off-layer
+ * fixtures and the ball carry special bits. A fixture touches the ball only
+ * while the ball's mask (Ball.setLayer) includes its category.
+ */
+export const CAT_BALL = 0x0002;
+const CAT_LAYER1 = 0x0010;
+const CAT_LAYER_M1 = 0x0020;
+/** Fixtures every layer must hit (the drain — a ball must always drain out). */
+export const CAT_ALWAYS = 0x0040;
+
+export function layerCategory(layer: number): number {
+  return layer === 1 ? CAT_LAYER1 : layer === -1 ? CAT_LAYER_M1 : 0x0001;
+}
+
+export function ballMaskForLayer(layer: number): number {
+  return layerCategory(layer) | CAT_ALWAYS;
 }
 
 /** Solid element kinds whose ball contacts become `hit` events. */
@@ -86,11 +120,22 @@ export class PhysicsWorld {
       beforeStep?.();
       this.world.step(FIXED_DT, 8, 3);
       this.accumulator -= FIXED_DT;
+      // Flush between steps, not once per frame: a layer switch or kick
+      // held to the end of a 3-step frame acts on a ball two steps past the
+      // contact that queued it — far enough to strand a layer switch on the
+      // wrong side of its walls.
+      this.flushPostStep();
     }
-    const queued = this.postStep;
-    this.postStep = [];
-    for (const fn of queued) fn();
+    this.flushPostStep(); // work queued outside stepping still runs this frame
     return this.accumulator / FIXED_DT;
+  }
+
+  private flushPostStep(): void {
+    while (this.postStep.length) {
+      const queued = this.postStep;
+      this.postStep = [];
+      for (const fn of queued) fn();
+    }
   }
 
   private onBeginContact(contact: Contact): void {
@@ -101,7 +146,14 @@ export class PhysicsWorld {
     if (!other) return;
     const sensorHit =
       contact.getFixtureA().isSensor() || contact.getFixtureB().isSensor();
-    if (sensorHit) this.bus.emit("sensor", { kind: other.kind, id: other.id });
+    if (sensorHit)
+      this.bus.emit("sensor", {
+        kind: other.kind,
+        id: other.id,
+        toLayer: other.toLayer,
+        upOnly: other.upOnly,
+        bounds: other.bounds,
+      });
     else if (HIT_KINDS.has(other.kind))
       this.bus.emit("hit", { kind: other.kind, id: other.id ?? "" });
   }
@@ -136,11 +188,15 @@ export class PhysicsWorld {
   private collectBodyShapes(body: Body, out: DebugShape[]): void {
     for (let f = body.getFixtureList(); f; f = f.getNext()) {
       const sensor = f.isSensor();
+      // expose the fixture's collision layer so the overlay can color
+      // raised/subway geometry differently from the main field (M10)
+      const cat = f.getFilterCategoryBits();
+      const layer = cat & 0x0010 ? 1 : cat & 0x0020 ? -1 : 0;
       const type = f.getType();
       if (type === "circle") {
         const s = f.getShape() as CircleShape;
         const p = body.getWorldPoint(s.m_p);
-        out.push({ type: "circle", x: p.x, y: p.y, r: s.m_radius, sensor });
+        out.push({ type: "circle", x: p.x, y: p.y, r: s.m_radius, sensor, layer });
       } else if (type === "polygon" || type === "chain") {
         const verts = (f.getShape() as PolygonShape | ChainShape).m_vertices;
         out.push({
@@ -151,6 +207,7 @@ export class PhysicsWorld {
           }),
           closed: type === "polygon",
           sensor,
+          layer,
         });
       }
     }

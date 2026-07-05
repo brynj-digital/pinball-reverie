@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 896 32" width="896" height="32">
+  <!-- MIDNIGHT MIDWAY DMD scene: GHOST TRAIN — the tunnel doors bang open,
+       one ghost swoops past, the doors slam. 7 frames of 128x32 (style
+       guide §6): #fff=3, #888=2, #666=1, black=0. Art rows 0..22; caption
+       from row 24. -->
+  <rect width="896" height="32" fill="#000"/>
+  <!-- constant: the tunnel arch -->
+  <g id="arch" fill="none" stroke="#666" stroke-width="1.2">
+    <path d="M 44 21 L 44 8 A 20 12 0 0 1 84 8 L 84 21"/>
+    <line x1="38" y1="21" x2="90" y2="21"/>
+  </g>
+  <use href="#arch" x="0"/><use href="#arch" x="128"/><use href="#arch" x="256"/>
+  <use href="#arch" x="384"/><use href="#arch" x="512"/><use href="#arch" x="640"/>
+  <use href="#arch" x="768"/>
+  <!-- f0: doors shut -->
+  <g fill="#888"><rect x="46" y="6" width="17" height="15"/><rect x="65" y="6" width="17" height="15"/></g>
+  <!-- f1: doors cracking open -->
+  <g fill="#888"><rect x="174" y="6" width="12" height="15"/><rect x="198" y="6" width="12" height="15"/></g>
+  <!-- f2: open, something pale inside -->
+  <g><rect x="300" y="6" width="6" height="15" fill="#888"/><rect x="334" y="6" width="6" height="15" fill="#888"/>
+    <circle cx="320" cy="13" r="4" fill="#666"/></g>
+  <!-- f3: the ghost swoops out left -->
+  <g>
+    <path d="M 434 8 Q 428 2 422 8 Q 420 14 424 16 L 427 13 L 430 16 L 433 13 Z" fill="#fff"/>
+    <circle cx="426" cy="7" r="1" fill="#000"/><circle cx="430" cy="7" r="1" fill="#000"/>
+  </g>
+  <!-- f4: past the camera, big and bright -->
+  <g>
+    <path d="M 550 10 Q 540 0 530 10 Q 527 18 533 20 L 538 15 L 543 20 L 548 15 Z" fill="#fff"/>
+    <circle cx="536" cy="8" r="1.5" fill="#000"/><circle cx="543" cy="8" r="1.5" fill="#000"/>
+    <g stroke="#888" stroke-width="1"><line x1="556" y1="6" x2="562" y2="4"/><line x1="556" y1="14" x2="563" y2="14"/></g>
+  </g>
+  <!-- f5: gone; a wisp -->
+  <path d="M 648 8 q 6 -4 12 0 q 6 4 12 0" fill="none" stroke="#666" stroke-width="1.2"/>
+  <!-- f6: doors slam -->
+  <g fill="#888"><rect x="814" y="6" width="17" height="15"/><rect x="833" y="6" width="17" height="15"/>
+    <g stroke="#666" stroke-width="1"><line x1="808" y1="4" x2="805" y2="2"/><line x1="856" y1="4" x2="859" y2="2"/></g>
+  </g>
+</svg>

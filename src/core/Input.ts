@@ -17,12 +17,15 @@
 export interface InputState {
   left: boolean;
   right: boolean;
+  /** Upper (third) flipper, on tables that have one (Midway's mallet). */
+  upper: boolean;
   plunger: boolean;
 }
 
 export type BindableAction =
   | "left"
   | "right"
+  | "upper"
   | "plunger"
   | "start"
   | "nudgeLeft"
@@ -35,6 +38,7 @@ export type Bindings = Record<BindableAction, string[]>;
 export const ACTION_LABELS: Record<BindableAction, string> = {
   left: "Left flipper",
   right: "Right flipper",
+  upper: "Upper flipper",
   plunger: "Plunger",
   start: "Start game",
   nudgeLeft: "Nudge left",
@@ -46,6 +50,9 @@ export const ACTION_LABELS: Record<BindableAction, string> = {
 export const DEFAULT_BINDINGS: Bindings = {
   left: ["ShiftLeft", "KeyZ"],
   right: ["ShiftRight", "Slash"],
+  // shares the right flipper's keys by default (traditional pinball wiring);
+  // rebind for an independent stroke
+  upper: ["ShiftRight", "Slash"],
   plunger: ["Space", "ArrowDown"],
   start: ["Enter"],
   nudgeLeft: ["ArrowLeft"],
@@ -76,11 +83,11 @@ export function prettyCode(code: string): string {
 }
 
 export class Input {
-  readonly state: InputState = { left: false, right: false, plunger: false };
+  readonly state: InputState = { left: false, right: false, upper: false, plunger: false };
   bindings: Bindings;
 
   private down = new Set<string>();
-  private pulse = { left: false, right: false };
+  private pulse = { left: false, right: false, upper: false };
   private capturingText = false;
   private typed: string[] = [];
   private resetHandlers: (() => void)[] = [];
@@ -132,7 +139,7 @@ export class Input {
   }
 
   /** True if the flipper was tapped since the last poll, even sub-frame. Clears on read. */
-  consumeTap(side: "left" | "right"): boolean {
+  consumeTap(side: "left" | "right" | "upper"): boolean {
     const was = this.pulse[side];
     this.pulse[side] = false;
     return was;
@@ -203,6 +210,7 @@ export class Input {
     if (isNew) {
       if (this.is("left", e.code)) this.pulse.left = true;
       if (this.is("right", e.code)) this.pulse.right = true;
+      if (this.is("upper", e.code)) this.pulse.upper = true;
       if (this.is("reset", e.code)) this.resetHandlers.forEach((fn) => fn());
       if (this.is("start", e.code)) this.startHandlers.forEach((fn) => fn());
       if (this.is("nudgeLeft", e.code)) this.nudgeHandlers.forEach((fn) => fn("left"));
@@ -219,6 +227,7 @@ export class Input {
   private sync(): void {
     this.state.left = this.bindings.left.some((c) => this.down.has(c));
     this.state.right = this.bindings.right.some((c) => this.down.has(c));
+    this.state.upper = this.bindings.upper.some((c) => this.down.has(c));
     this.state.plunger = this.bindings.plunger.some((c) => this.down.has(c));
   }
 }

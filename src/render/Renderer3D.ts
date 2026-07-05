@@ -1,9 +1,12 @@
 import * as THREE from "three";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import type { Camera } from "../core/Camera";
-import { BALL_RADIUS, PLUNGER, TABLE, flipperVerts } from "../table/geometry";
-import { parseTableSvg } from "../table/SvgCollision";
-import { loadSvgAt } from "./svgImage";
+import { BALL_RADIUS, flipperVerts } from "../table/geometry";
+import { heightAt, parseTableSvg } from "../table/SvgCollision";
+import { loadSvgAt, splitElevatedOverlay } from "./svgImage";
 import type {
   EffectKind,
   Renderer,
@@ -54,7 +57,19 @@ export class Renderer3D implements Renderer {
   /** Top-down orthographic camera for the "flat" classic view. */
   private camFlat = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 3);
   private view: View3D = "tilted";
-  private fog = new THREE.FogExp2(PALETTE.bg, 0.22);
+  private fog = new THREE.FogExp2(PALETTE.bg, 0.14);
+  // post chain (plan §7's final step), SINGLE pass — no double render.
+  // Bloom threshold sits at 1.3, and every chrome material clamps its
+  // outgoing light to 1.25 in-shader (clampBloom): ACES compresses those
+  // values to near-white anyway, so the clamp is invisible — but chrome can
+  // never cross the threshold, so only emissive lamps/flashes bloom.
+  private composer?: EffectComposer;
+  private renderPass?: RenderPass;
+  private bloom?: UnrealBloomPass;
+  /** Soft light pool on the art, following the ball (the plane is unlit —
+   * this is how it appears to respond to the ball's presence). */
+  private ballGlow?: THREE.Mesh;
+  private ballGlowMat?: THREE.MeshBasicMaterial;
   private pmrem?: THREE.PMREMGenerator;
   private envTex?: THREE.Texture;
   private table!: TableRenderData;
@@ -69,6 +84,7 @@ export class Renderer3D implements Renderer {
   private targetMeshes: THREE.Mesh[] = [];
   private rolloverMats: THREE.MeshStandardMaterial[] = [];
   private rolloverGlowMats: THREE.MeshBasicMaterial[] = [];
+  private lampGlowMats: THREE.MeshBasicMaterial[] = [];
   private spinnerMesh?: THREE.Mesh;
   private plungerRod?: THREE.Mesh;
   private built = false;
@@ -95,7 +111,9 @@ export class Renderer3D implements Renderer {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    // with the composer, ACES applies to the WHOLE frame (art included, via
+    // OutputPass) — exposure compensates for ACES's mid-tone compression
+    this.renderer.toneMappingExposure = 1.3;
   }
 
   setView3D(view: View3D): void {
@@ -109,17 +127,36 @@ export class Renderer3D implements Renderer {
     this.camFlat.up.set(0, 0, -1); // screen-up is up-table when looking down
 
     // metallic reflections for the ball and rails ONLY — assigned per-material,
-    // never as scene.environment: RoomEnvironment is strongly HDR (emissive
-    // panels at 17–100×) and as an IBL it out-shines the scene lights on every
-    // diffuse element, washing the palette no matter how the lights are tuned
+    // never as scene.environment (as an IBL it would out-shine the scene
+    // lights on every diffuse element). Hand-built, intensity-CAPPED room:
+    // three's stock RoomEnvironment has emissive panels at 17–100×, which
+    // ACES used to clamp — but bloom reads the linear HDR frame, so those
+    // reflections detonated on the ball/spinner. Panels here top out ~2.2×.
     this.pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.envTex = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.envTex = this.pmrem.fromScene(makeCabinetEnv(), 0.04).texture;
 
     this.buildLights();
     this.buildPlayfield();
     this.buildWalls();
     this.buildPlunger();
     this.buildPanel();
+
+    // the composer renders offscreen, where the canvas's MSAA doesn't
+    // apply — without a multisampled target, adding post-processing
+    // silently turns antialiasing OFF (the rail stepping seen in playtest).
+    // 4x MSAA + half-float keeps both the smooth edges and the HDR range
+    // the bloom threshold needs.
+    this.composer = new EffectComposer(
+      this.renderer,
+      new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 }),
+    );
+    this.renderPass = new RenderPass(this.scene, this.cam3);
+    // threshold above the (clamped) chrome ceiling: only emissives bloom —
+    // lit lamps (2.45), bumper flashes (2.75), sling flashes
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.4, 1.3);
+    this.composer.addPass(this.renderPass);
+    this.composer.addPass(this.bloom);
+    this.composer.addPass(new OutputPass());
   }
 
   private buildLights(): void {
@@ -132,14 +169,16 @@ export class Renderer3D implements Renderer {
     // top-of-table grazing angle blew out the arch rails and upper lamps
     const key = new THREE.DirectionalLight(0xfff2dd, 0.9);
     key.position.set(0.55, 1.6, 1.5);
-    key.target.position.set(TABLE.width / 2, 0, TABLE.height * 0.45);
+    key.target.position.set(this.table.width / 2, 0, this.table.height * 0.45);
     key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
+    // shadow frustum hugs the table (±0.8 wasted half the map off-board)
+    // and the map doubled — crisper element/ball contact shadows
+    key.shadow.mapSize.set(2048, 2048);
     const sc = key.shadow.camera;
-    sc.left = -0.8;
-    sc.right = 0.8;
-    sc.top = 0.8;
-    sc.bottom = -0.8;
+    sc.left = -0.45;
+    sc.right = 0.45;
+    sc.top = 0.7;
+    sc.bottom = -0.7;
     sc.near = 0.1;
     sc.far = 4;
     this.scene.add(key, key.target);
@@ -148,11 +187,12 @@ export class Renderer3D implements Renderer {
   private buildPlayfield(): void {
     const geo = new THREE.PlaneGeometry(this.table.width, this.table.height);
     geo.rotateX(-Math.PI / 2); // face up; texture top edge lands at z=0
-    // UNLIT and un-tonemapped: the art must display exactly as authored, like
-    // the 2D renderer shows it — through a lit material it becomes albedo and
-    // scene lighting multiplies the whole palette brighter than the masters
+    // UNLIT: the art must not become albedo (scene lighting would multiply
+    // the palette away from the masters). Tone mapping now happens on the
+    // whole frame in the composer's OutputPass — the exposure bump in the
+    // constructor keeps the art's overall brightness at authored levels,
+    // and the bake below adds the light direction the flat plane can't get.
     const mat = new THREE.MeshBasicMaterial({ color: 0x232438 });
-    mat.toneMapped = false;
     const plane = new THREE.Mesh(geo, mat);
     plane.position.set(this.table.width / 2, 0, this.table.height / 2);
     this.scene.add(plane);
@@ -169,15 +209,40 @@ export class Renderer3D implements Renderer {
 
     if (this.table.artSvgText) {
       // the same SVG the 2D renderer draws, rasterized once as the plane map
+      // — minus the elevated-rail art: up here the ramp is real geometry,
+      // and its painted twin on the floor read as a ghost of itself (M10)
+      const baseArt = splitElevatedOverlay(this.table.artSvgText)?.base ?? this.table.artSvgText;
       loadSvgAt(
-        this.table.artSvgText,
+        baseArt,
         1280,
         Math.round((1280 * this.table.height) / this.table.width),
         (img) => {
-          const tex = new THREE.Texture(img);
+          // bake a subtle lighting pass into the raster (key-light falloff
+          // toward bottom-right + edge occlusion): the plane stays unlit for
+          // palette fidelity, so this is how the field joins the same light
+          // story as the elements sitting on it
+          const cnv = document.createElement("canvas");
+          cnv.width = img.width;
+          cnv.height = img.height;
+          const c = cnv.getContext("2d")!;
+          c.drawImage(img, 0, 0);
+          c.globalCompositeOperation = "multiply";
+          const lin = c.createLinearGradient(0, 0, cnv.width * 0.6, cnv.height);
+          lin.addColorStop(0, "#ffffff");
+          lin.addColorStop(1, "#dfe3ea");
+          c.fillStyle = lin;
+          c.fillRect(0, 0, cnv.width, cnv.height);
+          const rad = c.createRadialGradient(
+            cnv.width * 0.5, cnv.height * 0.45, cnv.height * 0.28,
+            cnv.width * 0.5, cnv.height * 0.5, cnv.height * 0.62,
+          );
+          rad.addColorStop(0, "#ffffff");
+          rad.addColorStop(1, "#e3e6ec");
+          c.fillStyle = rad;
+          c.fillRect(0, 0, cnv.width, cnv.height);
+          const tex = new THREE.CanvasTexture(cnv);
           tex.colorSpace = THREE.SRGBColorSpace;
           tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-          tex.needsUpdate = true;
           mat.map = tex;
           mat.color.set(0xffffff);
           mat.needsUpdate = true;
@@ -187,38 +252,42 @@ export class Renderer3D implements Renderer {
     }
   }
 
-  /** Walls: the SVG's collision polylines extruded as two stacked rails. */
+  /**
+   * Walls: the SVG's collision polylines extruded as two stacked rails.
+   * Layered walls (M10) ride their height profile — this is where the 3D
+   * renderer earns its keep: ramps and habitrails are genuinely elevated.
+   */
   private buildWalls(): void {
     if (!this.table.artSvgText) return;
-    const railMat = new THREE.MeshStandardMaterial({
-      color: 0xaebcd0,
-      metalness: 0.9,
-      roughness: 0.38,
-      envMap: this.envTex,
-      envMapIntensity: 0.55, // full env reflections read white-hot on the arch
-    });
-    for (const wall of parseTableSvg(this.table.artSvgText).walls) {
+    const makeRailMat = (color: number) =>
+      clampBloom(new THREE.MeshStandardMaterial({
+        color,
+        metalness: 0.9,
+        roughness: 0.38,
+        envMap: this.envTex,
+        envMapIntensity: 0.9, // rebalanced for the capped cabinet env
+      }));
+    // field walls follow the table's theme; elevated wireforms stay OPAQUE
+    // chrome on every table — only the ramp BED between them is glass
+    // (buildGlassBeds below; STYLE-GUIDE §2)
+    const railMat = makeRailMat(this.table.theme?.rail3d ?? 0xaebcd0);
+    const railMatElevated = makeRailMat(this.table.theme?.rail3dElevated ?? 0xbdc9dc);
+    const parsed = parseTableSvg(this.table.artSvgText);
+    const elevation = (p: { x: number; y: number }, layer: number) =>
+      layer === 0 ? 0 : heightAt(parsed.profiles, layer, p.x, p.y, 0.08);
+    for (const wall of parsed.walls) {
       for (const [h, r] of [
         [RAIL_LOW, wall.radius],
         [RAIL_HIGH, wall.radius * 0.7],
       ] as const) {
         const path = new THREE.CurvePath<THREE.Vector3>();
+        const at = (p: { x: number; y: number }) =>
+          new THREE.Vector3(p.x, h + elevation(p, wall.layer), p.y);
         for (let i = 0; i < wall.pts.length - 1; i++) {
-          path.add(
-            new THREE.LineCurve3(
-              new THREE.Vector3(wall.pts[i].x, h, wall.pts[i].y),
-              new THREE.Vector3(wall.pts[i + 1].x, h, wall.pts[i + 1].y),
-            ),
-          );
+          path.add(new THREE.LineCurve3(at(wall.pts[i]), at(wall.pts[i + 1])));
         }
         if (wall.loop) {
-          const last = wall.pts[wall.pts.length - 1];
-          path.add(
-            new THREE.LineCurve3(
-              new THREE.Vector3(last.x, h, last.y),
-              new THREE.Vector3(wall.pts[0].x, h, wall.pts[0].y),
-            ),
-          );
+          path.add(new THREE.LineCurve3(at(wall.pts[wall.pts.length - 1]), at(wall.pts[0])));
         }
         const geo = new THREE.TubeGeometry(
           path,
@@ -227,19 +296,57 @@ export class Renderer3D implements Renderer {
           10,
           wall.loop,
         );
-        this.scene.add(new THREE.Mesh(geo, railMat));
+        this.scene.add(new THREE.Mesh(geo, wall.layer === 0 ? railMat : railMatElevated));
       }
+    }
+
+    // translucent glass beds: a ribbon along each layer-1 height profile,
+    // riding its elevation — the see-through ramp surface between the
+    // opaque chrome edge wires
+    for (const prof of parsed.profiles) {
+      if (prof.layer !== 1) continue;
+      const total = prof.cumLen[prof.cumLen.length - 1] || 1;
+      const pos: number[] = [];
+      for (let i = 0; i < prof.pts.length; i++) {
+        const a = prof.pts[Math.max(0, i - 1)];
+        const b = prof.pts[Math.min(prof.pts.length - 1, i + 1)];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const l = Math.hypot(dx, dy) || 1;
+        const h = prof.hFrom + (prof.hTo - prof.hFrom) * (prof.cumLen[i] / total) + 0.002;
+        pos.push(prof.pts[i].x - (dy / l) * 0.025, h, prof.pts[i].y + (dx / l) * 0.025);
+        pos.push(prof.pts[i].x + (dy / l) * 0.025, h, prof.pts[i].y - (dx / l) * 0.025);
+      }
+      const idx: number[] = [];
+      for (let i = 0; i < prof.pts.length - 1; i++) {
+        const k = i * 2;
+        idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      geo.setIndex(idx);
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x2fc9d6,
+        transparent: true,
+        opacity: 0.16,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      this.scene.add(new THREE.Mesh(geo, mat));
     }
   }
 
   private buildPlunger(): void {
-    const mat = new THREE.MeshStandardMaterial({
-      color: 0x9aa5b8,
-      metalness: 0.85,
-      roughness: 0.35,
-      envMap: this.envTex,
-      envMapIntensity: 0.55,
-    });
+    const PLUNGER = this.table.plunger;
+    const mat = clampBloom(
+      new THREE.MeshStandardMaterial({
+        color: 0x9aa5b8,
+        metalness: 0.85,
+        roughness: 0.35,
+        envMap: this.envTex,
+        envMapIntensity: 0.9,
+      }),
+    );
     const rod = new THREE.CylinderGeometry(0.0035, 0.0035, 0.05, 10);
     rod.rotateX(Math.PI / 2); // lie along z (down the lane)
     this.plungerRod = new THREE.Mesh(rod, mat);
@@ -275,17 +382,47 @@ export class Renderer3D implements Renderer {
   private buildDynamic(snap: WorldSnapshot): void {
     this.built = true;
 
-    this.ballMat = new THREE.MeshStandardMaterial({
-      color: PALETTE.ball,
-      metalness: 1,
-      roughness: 0.12,
-      transparent: true,
-      envMap: this.envTex,
-    });
+    this.ballMat = clampBloom(
+      new THREE.MeshStandardMaterial({
+        color: PALETTE.ball,
+        metalness: 1,
+        // mirror chrome: clampBloom caps its output under the bloom
+        // threshold, and low roughness avoids the banded look of blurred
+        // env-map mips on the lower hemisphere
+        roughness: 0.12,
+        transparent: true,
+        envMap: this.envTex,
+        envMapIntensity: 0.9,
+      }),
+    );
     this.ballMesh = new THREE.Mesh(new THREE.SphereGeometry(BALL_RADIUS, 32, 24), this.ballMat);
     this.ballMesh.castShadow = true;
     this.scene.add(this.ballMesh);
     this.prevBallPos.set(snap.ball.x, BALL_RADIUS, snap.ball.y);
+
+    // light pool under the ball: the unlit art can't receive a real point
+    // light, so a soft additive pool rides the floor beneath the ball.
+    // Radial-gradient sprite, NOT a plain disc — a uniform circle has a
+    // hard edge and reads as a spotlight cutout (seen in playtest).
+    const glowCnv = document.createElement("canvas");
+    glowCnv.width = glowCnv.height = 64;
+    const gctx = glowCnv.getContext("2d")!;
+    const grad = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, "rgba(191, 216, 255, 0.4)");
+    grad.addColorStop(0.5, "rgba(191, 216, 255, 0.12)");
+    grad.addColorStop(1, "rgba(191, 216, 255, 0)");
+    gctx.fillStyle = grad;
+    gctx.fillRect(0, 0, 64, 64);
+    this.ballGlowMat = new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(glowCnv),
+      transparent: true,
+      opacity: 0.3,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    this.ballGlow = new THREE.Mesh(new THREE.CircleGeometry(0.036, 24), this.ballGlowMat);
+    this.ballGlow.geometry.rotateX(-Math.PI / 2);
+    this.scene.add(this.ballGlow);
 
     // element materials get NO envMap — see init(); they're lit by the scene
     // lights alone so their albedo reads at authored saturation
@@ -303,13 +440,15 @@ export class Renderer3D implements Renderer {
     });
 
     // rim ring matches the rail chrome so bumpers share the table's metal
-    const bumperRimMat = new THREE.MeshStandardMaterial({
-      color: 0xbdc9dc,
-      metalness: 0.9,
-      roughness: 0.35,
-      envMap: this.envTex,
-      envMapIntensity: 0.55,
-    });
+    const bumperRimMat = clampBloom(
+      new THREE.MeshStandardMaterial({
+        color: 0xbdc9dc,
+        metalness: 0.9,
+        roughness: 0.35,
+        envMap: this.envTex,
+        envMapIntensity: 0.9,
+      }),
+    );
     for (const b of snap.elements.bumpers) {
       const body = new THREE.Mesh(
         new THREE.CylinderGeometry(b.r * 0.92, b.r, 0.026, 24),
@@ -400,16 +539,36 @@ export class Renderer3D implements Renderer {
       this.scene.add(ring, glow);
     }
 
+    // extra insert lamps (depth gauge etc.): additive discs like the
+    // rollover glow, colored per-lamp from the snapshot's rgb string
+    for (const l of snap.elements.lamps) {
+      const [r, g, b] = l.rgb.split(",").map((v) => Number(v.trim()) / 255);
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(r, g, b),
+        transparent: true,
+        opacity: 0.08,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const glow = new THREE.Mesh(new THREE.CircleGeometry(0.012, 20), glowMat);
+      glow.geometry.rotateX(-Math.PI / 2);
+      glow.position.set(l.x, 0.0012, l.y);
+      this.lampGlowMats.push(glowMat);
+      this.scene.add(glow);
+    }
+
     const sp = snap.elements.spinner;
     this.spinnerMesh = new THREE.Mesh(
       new THREE.BoxGeometry(sp.halfW * 2 - 0.004, 0.0016, 0.02),
-      new THREE.MeshStandardMaterial({
-        color: 0xd8dee9,
-        metalness: 0.85,
-        roughness: 0.3,
-        envMap: this.envTex,
-        envMapIntensity: 0.55,
-      }),
+      clampBloom(
+        new THREE.MeshStandardMaterial({
+          color: 0xd8dee9,
+          metalness: 0.85,
+          roughness: 0.42,
+          envMap: this.envTex,
+          envMapIntensity: 0.5,
+        }),
+      ),
     );
     this.spinnerMesh.position.set(sp.x, BALL_RADIUS, sp.y);
     this.scene.add(this.spinnerMesh);
@@ -425,7 +584,7 @@ export class Renderer3D implements Renderer {
         depthWrite: false,
         side: THREE.DoubleSide,
       });
-      const mesh = new THREE.Mesh(new THREE.RingGeometry(0.72, 1, 28), mat);
+      const mesh = new THREE.Mesh(new THREE.RingGeometry(0.84, 1, 28), mat);
       mesh.geometry.rotateX(-Math.PI / 2);
       this.scene.add(mesh);
       fx = { mesh, mat, t: 0, live: false, grow: 0.1 };
@@ -433,7 +592,7 @@ export class Renderer3D implements Renderer {
     }
     fx.live = true;
     fx.t = 0;
-    fx.grow = kind === "flash" ? 0.09 : 0.14;
+    fx.grow = kind === "flash" ? 0.06 : 0.09;
     fx.mat.color.set(PALETTE.effect[kind]);
     fx.mesh.position.set(x, 0.004, y);
     fx.mesh.visible = true;
@@ -446,9 +605,10 @@ export class Renderer3D implements Renderer {
     const dt = this.lastT ? Math.min(now - this.lastT, 0.1) : 0.016;
     this.lastT = now;
 
-    // ball: position + faked rolling (real spin is planar and reads wrong)
+    // ball: position + faked rolling (real spin is planar and reads wrong).
+    // Height (M10) is real here: ramps lift the ball, subways sink it.
     const ball = this.ballMesh!;
-    ball.position.set(snap.ball.x, BALL_RADIUS, snap.ball.y);
+    ball.position.set(snap.ball.x, BALL_RADIUS + snap.ball.h, snap.ball.y);
     const delta = ball.position.clone().sub(this.prevBallPos);
     const dist = delta.length();
     if (dist > 1e-6) {
@@ -458,6 +618,14 @@ export class Renderer3D implements Renderer {
     this.prevBallPos.copy(ball.position);
     this.ballMat!.opacity = snap.ball.alpha;
     ball.visible = snap.ball.alpha > 0.02;
+    // the light pool stays on the floor; it spreads and dims as the ball
+    // climbs a ramp, and follows it dimmer through a subway
+    const pool = 1 + Math.max(0, snap.ball.h) * 12;
+    this.ballGlow!.position.set(snap.ball.x, 0.0018, snap.ball.y);
+    this.ballGlow!.scale.set(pool, 1, pool);
+    this.ballGlowMat!.opacity =
+      (snap.ball.layer === -1 ? 0.12 : 0.3 / pool) * snap.ball.alpha;
+    this.ballGlow!.visible = ball.visible;
 
     snap.flippers.forEach((f, i) => {
       this.flipperMeshes[i].rotation.y = -f.angle;
@@ -479,9 +647,12 @@ export class Renderer3D implements Renderer {
       this.rolloverMats[i].emissiveIntensity = 0.25 + r.lit * 2.2;
       this.rolloverGlowMats[i].opacity = 0.1 + r.lit * 0.5;
     });
+    snap.elements.lamps.forEach((l, i) => {
+      this.lampGlowMats[i].opacity = 0.08 + l.lit * 0.55;
+    });
     this.spinnerMesh!.rotation.x = snap.elements.spinner.angle;
     this.plungerRod!.position.z =
-      PLUNGER.tipRestY + PLUNGER.pull * snap.plungerCharge + 0.025;
+      this.table.plunger.tipRestY + this.table.plunger.pull * snap.plungerCharge + 0.025;
 
     for (const fx of this.fx) {
       if (!fx.live) continue;
@@ -494,7 +665,8 @@ export class Renderer3D implements Renderer {
       }
       const s = 0.015 + k * fx.grow;
       fx.mesh.scale.set(s, 1, s);
-      fx.mat.opacity = 0.85 * (1 - k);
+      // subtle impact cue, not a shockwave — quadratic fade ends it early
+      fx.mat.opacity = 0.3 * (1 - k) * (1 - k);
     }
 
     const cx = this.table.width / 2;
@@ -512,7 +684,8 @@ export class Renderer3D implements Renderer {
       const cz = camera.y + halfH + camera.shakeY;
       this.camFlat.position.set(cx + camera.shakeX, 1.2, cz);
       this.camFlat.lookAt(cx + camera.shakeX, 0, cz);
-      this.renderer.render(this.scene, this.camFlat);
+      this.renderPass!.camera = this.camFlat;
+      this.composer!.render();
     } else {
       // tilted chase camera mirroring the 2D scroll window [camera.y, +viewH].
       // Framing solved against the frustum: with fov 38 these factors put the
@@ -527,7 +700,8 @@ export class Renderer3D implements Renderer {
         focusZ + camera.viewH * 0.69,
       );
       this.cam3.lookAt(cx, 0, focusZ);
-      this.renderer.render(this.scene, this.cam3);
+      this.renderPass!.camera = this.cam3;
+      this.composer!.render();
     }
 
     // DOM chrome updates (throttled; the DMD canvas repaints itself)
@@ -554,6 +728,9 @@ export class Renderer3D implements Renderer {
     this.lastDpr = dpr;
     this.renderer.setPixelRatio(dpr);
     this.renderer.setSize(w, h, false);
+    this.composer?.setPixelRatio(dpr);
+    this.composer?.setSize(w, h);
+    this.bloom?.setSize(w * dpr, h * dpr);
     this.cam3.aspect = w / h;
     this.cam3.updateProjectionMatrix();
   }
@@ -570,8 +747,87 @@ export class Renderer3D implements Renderer {
       }
     });
     this.pmrem?.dispose();
+    this.composer?.dispose();
     this.renderer.dispose();
   }
+}
+
+/**
+ * Clamp a material's outgoing light in-shader, just under the bloom
+ * threshold. ACES already compresses these values to near-white, so the
+ * clamp is visually invisible — but the bloom pass can never see chrome
+ * speculars (the key light's lobe on a smooth metal sphere peaks 5–10×,
+ * past any sane threshold). Zero cost: one min() in the fragment shader.
+ */
+function clampBloom<T extends THREE.Material>(mat: T): T {
+  mat.onBeforeCompile = (shader) => {
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <opaque_fragment>",
+      "outgoingLight = min(outgoingLight, vec3(1.25));\n#include <opaque_fragment>",
+    );
+  };
+  return mat;
+}
+
+/**
+ * Environment for the chrome reflections: a dim arcade room with one long
+ * ceiling striplight, two soft side panels and a faint warm back wall —
+ * cabinet GI, essentially. Every emitter is intensity-capped (≤2.2×) so
+ * env glints stay just above the bloom threshold instead of overdriving it.
+ */
+function makeCabinetEnv(): THREE.Scene {
+  const s = new THREE.Scene();
+  // Stainless is a GRADIENT, not a level: bright above, a dark "chrome
+  // horizon" band at the equator, softer bounce below — the same 3-stop
+  // chrome ramp with a hard mid-stop the style guide (§7) uses for the 2D
+  // ball. A gradient dome gives the metal that structure; a uniform room
+  // reads as flat reflective grey (playtested both ways).
+  const cnv = document.createElement("canvas");
+  cnv.width = 2;
+  cnv.height = 256;
+  const c = cnv.getContext("2d")!;
+  const g = c.createLinearGradient(0, 0, 0, 256);
+  g.addColorStop(0, "#eef3fa"); // zenith — bright sky
+  g.addColorStop(0.38, "#a8b2c2");
+  g.addColorStop(0.52, "#3a4048"); // the horizon band, hard-ish stop
+  g.addColorStop(0.6, "#272c33");
+  g.addColorStop(0.78, "#4e565f"); // floor bounce
+  g.addColorStop(1, "#3d444c");
+  c.fillStyle = g;
+  c.fillRect(0, 0, 2, 256);
+  const domeTex = new THREE.CanvasTexture(cnv);
+  domeTex.colorSpace = THREE.SRGBColorSpace;
+  const dome = new THREE.Mesh(
+    new THREE.SphereGeometry(20, 16, 24),
+    new THREE.MeshBasicMaterial({ map: domeTex, side: THREE.BackSide }),
+  );
+  s.add(dome);
+  const panel = (
+    w: number,
+    h: number,
+    intensity: number,
+    x: number,
+    y: number,
+    z: number,
+    rx = 0,
+    ry = 0,
+  ) => {
+    const mat = new THREE.MeshBasicMaterial();
+    mat.color.setScalar(intensity);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    m.position.set(x, y, z);
+    m.rotation.set(rx, ry, 0);
+    s.add(m);
+  };
+  panel(6, 1.2, 2.2, 0, 4, 0, Math.PI / 2); // ceiling striplight
+  panel(3, 2, 1.4, -4, 1.5, 0, 0, Math.PI / 2); // left softbox
+  panel(3, 2, 1.4, 4, 1.5, 0, 0, -Math.PI / 2); // right softbox
+
+  const warm = new THREE.MeshBasicMaterial({ color: new THREE.Color(1.0, 0.85, 0.65) });
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.5), warm);
+  back.position.set(0, 1.2, -4.5);
+  s.add(back);
+  return s;
 }
 
 /**

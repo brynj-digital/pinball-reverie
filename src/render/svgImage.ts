@@ -30,3 +30,35 @@ export function loadSvgAt(
   };
   img.src = url;
 }
+
+/**
+ * Split a playfield SVG at its `art-rails-elevated` group (M10): the group
+ * (plus the <defs> its <use> hrefs need) becomes a standalone transparent
+ * overlay document, and the base document has it removed — the renderer
+ * composites the overlay over/under the ball by layer. Tables without
+ * elevated walls return undefined. String surgery, like the collision
+ * parser — no DOMParser, same text in every renderer.
+ */
+export function splitElevatedOverlay(svgText: string): { base: string; overlay: string } | undefined {
+  const start = svgText.indexOf('<g id="art-rails-elevated"');
+  if (start < 0) return undefined;
+  const re = /<\/?g\b/g;
+  re.lastIndex = start;
+  let depth = 0;
+  let end = -1;
+  for (let m = re.exec(svgText); m; m = re.exec(svgText)) {
+    if (m[0] === "<g") depth++;
+    else if (--depth === 0) {
+      end = svgText.indexOf(">", m.index) + 1;
+      break;
+    }
+  }
+  if (end <= 0) return undefined;
+  const group = svgText.slice(start, end);
+  const defs = (svgText.match(/<defs>[\s\S]*?<\/defs>/g) ?? []).join("");
+  const open = svgText.match(/<svg\b[^>]*>/)?.[0] ?? '<svg xmlns="http://www.w3.org/2000/svg">';
+  return {
+    base: svgText.slice(0, start) + svgText.slice(end),
+    overlay: `${open}${defs}${group}</svg>`,
+  };
+}

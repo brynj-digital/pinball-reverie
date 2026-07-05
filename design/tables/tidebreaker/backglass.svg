@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <!-- TIDEBREAKER backglass (M10): shown in the landscape side panel above
+       the DMD (§4.5). Chrome-horizon wordmark, the dive bell descending a
+       moonlit trench, the leviathan's eye in the dark. Abyss field ramp +
+       cyan feature color per STYLE-GUIDE §2 (2026-07-05 amendment). -->
+  <defs>
+    <linearGradient id="tbSea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14303c"/>
+      <stop offset="0.5" stop-color="#0e2129"/>
+      <stop offset="1" stop-color="#071217"/>
+    </linearGradient>
+    <linearGradient id="tbChrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <radialGradient id="tbBellGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2fc9d6" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#2fc9d6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="tbEye" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff3e9a" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#ff3e9a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tbGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="300" height="360" fill="url(#tbSea)"/>
+
+  <!-- moonlight through the surface -->
+  <g fill="#2fc9d6">
+    <polygon points="70,14 40,200 62,206 84,16" opacity="0.06"/>
+    <polygon points="150,10 138,220 162,220 164,10" opacity="0.07"/>
+    <polygon points="228,14 240,200 262,192 244,18" opacity="0.05"/>
+  </g>
+  <path d="M 0 14 q 20 -8 40 0 q 20 8 40 0 q 20 -8 40 0 q 20 8 40 0 q 20 -8 40 0 q 20 8 40 0 q 20 -8 40 0 q 12 5 20 2"
+        fill="none" stroke="#7f8fc9" stroke-width="2" opacity="0.5"/>
+
+  <!-- trench walls closing in -->
+  <path d="M 0 120 L 46 190 L 30 360 L 0 360 Z" fill="#071217" stroke="#07080d" stroke-width="2"/>
+  <path d="M 300 140 L 250 210 L 272 360 L 300 360 Z" fill="#071217" stroke="#07080d" stroke-width="2"/>
+
+  <!-- the dive bell on its cable, lamp burning -->
+  <g>
+    <line x1="150" y1="20" x2="150" y2="112" stroke="#aeb6c8" stroke-width="2.5"/>
+    <line x1="150" y1="20" x2="150" y2="112" stroke="#07080d" stroke-width="0.8"/>
+    <circle cx="150" cy="150" r="56" fill="url(#tbBellGlow)"/>
+    <circle cx="150" cy="148" r="34" fill="#262a3e" stroke="#07080d" stroke-width="2.5"/>
+    <circle cx="150" cy="148" r="34" fill="none" stroke="#9c7c2c" stroke-width="4"/>
+    <circle cx="150" cy="148" r="34" fill="none" stroke="#e0b64e" stroke-width="1.4" stroke-dasharray="4 5"/>
+    <rect x="140" y="108" width="20" height="10" rx="2" fill="#9c7c2c" stroke="#07080d" stroke-width="1.5"/>
+    <!-- porthole with a diver's silhouette looking out -->
+    <circle cx="150" cy="148" r="17" fill="#0e2129" stroke="#07080d" stroke-width="2"/>
+    <circle cx="150" cy="148" r="17" fill="none" stroke="#2fc9d6" stroke-width="1.4" opacity="0.8"/>
+    <circle cx="146" cy="146" r="6" fill="#12141f"/>
+    <path d="M 138 156 q 8 -6 16 0" fill="none" stroke="#12141f" stroke-width="4"/>
+    <!-- key-light glint -->
+    <path d="M 128 132 a 30 30 0 0 1 12 -9" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+    <g fill="#e0b64e">
+      <circle cx="150" cy="117" r="1.6"/><circle cx="122" cy="140" r="1.6"/>
+      <circle cx="178" cy="140" r="1.6"/><circle cx="130" cy="170" r="1.6"/><circle cx="170" cy="170" r="1.6"/>
+    </g>
+  </g>
+
+  <!-- the leviathan below: a spine of ridges and one lit eye -->
+  <g>
+    <path d="M 20 262 q 60 -26 130 -14 q 80 12 130 -8 L 300 292 q -70 24 -150 12 q -80 -12 -130 4 Z"
+          fill="#07080d" opacity="0.85"/>
+    <g fill="#071217" stroke="#07080d" stroke-width="1.5">
+      <path d="M 84 250 L 96 230 L 108 248 Z"/>
+      <path d="M 128 244 L 142 222 L 156 242 Z"/>
+      <path d="M 176 242 L 190 222 L 202 240 Z"/>
+    </g>
+    <circle cx="226" cy="256" r="20" fill="url(#tbEye)"/>
+    <circle cx="226" cy="256" r="6" fill="#ff3e9a" filter="url(#tbGlow)"/>
+    <circle cx="226" cy="256" r="2.2" fill="#07080d"/>
+  </g>
+
+  <!-- bubbles rising off the bell -->
+  <g fill="none" stroke="#7f8fc9" opacity="0.5">
+    <circle cx="184" cy="118" r="3" stroke-width="1.4"/>
+    <circle cx="190" cy="100" r="4" stroke-width="1.4"/>
+    <circle cx="185" cy="80" r="5" stroke-width="1.6"/>
+  </g>
+
+  <!-- wordmark: chrome horizon, cyan rim, violet reverie glow -->
+  <g>
+    <text x="150" y="322" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="34" font-weight="800" letter-spacing="1.5"
+          fill="#4e37a8" opacity="0.55" filter="url(#tbGlow)">TIDEBREAKER</text>
+    <text x="150" y="318" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="34" font-weight="800" letter-spacing="1.5"
+          fill="url(#tbChrome)" stroke="#07080d" stroke-width="2" paint-order="stroke">TIDEBREAKER</text>
+    <text x="150" y="318" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="34" font-weight="800" letter-spacing="1.5"
+          fill="none" stroke="#2fc9d6" stroke-width="0.8" opacity="0.9">TIDEBREAKER</text>
+    <text x="150" y="340" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="9" letter-spacing="4" fill="#7f8fc9">AN · ABYSSAL · SALVAGE</text>
+  </g>
+
+  <!-- deco frame -->
+  <rect x="5" y="5" width="290" height="350" fill="none" stroke="#2c3352" stroke-width="3"/>
+  <rect x="9" y="9" width="282" height="342" fill="none" stroke="#9c7c2c" stroke-width="1.5"/>
+</svg>

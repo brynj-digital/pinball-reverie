@@ -1,9 +1,26 @@
 # Tidebreaker — Table 2 design brief
 
-**Status: concept approved (2026-07-05), pre-authoring.** No SVG, tokens, or
-code exist yet. This brief is the table's design truth until
-`playfield.svg` + `rules.json` supersede its specifics; update it if the
-design moves during authoring.
+**Status: v1 built (2026-07-05).** `playfield.svg` + `rules.json` +
+`src/table/defs/tidebreaker.ts` are now the specifics; this brief remains
+the design intent. Deltas from the concept, found during clearance-solving
+and simcheck/soak:
+
+- **The airlock moved.** A mid-field diagonal bank sat inside the winch
+  ramp's corridor (every bank shot tripped the ramp's layer sensor), and a
+  free-standing staircase housing could not be sealed against the ball-gap
+  rules. v1 recesses the three hatch-bolt targets into the orbit wall's
+  field face (left side, faces pointing right, Moondial's proven housing
+  pattern mirrored) — an intentional **right-flipper cross-field shot**.
+  Flipper jobs became: left = trench mouth + dive bell; right = winch ramp
+  (straight up) + airlock (cross-field).
+- **The Raised Deck was cut** per §7's cut line (no mini-flipper or
+  diverter in v1); the height centrepiece is the ramp + habitrail circuit.
+- **Real outlanes were engineered in** (the Moondial funnel seals its
+  corners): outlane guide walls at x=52/470 with 40 mm channels, plus a
+  deflector off the left shell so Current exits can't feed the outlane.
+- **`data-up-only`** was added to the layer-switch convention after soak
+  found stray balls crossing the ramp-entry zone sideways becoming
+  wrong-layer ghosts (STYLE-GUIDE §4).
 
 **Premise:** a salvage diver works a single dive down an abyssal trench to a
 wreck on the seafloor. The tall scrolling playfield *is* the trench — the
@@ -35,8 +52,9 @@ active at a time.
 
 ## 2. Layout
 
-Playfield `0..520`, plunger lane `520..575` (fiction: the **moon pool** —
-the launch hole in a real dive platform). Deliberately **asymmetric**
+Playfield `0..520`, plunger lane `520..575` (fiction: the **descent
+shaft** — originally labelled "moon pool", the real diving term, but in a
+game whose other table is MOONDIAL it read as theme bleed). Deliberately **asymmetric**
 interior (STYLE-GUIDE §3, as amended): the two flippers have different
 jobs, which is what makes the table shoot differently from Moondial.
 

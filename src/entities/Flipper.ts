@@ -1,7 +1,7 @@
 import { Body, Circle, Polygon, RevoluteJoint, Vec2, World } from "planck";
 import type { Tuning } from "../tuning";
 import type { FixtureTag } from "../core/PhysicsWorld";
-import { FLIPPER, flipperVerts, type FlipperSide } from "../table/geometry";
+import { FLIPPER, flipperVerts, type FlipperSide, type Pt } from "../table/geometry";
 
 /**
  * Flipper = dynamic body on a revolute joint with motor + angle limits
@@ -23,8 +23,8 @@ export class Flipper {
     tableBody: Body,
     readonly side: FlipperSide,
     tuning: Tuning,
+    pivot: Pt,
   ) {
-    const pivot = side === "left" ? FLIPPER.pivotL : FLIPPER.pivotR;
     const restAngle = side === "left" ? FLIPPER.restAngle : -FLIPPER.restAngle;
 
     this.body = world.createBody({

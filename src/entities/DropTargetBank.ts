@@ -1,10 +1,11 @@
 import { Body, Box, Fixture, Vec2, World } from "planck";
 import { EventBus } from "../core/EventBus";
 import type { PhysicsWorld, FixtureTag } from "../core/PhysicsWorld";
-import { DROP_TARGETS } from "../table/geometry";
+import type { DropTargetsDef } from "../table/geometry";
 
 interface Target {
   id: string;
+  x: number;
   y: number;
   up: boolean;
   fixture: Fixture | null;
@@ -26,10 +27,11 @@ export class DropTargetBank {
     world: World,
     private physics: PhysicsWorld,
     private bus: EventBus,
+    readonly def: DropTargetsDef,
   ) {
     this.body = world.createBody();
-    this.targets = DROP_TARGETS.ys.map((y, i) => {
-      const t: Target = { id: String(i + 1), y, up: false, fixture: null };
+    this.targets = def.targets.map((d) => {
+      const t: Target = { id: d.id, x: d.x, y: d.y, up: false, fixture: null };
       return t;
     });
     for (const t of this.targets) this.raise(t);
@@ -64,7 +66,7 @@ export class DropTargetBank {
   private raise(t: Target): void {
     t.up = true;
     t.fixture = this.body.createFixture({
-      shape: new Box(DROP_TARGETS.hw, DROP_TARGETS.hh, new Vec2(DROP_TARGETS.x, t.y), 0),
+      shape: new Box(this.def.hw, this.def.hh, new Vec2(t.x, t.y), 0),
       restitution: 0.2,
       friction: 0.1,
       userData: { kind: "target", id: t.id } satisfies FixtureTag,
