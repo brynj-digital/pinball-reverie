@@ -54,6 +54,8 @@
   --magenta-600: #b01860;
   --cyan-400: #2fc9d6;
   --cyan-600: #147986;
+  --green-400: #39ff14; /* DAYGLO green: elevated ramp glass (M11 beds) */
+  --green-600: #1cae0d;
   --violet-400: #8c6bff; /* the Reverie signature hue */
   --violet-600: #4e37a8;
   --alert-400: #ff5555; /* tilt, danger lamps */

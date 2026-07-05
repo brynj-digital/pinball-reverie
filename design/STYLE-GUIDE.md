@@ -19,7 +19,7 @@ kept deliberately:
   outline-less flat design, no photorealism, no soft ambient blur.
 - **Saturation lives in the accents.** Compositions are ~70% field/steel
   darks, ~20% chrome/steel mids, ≤10% neon (`magenta / cyan / violet /
-  brass`). The dark field is what makes lamps read as *lit*.
+  green / brass`). The dark field is what makes lamps read as *lit*.
 - **Could-be-real.** Every drawn element must be plausible on a physical
   machine: printed playfield art, plastic inserts, lamps, screened metal.
 
@@ -28,7 +28,7 @@ kept deliberately:
 See [tokens.css](tokens.css) and [previews/colors.html](previews/colors.html).
 Families: **field** (playfield darks), **steel** (blue structure), **chrome**
 (ball/rails/bezels), **brass** (flippers, warm mechanicals), **neon** accents
-(magenta / cyan / violet + alert red), **DMD amber** (5-level ramp), and
+(magenta / cyan / green / violet + alert red), **DMD amber** (5-level ramp), and
 **debug** (green bodies / orange sensors — engineering overlay only, never in
 shipped art; these exact values are what the in-game debug overlay draws).
 
@@ -78,8 +78,9 @@ Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
 are OPAQUE bright chrome, and only the ramp BED between them — a wide
-pale-cyan wash along the height profiles — is semi-transparent (~0.19
-combined), like translucent ramp plastic. Renderers composite the
+DAYGLO-GREEN wash (`--green-400` #39ff14 at ~0.2, amended 2026-07-05 by
+direction; was pale cyan) spanning the full rail-to-rail interior along
+the height profiles — semi-transparent fluorescent ramp plastic. Renderers composite the
 `art-rails-elevated` group separately — over the ball on the main field
 (the ball shows through the bed, disappears behind the wires), under it on
 the raised layer — so which level the ball is on is always unambiguous.

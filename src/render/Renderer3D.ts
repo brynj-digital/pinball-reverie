@@ -197,10 +197,11 @@ export class Renderer3D implements Renderer {
     this.scene.add(plane);
 
     // basic materials can't receive shadows — a transparent shadow catcher
-    // just above the art keeps the ball/flipper shadows
+    // just above the art keeps the ball/flipper shadows. Opacity stays low:
+    // at 0.3 the ball's shadow read as a hard dark blob (playtest)
     const catcher = new THREE.Mesh(
       geo.clone(),
-      new THREE.ShadowMaterial({ opacity: 0.3 }),
+      new THREE.ShadowMaterial({ opacity: 0.16 }),
     );
     catcher.position.set(this.table.width / 2, 0.0004, this.table.height / 2);
     catcher.receiveShadow = true;
@@ -325,9 +326,9 @@ export class Renderer3D implements Renderer {
       geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
       geo.setIndex(idx);
       const mat = new THREE.MeshBasicMaterial({
-        color: 0x2fc9d6,
+        color: 0x39ff14,
         transparent: true,
-        opacity: 0.16,
+        opacity: 0.24,
         depthWrite: false,
         side: THREE.DoubleSide,
       });
@@ -406,20 +407,23 @@ export class Renderer3D implements Renderer {
     const glowCnv = document.createElement("canvas");
     glowCnv.width = glowCnv.height = 64;
     const gctx = glowCnv.getContext("2d")!;
+    // Kept deliberately faint: at higher alphas the pool reads as a halo
+    // around the ball from the tilted camera (playtest feedback, twice).
     const grad = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grad.addColorStop(0, "rgba(191, 216, 255, 0.4)");
-    grad.addColorStop(0.5, "rgba(191, 216, 255, 0.12)");
+    grad.addColorStop(0, "rgba(191, 216, 255, 0.2)");
+    grad.addColorStop(0.35, "rgba(191, 216, 255, 0.08)");
+    grad.addColorStop(0.7, "rgba(191, 216, 255, 0.02)");
     grad.addColorStop(1, "rgba(191, 216, 255, 0)");
     gctx.fillStyle = grad;
     gctx.fillRect(0, 0, 64, 64);
     this.ballGlowMat = new THREE.MeshBasicMaterial({
       map: new THREE.CanvasTexture(glowCnv),
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.16,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
-    this.ballGlow = new THREE.Mesh(new THREE.CircleGeometry(0.036, 24), this.ballGlowMat);
+    this.ballGlow = new THREE.Mesh(new THREE.CircleGeometry(0.044, 24), this.ballGlowMat);
     this.ballGlow.geometry.rotateX(-Math.PI / 2);
     this.scene.add(this.ballGlow);
 
@@ -490,8 +494,10 @@ export class Renderer3D implements Renderer {
         metalness: 0.3,
         roughness: 0.5,
       });
-      // rubber-ring corners — the raw physics triangle is razor-sharp
-      const mesh = extrudeFlat(roundCorners(s.verts, 0.005), 0.018, mat);
+      // rubber-ring corners — the raw physics triangle is razor-sharp; 8 mm
+      // because the up-table apex is acute and a smaller fillet still reads
+      // pointed through the quadratic's tight midpoint
+      const mesh = extrudeFlat(roundCorners(s.verts, 0.008), 0.018, mat);
       mesh.position.y = 0.001;
       mesh.castShadow = true;
       this.slingMats.push(mat);
@@ -627,7 +633,7 @@ export class Renderer3D implements Renderer {
     this.ballGlow!.position.set(snap.ball.x, 0.0018, snap.ball.y);
     this.ballGlow!.scale.set(pool, 1, pool);
     this.ballGlowMat!.opacity =
-      (snap.ball.layer === -1 ? 0.12 : 0.3 / pool) * snap.ball.alpha;
+      (snap.ball.layer === -1 ? 0.07 : 0.16 / pool) * snap.ball.alpha;
     this.ballGlow!.visible = ball.visible;
 
     snap.flippers.forEach((f, i) => {
