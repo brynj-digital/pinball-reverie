@@ -36,6 +36,19 @@ concept, found during clearance-solving and simcheck/soak:
   the drain sequence). Drain contacts are now ignored while a kicker or
   subway holds the ball.
 
+**M11 deltas (true height, plan §7a — this table drove the migration):**
+the ball now really rides the ramps; entry zones, `striker-back`, and all
+layer sensors are gone (boarding is geometry — any swing that reaches the
+mouth rides). Consequences found by physics: the striker's curled mouth
+became a real pocket against the mallet base and was removed (the lane now
+starts as an open throat above the bat); the coaster's valley between
+crests stranded slow riders — a real machine's ball-search problem — so
+the profile is now crest → gentle continuous descent; both the coaster
+drop-off and the striker's bell end are **ballistic drops** (the rail ends
+in the air and the ball genuinely falls to the inlane / the P lane);
+climbs cost real energy, so the mallet must connect cleanly to ring the
+bell.
+
 **Premise:** a travelling funfair after dark. The tall scrolling playfield
 is the midway itself — the park gates and ticket booth at the bottom, the
 big rides stacked up the field, the ferris wheel crowning the skyline at

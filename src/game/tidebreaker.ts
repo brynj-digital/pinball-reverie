@@ -42,11 +42,23 @@ export class TidebreakerLogic implements TableLogic {
   private leviathanUntil = -Infinity;
   private leviathanWasActive = false;
 
+  /** A haul only counts when the ramp was boarded at the mouth (both ends
+   * of the winch circuit sit at ground height). */
+  private winchFromMouth = false;
+
   constructor(private ctx: TableLogicCtx) {
-    ctx.bus.on("sensor", ({ kind, id }) => {
+    ctx.bus.on("sensor", ({ kind }) => {
       if (kind === "ramp-entry") this.currentEnd("entry");
       else if (kind === "ramp-exit") this.currentEnd("exit");
-      else if (kind === "layer" && id === "rail-out") this.onWinch();
+    });
+    // M11: the ramp ride is a surface event — boarded at the mouth (right,
+    // x ≈ 0.349), paid when the habitrail drops it off at the left wall
+    ctx.bus.on("surface", ({ from, to, x }) => {
+      if (to === "winch") this.winchFromMouth = x > 0.25;
+      else if (from === "winch") {
+        if (x < 0.15 && this.winchFromMouth) this.onWinch();
+        this.winchFromMouth = false;
+      }
     });
     ctx.bus.on("bankComplete", () => {
       if (this.ctx.scoring.muted) return;

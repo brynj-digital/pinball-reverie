@@ -10,13 +10,16 @@
  *   height-profile-<name>     <path>                          render-height /
  *                                                             subway guide
  *
- * Layers (M10): any collision path or sensor may carry data-layer (integer,
- * default 0 — the main playfield; 1 = raised rails/ramps; -1 = subway). A
- * fixture collides with the ball only while the ball is on its layer.
- * Sensors may carry data-to-layer: crossing one switches the ball's layer.
- * Height profiles carry data-height-from/-to (mm relative to the playfield
- * surface); renderers project the ball onto them to derive display height —
- * physics never reads it (plan §7: physics stays planar).
+ * Height (M11, plan §7a): height profiles carry data-height-from/-to (mm
+ * relative to the playfield surface). Profiles with data-surface (plus
+ * data-surface-width, mm) group into physical SURFACES — the ball really
+ * rides them (src/table/Surfaces.ts): slope forces, airborne drops, and
+ * per-contact height gating replace M10's layer bits and switch sensors.
+ * Walls may carry data-surface (an elevated run's own rails — their band
+ * follows the local surface height) or data-z="all" (full-height: the
+ * shell and plunger-lane wall, i.e. the cabinet glass). Sensors may carry
+ * data-z-min/-max (mm) to admit only balls at those heights. data-layer
+ * remains on paths/profiles as a RENDER styling hint (1 raised, -1 subway).
  *
  * Deliberately a plain-string parser (no DOMParser): the same code runs in
  * the browser and in the headless simcheck/soak under Node. Authoring is
@@ -35,6 +38,10 @@ export interface HeightProfile {
   hTo: number;
   /** Cumulative arc length at each point (m); total = last entry. */
   cumLen: number[];
+  /** Physical surface this profile belongs to (M11), if any. */
+  surface?: string;
+  /** Footprint half-width (m) when part of a surface. */
+  surfaceHalfWidth?: number;
 }
 
 export interface ParsedTable {
@@ -48,7 +55,12 @@ export interface ParsedTable {
      * the ball visually sinks half a wall-width into the art.
      */
     radius: number;
+    /** Render styling hint (1 = elevated); derived from data-surface. */
     layer: number;
+    /** M11 height band: rails of this surface (band follows local height). */
+    surfaceName?: string;
+    /** Full-height wall (shell / lane wall — the cabinet glass). */
+    zAll?: boolean;
   }[];
   sensors: {
     kind: string;
@@ -57,11 +69,9 @@ export interface ParsedTable {
     cy: number;
     hw: number;
     hh: number;
-    layer: number;
-    toLayer?: number;
-    /** Layer switch applies only to an upward-moving ball (ramp entries —
-     * a stray ball drifting sideways across the zone must not switch). */
-    upOnly?: boolean;
+    /** Optional height band (m): the sensor admits only balls within it. */
+    zMin?: number;
+    zMax?: number;
   }[];
   anchors: Map<string, { x: number; y: number }>;
   profiles: HeightProfile[];
@@ -75,7 +85,6 @@ const SENSOR_KINDS = [
   "spinner",
   "subway",
   "drain",
-  "layer",
   "lane",
   "kicker",
   "target",
@@ -124,7 +133,9 @@ export function parseTableSvg(svgText: string): ParsedTable {
         pts,
         loop: loop || a.id.startsWith("collision-loop-"),
         radius: (Number(width) / 2) * MM,
-        layer: Number(a["data-layer"] ?? 0),
+        layer: a["data-surface"] ? 1 : 0,
+        surfaceName: a["data-surface"],
+        zAll: a["data-z"] === "all" || undefined,
       });
     } else if (a.id.startsWith("height-profile-")) {
       const { pts } = parsePathPoints(a.d);
@@ -139,6 +150,10 @@ export function parseTableSvg(svgText: string): ParsedTable {
         hFrom: Number(a["data-height-from"] ?? 0) * MM,
         hTo: Number(a["data-height-to"] ?? 0) * MM,
         cumLen,
+        surface: a["data-surface"],
+        surfaceHalfWidth: a["data-surface-width"]
+          ? (Number(a["data-surface-width"]) / 2) * MM
+          : undefined,
       });
     }
   }
@@ -159,9 +174,8 @@ export function parseTableSvg(svgText: string): ParsedTable {
       cy: Number(a.y) * MM + h / 2,
       hw: w / 2,
       hh: h / 2,
-      layer: Number(a["data-layer"] ?? 0),
-      toLayer: a["data-to-layer"] !== undefined ? Number(a["data-to-layer"]) : undefined,
-      upOnly: a["data-up-only"] !== undefined,
+      zMin: a["data-z-min"] !== undefined ? Number(a["data-z-min"]) * MM : undefined,
+      zMax: a["data-z-max"] !== undefined ? Number(a["data-z-max"]) * MM : undefined,
     });
   }
 

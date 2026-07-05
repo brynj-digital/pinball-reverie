@@ -20,7 +20,7 @@ import { Spinner } from "../src/entities/Spinner";
 import { Kicker } from "../src/entities/Kicker";
 import { Subway } from "../src/entities/Subway";
 import { Scoring } from "../src/game/Scoring";
-import { heightAt } from "../src/table/SvgCollision";
+import { contactApplies, sensorApplies } from "../src/table/Surfaces";
 import { TABLE_SPECS, TABLE_ORDER, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
 
@@ -47,7 +47,17 @@ for (const tableId of tables) {
     readFileSync(new URL(`../design/tables/${tableId}/playfield.svg`, import.meta.url), "utf8"),
     g,
   );
-  const ball = new Ball(pw.world, t, g.table.spawn);
+  const ball = new Ball(pw.world, t, g.table.spawn, table.surfaces);
+  pw.setZGate((tag, x, y) => contactApplies(tag, table.surfaces, x, y, ball.height.z));
+  // M11: support changes feed logic + resense touching banded sensors
+  ball.height.onChange = (from, to) => {
+    const p = ball.body.getPosition();
+    bus.emit("surface", { from, to, x: p.x, y: p.y, z: ball.height.z });
+    for (const tag of pw.sensorsTouching(ball.body)) {
+      if ((tag.zMin !== undefined || tag.zMax !== undefined) && sensorApplies(tag, ball.height.z))
+        bus.emit("sensor", { kind: tag.kind, id: tag.id, zMin: tag.zMin, zMax: tag.zMax });
+    }
+  };
   const flippers = [
     new Flipper(pw.world, table.body, "left", t, g.flippers.left),
     new Flipper(pw.world, table.body, "right", t, g.flippers.right),
@@ -75,8 +85,8 @@ for (const tableId of tables) {
   });
 
   let drainFlag = false;
-  bus.on("sensor", ({ kind, id, toLayer, upOnly, bounds }) => {
-    ball.queueLayerSwitch(pw, { toLayer, upOnly, bounds });
+  bus.on("sensor", ({ kind, id, zMin, zMax }) => {
+    if (!sensorApplies({ zMin, zMax }, ball.height.z)) return;
     // captive balls are exempt, as in Game: saving subways cross the drain zone
     if (kind === "drain" && !kickers.some((k) => k.holding) && !subways.some((s) => s.active))
       drainFlag = true;
@@ -100,7 +110,6 @@ for (const tableId of tables) {
   const pressed = flippers.map(() => false);
   const nextToggle = flippers.map(() => 0);
   let stillTime = 0;
-  let offRailT = 0;
   let drains = 0;
   let launches = 0;
   const stuck: { x: number; y: number; time: number; kind: string }[] = [];
@@ -143,7 +152,14 @@ for (const tableId of tables) {
       launches++;
     }
 
-    pw.update(FIXED_DT); // flushes post-step queue (kicks, layer switches)
+    pw.update(
+      FIXED_DT,
+      () => ball.height.applyForces(ball.body),
+      () => {
+        const bp = ball.body.getPosition();
+        ball.height.step(FIXED_DT, bp.x, bp.y);
+      },
+    );
     bank.update(FIXED_DT);
     for (const k of kickers) k.update(FIXED_DT, ball, t);
     for (const s of subways) s.update(FIXED_DT, ball);
@@ -153,21 +169,6 @@ for (const tableId of tables) {
     for (const s of slings) s.update(FIXED_DT);
     for (const b of bumpers) b.update(FIXED_DT);
 
-    // same off-rail/stall safety net Game runs: a layer-1 ball away from
-    // its rail (or stalled on the outside of the wireform) gets grounded
-    if (ball.layer === 1) {
-      const bp = ball.body.getPosition();
-      const bv = ball.body.getLinearVelocity();
-      const h = heightAt(table.profiles, 1, bp.x, bp.y, 0.06);
-      const stalled = Math.hypot(bv.x, bv.y) < 0.05;
-      offRailT = h === 0 || stalled ? offRailT + FIXED_DT : 0;
-      if (offRailT > (stalled ? 1.0 : 0.5)) {
-        offRailT = 0;
-        ball.setLayer(0);
-      }
-    } else {
-      offRailT = 0;
-    }
 
     if (drainFlag) {
       drainFlag = false;
@@ -185,7 +186,6 @@ for (const tableId of tables) {
       stuck.push({ x: p.x, y: p.y, time: now, kind: `OOB L${ball.layer}` });
       resetBall();
       stillTime = 0;
-      offRailT = 0;
       loopBuf.length = 0;
       continue;
     }

@@ -1,8 +1,9 @@
 import { Body, Box, Chain, Fixture, Vec2, World } from "planck";
 import type { Tuning } from "../tuning";
-import { CAT_ALWAYS, layerCategory, type FixtureTag } from "../core/PhysicsWorld";
+import { type FixtureTag } from "../core/PhysicsWorld";
 import type { TableRenderData } from "../render/Renderer";
 import { parseTableSvg, type HeightProfile } from "./SvgCollision";
+import { buildSurfaces, type Surface } from "./Surfaces";
 import type { TableGeometry } from "./geometry";
 
 export interface DevTable {
@@ -10,6 +11,8 @@ export interface DevTable {
   renderData: TableRenderData;
   wallFixtures: Fixture[];
   profiles: HeightProfile[];
+  /** M11: the table's physical elevated surfaces (plan §7a). */
+  surfaces: Surface[];
 }
 
 /**
@@ -19,9 +22,10 @@ export interface DevTable {
  * are validated against the table spec's entity constants so art and physics
  * can't silently drift.
  *
- * Layers (M10): fixtures on data-layer N get that layer's category bit, so
- * they only touch a ball whose mask includes it (Ball.setLayer). The drain
- * sensor is CAT_ALWAYS — a ball on any layer must always be able to drain.
+ * Height (M11): every fixture shares the broadphase; contacts are gated per
+ * step by the PhysicsWorld pre-solve hook against the ball's height. Walls
+ * carry their band in the fixture tag (zAll = full height, surfaceName =
+ * follows the local surface height, neither = field furniture).
  */
 export function buildTableFromSvg(
   world: World,
@@ -31,6 +35,7 @@ export function buildTableFromSvg(
 ): DevTable {
   const parsed = parseTableSvg(svgText);
   validateAnchors(parsed.anchors, geometry);
+  const surfaces = buildSurfaces(parsed.profiles);
 
   const body = world.createBody(); // static, at origin — all coords in table space
 
@@ -45,8 +50,11 @@ export function buildTableFromSvg(
       shape,
       friction: tuning.wallFriction,
       restitution: tuning.wallRestitution,
-      filterCategoryBits: layerCategory(wall.layer),
-      userData: { kind: "wall" } satisfies FixtureTag,
+      userData: {
+        kind: "wall",
+        zAll: wall.zAll,
+        surfaceName: wall.surfaceName,
+      } satisfies FixtureTag,
     });
   });
 
@@ -55,16 +63,11 @@ export function buildTableFromSvg(
     body.createFixture({
       shape: new Box(s.hw, s.hh, new Vec2(s.cx, s.cy), 0),
       isSensor: true,
-      filterCategoryBits: s.kind === "drain" ? CAT_ALWAYS : layerCategory(s.layer),
       userData: {
         kind: s.kind,
         id: s.id,
-        toLayer: s.toLayer,
-        upOnly: s.upOnly,
-        // layer switches re-validate the ball is inside the zone at
-        // application time (Ball.queueLayerSwitch)
-        bounds:
-          s.toLayer !== undefined ? { cx: s.cx, cy: s.cy, hw: s.hw, hh: s.hh } : undefined,
+        zMin: s.zMin,
+        zMax: s.zMax,
       } satisfies FixtureTag,
     });
   }
@@ -84,6 +87,7 @@ export function buildTableFromSvg(
     },
     wallFixtures,
     profiles: parsed.profiles,
+    surfaces,
   };
 }
 

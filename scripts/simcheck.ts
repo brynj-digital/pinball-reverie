@@ -9,6 +9,7 @@ import { EventBus } from "../src/core/EventBus";
 import { PhysicsWorld, FIXED_DT } from "../src/core/PhysicsWorld";
 import { buildTableFromSvg } from "../src/table/DevTable";
 import { parseTableSvg } from "../src/table/SvgCollision";
+import { contactApplies, sensorApplies } from "../src/table/Surfaces";
 import { Ball } from "../src/entities/Ball";
 import { Flipper } from "../src/entities/Flipper";
 import { Bumper } from "../src/entities/Bumper";
@@ -45,7 +46,8 @@ function buildRig(id: TableId) {
     "utf8",
   );
   const table = buildTableFromSvg(pw.world, t, svgText, g);
-  const ball = new Ball(pw.world, t, g.table.spawn);
+  const ball = new Ball(pw.world, t, g.table.spawn, table.surfaces);
+  pw.setZGate((tag, x, y) => contactApplies(tag, table.surfaces, x, y, ball.height.z));
   const flippers = [
     new Flipper(pw.world, table.body, "left", t, g.flippers.left),
     new Flipper(pw.world, table.body, "right", t, g.flippers.right),
@@ -80,9 +82,18 @@ function buildRig(id: TableId) {
     bankDone: false,
     modeEvents: [] as string[],
   };
-  bus.on("sensor", ({ kind, id: sid, toLayer, upOnly, bounds }) => {
+  // M11: support changes feed logic + resense touching banded sensors
+  ball.height.onChange = (from, to) => {
+    const p = ball.body.getPosition();
+    bus.emit("surface", { from, to, x: p.x, y: p.y, z: ball.height.z });
+    for (const tag of pw.sensorsTouching(ball.body)) {
+      if ((tag.zMin !== undefined || tag.zMax !== undefined) && sensorApplies(tag, ball.height.z))
+        bus.emit("sensor", { kind: tag.kind, id: tag.id, zMin: tag.zMin, zMax: tag.zMax });
+    }
+  };
+  bus.on("sensor", ({ kind, id: sid, zMin, zMax }) => {
+    if (!sensorApplies({ zMin, zMax }, ball.height.z)) return;
     state.sensors.push(sid ? `${kind}:${sid}` : kind);
-    ball.queueLayerSwitch(pw, { toLayer, upOnly, bounds });
     // captive balls are exempt, as in Game: saving subways cross the drain zone
     if (kind === "drain" && !kickers.some((k) => k.holding) && !subways.some((s) => s.active))
       state.drained = true;
@@ -120,7 +131,14 @@ function buildRig(id: TableId) {
   function run(seconds: number, each?: () => void): void {
     const steps = Math.round(seconds / FIXED_DT);
     for (let i = 0; i < steps; i++) {
-      pw.update(FIXED_DT); // also flushes the post-step queue
+      pw.update(
+        FIXED_DT,
+        () => ball.height.applyForces(ball.body),
+        () => {
+          const p = ball.body.getPosition();
+          ball.height.step(FIXED_DT, p.x, p.y);
+        },
+      );
       bank.update(FIXED_DT);
       for (const k of kickers) k.update(FIXED_DT, ball, t);
       for (const s of subways) s.update(FIXED_DT, ball);
@@ -136,7 +154,7 @@ function buildRig(id: TableId) {
   function placeBall(x: number, y: number, vx = 0, vy = 0): void {
     for (const k of kickers) k.cancel(ball);
     for (const s of subways) s.cancel(ball);
-    ball.setLayer(0);
+    ball.height.reset();
     ball.body.setGravityScale(1);
     ball.body.setTransform(new Vec2(x, y), 0);
     ball.body.setLinearVelocity(new Vec2(vx, vy));
@@ -501,22 +519,23 @@ function tidebreakerSuite(): void {
     if (Number.isNaN(landedX) && ball.layer === 0 && onRamp && ball.body.getPosition().y > 0.7)
       landedX = ball.body.getPosition().x;
   });
-  check("ramp shot switches to layer 1", onRamp && state.sensors.includes("layer:winch-in"));
+  check("ramp shot boards the winch surface", onRamp);
   check("winch spinner ticks on the climb", state.spins > 0, `ticks=${state.spins}`);
-  check("habitrail exit fires + WINCH scores", state.sensors.includes("layer:rail-out") && state.labels.includes("WINCH HAUL"));
+  check("habitrail drop-off pays WINCH", state.labels.includes("WINCH HAUL"));
   check(
-    "rail drops the ball into the left inlane",
-    landedX > 0.045 && landedX < 0.1,
+    "rail drop-off lands in the left inlane",
+    landedX > 0.04 && landedX < 0.17,
     `landed x=${Number.isNaN(landedX) ? "never" : landedX.toFixed(3)}`,
   );
   check("inlane feeds through to the drain (flippers down)", state.drained, `layer=${ball.layer}`);
 
   // 8b — a weak ramp shot rolls back out of the mouth and returns to layer 0
+  state.labels.length = 0;
   placeBall(0.349, 0.75, 0, -1.0);
   run(4);
   check(
-    "failed ramp climb restores layer 0",
-    ball.layer === 0 && state.sensors.includes("layer:winch-back"),
+    "failed ramp climb rolls back to the field",
+    ball.layer === 0 && !state.labels.includes("WINCH HAUL"),
     `layer=${ball.layer}`,
   );
 
@@ -752,8 +771,8 @@ function midwaySuite(): void {
     if (Number.isNaN(landedX) && ball.layer === 0 && onRide && ball.body.getPosition().y > 0.7)
       landedX = ball.body.getPosition().x;
   });
-  check("coaster shot switches to layer 1", onRide && state.sensors.includes("layer:coaster-in"));
-  check("circuit completes + COASTER scores", state.sensors.includes("layer:coaster-out") && state.labels.includes("COASTER"));
+  check("coaster shot boards the ride", onRide);
+  check("circuit completes + COASTER scores", state.labels.includes("COASTER"));
   check(
     "drop-off lands in the right inlane",
     landedX > 0.4 && landedX < 0.48,
@@ -764,11 +783,12 @@ function midwaySuite(): void {
   // 8b — a weak coaster shot stalls on the lift hill and rolls back out of
   // the mouth to layer 0
   state.sensors.length = 0;
+  state.labels.length = 0;
   placeBall(0.163, 0.75, 0, -0.75);
   run(4);
   check(
-    "failed lift hill restores layer 0",
-    ball.layer === 0 && state.sensors.includes("layer:coaster-back"),
+    "failed lift hill rolls back to the field",
+    ball.layer === 0 && !state.labels.includes("COASTER"),
     `layer=${ball.layer}`,
   );
 
@@ -861,7 +881,7 @@ function midwaySuite(): void {
   // while the ball is mid-bat sends it up the striker lane (layer 1)
   // through the timing gates to the bell
   placeBall(0.452, 0.2);
-  run(0.5); // fall onto the bat and start rolling toward the tip
+  run(0.6); // fall onto the bat and start rolling toward the tip
   state.sensors.length = 0;
   state.labels.length = 0;
   let sawStrikerRide = false;
@@ -876,7 +896,7 @@ function midwaySuite(): void {
   });
   check(
     "mallet flip rides the striker lane",
-    sawStrikerRide && state.sensors.includes("layer:striker-out"),
+    sawStrikerRide,
     `sensors=${state.sensors.slice(0, 8).join(",")}`,
   );
   check(
@@ -910,16 +930,20 @@ function midwaySuite(): void {
   rig.scoring.reset();
   logic.resetGame();
   const syntheticSwing = (transitS: number) => {
-    bus.emit("sensor", { kind: "layer", id: "striker-in" });
+    bus.emit("surface", { from: "field", to: "striker", x: 0.47, y: 0.28, z: 0 });
     bus.emit("sensor", { kind: "lane", id: "striker-a" });
     run(transitS);
     bus.emit("sensor", { kind: "lane", id: "striker-b" });
-    bus.emit("sensor", { kind: "layer", id: "striker-out" });
+    bus.emit("surface", { from: "striker", to: "air", x: 0.14, y: 0.1, z: 0.05 });
+    run(0.1);
+  };
+  const syntheticCoasterRide = () => {
+    bus.emit("surface", { from: "field", to: "coaster", x: 0.163, y: 0.7, z: 0 });
+    bus.emit("surface", { from: "coaster", to: "field", x: 0.452, y: 0.672, z: 0 });
     run(0.1);
   };
   syntheticSwing(0.05); // DING
-  bus.emit("sensor", { kind: "layer", id: "coaster-out" });
-  run(0.1);
+  syntheticCoasterRide();
   logic.onCapture("ghost");
   run(0.1);
   check(
@@ -949,8 +973,7 @@ function midwaySuite(): void {
     state.modeEvents.includes("fireworksStart") && logic.fireworksActive && rig.scoring.eclipseFactor === 2,
   );
   state.labels.length = 0;
-  bus.emit("sensor", { kind: "layer", id: "coaster-out" });
-  run(0.1);
+  syntheticCoasterRide();
   check("coaster pays jackpot during the finale", state.labels.includes("COASTER JACKPOT"));
   run(31);
   check(

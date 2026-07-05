@@ -146,38 +146,46 @@ Two invariants from the physics work (see `src/table/geometry.ts`):
    the flipper anchor), past its apex — never short of it (pocket) and never
    below the crown (a creeping ball stalls on the hump).
 
-### Layers & height (added 2026-07-05 for table 2, Tidebreaker — parser support lands with M10)
+### Surfaces & height (M11, plan §7a — supersedes the M10 layer trick, 2026-07-05)
 
-Physics stays planar (plan §7); "height" is a collision-filter and render
-trick, never a Z-axis in the physics world.
+Planar physics gains one real scalar: the ball's height `z`. Ramps are
+SURFACES the ball genuinely rides — it attaches where a surface meets its
+height, feels the slope (climbs decelerate, stalls roll back out of the
+mouth), and flies off drop-offs ballistically. There are no layer-switch
+sensors; entry and exit are geometry.
 
-- A collision path may carry **`data-layer`** (integer, default `0`): `0`
-  main playfield, `1` raised (ramps, decks, habitrails), `-1` subway. A
-  fixture collides with the ball only while the ball is on the same layer.
-- **`sensor-layer-<name>`** sensors switch the ball's layer via
-  **`data-to-layer`** (ramp mouths pair an entry switch with a roll-back
-  restore). **`data-up-only`** restricts a switch to an upward-moving ball —
-  required on open-field ramp entries, or strays drifting sideways across
-  the zone become ghosts on the wrong layer.
-- **Switch-to-raised zones keep their edges a full ball radius (13.5 mm)
-  clear of the target layer's wall faces** (added 2026-07-05, Midway soak):
-  a ball switched while overlapping a wall of its new layer is embedded,
-  and the solver may eject it *outside* the channel — a ghost that sails
-  over the field. Prefer several small zones centred on the channel line
-  over one large rect: a missed switch is harmless (the ball just stays on
-  its layer), an embedded one is not. Diagonal channels especially — an
-  axis-aligned rect can't hug a diagonal interior.
-- A ramp or subway with vertical travel pairs with a
-  **`height-profile-<name>`** polyline carrying **`data-height-from`** /
+- A **`height-profile-<name>`** polyline carries **`data-height-from`** /
   **`data-height-to`** (mm relative to the playfield surface, negative =
-  below). Renderers project the ball onto the profile to derive its display
-  height; physics never reads it.
-- An upper (third) flipper is placed by **`anchor-flipper-upper`** — on a
-  raised deck or on the main field (Midway's mallet is a main-layer upper
-  flipper); its side/pivot lives in the table's defs like the lower pair.
-- The two invariants above apply **per layer**: gaps are measured between
-  surfaces the ball can touch on the same layer, and simcheck/soak must be
-  able to flag a ball trapped in a subway or on a deck.
+  below; linear in arc length). Profiles carrying **`data-surface`** (plus
+  **`data-surface-width`**, mm, the footprint width) group into one
+  physical surface; chain several profiles to shape crests and dips.
+  **`data-layer`** remains on paths/profiles purely as a RENDER hint
+  (1 = elevated wireform styling, −1 = subway).
+- A collision wall carrying the same **`data-surface`** is that run's rail:
+  it touches the ball only near the LOCAL surface height (one climbing rail
+  is low at its mouth, high at its crest). Plain walls are field furniture
+  (~ball height). **`data-z="all"`** marks full-height walls — the shell
+  and plunger-lane wall, i.e. the cabinet glass.
+- Sensors may carry **`data-z-min`/`data-z-max`** (mm): admission bands
+  (a ramp's spinner ignores ground balls; lanes under a wireform ignore
+  riders). Set band edges ~4 mm looser than the geometric height at the
+  zone edge — begin-contact fires when the ball's EDGE touches, when its
+  centre is still a half-ball short of the zone.
+- **Mouths point down-table** (the roll-back must fall OUT), and their
+  attach zone (local height ≤ 4 mm) must sit clear of posts and bats — an
+  attach zone against furniture is a pocket. **Descents end in the air**:
+  finish the profile at ≥ 12 mm over a clear landing zone and let the ball
+  drop; a rail that descends to ground level through live field traffic
+  genuinely blocks it (it is physically there now).
+- Rails crossing over field furniture keep the local surface height at
+  least ~7 mm above that furniture's top (ball tops clear rails at
+  local-height − 1 mm).
+- Subways stay scripted transits below the field (no surface, no walls).
+- An upper (third) flipper is placed by **`anchor-flipper-upper`**; its
+  side/pivot lives in the table's defs like the lower pair.
+- The two invariants above apply **per height stratum**: gaps are measured
+  between surfaces the ball can touch at the same height, and simcheck/soak
+  must be able to flag a ball trapped on a ramp or in a subway.
 
 ## 5. Type
 

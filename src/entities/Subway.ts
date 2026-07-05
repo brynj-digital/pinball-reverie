@@ -44,7 +44,7 @@ export class Subway {
     this.active = false;
     if (this.started) {
       ball.body.setGravityScale(1);
-      ball.setLayer(0);
+      ball.height.endTransit();
     }
   }
 
@@ -71,7 +71,7 @@ export class Subway {
     if (!this.started) {
       this.started = true;
       b.setGravityScale(0);
-      ball.setLayer(-1);
+      ball.height.beginTransit(this.path.hFrom);
     }
     this.s += this.def.speed * dt;
     if (this.s >= this.total) {
@@ -83,7 +83,7 @@ export class Subway {
       const e = pts[pts.length - 1];
       const d = Math.hypot(e.x - a.x, e.y - a.y) || 1;
       b.setGravityScale(1);
-      ball.setLayer(0);
+      ball.height.endTransit();
       b.setTransform(new Vec2(e.x, e.y), b.getAngle());
       b.setLinearVelocity(
         new Vec2(((e.x - a.x) / d) * this.def.exitSpeed, ((e.y - a.y) / d) * this.def.exitSpeed),

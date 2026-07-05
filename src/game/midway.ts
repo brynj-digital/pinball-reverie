@@ -54,17 +54,32 @@ export class MidwayLogic implements TableLogic {
   private swingScored = false;
   private aAt = -Infinity;
 
+  /** Rides only count when boarded at the mouth (both coaster ends sit at
+   * ground height, so a stray can attach at the drop-off too). */
+  private coasterFromMouth = false;
+
   constructor(private ctx: TableLogicCtx) {
     ctx.bus.on("sensor", ({ kind, id }) => {
       if (kind === "ramp-entry") this.loopEnd("entry");
       else if (kind === "ramp-exit") this.loopEnd("exit");
-      else if (kind === "layer") {
-        if (id === "coaster-out") this.onCoaster();
-        else if (id === "striker-in") this.onSwingStart();
-        else if (id === "striker-back") this.onSwingBack();
-      } else if (kind === "lane") {
+      else if (kind === "lane") {
         if (id === "striker-a") this.onStrikerA();
         else if (id === "striker-b") this.onStrikerB();
+      }
+    });
+    // M11: rides are surface events — the ball genuinely boards and leaves
+    ctx.bus.on("surface", ({ from, to, x }) => {
+      if (to === "striker") this.onSwingStart();
+      else if (from === "striker") {
+        // rolled back out over the mallet (the bell end exits airborne
+        // far left; the mouth sits over the bat at x ≈ 0.47)
+        if (x > 0.35) this.onSwingBack();
+        else this.swingReset();
+      } else if (to === "coaster") {
+        this.coasterFromMouth = x < 0.3;
+      } else if (from === "coaster") {
+        if (x > 0.35 && this.coasterFromMouth) this.onCoaster();
+        this.coasterFromMouth = false;
       }
     });
     ctx.bus.on("bankComplete", () => {
@@ -256,6 +271,10 @@ export class MidwayLogic implements TableLogic {
         this.ctx.push(new MessageScene([["WEAK SWING", "PUT YOUR BACK IN IT"]], 1.0));
       }
     }
+    this.swingReset();
+  }
+
+  private swingReset(): void {
     this.swingActive = false;
     this.swingScored = false;
     this.aAt = -Infinity;

@@ -317,7 +317,7 @@
         <path d="M 254 656.5 L 261 647.5 L 268 656.5" transform="rotate(14 261 652)"/>
       </g>
       <!-- the tunnel, glimpsed: dashed run + two grates -->
-      <path d="M 240 500 L 262 540 L 290 572 L 322 594 L 356 608 L 390 618 L 410 625"
+      <path d="M 240 500 L 262 540 L 290 572 L 318 596 L 340 612 L 330 634"
             fill="none" stroke="#2fc9d6" stroke-width="4" stroke-dasharray="3 9" opacity="0.28"/>
       <g stroke="#45215a" stroke-width="2">
         <circle cx="290" cy="572" r="7" fill="#1c0f26"/>
@@ -535,12 +535,12 @@
   <defs>
     <g id="collision-paths" fill="none">
       <!-- outer shell: identical envelope to the other tables (§3) -->
-      <path data-width="12" id="collision-loop-shell" d="M 0 1050 L 0 260 L 1.3 234.5 L 5 209.3 L 11.2 184.5 L 19.8 160.5 L 30.7 137.4 L 43.8 115.6 L 59 95.1 L 76.2 76.2 L 95.1 59 L 115.6 43.8 L 137.4 30.7 L 160.5 19.8 L 184.5 11.2 L 209.3 5 L 234.5 1.3 L 260 0 L 290.9 1.5 L 321.5 6.1 L 351.4 13.6 L 380.5 24 L 408.5 37.2 L 435 53.1 L 459.8 71.5 L 482.7 92.3 L 503.5 115.2 L 521.9 140 L 537.8 166.5 L 551 194.5 L 561.4 223.6 L 568.9 253.5 L 573.5 284.1 L 575 315 L 575 1050 Z"/>
+      <path data-width="12" data-z="all" id="collision-loop-shell" d="M 0 1050 L 0 260 L 1.3 234.5 L 5 209.3 L 11.2 184.5 L 19.8 160.5 L 30.7 137.4 L 43.8 115.6 L 59 95.1 L 76.2 76.2 L 95.1 59 L 115.6 43.8 L 137.4 30.7 L 160.5 19.8 L 184.5 11.2 L 209.3 5 L 234.5 1.3 L 260 0 L 290.9 1.5 L 321.5 6.1 L 351.4 13.6 L 380.5 24 L 408.5 37.2 L 435 53.1 L 459.8 71.5 L 482.7 92.3 L 503.5 115.2 L 521.9 140 L 537.8 166.5 L 551 194.5 L 561.4 223.6 L 568.9 253.5 L 573.5 284.1 L 575 315 L 575 1050 Z"/>
       <!-- plunger lane inner wall. Its top curls into a shield over the
            mallet pivot: the V between pivot base and wall would otherwise
            perch a descending ball (soak-found); the shield roofs it and
            sheds arch drops left onto the bat. -->
-      <path data-width="12" id="collision-wall-lane" d="M 500 272 L 520 262 L 520 1050"/>
+      <path data-width="12" data-z="all" id="collision-wall-lane" d="M 500 272 L 520 262 L 520 1050"/>
       <!-- the Sky Ride: orbit inner wall; unlike the other tables its right
            tail stays open — descending chairs feed the mallet or the queue -->
       <path data-width="12" id="collision-wall-orbit" d="M 65 550 L 65 260 L 66.5 236.2 L 70.8 212.8 L 78 190.1 L 87.8 168.5 L 100.3 148.2 L 115.1 129.5 L 132.1 112.8 L 151 98.3 L 171.5 86.3 L 193.3 76.8 L 216.1 70 L 239.6 66.1 L 263.4 65 L 287.1 66.9 L 310.5 71.6 L 333 79.2 L 354.5 89.4 L 374.6 102.2 L 393 117.4 L 409.4 134.7"/>
@@ -571,14 +571,14 @@
       <!-- coaster circuit (layer 1): lift hill up the left-centre, the drop,
            a second hump crossing over the dodgems, then down the right side
            to the drop-off into the right inlane -->
-      <path data-width="12" data-layer="1" id="collision-wall-coaster-rail-in" d="M 189 712 L 189 650 L 189 560 L 189 470.4 L 190.7 444.2 L 195.8 425.6 L 203.4 413.4 L 215.1 406 L 234.4 401.6 L 258.9 399 L 282.7 399.9 L 311.1 403.7 L 339.9 408.5 L 369 415.3 L 390.8 420.3 L 392 420.6 L 394.5 425 L 395 450 L 394 499.8 L 394 560 L 394 610.7 L 396.6 640.6 L 407.8 668.6 L 425.1 686.6 L 439.5 694.8"/>
-      <path data-width="12" data-layer="1" id="collision-wall-coaster-rail-out" d="M 137 712 L 137 650 L 137 560 L 137 469.6 L 139.3 435.8 L 148.2 404.4 L 166.6 376.6 L 194.9 358 L 225.6 350.4 L 257.1 347 L 287.3 348.1 L 318.9 352.3 L 350.1 357.5 L 381 364.7 L 409.2 371.7 L 432 387.4 L 445.5 415 L 447 450 L 446 500.2 L 446 560 L 446 609.3 L 447.4 629.4 L 452.2 641.4 L 456.9 645.4 L 464.5 649.2"/>
+      <path data-width="12" data-surface="coaster" id="collision-wall-coaster-rail-in" d="M 189 712 L 189 650 L 189 560 L 189 470.4 L 190.7 444.2 L 195.8 425.6 L 203.4 413.4 L 215.1 406 L 234.4 401.6 L 258.9 399 L 282.7 399.9 L 311.1 403.7 L 339.9 408.5 L 369 415.3 L 390.8 420.3 L 392 420.6 L 394.5 425 L 395 450 L 394 499.8 L 394 560"/>
+      <path data-width="12" data-surface="coaster" id="collision-wall-coaster-rail-out" d="M 137 712 L 137 650 L 137 560 L 137 469.6 L 139.3 435.8 L 148.2 404.4 L 166.6 376.6 L 194.9 358 L 225.6 350.4 L 257.1 347 L 287.3 348.1 L 318.9 352.3 L 350.1 357.5 L 381 364.7 L 409.2 371.7 L 432 387.4 L 445.5 415 L 447 450 L 446 500.2 L 446 560"/>
       <!-- high striker wire lane (layer 1): the mallet's one shot, curling up
            from above the bat to the bell in the top-left corner -->
-      <path data-width="12" data-layer="1" id="collision-wall-striker-rail-a" d="M 505.8 293.1 L 502.9 270.7 L 484.8 240.6 L 436.5 218.2 L 360.3 185.1 L 280.2 151.1 L 206.6 119.7 L 166.5 94.4 L 156.6 86"/>
-      <path data-width="12" data-layer="1" id="collision-wall-striker-rail-b" d="M 454.2 298.9 L 453.1 285.3 L 455.2 283.4 L 415.5 265.8 L 339.7 232.9 L 259.8 198.9 L 183.4 166.3 L 137.5 137.6 L 123.4 126"/>
+      <path data-width="12" data-surface="striker" id="collision-wall-striker-rail-a" d="M 436.5 218.2 L 360.3 185.1 L 280.2 151.1 L 206.6 119.7 L 166.5 94.4 L 156.6 86"/>
+      <path data-width="12" data-surface="striker" id="collision-wall-striker-rail-b" d="M 415.5 265.8 L 339.7 232.9 L 259.8 198.9 L 183.4 166.3 L 137.5 137.6 L 123.4 126"/>
       <!-- the bell post caps the lane end -->
-      <path data-width="12" data-layer="1" id="collision-wall-striker-cap" d="M 156.6 86 L 123.4 126"/>
+      <path data-width="12" data-surface="striker" id="collision-wall-striker-cap" d="M 156.6 86 L 123.4 126"/>
     </g>
   </defs>
   <!-- field walls: layered DUSK PLUM rails, kept dark so the lit ball and
@@ -603,17 +603,17 @@
          the bright ball whenever it passes UNDERNEATH — the depth cue the
          open wires alone can't give -->
     <g stroke="#2fc9d6" stroke-width="30" opacity="0.09">
-      <path d="M 163 712 L 163 650 L 163 560 L 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560 L 420 610 L 422 635 L 430 655 L 441 666 L 452 672"/>
+      <path d="M 163 712 L 163 650 L 163 560 L 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560 L 420 560"/>
       <path d="M 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
     </g>
     <!-- cross-ties: sleepers under the coaster, rungs under the striker -->
     <g stroke="#07080d" stroke-width="4.5" opacity="0.9">
-      <path d="M 145 698 L 181 698 M 145 670 L 181 670 M 145 642 L 181 642 M 145 614 L 181 614 M 145 586 L 181 586 M 145 558 L 181 558 M 145 530 L 181 530 M 145 502 L 181 502 M 145 474 L 181 474 M 146.6 444.9 L 182.6 447.3 M 153.6 414 L 188.2 423.7 M 175.3 379.8 L 194.9 410 M 204.9 363.5 L 213.3 398.5 M 234.6 357.4 L 238.4 393.2 M 265.1 355.2 L 263.7 391.2 M 294.7 357.1 L 289.9 392.8 M 323 361.1 L 317.1 396.6 M 351.7 366.1 L 343.5 401.1 M 379 372.4 L 370.8 407.5 M 411.8 382.2 L 391.8 412.2 M 435.1 410 L 402.9 426.1 M 438.9 445.3 L 402.9 446.5 M 438.5 474.2 L 402.5 473.5 M 438 501.8 L 402 501.8 M 438 529.8 L 402 529.8 M 438 557.8 L 402 557.8 M 438 585.8 L 402 585.8 M 438.2 612.4 L 402.4 615.3 M 441.2 634.6 L 407.8 648 M 452.1 651.6 L 426.6 677.1"/>
-      <path d="M 460.5 283.1 L 496.2 279.1 M 454.4 274.7 L 469.3 241.9 M 427 262.2 L 441.9 229.5 M 399.9 250.3 L 414.2 217.3 M 372.4 238.3 L 386.7 205.3 M 344.8 226.4 L 359.2 193.4 M 317.4 214.7 L 331.4 181.6 M 289.8 203 L 303.8 169.8 M 262.1 191.2 L 276.2 158.1 M 234.5 179.4 L 248.7 146.3 M 206.9 167.7 L 221.1 134.5 M 177.5 153.3 L 196.7 122.8 M 152.1 137.3 L 171.2 106.8"/>
+      <path d="M 145 698 L 181 698 M 145 670 L 181 670 M 145 642 L 181 642 M 145 614 L 181 614 M 145 586 L 181 586 M 145 558 L 181 558 M 145 530 L 181 530 M 145 502 L 181 502 M 145 474 L 181 474 M 146.6 444.9 L 182.6 447.3 M 153.6 414 L 188.2 423.7 M 175.3 379.8 L 194.9 410 M 204.9 363.5 L 213.3 398.5 M 234.6 357.4 L 238.4 393.2 M 265.1 355.2 L 263.7 391.2 M 294.7 357.1 L 289.9 392.8 M 323 361.1 L 317.1 396.6 M 351.7 366.1 L 343.5 401.1 M 379 372.4 L 370.8 407.5 M 411.8 382.2 L 391.8 412.2 M 435.1 410 L 402.9 426.1 M 438.9 445.3 L 402.9 446.5 M 438.5 474.2 L 402.5 473.5 M 438 501.8 L 402 501.8 M 438 529.8 L 402 529.8 M 438 557.8 L 402 557.8 M 438 557.8 L 402 557.8"/>
+      <path d="M 427 262.2 L 441.9 229.5 M 399.9 250.3 L 414.2 217.3 M 372.4 238.3 L 386.7 205.3 M 344.8 226.4 L 359.2 193.4 M 317.4 214.7 L 331.4 181.6 M 289.8 203 L 303.8 169.8 M 262.1 191.2 L 276.2 158.1 M 234.5 179.4 L 248.7 146.3 M 206.9 167.7 L 221.1 134.5 M 177.5 153.3 L 196.7 122.8 M 152.1 137.3 L 171.2 106.8"/>
     </g>
     <g stroke="#aeb6c8" stroke-width="2.2">
-      <path d="M 145 698 L 181 698 M 145 670 L 181 670 M 145 642 L 181 642 M 145 614 L 181 614 M 145 586 L 181 586 M 145 558 L 181 558 M 145 530 L 181 530 M 145 502 L 181 502 M 145 474 L 181 474 M 146.6 444.9 L 182.6 447.3 M 153.6 414 L 188.2 423.7 M 175.3 379.8 L 194.9 410 M 204.9 363.5 L 213.3 398.5 M 234.6 357.4 L 238.4 393.2 M 265.1 355.2 L 263.7 391.2 M 294.7 357.1 L 289.9 392.8 M 323 361.1 L 317.1 396.6 M 351.7 366.1 L 343.5 401.1 M 379 372.4 L 370.8 407.5 M 411.8 382.2 L 391.8 412.2 M 435.1 410 L 402.9 426.1 M 438.9 445.3 L 402.9 446.5 M 438.5 474.2 L 402.5 473.5 M 438 501.8 L 402 501.8 M 438 529.8 L 402 529.8 M 438 557.8 L 402 557.8 M 438 585.8 L 402 585.8 M 438.2 612.4 L 402.4 615.3 M 441.2 634.6 L 407.8 648 M 452.1 651.6 L 426.6 677.1"/>
-      <path d="M 460.5 283.1 L 496.2 279.1 M 454.4 274.7 L 469.3 241.9 M 427 262.2 L 441.9 229.5 M 399.9 250.3 L 414.2 217.3 M 372.4 238.3 L 386.7 205.3 M 344.8 226.4 L 359.2 193.4 M 317.4 214.7 L 331.4 181.6 M 289.8 203 L 303.8 169.8 M 262.1 191.2 L 276.2 158.1 M 234.5 179.4 L 248.7 146.3 M 206.9 167.7 L 221.1 134.5 M 177.5 153.3 L 196.7 122.8 M 152.1 137.3 L 171.2 106.8"/>
+      <path d="M 145 698 L 181 698 M 145 670 L 181 670 M 145 642 L 181 642 M 145 614 L 181 614 M 145 586 L 181 586 M 145 558 L 181 558 M 145 530 L 181 530 M 145 502 L 181 502 M 145 474 L 181 474 M 146.6 444.9 L 182.6 447.3 M 153.6 414 L 188.2 423.7 M 175.3 379.8 L 194.9 410 M 204.9 363.5 L 213.3 398.5 M 234.6 357.4 L 238.4 393.2 M 265.1 355.2 L 263.7 391.2 M 294.7 357.1 L 289.9 392.8 M 323 361.1 L 317.1 396.6 M 351.7 366.1 L 343.5 401.1 M 379 372.4 L 370.8 407.5 M 411.8 382.2 L 391.8 412.2 M 435.1 410 L 402.9 426.1 M 438.9 445.3 L 402.9 446.5 M 438.5 474.2 L 402.5 473.5 M 438 501.8 L 402 501.8 M 438 529.8 L 402 529.8 M 438 557.8 L 402 557.8 M 438 557.8 L 402 557.8"/>
+      <path d="M 427 262.2 L 441.9 229.5 M 399.9 250.3 L 414.2 217.3 M 372.4 238.3 L 386.7 205.3 M 344.8 226.4 L 359.2 193.4 M 317.4 214.7 L 331.4 181.6 M 289.8 203 L 303.8 169.8 M 262.1 191.2 L 276.2 158.1 M 234.5 179.4 L 248.7 146.3 M 206.9 167.7 L 221.1 134.5 M 177.5 153.3 L 196.7 122.8 M 152.1 137.3 L 171.2 106.8"/>
     </g>
     <!-- rail edges: OPAQUE bright chrome wire, slim so the park shows
          through the form -->
@@ -638,22 +638,20 @@
   <g fill="none" stroke="none">
     <!-- coaster: lift hill, drop, second hump, descent, drop-off (chained
          segments approximate the two-crest ride; endpoints agree) -->
-    <path id="height-profile-coaster-a" data-layer="1" data-height-from="0" data-height-to="55"
+    <path id="height-profile-coaster-a" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="0" data-height-to="55"
           d="M 163 712 L 163 650 L 163 560 L 163 470"/>
-    <path id="height-profile-coaster-b" data-layer="1" data-height-from="55" data-height-to="24"
+    <path id="height-profile-coaster-b" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="55" data-height-to="40"
           d="M 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376"/>
-    <path id="height-profile-coaster-c" data-layer="1" data-height-from="24" data-height-to="46"
+    <path id="height-profile-coaster-c" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="40" data-height-to="38"
           d="M 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396"/>
-    <path id="height-profile-coaster-d" data-layer="1" data-height-from="46" data-height-to="18"
+    <path id="height-profile-coaster-d" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="38" data-height-to="34"
           d="M 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560"/>
-    <path id="height-profile-coaster-e" data-layer="1" data-height-from="18" data-height-to="0"
-          d="M 420 560 L 420 610 L 422 635 L 430 655 L 441 666 L 452 672"/>
     <!-- high striker: the tower climb to the bell -->
-    <path id="height-profile-striker" data-layer="1" data-height-from="0" data-height-to="55"
-          d="M 480 296 L 478 278 L 470 262 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
+    <path id="height-profile-striker" data-layer="1" data-surface="striker" data-surface-width="52" data-height-from="0" data-height-to="55"
+          d="M 455 255 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
     <!-- subways -->
     <path id="height-profile-ghost" data-layer="-1" data-height-from="-8" data-height-to="-8"
-          d="M 240 500 L 262 540 L 290 572 L 322 594 L 356 608 L 390 618 L 410 625"/>
+          d="M 240 500 L 262 540 L 290 572 L 318 596 L 340 612 L 330 634"/>
     <path id="height-profile-chicken" data-layer="-1" data-height-from="-8" data-height-to="-8"
           d="M 496 915 L 500 950 L 505 985 L 512 1008 L 525 1020 L 540 1015 L 547 1000 L 547.5 975"/>
   </g>
@@ -661,10 +659,10 @@
   <!-- ═══════════════ sensors (invisible; zones only) ═══════════════ -->
   <g fill="none" stroke="none">
     <rect id="sensor-drain" x="0" y="1005" width="520" height="30"/>
-    <rect id="sensor-rollover-1" x="147" y="105" width="30" height="20"/>
-    <rect id="sensor-rollover-2" x="210" y="105" width="30" height="20"/>
-    <rect id="sensor-rollover-3" x="280" y="105" width="30" height="20"/>
-    <rect id="sensor-rollover-4" x="343" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-1" data-z-max="30" x="147" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-2" data-z-max="30" x="210" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-3" data-z-max="30" x="280" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-4" data-z-max="30" x="343" y="105" width="30" height="20"/>
     <!-- Sky Ride: entry at the bottom-left arm, exit on the descending tail -->
     <rect id="sensor-ramp-entry" x="2.5" y="492" width="60" height="16"/>
     <rect id="sensor-ramp-exit" x="468" y="128" width="44" height="40"/>
@@ -674,29 +672,10 @@
     <rect id="sensor-kicker-stamp" x="8" y="940" width="36" height="35"/>
     <rect id="sensor-subway-ghost" x="220" y="486" width="40" height="18"/>
     <rect id="sensor-subway-chicken" x="478" y="900" width="36" height="35"/>
-    <!-- coaster layer switches: mouth entry (0→1), roll-back restore (1→0),
-         and the drop-off into the right inlane (1→0, also the COASTER award) -->
     <!-- narrow entry zone: edges kept a full ball radius clear of the lift
          walls (same embedded-switch ghost hazard as the striker throat) -->
-    <rect id="sensor-layer-coaster-in" data-to-layer="1" data-up-only="1" x="156" y="648" width="14" height="28"/>
-    <rect id="sensor-layer-coaster-back" data-layer="1" data-to-layer="0" x="132" y="701" width="62" height="22"/>
-    <rect id="sensor-layer-coaster-out" data-layer="1" data-to-layer="0" x="406" y="640" width="64" height="40"/>
-    <!-- striker layer switches + the two speed-meter timing gates. The lane
-         has a long entry throat: the curled mouth over the bat root (in)
-         plus mid-channel zones (in2/in3) so a mid-bat swing is caught in
-         flight — all up-only. The zones are SMALL and centred on the lane's
-         centreline: a rect edge within a ball radius of a channel wall
-         switches an embedded ball, and the solver ejects it OUTSIDE the
-         lane as a layer-1 ghost (soak-found). A missed switch is harmless —
-         the ball stays layer 0; a mis-caught one rolls back down to the
-         striker-back restore and lands on the bat. -->
-    <rect id="sensor-layer-striker-in" data-to-layer="1" data-up-only="1" x="470" y="270" width="16" height="16"/>
-    <rect id="sensor-layer-striker-in2" data-to-layer="1" data-up-only="1" x="403" y="229" width="24" height="14"/>
-    <rect id="sensor-layer-striker-in3" data-to-layer="1" data-up-only="1" x="378" y="219" width="24" height="14"/>
-    <rect id="sensor-layer-striker-back" data-layer="1" data-to-layer="0" x="438" y="288" width="54" height="20"/>
-    <rect id="sensor-layer-striker-out" data-layer="1" data-to-layer="0" x="118" y="88" width="56" height="40"/>
-    <rect id="sensor-lane-striker-a" data-layer="1" x="372" y="211" width="40" height="30"/>
-    <rect id="sensor-lane-striker-b" data-layer="1" x="162" y="120" width="40" height="30"/>
+    <rect id="sensor-lane-striker-a" data-z-min="4" data-z-max="32" x="372" y="211" width="40" height="30"/>
+    <rect id="sensor-lane-striker-b" data-z-min="30" data-z-max="62" x="162" y="120" width="40" height="30"/>
   </g>
 
   <!-- ═══════════════ anchors (invisible placement points) ═══════════════ -->

@@ -1,6 +1,6 @@
 import { Vec2 } from "planck";
 import { EventBus } from "./EventBus";
-import { PhysicsWorld } from "./PhysicsWorld";
+import { FIXED_DT, PhysicsWorld } from "./PhysicsWorld";
 import { Camera } from "./Camera";
 import { Input } from "./Input";
 import { Ball } from "../entities/Ball";
@@ -38,7 +38,7 @@ import { buildTableFromSvg, type DevTable } from "../table/DevTable";
 import ballSvgRaw from "../../design/ball.svg?raw";
 import type { TableSpec } from "../table/specs";
 import type { TableAssets } from "../table/assets";
-import { heightAt } from "../table/SvgCollision";
+import { contactApplies, sensorApplies } from "../table/Surfaces";
 import type { RenderMode, Renderer, View3D, WorldSnapshot } from "../render/Renderer";
 import { Renderer2D } from "../render/Renderer2D";
 import { TuningPanel } from "../debug/TuningPanel";
@@ -151,8 +151,6 @@ export class Game {
   private audio = new AudioEngine();
   private music: ChipMusic;
   private prevFlip = { left: false, right: false, upper: false };
-  /** Seconds a layer-1 ball has spent away from any rail (safety reset). */
-  private offRailT = 0;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -169,7 +167,23 @@ export class Game {
     this.table.renderData.theme = spec.theme;
     this.table.renderData.ballSvgText = ballSvgRaw;
     this.table.renderData.backglassSvgText = assets.backglassSvg;
-    this.ball = new Ball(this.physics.world, this.tuning, g.table.spawn);
+    this.ball = new Ball(this.physics.world, this.tuning, g.table.spawn, this.table.surfaces);
+    // M11 height gate: rails only touch a ball at their height
+    this.physics.setZGate((tag, x, y) =>
+      contactApplies(tag, this.table.surfaces, x, y, this.ball.height.z),
+    );
+    // support changes drive table logic (ramp rides) + sensor resense
+    this.ball.height.onChange = (from, to) => {
+      const p = this.ball.body.getPosition();
+      this.bus.emit("surface", { from, to, x: p.x, y: p.y, z: this.ball.height.z });
+      for (const tag of this.physics.sensorsTouching(this.ball.body)) {
+        if (
+          (tag.zMin !== undefined || tag.zMax !== undefined) &&
+          sensorApplies(tag, this.ball.height.z)
+        )
+          this.bus.emit("sensor", { kind: tag.kind, id: tag.id, zMin: tag.zMin, zMax: tag.zMax });
+      }
+    };
     this.prevBall = { x: g.table.spawn.x, y: g.table.spawn.y, angle: 0 };
     this.flippers = [
       new Flipper(this.physics.world, this.table.body, "left", this.tuning, g.flippers.left),
@@ -303,11 +317,9 @@ export class Game {
     bake("gameover", gameoverSceneSvg, 8);
     for (const [key, scene] of Object.entries(assets.dmdScenes)) bake(key, scene.svg, scene.frames);
 
-    this.bus.on("sensor", ({ kind, id, toLayer, upOnly, bounds }) => {
-      // Layer-switch sensors (M10): deferred to post-step (the world is
-      // locked during the contact) and re-validated at application — the
-      // guard rules live in Ball.queueLayerSwitch, shared with the sims.
-      this.ball.queueLayerSwitch(this.physics, { toLayer, upOnly, bounds });
+    this.bus.on("sensor", ({ kind, id, zMin, zMax }) => {
+      // M11: a sensor with a height band only admits balls within it
+      if (!sensorApplies({ zMin, zMax }, this.ball.height.z)) return;
       // Drain starts a short visible fall-out (ball keeps simulating, fades,
       // then respawns) instead of teleporting away the instant the sensor
       // fires — the sensor sits above the floor, mid-drop. A captive ball is
@@ -534,43 +546,34 @@ export class Game {
     this.logic.update(dt);
     for (const [id, v] of this.rolloverLit) this.rolloverLit.set(id, Math.max(0, v - dt * 2));
 
-    this.renderAlpha = this.physics.update(dt, () => {
-      const bp = this.ball.body.getPosition();
-      this.prevBall.x = bp.x;
-      this.prevBall.y = bp.y;
-      this.prevBall.angle = this.ball.body.getAngle();
-      for (let i = 0; i < this.flippers.length; i++)
-        this.prevFlipAngles[i] = this.flippers[i].body.getAngle();
-    });
+    this.renderAlpha = this.physics.update(
+      dt,
+      () => {
+        const bp = this.ball.body.getPosition();
+        this.prevBall.x = bp.x;
+        this.prevBall.y = bp.y;
+        this.prevBall.angle = this.ball.body.getAngle();
+        for (let i = 0; i < this.flippers.length; i++)
+          this.prevFlipAngles[i] = this.flippers[i].body.getAngle();
+        // M11: climbs decelerate, drops accelerate — the support surface's
+        // slope feeds back into the plane
+        this.ball.height.applyForces(this.ball.body);
+      },
+      () => {
+        const bp = this.ball.body.getPosition();
+        this.ball.height.step(FIXED_DT, bp.x, bp.y);
+      },
+    );
 
-    // Safety net (M10): a raised ball that somehow left its rail geometry
-    // (glitch, nudge mid-transition) would float over the field colliding
-    // with nothing — after half a second off-rail, ground it. A layer-1
-    // ball STALLED for over a second is equally wrong (resting on the
-    // outside of the wireform): a real rail ball always keeps rolling.
-    if (this.ball.layer === 1 && !ballCaptive) {
-      const bp = this.ball.body.getPosition();
-      const bv = this.ball.body.getLinearVelocity();
-      const h = heightAt(this.table.profiles, 1, bp.x, bp.y, 0.06);
-      const stalled = Math.hypot(bv.x, bv.y) < 0.05;
-      this.offRailT = h === 0 || stalled ? this.offRailT + dt : 0;
-      if (this.offRailT > (stalled ? 1.0 : 0.5)) {
-        this.offRailT = 0;
-        this.ball.setLayer(0);
-      }
-    } else {
-      this.offRailT = 0;
-    }
-
-    // Out-of-bounds net (M10): no legitimate route leads off the table, so
-    // a ball outside the envelope is always an escapee (e.g. a mis-layered
-    // ball that ghosted through the layer-0 shell). It can never reach the
-    // drain sensor out there — count it as a drain instead of soft-locking.
+    // Out-of-bounds net: no legitimate route leads off the table (the shell
+    // is full-height since M11), so a ball outside the envelope is always a
+    // bug escapee. It can never reach the drain sensor out there — count it
+    // as a drain instead of soft-locking.
     if (this.drainTimer <= 0 && !ballCaptive) {
       const bp = this.ball.body.getPosition();
       const m = 0.03;
       if (bp.x < -m || bp.x > g.table.width + m || bp.y < -m || bp.y > g.table.height + m) {
-        this.ball.setLayer(0);
+        this.ball.height.reset();
         this.startDrain();
       }
     }
@@ -832,7 +835,7 @@ export class Game {
         vy: v.y,
         // fade out over the last 0.3 s of the drain fall
         alpha: this.drainTimer > 0 ? Math.min(1, this.drainTimer / 0.3) : 1,
-        h: heightAt(this.table.profiles, this.ball.layer, bx, by),
+        h: this.ball.height.z,
         layer: this.ball.layer,
       },
       flippers: this.flippers.map((f, i) => {

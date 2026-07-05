@@ -201,6 +201,44 @@ Because physics and render are decoupled, going 3D is mostly a new `Renderer3D`:
 - Lighting + bloom post-processing makes the particle/LED work shine.
 - Optional later: full 3D physics (Rapier/Ammo) if you want ball-on-ramp height dynamics — but planar physics + height-mapped rendering looks great for far less complexity. Start there.
 
+### 7a. True height on the planar world (M11 — the "2.5D" surface model)
+
+Adopted 2026-07-05, superseding M10's collision-layer trick. The layer system
+(filter bits + switch sensors) hit its ceiling on Midway: switch zones were a
+recurring hazard class (embedded switches minting off-layer ghosts), climbs
+cost no energy, and the ball's height was a render-time guess. M11 keeps the
+planar Planck world — flipper feel, fixed timestep and the bullet ball are
+untouched — and gives the ball one real scalar: `z`.
+
+- **Surfaces, not layers.** A table declares *surfaces*: the field (z = 0)
+  and each elevated run (the existing `height-profile-*` polylines grouped by
+  `data-surface`, plus a footprint width). The ball is always supported by
+  exactly one surface — or airborne.
+- **Support resolution by geometry.** A field ball entering a surface's
+  footprint where the local height ≈ its z attaches and rides; leaving the
+  footprint transfers support to whatever lies at its height, or goes
+  airborne (`z, vz` under real normal gravity) and lands on the best surface
+  below. Ramp entry/exit sensors, `data-to-layer`, `data-up-only` and their
+  guard logic are deleted — gravity and geometry do the job.
+- **Real slope dynamics.** While supported on an elevated surface, the ball
+  feels `−m·g·cosθ·∇h` in the plane: climbs decelerate, drops accelerate,
+  stalls roll back out of the mouth naturally.
+- **Collision by height band.** All fixtures share the broadphase; a
+  `pre-solve` hook disables contacts whose vertical band misses the ball's
+  span. Field walls/entities default to ball-height bands; the shell and
+  plunger-lane wall are full-height (the cabinet glass); an elevated
+  surface's own walls take their band from the *local* surface height at the
+  contact point, so one climbing rail is low at its mouth and high at its
+  crest.
+- **Cost:** a few height-field projections and one applyForce per 120 Hz
+  step plus a per-contact pre-solve check — well under 0.05 ms, unmeasurable
+  next to `world.step`. No new dependencies. The real cost is authoring
+  migration (Tidebreaker + Midway SVGs, logic events, sims) and re-approving
+  ramp shot tuning, since climbs now cost energy.
+- Subways stay scripted transits (z < 0 while carried); kickers unchanged.
+- Renderers read true `z` (snapshot keeps its `h`/`layer` shape, now derived
+  honestly). Full 3D physics remains post-v1.
+
 ---
 
 ## 8. Milestones
@@ -219,6 +257,8 @@ Because physics and render are decoupled, going 3D is mostly a new `Renderer3D`:
 | 7 | First full table | "Table 1" themed (backglass, logo, full playfield art in Claude Design), balanced, complete ruleset |
 | 8 | Polish + persistence | Attract mode, settings, localStorage/Laravel high-score API |
 | 9 | **3D renderer** | `Renderer3D` (three.js) swapped in behind the same interface |
+| 10 | Multi-table | Table-agnostic engine (specs/assets registries, collision layers, subways), table select, Tidebreaker + Midnight Midway |
+| 11 | **True height (2.5D surfaces)** | §7a: ball gains real `z`; surfaces + height-band collision replace the M10 layer trick; slope dynamics; all tables migrated + re-tuned |
 
 Milestone 1 is the make-or-break: if the flippers don't *feel* good, nothing else matters. Spend disproportionate time tuning it.
 

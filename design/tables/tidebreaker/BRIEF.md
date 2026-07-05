@@ -20,7 +20,14 @@ and simcheck/soak:
   deflector off the left shell so Current exits can't feed the outlane.
 - **`data-up-only`** was added to the layer-switch convention after soak
   found stray balls crossing the ramp-entry zone sideways becoming
-  wrong-layer ghosts (STYLE-GUIDE §4).
+  wrong-layer ghosts (STYLE-GUIDE §4). *(Historical: M11 deleted the whole
+  layer-switch system — see below.)*
+- **M11 (true height, plan §7a):** the winch ramp is now a real surface —
+  the climb costs energy and a stalled ball rolls back out of the mouth by
+  gravity, not by a restore sensor. The habitrail runs FLAT at 34 mm (its
+  old descent to ground inside the orbit channel would physically block
+  the Current) and ends in the air over the left inlane: the WINCH payoff
+  is now a genuine ballistic drop where the rail-out sensor used to sit.
 
 **Premise:** a salvage diver works a single dive down an abyssal trench to a
 wreck on the seafloor. The tall scrolling playfield *is* the trench — the
