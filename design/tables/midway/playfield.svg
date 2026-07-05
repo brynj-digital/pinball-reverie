@@ -620,12 +620,12 @@
     <!-- neon-green glass (STYLE-GUIDE §2): rail-to-rail beds on the true
          run geometry — barely reads on the dark field but tints the bright
          ball whenever it passes UNDERNEATH -->
-    <g stroke="#39ff14" stroke-width="40" opacity="0.22">
+    <g stroke="#39ff14" stroke-width="40" opacity="0.15">
       <path d="M 163 712 L 163 650 L 163 560 L 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560"/>
       <path d="M 455 255 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
       <path d="M 547.5 310 L 547.5 262 L 546 205"/>
     </g>
-    <g stroke="#ffffff" stroke-width="40" opacity="0.04">
+    <g stroke="#ffffff" stroke-width="40" opacity="0.03">
       <path d="M 163 712 L 163 650 L 163 560 L 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560"/>
       <path d="M 455 255 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
       <path d="M 547.5 310 L 547.5 262 L 546 205"/>

@@ -325,7 +325,7 @@ export class Renderer3D implements Renderer {
     const bedMat = new THREE.MeshBasicMaterial({
       color: 0x39ff14,
       transparent: true,
-      opacity: 0.24,
+      opacity: 0.16,
       depthWrite: false,
       side: THREE.DoubleSide,
     });

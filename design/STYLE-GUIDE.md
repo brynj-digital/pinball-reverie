@@ -78,7 +78,7 @@ Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
 are OPAQUE bright chrome, and only the ramp BED between them — a wide
-DAYGLO-GREEN wash (`--green-400` #39ff14 at ~0.2, amended 2026-07-05 by
+DAYGLO-GREEN wash (`--green-400` #39ff14 at ~0.15, amended 2026-07-05 by
 direction; was pale cyan) spanning the full rail-to-rail interior along
 the height profiles — semi-transparent fluorescent ramp plastic. Renderers composite the
 `art-rails-elevated` group separately — over the ball on the main field
