@@ -6,6 +6,7 @@ import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import type { Camera } from "../core/Camera";
 import { BALL_RADIUS, FLIPPER, type FlipperSide, type Pt } from "../table/geometry";
 import { heightAt, parseTableSvg } from "../table/SvgCollision";
+import { buildSurfaces } from "../table/Surfaces";
 import { loadSvgAt, splitElevatedOverlay } from "./svgImage";
 import type {
   EffectKind,
@@ -271,15 +272,32 @@ export class Renderer3D implements Renderer {
     // chrome on every table — only the ramp BED between them is glass
     // (buildGlassBeds below; STYLE-GUIDE §2)
     const railMat = makeRailMat(this.table.theme?.rail3d ?? 0xaebcd0);
-    const railMatElevated = makeRailMat(this.table.theme?.rail3dElevated ?? 0xbdc9dc);
+    // wireform chrome: near-mirror finish, unlike the softer field rails
+    const railMatElevated = clampBloom(new THREE.MeshStandardMaterial({
+      color: this.table.theme?.rail3dElevated ?? 0xbdc9dc,
+      metalness: 1.0,
+      roughness: 0.13,
+      envMap: this.envTex,
+      envMapIntensity: 1.5,
+    }));
     const parsed = parseTableSvg(this.table.artSvgText);
     const elevation = (p: { x: number; y: number }, layer: number) =>
       layer === 0 ? 0 : heightAt(parsed.profiles, layer, p.x, p.y, 0.08);
     for (const wall of parsed.walls) {
-      for (const [h, r] of [
-        [RAIL_LOW, wall.radius],
-        [RAIL_HIGH, wall.radius * 0.7],
-      ] as const) {
+      // field walls read as solid rails at their physical width; elevated
+      // wireforms are true wire gauge — the collision radius stays 6 mm,
+      // the LOOK slims to ~2.5 mm
+      const radii: ReadonlyArray<readonly [number, number]> =
+        wall.layer === 0
+          ? [
+              [RAIL_LOW, wall.radius],
+              [RAIL_HIGH, wall.radius * 0.7],
+            ]
+          : [
+              [RAIL_LOW, 0.0026],
+              [RAIL_HIGH, 0.0018],
+            ];
+      for (const [h, r] of radii) {
         const path = new THREE.CurvePath<THREE.Vector3>();
         const at = (p: { x: number; y: number }) =>
           new THREE.Vector3(p.x, h + elevation(p, wall.layer), p.y);
@@ -300,39 +318,124 @@ export class Renderer3D implements Renderer {
       }
     }
 
-    // translucent glass beds: a ribbon along each layer-1 height profile,
-    // riding its elevation — the see-through ramp surface between the
-    // opaque chrome edge wires
-    for (const prof of parsed.profiles) {
-      if (prof.layer !== 1) continue;
-      const total = prof.cumLen[prof.cumLen.length - 1] || 1;
-      const pos: number[] = [];
-      for (let i = 0; i < prof.pts.length; i++) {
-        const a = prof.pts[Math.max(0, i - 1)];
-        const b = prof.pts[Math.min(prof.pts.length - 1, i + 1)];
+    // M11 surfaces: ONE continuous structure per surface — a seam-free
+    // dayglo glass bed over the chained profiles, wireform cross-ties,
+    // vertical support posts down to the playfield, and edge wires for
+    // surfaces that have no collision rails (the queue's jump wedge)
+    const bedMat = new THREE.MeshBasicMaterial({
+      color: 0x39ff14,
+      transparent: true,
+      opacity: 0.24,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const postMat = clampBloom(
+      new THREE.MeshStandardMaterial({
+        color: 0x565d6e,
+        metalness: 0.8,
+        roughness: 0.4,
+        envMap: this.envTex,
+        envMapIntensity: 0.8,
+      }),
+    );
+    const tube = (a: THREE.Vector3, b: THREE.Vector3, r: number, mat: THREE.Material) =>
+      this.scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(a, b), 1, r, 8, false), mat));
+    for (const surf of buildSurfaces(parsed.profiles)) {
+      // merge the chained profiles into one run with per-point height
+      const run: { x: number; y: number; h: number }[] = [];
+      for (const prof of surf.profiles) {
+        const total = prof.cumLen[prof.cumLen.length - 1] || 1;
+        prof.pts.forEach((pt, i) => {
+          const h = prof.hFrom + (prof.hTo - prof.hFrom) * (prof.cumLen[i] / total);
+          const last = run[run.length - 1];
+          if (last && Math.hypot(last.x - pt.x, last.y - pt.y) < 1e-4) {
+            last.h = h;
+            return;
+          }
+          run.push({ x: pt.x, y: pt.y, h });
+        });
+      }
+      if (run.length < 2) continue;
+      const hw = Math.max(0.012, surf.halfWidth - 0.0025);
+      const nx: number[] = [];
+      const ny: number[] = [];
+      for (let i = 0; i < run.length; i++) {
+        const a = run[Math.max(0, i - 1)];
+        const b = run[Math.min(run.length - 1, i + 1)];
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const l = Math.hypot(dx, dy) || 1;
-        const h = prof.hFrom + (prof.hTo - prof.hFrom) * (prof.cumLen[i] / total) + 0.002;
-        pos.push(prof.pts[i].x - (dy / l) * 0.025, h, prof.pts[i].y + (dx / l) * 0.025);
-        pos.push(prof.pts[i].x + (dy / l) * 0.025, h, prof.pts[i].y - (dx / l) * 0.025);
+        nx.push(-dy / l);
+        ny.push(dx / l);
+      }
+      // the glass bed, mitred through every joint
+      const pos: number[] = [];
+      for (let i = 0; i < run.length; i++) {
+        pos.push(run[i].x - nx[i] * hw, run[i].h + 0.002, run[i].y - ny[i] * hw);
+        pos.push(run[i].x + nx[i] * hw, run[i].h + 0.002, run[i].y + ny[i] * hw);
       }
       const idx: number[] = [];
-      for (let i = 0; i < prof.pts.length - 1; i++) {
+      for (let i = 0; i < run.length - 1; i++) {
         const k = i * 2;
         idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2);
       }
       const geo = new THREE.BufferGeometry();
       geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
       geo.setIndex(idx);
-      const mat = new THREE.MeshBasicMaterial({
-        color: 0x39ff14,
-        transparent: true,
-        opacity: 0.24,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      });
-      this.scene.add(new THREE.Mesh(geo, mat));
+      this.scene.add(new THREE.Mesh(geo, bedMat));
+      // arc-length walk for ties + posts
+      const cum = [0];
+      for (let i = 1; i < run.length; i++)
+        cum.push(cum[i - 1] + Math.hypot(run[i].x - run[i - 1].x, run[i].y - run[i - 1].y));
+      const total = cum[cum.length - 1];
+      const at = (sLen: number) => {
+        let i = 1;
+        while (i < cum.length - 1 && cum[i] < sLen) i++;
+        const u = (sLen - cum[i - 1]) / (cum[i] - cum[i - 1] || 1);
+        return {
+          x: run[i - 1].x + (run[i].x - run[i - 1].x) * u,
+          y: run[i - 1].y + (run[i].y - run[i - 1].y) * u,
+          h: run[i - 1].h + (run[i].h - run[i - 1].h) * u,
+          nx: nx[i - 1] + (nx[i] - nx[i - 1]) * u,
+          ny: ny[i - 1] + (ny[i] - ny[i - 1]) * u,
+        };
+      };
+      for (let sLen = 0.014; sLen < total; sLen += 0.028) {
+        const p = at(sLen); // wireform cross-tie
+        tube(
+          new THREE.Vector3(p.x - p.nx * hw, p.h + 0.0015, p.y - p.ny * hw),
+          new THREE.Vector3(p.x + p.nx * hw, p.h + 0.0015, p.y + p.ny * hw),
+          0.0011,
+          railMatElevated,
+        );
+      }
+      for (let sLen = 0.03; sLen < total; sLen += 0.085) {
+        const p = at(sLen); // support posts, skipped near the mouths
+        if (p.h < 0.016) continue;
+        for (const side of [-1, 1])
+          tube(
+            new THREE.Vector3(p.x + side * p.nx * hw, p.h, p.y + side * p.ny * hw),
+            new THREE.Vector3(p.x + side * p.nx * hw, 0, p.y + side * p.ny * hw),
+            0.0013,
+            postMat,
+          );
+      }
+      // edge wires where the surface has no collision rails
+      if (!parsed.walls.some((w) => w.surfaceName === surf.name)) {
+        for (const side of [-1, 1]) {
+          const path = new THREE.CurvePath<THREE.Vector3>();
+          for (let i = 0; i < run.length - 1; i++)
+            path.add(
+              new THREE.LineCurve3(
+                new THREE.Vector3(run[i].x + side * nx[i] * hw, run[i].h + 0.006, run[i].y + side * ny[i] * hw),
+                new THREE.Vector3(run[i + 1].x + side * nx[i + 1] * hw, run[i + 1].h + 0.006, run[i + 1].y + side * ny[i + 1] * hw),
+              ),
+            );
+          this.scene.add(
+            new THREE.Mesh(new THREE.TubeGeometry(path, Math.max(8, run.length * 2), 0.0022, 8, false), railMatElevated),
+          );
+        }
+      }
     }
   }
 
