@@ -149,15 +149,24 @@ export class PhysicsWorld {
     if (!other) return;
     const sensorHit =
       contact.getFixtureA().isSensor() || contact.getFixtureB().isSensor();
-    if (sensorHit)
+    if (sensorHit) {
       this.bus.emit("sensor", {
         kind: other.kind,
         id: other.id,
         zMin: other.zMin,
         zMax: other.zMax,
       });
-    else if (HIT_KINDS.has(other.kind))
+    } else if (HIT_KINDS.has(other.kind)) {
+      // begin-contact fires even when the pre-solve height gate disables
+      // the contact — a ball riding a ramp over a bumper must not emit a
+      // hit (or be kicked). Apply the same gate to the event.
+      if (this.zGate) {
+        const ballFix = (a?.kind === "ball" ? contact.getFixtureA() : contact.getFixtureB());
+        const p = ballFix.getBody().getPosition();
+        if (!this.zGate(other, p.x, p.y)) return;
+      }
       this.bus.emit("hit", { kind: other.kind, id: other.id ?? "" });
+    }
   }
 
   /**

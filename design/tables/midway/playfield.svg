@@ -547,7 +547,7 @@
       <!-- orbit tail: the Sky Ride's descending inner arm, guiding traffic
            down toward the mallet; the delivery gap past its end is a free
            pass (≥38 mm) onto the bat -->
-      <path data-width="12" id="collision-wall-orbit-tail" d="M 409.4 134.7 L 430 165 L 448 200 L 455 225"/>
+      <path data-width="12" id="collision-wall-orbit-tail" d="M 409.4 134.7 L 430 165 L 443 200 L 443 230"/>
       <!-- arch catcher: sealed to the shell — EVERY descending loop return
            is deflected inward and delivered onto the mallet. The ascending
            plunge flies OVER it off the lane's jump wedge (band ≤16). -->
@@ -600,7 +600,8 @@
   </defs>
   <g id="art-ramp-backs" fill="none" stroke-linecap="round">
     <g stroke="#07080d" stroke-width="12" opacity="0.85"><use href="#collision-backs"/></g>
-    <g stroke="#45215a" stroke-width="5" opacity="0.6"><use href="#collision-backs"/></g>
+    <g stroke="#45215a" stroke-width="6.5"><use href="#collision-backs"/></g>
+    <g stroke="#aeb6c8" stroke-width="2" opacity="0.85"><use href="#collision-backs"/></g>
   </g>
   <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <g stroke="#07080d" stroke-width="16"><use href="#collision-paths"/></g>

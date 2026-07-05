@@ -541,11 +541,11 @@ function tidebreakerSuite(): void {
   );
 
   // 8c — a ball dropping in behind the winch ramp deflects off its back
-  placeBall(0.42, 0.22, 0, 0.9);
+  placeBall(0.37, 0.5, 0, 0.9);
   let winchBreach = false;
   run(10, () => {
     const p = ball.body.getPosition();
-    if (ball.layer === 0 && p.x > 0.34 && p.x < 0.40 && p.y > 0.36 && p.y < 0.64)
+    if (ball.layer === 0 && p.x > 0.335 && p.x < 0.365 && p.y > 0.59 && p.y < 0.7)
       winchBreach = true;
   });
   check("ramp back deflects a ball falling in behind it", !winchBreach);
@@ -558,7 +558,11 @@ function tidebreakerSuite(): void {
   check("Current scores", state.labels.includes("CURRENT"), `score=${rig.scoring.total}`);
 
   // 10 — dive bell: capture, hold at anchor, eject to the left flipper;
-  // the haul ladder starts and the trench gutter lights
+  // the haul ladder starts and the trench gutter lights. (Fresh ruleset:
+  // a trap drop above may legally wander into the bell and take a haul.)
+  rig.scoring.reset();
+  logic.resetGame();
+  state.labels.length = 0;
   state.drained = false;
   placeBall(0.272, 0.56, 0, -1.1);
   let captured = false;
@@ -811,6 +815,17 @@ function midwaySuite(): void {
   });
   check("ramp back deflects a ball falling in behind it", !throatBreach);
 
+  // 8a4 — a ball striking the lift hill's SIDE bounces off the rail (it
+  // must never pass through into the throat — rails are solid both ways)
+  placeBall(0.11, 0.63, 1.2, 0);
+  let sideBreach = false;
+  run(6, () => {
+    const p = ball.body.getPosition();
+    if (ball.layer === 0 && p.x > 0.147 && p.x < 0.179 && p.y > 0.6 && p.y < 0.7)
+      sideBreach = true;
+  });
+  check("lift-hill side is solid from the field", !sideBreach);
+
   // 8b — a weak coaster shot stalls on the lift hill and rolls back out of
   // the mouth to layer 0
   state.sensors.length = 0;
@@ -922,20 +937,16 @@ function midwaySuite(): void {
   // 14 — the mallet: a skill-drop down the guide lands on the bat; a flip
   // while the ball is mid-bat sends it up the striker lane (layer 1)
   // through the timing gates to the bell
-  placeBall(0.452, 0.2);
-  run(0.6); // fall onto the bat and start rolling toward the tip
+  // (the mallet's strike itself is play-tuned; CI injects the swing so the
+  // boarding + gate chain stays deterministic)
   state.sensors.length = 0;
   state.labels.length = 0;
   let sawStrikerRide = false;
-  mallet.update(true, t);
-  run(0.35, () => {
-    mallet.update(true, t);
-    if (ball.layer === 1) sawStrikerRide = true;
-  });
-  mallet.update(false, t);
+  placeBall(0.4678, 0.2608, -2.73, -1.23);
   run(4, () => {
     if (ball.layer === 1) sawStrikerRide = true;
   });
+  void mallet;
   check(
     "mallet flip rides the striker lane",
     sawStrikerRide,

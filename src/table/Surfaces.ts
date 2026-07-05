@@ -51,10 +51,27 @@ export function buildSurfaces(profiles: HeightProfile[]): Surface[] {
 
 /** Height of `s` at (x, y), or null when outside its footprint. */
 export function surfaceHeightAt(s: Surface, x: number, y: number): number | null {
+  return surfaceHeightNear(s, x, y, 0);
+}
+
+/**
+ * Like surfaceHeightAt but tolerant of positions up to `extra` beyond the
+ * footprint — the rail height gate needs the LOCAL height for a ball
+ * touching a rail from the OUTSIDE (a rail must be solid from both sides;
+ * treating outside-footprint as "no rail" made every ramp mouth a one-way
+ * wall that side-entering balls fell through).
+ */
+export function surfaceHeightNear(
+  s: Surface,
+  x: number,
+  y: number,
+  extra: number,
+): number | null {
   let best: { dist: number; h: number } | null = null;
   for (const p of s.profiles) {
     const r = projectOnProfile(p, x, y);
-    if (r.dist <= s.halfWidth && (!best || r.dist < best.dist)) best = { dist: r.dist, h: r.h };
+    if (r.dist <= s.halfWidth + extra && (!best || r.dist < best.dist))
+      best = { dist: r.dist, h: r.h };
   }
   return best ? best.h : null;
 }
@@ -241,7 +258,9 @@ export function contactApplies(
   const ballTop = ballZ + 2 * BALL_RADIUS;
   if (tag.surfaceName) {
     const s = surfaces.find((s) => s.name === tag.surfaceName);
-    const h = s ? surfaceHeightAt(s, x, y) : null;
+    // tolerate positions outside the footprint: a ball touching a rail
+    // from the field side must still see it at its local height
+    const h = s ? surfaceHeightNear(s, x, y, 0.06) : null;
     if (h === null) return false; // rail far from its own footprint: ignore
     return ballZ < h + RAIL_TOP && ballTop > h - RAIL_BOTTOM;
   }
