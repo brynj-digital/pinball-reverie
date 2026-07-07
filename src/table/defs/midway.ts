@@ -82,13 +82,20 @@ const GEOMETRY: TableGeometry = {
     { id: "3", x: 0.295, y: 0.115 },
     { id: "4", x: 0.358, y: 0.115 },
   ],
-  /** Ferris wheel gondola inserts — the bonus-X ring (magenta, BRIEF §4). */
+  /** Ferris wheel gondola inserts — the bonus-X ring (magenta, BRIEF §4) —
+   * plus the outlane save inserts: lit while the hand stamp / chicken exit
+   * is armed, so the player reads the outlane before the ball drops. */
   lamps: [
     { id: "g1", x: 0.315, y: 0.536, rgb: "255, 62, 154" },
     { id: "g2", x: 0.3473, y: 0.5595, rgb: "255, 62, 154" },
     { id: "g3", x: 0.335, y: 0.5975, rgb: "255, 62, 154" },
     { id: "g4", x: 0.295, y: 0.5975, rgb: "255, 62, 154" },
     { id: "g5", x: 0.2827, y: 0.5595, rgb: "255, 62, 154" },
+    { id: "stamp", x: 0.026, y: 0.868, rgb: "255, 62, 154" },
+    { id: "chicken", x: 0.494, y: 0.893, rgb: "47, 201, 214" },
+    // ghost-train turnstile: lit = the dark ride is open (green ghost glow);
+    // dark = spin the turnstile relightSpins times to re-open it
+    { id: "ghost", x: 0.24, y: 0.512, rgb: "57, 255, 20" },
   ],
   /** The turnstile: spinner across the ghost-train mouth. */
   spinner: { x: 0.24, y: 0.562, halfW: 0.023 },
@@ -127,5 +134,5 @@ export const MIDWAY_SPEC: TableSpec = {
   createLogic: (ctx) => new MidwayLogic(ctx),
   highScoreKey: "pinball-highscores-midway-v1",
   // dusk plum field walls (carnival-500/300 blend); wireforms stay chrome
-  theme: { rail3d: 0x45215a, rail3dElevated: 0xbdc9dc },
+  theme: { rail3d: 0x45215a, rail3dElevated: 0xbdc9dc, rampGlass3d: 0x39ff14 },
 };

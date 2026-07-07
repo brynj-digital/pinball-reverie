@@ -30,7 +30,11 @@ const SWING_WINDOW = 3;
  *   finale; shooting it starts durationS of ×scoreFactor scoring with
  *   coasterJackpot circuits.
  * - Combos, a live swing and a running finale die with the ball; gondolas,
- *   wheel turns, pass punches and lit states persist, reset per game.
+ *   wheel turns, pass punches, collected P-A-R-K letters and lit states
+ *   persist, reset per game.
+ * - LANE CHANGE: any main-flipper press rotates the collected letters
+ *   across the four lanes (left ← / right →), so one repeatable feed —
+ *   the striker drop-off or a dying Sky Ride loop — can finish the set.
  */
 export class MidwayLogic implements TableLogic {
   private now = 0;
@@ -45,6 +49,12 @@ export class MidwayLogic implements TableLogic {
   private boothLit = false;
   private chickenLit = false;
   private stampLit = false;
+  /** The ghost train's turnstile. Lit (open) at ball start; a ride consumes
+   * the light, then relightSpins turnstile spins re-open it — so the dark
+   * ride stops swallowing every ball that reaches mid-field (it used to be
+   * always-on, which walled the top half off). */
+  private ghostLit = true;
+  private turnstileSpins = 0;
   private pass = new Set<string>();
   fireworksReady = false;
   private fireworksUntil = -Infinity;
@@ -65,7 +75,7 @@ export class MidwayLogic implements TableLogic {
       else if (kind === "lane") {
         if (id === "striker-a") this.onStrikerA();
         else if (id === "striker-b") this.onStrikerB();
-      }
+      } else if (kind === "spinner") this.onTurnstile();
     });
     // M11: rides are surface events — the ball genuinely boards and leaves
     ctx.bus.on("surface", ({ from, to, x }) => {
@@ -108,10 +118,15 @@ export class MidwayLogic implements TableLogic {
     this.comboStep = 0;
     this.lastLoopAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
-    this.litLanes.clear();
+    // collected letters survive the drain — the lanes are the table's
+    // hardest real estate, and losing them per ball made P-A-R-K a fantasy
     this.swingActive = false;
     this.swingScored = false;
     this.aAt = -Infinity;
+    // the next ball starts with the dark ride open (one ride before it must
+    // be re-earned at the turnstile)
+    this.ghostLit = true;
+    this.turnstileSpins = 0;
     if (this.fireworksActive) {
       this.fireworksUntil = -Infinity;
       this.fireworksWasActive = false;
@@ -122,6 +137,7 @@ export class MidwayLogic implements TableLogic {
 
   resetGame(): void {
     this.endBall();
+    this.litLanes.clear();
     this.gondolas = 0;
     this.wheelTurns = 0;
     this.prizeIdx = 0;
@@ -147,8 +163,23 @@ export class MidwayLogic implements TableLogic {
     return this.litLanes.has(id) ? 0.55 : 0;
   }
 
-  /** Gondola inserts g1..g5: lit while loaded on the current ring. */
+  /** Lane change: a flipper press rotates the collected letters across the
+   * lanes, so the player can line an unlit lane up under a repeatable feed. */
+  onFlipper(side: "left" | "right"): void {
+    if (this.litLanes.size === 0 || this.litLanes.size === 4) return;
+    const ids = ["1", "2", "3", "4"];
+    const shift = side === "right" ? 1 : ids.length - 1;
+    const rotated = new Set<string>();
+    for (const id of this.litLanes) rotated.add(ids[(ids.indexOf(id) + shift) % ids.length]);
+    this.litLanes = rotated;
+  }
+
+  /** Gondola inserts g1..g5 lit while loaded on the current ring; the
+   * outlane save inserts mirror their kickback/subway lit state. */
   lamp(id: string): number {
+    if (id === "stamp") return this.stampLit ? 1 : 0;
+    if (id === "chicken") return this.chickenLit ? 1 : 0;
+    if (id === "ghost") return this.ghostLit ? 1 : 0;
     const n = Number(id.replace(/\D/g, ""));
     return n > 0 && n <= this.gondolas ? 1 : 0;
   }
@@ -157,7 +188,17 @@ export class MidwayLogic implements TableLogic {
     if (id === "booth") return this.boothLit || this.fireworksReady;
     if (id === "stamp") return this.stampLit;
     if (id === "chicken") return this.chickenLit;
-    return true; // the ghost train always takes riders
+    if (id === "ghost") return this.ghostLit; // gated by the turnstile light
+    return true;
+  }
+
+  /** Turnstile spins re-open the dark ride once its light has been spent. */
+  private onTurnstile(): void {
+    if (this.ghostLit) return;
+    if (++this.turnstileSpins >= rules.ghostTrain.relightSpins) {
+      this.ghostLit = true;
+      this.turnstileSpins = 0;
+    }
   }
 
   /** Game confirmed a kicker/subway capture (awards live here, not on the
@@ -165,6 +206,9 @@ export class MidwayLogic implements TableLogic {
   onCapture(id: string): void {
     if (id === "booth") this.onBooth();
     else if (id === "ghost") {
+      // the ride is spent; the turnstile must be spun to re-open it
+      this.ghostLit = false;
+      this.turnstileSpins = 0;
       if (this.ctx.scoring.muted) return;
       this.ctx.scoring.award(rules.ghostTrain.points, "GHOST TRAIN");
       this.ctx.scoring.bonusUnits += rules.ghostTrain.bonusUnit;

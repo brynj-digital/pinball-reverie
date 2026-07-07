@@ -78,15 +78,18 @@ Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
 are OPAQUE bright chrome, and only the ramp BED between them — a wide
-DAYGLO-GREEN wash (`--green-400` #39ff14 at ~0.15, amended 2026-07-05 by
-direction; was pale cyan) spanning the full rail-to-rail interior along
-the height profiles — semi-transparent fluorescent ramp plastic. Renderers composite the
+translucent wash (~0.15) spanning the full rail-to-rail interior along
+the height profiles — semi-transparent fluorescent ramp plastic. **The
+glass TINT is per-table, matching the field variant** (amended 2026-07-05
+by direction): DAYGLO green (`--green-400` #39ff14) is the default —
+Moondial and Midway use it — while Tidebreaker's glass is abyssal
+`--cyan-400` #2fc9d6. The SVG wash and `TableSpec.theme.rampGlass3d` must
+carry the same hue. Renderers composite the
 `art-rails-elevated` group separately — over the ball on the main field
 (the ball shows through the bed, disappears behind the wires), under it on
 the raised layer — so which level the ball is on is always unambiguous.
 The 3D renderer builds the same split: opaque chrome tubes plus a
-translucent bed ribbon riding each layer-1 height profile
-(`TableSpec.theme` keeps the tints per-table).
+translucent bed ribbon riding each layer-1 height profile.
 
 ## 3. Master units & scale
 
@@ -185,7 +188,15 @@ sensors; entry and exit are geometry.
   point, spanning rail to rail, with **`data-z-max="22"`** (walls accept
   explicit `data-z-min`/`data-z-max` bands): ground balls bounce off it,
   riders pass above. Check its end caps against neighbouring furniture for
-  the §4 gap bands.
+  the §4 gap bands. **Caution (Midway 2026-07-06):** on a shallow lift hill
+  the bed is still low near the back's location, so a *fast* climber sweeps
+  up through the sub-22 mm band and CCD snags it on the back before its
+  height clears — the ramp completes ~0 % of aimed shots, worse the harder
+  you hit it. If a `feature-rates` probe shows climbers stalling at the
+  back, **drop the band to `data-z-max="10"`** (blocks only near-ground
+  z≈0 fallers; lets the rider, whose base sits at the local bed height,
+  pass). Reserve the full `22` for backs sitting where the bed is already
+  steep/high enough that riders are well clear when in CCD reach.
 - Rails crossing over field furniture keep the local surface height at
   least ~7 mm above that furniture's top (ball tops clear rails at
   local-height − 1 mm).

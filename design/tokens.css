@@ -54,7 +54,8 @@
   --magenta-600: #b01860;
   --cyan-400: #2fc9d6;
   --cyan-600: #147986;
-  --green-400: #39ff14; /* DAYGLO green: elevated ramp glass (M11 beds) */
+  --green-400: #39ff14; /* DAYGLO green: default elevated ramp glass (M11 beds);
+                           ramp glass is per-table — Tidebreaker uses cyan-400 */
   --green-600: #1cae0d;
   --violet-400: #8c6bff; /* the Reverie signature hue */
   --violet-600: #4e37a8;

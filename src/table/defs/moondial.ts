@@ -101,5 +101,5 @@ export const MOONDIAL_SPEC: TableSpec = {
   createLogic: (ctx) => new MoondialLogic(ctx),
   // pre-M10 key, kept so existing players' scores survive the multi-table move
   highScoreKey: "pinball-highscores-v2",
-  theme: { rail3d: 0xaebcd0, rail3dElevated: 0xbdc9dc }, // steel + chrome
+  theme: { rail3d: 0xaebcd0, rail3dElevated: 0xbdc9dc, rampGlass3d: 0x39ff14 }, // steel + chrome, dayglo glass
 };

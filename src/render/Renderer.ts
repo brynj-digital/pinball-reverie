@@ -23,7 +23,7 @@ export interface TableRenderData {
   /** Plunger assembly placement (per-table; drawn by the renderer). */
   plunger: { x: number; saddleY: number; tipRestY: number; pull: number; baseY: number };
   /** Per-table 3D material tints (wall art colors live in the SVG). */
-  theme?: { rail3d: number; rail3dElevated: number };
+  theme?: { rail3d: number; rail3dElevated: number; rampGlass3d: number };
 }
 
 export interface BallSnapshot {

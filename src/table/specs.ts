@@ -38,9 +38,11 @@ export interface TableSpec {
    * Renderer theming that can't live in the SVG (3D materials). Wall art
    * colors themselves are per-table IN the SVG (STYLE-GUIDE §2); these keep
    * the 3D rail materials in step. Elevated wireforms stay chrome on every
-   * table — the material split is the layer cue.
+   * table — the material split is the layer cue. `rampGlass3d` tints the
+   * translucent bed between the wires and must match the SVG's
+   * art-rails-elevated wash (STYLE-GUIDE §2).
    */
-  theme: { rail3d: number; rail3dElevated: number };
+  theme: { rail3d: number; rail3dElevated: number; rampGlass3d: number };
 }
 
 export type TableId = "moondial" | "tidebreaker" | "midway";

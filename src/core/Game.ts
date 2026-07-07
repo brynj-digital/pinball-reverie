@@ -515,6 +515,12 @@ export class Game {
     if (flipL && !this.prevFlip.left) this.audio.sfx("flipper");
     if (flipR && !this.prevFlip.right) this.audio.sfx("flipper");
     if (this.flippers[2] && flipU && !this.prevFlip.upper) this.audio.sfx("flipper");
+    // lane change (flippersLive already excludes tilt): main flippers only —
+    // the upper defaults to sharing the right keys, so it must not re-fire
+    if (this.phase === "play") {
+      if (flipL && !this.prevFlip.left) this.logic.onFlipper?.("left");
+      if (flipR && !this.prevFlip.right) this.logic.onFlipper?.("right");
+    }
     this.prevFlip.left = flipL;
     this.prevFlip.right = flipR;
     this.prevFlip.upper = flipU;

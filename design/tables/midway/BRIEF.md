@@ -50,6 +50,71 @@ in the air and the ball genuinely falls to the inlane / the P lane);
 climbs cost real energy, so the mallet must connect cleanly to ring the
 bell.
 
+**P-A-R-K feed rework (2026-07-05):** soak instrumentation found the lanes
+effectively unreachable — 6 lane hits and ZERO completions in 30 simulated
+minutes — because the orbit inner wall sealed them off from above and the
+striker's bell end was (contrary to the M11 delta above) capped by a bell
+post, so nothing ever fed them but stray dodgem bounces. Three changes,
+all realizing the briefed flow (right flipper → Sky Ride → mallet →
+striker → P-A-R-K):
+
+- **The orbit crest is open over the P and A mouths.** The inner wall's
+  left arm now ends at (132, 113) and resumes at divider-2's top (263, 65),
+  covering R/K and descending as before; the dividers rise to the old arc
+  line and frame two 46–70 mm mouths. A fast Sky Ride loop rides the shell
+  straight over the window into the arch catcher (mallet feed unchanged);
+  a dying loop or soft crest ball drops into P or A. A full four-lane
+  window was tried first: soak showed balls raining down the right half
+  land on the striker wire's ball-height mouth run and wedge in the orbit
+  tail V — the left half drains clean through the dodgems. The P column
+  exposed a latent trap either way (the dead-end strip under the coaster
+  lift hill, against the bed's solid back): a sloped **underbrace**
+  continuing the ghost pocket's now-sloped roof sheds that column left
+  into the orbit-arm corridor and back to the left inlane.
+- **The striker cap is gone** — the bell end really is a ballistic drop
+  now: a swing that rings the bell flies off the wire and lands in the
+  lanes (or the open crest, rolling back in). The M11 text above was the
+  intent; the cap was the bug.
+- **Lane change + persistence.** Any main-flipper press rotates the
+  collected letters across the lanes (left ←, right →), and letters
+  survive the drain (reset per game). One repeatable feed can finish the
+  set — tough, not impossible.
+
+The outlane saves also gained **lit-state insert lamps** (stamp magenta,
+chicken-exit cyan; Tidebreaker's hatch/gutter got the same) — the saves
+were invisible when armed, and an unlit save reads as a dead gutter.
+
+**Playability pass (2026-07-06):** two player-reported problems, both
+measured with an instrumented soak (`scripts/feature-rates.tmp.ts`) before
+and after — the coaster/striker "impossible to climb", and the ghost train
+walling off the top half.
+
+- **The ramp back walls were snagging their own climbers.** Both the
+  coaster lift hill and the high-striker wire completed ~0 rides — not an
+  energy stall but the `collision-wall-*-back` throat guards: their
+  `data-z-max="22"` band caught a *climbing* rider. A fast climb sweeps up
+  through the low-z part of the ramp (ball base z < 22 mm) and CCD snags it
+  on the back wall before its height rises clear — so paradoxically the
+  faster the shot, the harder it stuck (non-monotonic: 1.8 and 3.5 m/s rode,
+  2.6/3.0/4.0/4.5 stalled). Fix: **drop both backs to `data-z-max="10"`**
+  (positions unchanged). Only near-ground fallers (a wedged P-column drop
+  sits at z≈0) are still blocked; a rider on the bed (z ≥ local height, and
+  ≥ ~19 mm within CCD reach of the wall) now passes. A direct-shot probe
+  rides at every entry speed 1.8–5.0 m/s; simcheck + soak clean (0 stuck).
+  The lift-hill *geometry* was never the problem — it did not need
+  reshaping. (Tidebreaker's winch uses the same z-max=22 back; likely the
+  same latent snag.)
+- **The ghost train is now gated by its turnstile light.** It used to
+  capture unconditionally (`kickerLit` always true), so every ball that
+  reached mid-field got subwayed to y634 — the "ball grabber" that walled
+  off the top half. Now it is **lit at ball start** (one dark-ride before it
+  must be re-earned), a ride **consumes** the light, and **relightSpins (3)
+  turnstile spins re-open it** (`rules.ghostTrain.relightSpins`). A green
+  ghost lamp at the mouth shows the lit state. Consequence: an unlit mouth
+  entry rolls back out into play instead of removing the ball, so the player
+  keeps the ball live to work the orbit / the now-rideable ramps toward the
+  top. Ride-pass qualifier unchanged (one transit still punches it).
+
 **Premise:** a travelling funfair after dark. The tall scrolling playfield
 is the midway itself — the park gates and ticket booth at the bottom, the
 big rides stacked up the field, the ferris wheel crowning the skyline at

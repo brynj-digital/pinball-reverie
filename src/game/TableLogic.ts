@@ -48,4 +48,9 @@ export interface TableLogic {
    * and lit-state consumption belong here.
    */
   onCapture?(id: string): void;
+  /**
+   * A main flipper was pressed (edge, play phase, not tilted). Classic
+   * lane-change: tables may rotate their lit rollover lanes on it.
+   */
+  onFlipper?(side: "left" | "right"): void;
 }

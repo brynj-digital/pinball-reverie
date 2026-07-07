@@ -124,7 +124,17 @@ export class Renderer3D implements Renderer {
   private rolloverGlowMats: THREE.MeshBasicMaterial[] = [];
   private lampGlowMats: THREE.MeshBasicMaterial[] = [];
   private spinnerMesh?: THREE.Mesh;
-  private plungerRod?: THREE.Mesh;
+  /** Moving plunger assembly (tip pad + rod + knob); origin at the tip face. */
+  private plungerGroup?: THREE.Group;
+  private plungerSpring?: THREE.Mesh;
+  private plungerSpringRest = 1;
+  /** 3D-only tip rest: the saddle bar isn't drawn here, so the tip sits where
+   * the ball's surface actually is — saddleY minus the saddle wall's 6 mm
+   * collision radius (tipRestY itself is authored for the 2D under-saddle
+   * layout and would leave a 4 mm float). */
+  private plungerTipRestZ = 0;
+  private plungerLastCharge = 0;
+  private plungerStrikeAt = -1;
   private built = false;
 
   private fx: RingFx[] = [];
@@ -322,6 +332,10 @@ export class Renderer3D implements Renderer {
     const elevation = (p: { x: number; y: number }, layer: number) =>
       layer === 0 ? 0 : heightAt(parsed.profiles, layer, p.x, p.y, 0.08);
     for (const wall of parsed.walls) {
+      // the plunger saddle stays physics-only here: no real machine has a bar
+      // across the shooter lane — the ball visually rests on the plunger tip
+      // instead (buildPlunger places the tip at the saddle's contact face)
+      if (wall.name.includes("plunger-saddle")) continue;
       // field walls read as solid rails at their physical width; elevated
       // wireforms are true wire gauge — the collision radius stays 6 mm,
       // the LOOK slims to ~2.5 mm
@@ -358,11 +372,11 @@ export class Renderer3D implements Renderer {
     }
 
     // M11 surfaces: ONE continuous structure per surface — a seam-free
-    // dayglo glass bed over the chained profiles, wireform cross-ties,
+    // theme-tinted glass bed over the chained profiles, wireform cross-ties,
     // vertical support posts down to the playfield, and edge wires for
     // surfaces that have no collision rails (the queue's jump wedge)
     const bedMat = new THREE.MeshBasicMaterial({
-      color: 0x39ff14,
+      color: this.table.theme?.rampGlass3d ?? 0x39ff14,
       transparent: true,
       opacity: 0.16,
       depthWrite: false,
@@ -481,9 +495,16 @@ export class Renderer3D implements Renderer {
     }
   }
 
+  /** The 2D renderer's plunger assembly in the round: rubber tip pad + chrome
+   * rod sliding through a brass housing to a knob, with a coil spring that
+   * squashes as the charge pulls the rod back (and stretches on the release
+   * overshoot). The rod protruding past the housing is the shooter handle —
+   * the housing is what makes that read as through-the-cabinet, not floating. */
   private buildPlunger(): void {
     const PLUNGER = this.table.plunger;
-    const mat = clampBloom(
+    this.plungerTipRestZ = PLUNGER.saddleY - 0.006;
+    const y = BALL_RADIUS; // strike the ball on its equator
+    const chrome = clampBloom(
       new THREE.MeshStandardMaterial({
         color: 0x9aa5b8,
         metalness: 0.85,
@@ -492,17 +513,77 @@ export class Renderer3D implements Renderer {
         envMapIntensity: 0.9,
       }),
     );
-    const rod = new THREE.CylinderGeometry(0.0035, 0.0035, 0.05, 10);
-    rod.rotateX(Math.PI / 2); // lie along z (down the lane)
-    this.plungerRod = new THREE.Mesh(rod, mat);
-    this.plungerRod.position.set(PLUNGER.x, 0.01, PLUNGER.tipRestY + 0.025);
+
+    const g = new THREE.Group();
     const tip = new THREE.Mesh(
-      new THREE.SphereGeometry(0.006, 12, 10),
+      new THREE.CylinderGeometry(0.0085, 0.0085, 0.005, 16).rotateX(Math.PI / 2),
+      new THREE.MeshStandardMaterial({ color: 0x14161c, roughness: 0.8 }),
+    );
+    tip.position.z = 0.0025;
+    const rodLen = PLUNGER.baseY - this.plungerTipRestZ + 0.008;
+    const rod = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.0032, 0.0032, rodLen, 10).rotateX(Math.PI / 2),
+      chrome,
+    );
+    rod.position.z = 0.005 + rodLen / 2;
+    const knob = new THREE.Mesh(
+      new THREE.SphereGeometry(0.0075, 14, 12),
       new THREE.MeshStandardMaterial({ color: 0xc23b2e, roughness: 0.5 }),
     );
-    tip.position.set(0, 0, -0.025);
-    this.plungerRod.add(tip);
-    this.scene.add(this.plungerRod);
+    knob.position.z = 0.005 + rodLen;
+    for (const m of [tip, rod, knob]) m.castShadow = true;
+    g.add(tip, rod, knob);
+    g.position.set(PLUNGER.x, y, this.plungerTipRestZ);
+    this.plungerGroup = g;
+    this.scene.add(g);
+
+    // coil spring built at rest length, squashed per-frame via scale.z — the
+    // slight wire flattening under compression is invisible at 1.1 mm gauge
+    this.plungerSpringRest = PLUNGER.baseY - this.plungerTipRestZ - 0.005;
+    const coils = 7;
+    const segsPerCoil = 16;
+    const n = coils * segsPerCoil;
+    const helix: THREE.Vector3[] = [];
+    for (let i = 0; i <= n; i++) {
+      const a = (i / segsPerCoil) * Math.PI * 2;
+      helix.push(
+        new THREE.Vector3(
+          Math.cos(a) * 0.0068,
+          Math.sin(a) * 0.0068,
+          (i / n) * this.plungerSpringRest,
+        ),
+      );
+    }
+    this.plungerSpring = new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(helix), n, 0.0011, 6, false),
+      clampBloom(
+        new THREE.MeshStandardMaterial({
+          color: 0x7f8fc9,
+          metalness: 0.8,
+          roughness: 0.45,
+          envMap: this.envTex,
+          envMapIntensity: 0.7,
+        }),
+      ),
+    );
+    this.plungerSpring.position.set(PLUNGER.x, y, this.plungerTipRestZ + 0.005);
+    this.scene.add(this.plungerSpring);
+
+    const base = new THREE.Mesh(
+      new THREE.BoxGeometry(0.024, 0.02, 0.007),
+      clampBloom(
+        new THREE.MeshStandardMaterial({
+          color: 0xe0b64e,
+          metalness: 0.6,
+          roughness: 0.4,
+          envMap: this.envTex,
+          envMapIntensity: 0.5,
+        }),
+      ),
+    );
+    base.position.set(PLUNGER.x, y - 0.002, PLUNGER.baseY + 0.0035);
+    base.castShadow = true;
+    this.scene.add(base);
   }
 
   /** DMD + backglass as a DOM side panel; HUD line along the bottom. */
@@ -805,8 +886,22 @@ export class Renderer3D implements Renderer {
       this.lampGlowMats[i].opacity = 0.08 + l.lit * 0.55;
     });
     this.spinnerMesh!.rotation.x = snap.elements.spinner.angle;
-    this.plungerRod!.position.z =
-      this.table.plunger.tipRestY + this.table.plunger.pull * snap.plungerCharge + 0.025;
+    // plunger travel with the 2D renderer's release snap: a brief sine
+    // overshoot past rest when the charge lets go
+    const PLUNGER = this.table.plunger;
+    if (this.plungerLastCharge > 0.1 && snap.plungerCharge === 0) this.plungerStrikeAt = now;
+    this.plungerLastCharge = snap.plungerCharge;
+    const strikePhase = (now - this.plungerStrikeAt) / 0.14;
+    const overshoot =
+      strikePhase >= 0 && strikePhase < 1 ? Math.sin(Math.PI * strikePhase) * 0.007 : 0;
+    const tipZ = this.plungerTipRestZ + PLUNGER.pull * snap.plungerCharge - overshoot;
+    this.plungerGroup!.position.z = tipZ;
+    const springTop = tipZ + 0.005;
+    this.plungerSpring!.position.z = springTop;
+    this.plungerSpring!.scale.z = Math.max(
+      0.15,
+      (PLUNGER.baseY - springTop) / this.plungerSpringRest,
+    );
 
     for (const fx of this.fx) {
       if (!fx.live) continue;

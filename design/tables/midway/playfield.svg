@@ -145,22 +145,30 @@
 
     <!-- P·A·R·K lane inserts (rollovers light these) — every letter its own
          neon; the row sits BELOW the sensor line, in the open slot space
-         (at the arch line the wall tube and bell rig bury it) -->
+         (at the arch line the wall tube and bell rig bury it). Rings run
+         full-strength: the striker wireform crosses this row and a timid
+         ring vanished under the chrome -->
     <g stroke="#07080d" stroke-width="1.5">
-      <circle cx="162" cy="132" r="10" fill="#2b1638" stroke-width="1.5"/>
-      <circle cx="225" cy="132" r="10" fill="#2b1638"/>
-      <circle cx="295" cy="132" r="10" fill="#2b1638"/>
-      <circle cx="358" cy="132" r="10" fill="#2b1638"/>
+      <circle cx="162" cy="132" r="11" fill="#2b1638" stroke-width="1.5"/>
+      <circle cx="225" cy="132" r="11" fill="#2b1638"/>
+      <circle cx="295" cy="132" r="11" fill="#2b1638"/>
+      <circle cx="358" cy="132" r="11" fill="#2b1638"/>
     </g>
-    <g fill="none" stroke-width="1.5" opacity="0.6">
-      <circle cx="162" cy="132" r="10" stroke="#ff3e9a"/>
-      <circle cx="225" cy="132" r="10" stroke="#2fc9d6"/>
-      <circle cx="295" cy="132" r="10" stroke="#e0b64e"/>
-      <circle cx="358" cy="132" r="10" stroke="#8c6bff"/>
+    <g fill="none" stroke-width="2" opacity="0.95">
+      <circle cx="162" cy="132" r="11" stroke="#ff3e9a"/>
+      <circle cx="225" cy="132" r="11" stroke="#2fc9d6"/>
+      <circle cx="295" cy="132" r="11" stroke="#e0b64e"/>
+      <circle cx="358" cy="132" r="11" stroke="#8c6bff"/>
     </g>
     <g font-family="ui-monospace, monospace" font-size="12" font-weight="700" text-anchor="middle">
       <text x="162" y="136.5" fill="#ff3e9a">P</text><text x="225" y="136.5" fill="#2fc9d6">A</text>
       <text x="295" y="136.5" fill="#e0b64e">R</text><text x="358" y="136.5" fill="#8c6bff">K</text>
+    </g>
+    <!-- entry chevrons at the two open lane mouths (the orbit crest
+         window spans P and A only; R and K fill by lane change) -->
+    <g stroke="#e0b64e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+      <path d="M 156 88 L 162 96 L 168 88"/>
+      <path d="M 219 88 L 225 96 L 231 88"/>
     </g>
 
     <!-- glow pools under the bright spots -->
@@ -413,14 +421,20 @@
             font-size="8" letter-spacing="1" fill="#f4d27a">DING!</text>
     </g>
 
-    <!-- outlanes: hand stamp (kickback) and the chicken exit -->
+    <!-- outlanes: hand stamp (kickback) and the chicken exit. Each save
+         carries a lit-when-armed insert lamp (TableGeometry.lamps drive the
+         glow) so the player can read the outlane BEFORE the ball drops -->
     <g id="art-outlanes">
       <rect x="12" y="948" width="28" height="20" rx="4" fill="#3d1f4d" stroke="#07080d" stroke-width="1.5"/>
       <path d="M 26 944 L 20 934 L 32 934 Z" fill="#ff3e9a" opacity="0.8"/>
+      <circle cx="26" cy="868" r="7" fill="#2b1638" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="26" cy="868" r="7" fill="none" stroke="#ff3e9a" stroke-width="1.8" opacity="0.9"/>
       <text x="30" y="905" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="9" letter-spacing="1" fill="#b01860" transform="rotate(-90 30 905)">STAMP</text>
-      <text x="492" y="868" text-anchor="middle" font-family="ui-monospace, monospace"
-            font-size="8" letter-spacing="1" fill="#b01860" transform="rotate(-90 492 868)">CHICKEN EXIT</text>
+      <circle cx="494" cy="893" r="7" fill="#2b1638" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="494" cy="893" r="7" fill="none" stroke="#2fc9d6" stroke-width="1.8" opacity="0.9"/>
+      <text x="492" y="845" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="8" letter-spacing="1" fill="#b01860" transform="rotate(-90 492 845)">CHICKEN EXIT</text>
       <!-- the chicken exit tunnel, glimpsed under the apron -->
       <path d="M 496 915 L 500 950 L 505 985 L 512 1008 L 525 1020 L 540 1015 L 547 1000 L 547.5 975"
             fill="none" stroke="#2fc9d6" stroke-width="4" stroke-dasharray="3 9" opacity="0.22"/>
@@ -541,30 +555,49 @@
            perch a descending ball (soak-found); the shield roofs it and
            sheds arch drops left onto the bat. -->
       <path data-width="12" data-z="all" id="collision-wall-lane" d="M 500 272 L 520 262 L 520 1050"/>
-      <!-- the Sky Ride: orbit inner wall; unlike the other tables its right
-           tail stays open — descending chairs feed the mallet or the queue -->
-      <path data-width="12" id="collision-wall-orbit" d="M 65 550 L 65 260 L 66.5 236.2 L 70.8 212.8 L 78 190.1 L 87.8 168.5 L 100.3 148.2 L 115.1 129.5 L 132.1 112.8 L 151 98.3 L 171.5 86.3 L 193.3 76.8 L 216.1 70 L 239.6 66.1 L 263.4 65 L 287.1 66.9 L 310.5 71.6 L 333 79.2 L 354.5 89.4 L 374.6 102.2 L 393 117.4 L 409.4 134.7"/>
-      <!-- orbit tail: the Sky Ride's descending inner arm, guiding traffic
-           down toward the mallet; the delivery gap past its end is a free
-           pass (≥38 mm) onto the bat -->
-      <path data-width="12" id="collision-wall-orbit-tail" d="M 409.4 134.7 L 430 165 L 443 200 L 443 230"/>
+      <!-- the Sky Ride: orbit inner wall, left arm — the crest is OPEN over
+           the P and A lane mouths only (the lanes' feed): a fast loop rides
+           the shell straight over the window into the arch catcher, a dying
+           one drops into lane P or A and lane change spreads it to R/K.
+           Slots 3-4 stay covered: soak proved balls raining down the right
+           half land on the striker wire's ball-height mouth run and wedge
+           in the tail V at (418, 189) -->
+      <path data-width="12" id="collision-wall-orbit" d="M 65 550 L 65 260 L 66.5 236.2 L 70.8 212.8 L 78 190.1 L 87.8 168.5 L 100.3 148.2 L 115.1 129.5 L 132.1 112.8"/>
+      <!-- orbit tail: the inner wall resumes at divider-2's top (sealed
+           joint), covers the R/K mouths and descends toward the mallet;
+           the delivery gap past its end is a free pass (≥38 mm) onto the
+           bat -->
+      <path data-width="12" id="collision-wall-orbit-tail" d="M 263.4 65 L 287.1 66.9 L 310.5 71.6 L 333 79.2 L 354.5 89.4 L 374.6 102.2 L 393 117.4 L 409.4 134.7 L 430 165 L 443 200 L 443 230"/>
       <!-- arch catcher: sealed to the shell — EVERY descending loop return
            is deflected inward and delivered onto the mallet. The ascending
            plunge flies OVER it off the lane's jump wedge (band ≤16). -->
       <path data-width="12" data-z-max="16" id="collision-wall-arch-catcher" d="M 552 214 L 500 258"/>
-      <!-- P-A-R-K lane dividers, starting 4 mm below the orbit arc line -->
-      <path data-width="12" id="collision-wall-divider-1" d="M 190 82 L 190 150"/>
-      <path data-width="12" id="collision-wall-divider-2" d="M 260 69 L 260 150"/>
-      <path data-width="12" id="collision-wall-divider-3" d="M 330 82 L 330 150"/>
+      <!-- P-A-R-K lane dividers, raised to the old orbit arc line: 1 and 2
+           frame the open P/A mouths (46-70 mm openings, ball 27); 2 and 3
+           join the covering wall above R/K (sealed joints, no pockets) -->
+      <path data-width="12" id="collision-wall-divider-1" d="M 190 78 L 190 150"/>
+      <path data-width="12" id="collision-wall-divider-2" d="M 260 65 L 260 150"/>
+      <path data-width="12" id="collision-wall-divider-3" d="M 330 78 L 330 150"/>
       <!-- deflector: sheds orbit-exit balls right, away from the outlane mouth -->
       <path data-width="12" id="collision-wall-deflector" d="M 0 585 L 40 640"/>
+      <!-- coaster underbrace: the strip beneath the lift hill dead-ends at
+           the bed's solid back (y 588.8) — balls dropping the P-lane column
+           (crest window or bell drop-off) wedged there (soak). The brace
+           sheds them LEFT into the orbit-arm corridor and on to the left
+           inlane (a right shed wedged the ghost-pocket corner — soak). It
+           continues the pocket's sloped roof from the shared corner in one
+           unbroken descent, no perch gap; riders pass 20+ mm above its top
+           (bed 47-55 mm here, rule ≥7) -->
+      <path data-width="12" id="collision-wall-coaster-underbrace" d="M 214 480 L 137 508"/>
       <!-- inlane guides: outlane channel outside, inlane inside, each ending
            tangent to its flipper base circle past the apex -->
       <path data-width="12" id="collision-wall-guide-left" d="M 52 690 L 52 905 L 174.2 938.4"/>
       <path data-width="12" id="collision-wall-guide-right" d="M 470 690 L 470 905 L 345.9 938.4"/>
       <!-- ghost-train pocket (opens down; the subway sensor sits inside —
-           gravity alone always rolls an uncaptured ball back out) -->
-      <path data-width="12" id="collision-wall-ghost-pocket" d="M 214 545 L 214 480 L 266 480 L 266 545"/>
+           gravity alone always rolls an uncaptured ball back out). The
+           roof slopes down-left so balls landing on it shed onto the
+           underbrace instead of perching (soak) -->
+      <path data-width="12" id="collision-wall-ghost-pocket" d="M 214 545 L 214 480 L 266 468 L 266 545"/>
       <!-- prize booth canopy: mouth opens straight down, never traps -->
       <path data-width="12" id="collision-wall-booth-hood" d="M 323.7 451.6 L 322 442 L 323.7 432.4 L 328.6 424 L 336 417.8 L 345.1 414.4 L 354.9 414.4 L 364 417.8 L 371.4 424 L 376.3 432.4 L 378 442 L 376.3 451.6"/>
       <!-- drop tower housing: recess brackets off the lane wall -->
@@ -582,8 +615,10 @@
            from above the bat to the bell in the top-left corner -->
       <path data-width="12" data-surface="striker" id="collision-wall-striker-rail-a" d="M 436.5 218.2 L 360.3 185.1 L 280.2 151.1 L 206.6 119.7 L 166.5 94.4 L 156.6 86"/>
       <path data-width="12" data-surface="striker" id="collision-wall-striker-rail-b" d="M 415.5 265.8 L 339.7 232.9 L 259.8 198.9 L 183.4 166.3 L 137.5 137.6 L 123.4 126"/>
-      <!-- the bell post caps the lane end -->
-      <path data-width="12" data-surface="striker" id="collision-wall-striker-cap" d="M 156.6 86 L 123.4 126"/>
+      <!-- NO cap: the lane end past the bell is a drop-off (BRIEF: a good
+           swing DROPS INTO THE P-A-R-K LANES). The rail ends leave a 40 mm
+           exit; the ball flies off at bell height and lands in the lanes
+           or the open orbit crest below -->
     </g>
   </defs>
   <!-- field walls: layered DUSK PLUM rails, kept dark so the lit ball and
@@ -594,8 +629,17 @@
        as the ramp's underside rather than a gate. Riders pass above. -->
   <defs>
     <g id="collision-backs" fill="none">
-      <path data-width="12" data-z-max="22" id="collision-wall-coaster-back" d="M 137 588.8 L 189 588.8"/>
-      <path data-width="12" data-z-max="22" id="collision-wall-striker-back" d="M 258.2 198.2 L 278.6 150.4"/>
+      <!-- Back walls guard against a ball dropping into a ramp channel and
+           wedging against the bed's solid back. Their z-max=22 band, however,
+           also snagged CLIMBING riders: a fast climb sweeps up through the
+           low-z part of the lift hill (base z < 22) and CCD catches the wall
+           before the ball's height rises clear — coaster/striker rides
+           completed ~0% (feature-rates soak). Fix: drop the band to z-max=10
+           so only near-ground fallers (a wedged P-column drop sits at z≈0)
+           are blocked; a rider is on the ramp bed (z≥ local height) and now
+           passes. Positions unchanged. -->
+      <path data-width="12" data-z-max="10" id="collision-wall-coaster-back" d="M 137 588.8 L 189 588.8"/>
+      <path data-width="12" data-z-max="10" id="collision-wall-striker-back" d="M 258.2 198.2 L 278.6 150.4"/>
     </g>
   </defs>
   <g id="art-ramp-backs" fill="none" stroke-linecap="round">

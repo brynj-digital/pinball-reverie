@@ -136,6 +136,8 @@ for (const tableId of tables) {
       if (now >= nextToggle[i]) {
         pressed[i] = !pressed[i];
         nextToggle[i] = now + 0.05 + rand() * (pressed[i] ? 1.45 : 1.0);
+        // main-flipper press edge drives lane change, as in Game
+        if (pressed[i] && i < 2) logic.onFlipper?.(i === 0 ? "left" : "right");
       }
       flippers[i].update(pressed[i], t);
     }

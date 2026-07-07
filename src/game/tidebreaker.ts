@@ -131,8 +131,11 @@ export class TidebreakerLogic implements TableLogic {
     return this.litLanes.has(id) ? 0.55 : 0;
   }
 
-  /** Depth-gauge inserts g1..g5: lit up to the reached stage. */
+  /** Depth-gauge inserts g1..g5 lit up to the reached stage; the outlane
+   * save inserts mirror their kickback/subway lit state. */
   lamp(id: string): number {
+    if (id === "hatch") return this.hatchLit ? 1 : 0;
+    if (id === "gutter") return this.gutterLit ? 1 : 0;
     const n = Number(id.replace(/\D/g, ""));
     return n > 0 && n <= this.stage ? 1 : 0;
   }
