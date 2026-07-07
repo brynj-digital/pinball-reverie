@@ -99,16 +99,14 @@ function buildRig(id: TableId) {
       state.drained = true;
     if (kind === "spinner") spinner.trip(ball.body.getLinearVelocity().y);
     if (kind === "kicker" && sid) {
-      // capture only a physically-present ball — synthetic kicker events in
-      // the rules tests fire with the ball parked at the plunger saddle
+      // capture only a physically-present ball. Synthetic kicker events in the
+      // rules tests fire with the ball parked on the plunger saddle, so gate on
+      // the ball being in the playfield (not the lane) — robust even for a
+      // kickback whose hold point sits far from its trip sensor (the hatch,
+      // which catches at the outlane bottom but fires from the chute above).
       const k = kickers.find((k) => k.def.id === sid);
       const p = ball.body.getPosition();
-      if (
-        k &&
-        Math.hypot(p.x - k.def.hold.x, p.y - k.def.hold.y) < 0.06 &&
-        logic.kickerLit(sid) &&
-        k.capture()
-      )
+      if (k && p.x < g.table.laneWallX && logic.kickerLit(sid) && k.capture())
         logic.onCapture?.(sid);
     }
     if (kind === "subway" && sid) {

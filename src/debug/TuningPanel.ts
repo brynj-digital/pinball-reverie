@@ -27,12 +27,40 @@ const SLIDERS: SliderDef[] = [
 ];
 
 /**
+ * Hidden by default; the only way in is the "Physics tuning" row in the
+ * settings overlay. Deliberately outside `Tuning` (like the render mode) so
+ * a tuning reset can't pop the dev panel open.
+ */
+const VISIBLE_KEY = "pinball-tuning-panel-v1";
+
+function loadVisible(): boolean {
+  try {
+    return typeof localStorage !== "undefined" && localStorage.getItem(VISIBLE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/**
  * The Milestone-1 tuning panel (plan §8/§9: expose every feel constant, never
  * hardcode). Mutates the shared Tuning object in place; Game reads it live.
+ * A dev tool: hidden by default, shown via the settings overlay.
  */
 export class TuningPanel {
   /** Bumped on every user change; Game re-applies tuning only when it moves. */
   version = 0;
+
+  visible = loadVisible();
+
+  setVisible(visible: boolean): void {
+    this.visible = visible;
+    this.root.style.display = visible ? "" : "none";
+    try {
+      localStorage.setItem(VISIBLE_KEY, visible ? "1" : "0");
+    } catch {
+      // storage unavailable — the choice just won't persist
+    }
+  }
 
   /** Another UI (e.g. SettingsPanel) changed the shared tuning object. */
   notifyExternal(): void {
@@ -66,6 +94,7 @@ export class TuningPanel {
     body.appendChild(this.buildDebugToggle());
     body.appendChild(this.buildResetButton());
 
+    this.root.style.display = this.visible ? "" : "none";
     host.appendChild(this.root);
   }
 

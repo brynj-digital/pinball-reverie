@@ -62,6 +62,7 @@ export class SettingsPanel {
     card.appendChild(this.tableRow());
     card.appendChild(this.rendererRow());
     card.appendChild(this.view3dRow());
+    card.appendChild(this.tuningVisibleRow());
 
     const keysTitle = document.createElement("h3");
     keysTitle.textContent = "Keys";
@@ -166,6 +167,27 @@ export class SettingsPanel {
     btn.onclick = async () => {
       btn.textContent = "SWITCHING…"; // 3D loads as its own chunk
       await this.renderMode.set(this.renderMode.get() === "3d" ? "2d" : "3d");
+      label();
+    };
+    this.valueRefreshers.push(label);
+    row.append(span, btn);
+    return row;
+  }
+
+  /**
+   * The physics tuning panel is a dev tool, hidden by default — this row is
+   * the one place it can be summoned from (it persists its own visibility).
+   */
+  private tuningVisibleRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "key-row";
+    const span = document.createElement("span");
+    span.textContent = "Physics tuning";
+    const btn = document.createElement("button");
+    const label = () => (btn.textContent = this.tuningPanel.visible ? "SHOWN" : "HIDDEN");
+    label();
+    btn.onclick = () => {
+      this.tuningPanel.setVisible(!this.tuningPanel.visible);
       label();
     };
     this.valueRefreshers.push(label);

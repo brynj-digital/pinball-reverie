@@ -75,13 +75,17 @@ const GEOMETRY: TableGeometry = {
     { id: "3", x: 0.295, y: 0.115 },
     { id: "4", x: 0.358, y: 0.115 },
   ],
-  /** Depth-gauge inserts down the lower centreline (cyan, per BRIEF §4). */
+  /** Depth-gauge inserts down the lower centreline (cyan, per BRIEF §4) —
+   * plus the outlane save inserts: lit while the escape hatch / gutter is
+   * armed, so the player reads the outlane before the ball drops. */
   lamps: [
     { id: "g1", x: 0.255, y: 0.625, rgb: "82, 224, 232" },
     { id: "g2", x: 0.255, y: 0.66, rgb: "82, 224, 232" },
     { id: "g3", x: 0.255, y: 0.695, rgb: "82, 224, 232" },
     { id: "g4", x: 0.255, y: 0.73, rgb: "82, 224, 232" },
     { id: "g5", x: 0.255, y: 0.765, rgb: "82, 224, 232" },
+    { id: "hatch", x: 0.026, y: 0.868, rgb: "82, 224, 232" },
+    { id: "gutter", x: 0.494, y: 0.838, rgb: "82, 224, 232" },
   ],
   /** The winch reel: spinner across the ramp entry channel. */
   spinner: { x: 0.356, y: 0.62, halfW: 0.023 },
@@ -95,13 +99,21 @@ const GEOMETRY: TableGeometry = {
       cooldownS: 0.4,
     },
     {
-      /** Escape-hatch kickback in the left outlane (lit by D-I-V-E). */
+      /**
+       * Escape-hatch kickback in the left outlane (lit by D-I-V-E). The ball is
+       * eased up to a hold point in the outlane-top chute — right of and below
+       * the deflector tip (0.040, 0.640), the one spot clear of both the
+       * deflector ceiling and the guide wall — then fired up-and-right hard
+       * enough to clear the guide corner into the lower-left field. A lower
+       * hold just fires the ball into the deflector's underside and it drops
+       * back down the outlane (the kickback then reads as a dud).
+       */
       id: "hatch",
-      hold: { x: 0.026, y: 0.958 },
-      eject: { x: 0.06, y: -1 },
+      hold: { x: 0.044, y: 0.68 },
+      eject: { x: 0.4, y: -1 },
       holdS: 0.25,
       cooldownS: 0.6,
-      ejectSpeed: 1.25,
+      ejectSpeed: 2.0,
     },
   ],
   /** Under-field transits; paths are the SVG's height-profile-<id>. */
@@ -119,6 +131,7 @@ export const TIDEBREAKER_SPEC: TableSpec = {
   scoring: rules,
   createLogic: (ctx) => new TidebreakerLogic(ctx),
   highScoreKey: "pinball-highscores-tidebreaker-v1",
-  // dark verdigris field walls (abyss-300/500 blend); habitrail stays chrome
-  theme: { rail3d: 0x2d5a66, rail3dElevated: 0xbdc9dc },
+  // dark verdigris field walls (abyss-300/500 blend); habitrail stays chrome;
+  // ramp glass is cyan-400 abyssal blue, not the dayglo default (STYLE-GUIDE §2)
+  theme: { rail3d: 0x2d5a66, rail3dElevated: 0xbdc9dc, rampGlass3d: 0x2fc9d6 },
 };

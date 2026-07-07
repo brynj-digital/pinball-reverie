@@ -252,12 +252,18 @@
       </g>
     </g>
 
-    <!-- escape hatch (kickback) + gutter labels -->
+    <!-- escape hatch (kickback) + gutter labels. Each save carries a
+         lit-when-armed insert lamp (TableGeometry.lamps drive the glow) so
+         the player can read the outlane BEFORE the ball drops -->
     <g id="art-outlanes">
       <rect x="12" y="948" width="28" height="20" rx="4" fill="#262a3e" stroke="#07080d" stroke-width="1.5"/>
       <path d="M 26 944 L 20 934 L 32 934 Z" fill="#2fc9d6" opacity="0.8"/>
+      <circle cx="26" cy="868" r="7" fill="#12141f" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="26" cy="868" r="7" fill="none" stroke="#52e0e8" stroke-width="1.8" opacity="0.9"/>
       <text x="30" y="905" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="9" letter-spacing="1" fill="#147986" transform="rotate(-90 30 905)">HATCH</text>
+      <circle cx="494" cy="838" r="7" fill="#12141f" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="494" cy="838" r="7" fill="none" stroke="#52e0e8" stroke-width="1.8" opacity="0.9"/>
       <text x="492" y="880" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="9" letter-spacing="1" fill="#147986" transform="rotate(-90 492 880)">GUTTER</text>
       <!-- gutter subway, glimpsed under the apron -->
@@ -390,10 +396,12 @@
        and composites it over/under the ball by layer, so a ball running
        beneath shows through it (STYLE-GUIDE §2) -->
   <g id="art-rails-elevated" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <!-- the glass bed: a translucent pale-cyan surface spanning the channel
-         (cyan-400 + chrome-50 washes) — this is what sells the ramp as
-         see-through plastic; the field art tints through it -->
-    <g stroke="#39ff14" stroke-width="46" opacity="0.14">
+    <!-- the glass bed: a translucent abyssal-cyan surface spanning the
+         channel (cyan-400 + chrome-50 washes; per-table glass tint,
+         STYLE-GUIDE §2 — matches TableSpec.theme.rampGlass3d) — this is
+         what sells the ramp as see-through plastic; the field art tints
+         through it -->
+    <g stroke="#2fc9d6" stroke-width="46" opacity="0.14">
       <path d="M 349.0 712 L 349.0 700.0 L 350.1 680.5 L 351.1 660.0 L 352.3 637.7 L 353.6 614.3 L 355.4 592.1 L 357.3 572.7 L 360.1 553.2 L 364.5 532.2 L 369.3 514.0 L 374.6 496.8 L 380.3 479.6 L 387.1 460.6 L 393.8 443.6 L 400.2 428.6 L 406.8 412.8 L 415.7 390.6 L 420.2 376.9 L 423.4 363.6 L 426.8 340.8 L 427.6 328.6 L 427.5 305.5 L 426.3 292.2 L 423.4 277.7 L 419.6 265.7 L 414.6 253.8 L 400.9 230.9 L 381.7 213.1 L 369.2 205.9 L 358.1 200.3 L 346.0 194.0"/>
       <path d="M 346 194 L 326.1 181.6 L 300 168 L 275.6 161.1 L 250 158 L 222.3 158.8 L 195 163 L 170.6 170.1 L 148 180 L 126.8 192.8 L 108 208 L 92.5 225.4 L 80 245 L 70.6 266.7 L 64 290 L 60 309.1 L 58 340 L 57.7 359 L 57.6 382.8 L 57.6 409.1 L 57.8 435.6 L 57.9 460 L 58 480 L 57.9 508 L 57.7 527.6 L 58 545 L 58 545"/>
     </g>
@@ -447,6 +455,6 @@
     <circle id="anchor-bumper-2" cx="272" cy="232" r="5"/>
     <circle id="anchor-bumper-3" cx="200" cy="345" r="5"/>
     <circle id="anchor-kicker-divebell" cx="272" cy="450" r="5"/>
-    <circle id="anchor-kicker-hatch" cx="26" cy="958" r="5"/>
+    <circle id="anchor-kicker-hatch" cx="44" cy="680" r="5"/>
   </g>
 </svg>
