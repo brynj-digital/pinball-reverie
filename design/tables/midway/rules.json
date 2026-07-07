@@ -26,10 +26,10 @@
     "bonusUnit": 250
   },
   "ghostTrain": {
-    "comment": "Ghost-train subway transit under the field, out past the wheel. Lit (open turnstile) at ball start; one ride consumes the light, then the turnstile must be spun relightSpins times to re-open it — so the dark ride no longer swallows every ball that reaches mid-field.",
+    "comment": "Ghost-train subway transit under the field, out past the wheel. The turnstile gates it: CLOSED at ball start, spin the turnstile relightSpins times to open it for one ride, then a ride closes it again — so the dark ride only ever takes the ball when the player has opted in (it used to be always-on, which walled the top half off).",
     "points": 2500,
     "bonusUnit": 500,
-    "relightSpins": 3
+    "relightSpins": 2
   },
   "striker": {
     "comment": "High striker: the mallet (upper flipper) swings the ball up the wire lane; a→b transit time grades the swing. DING loads a gondola; STRONG or better punches the ride pass.",

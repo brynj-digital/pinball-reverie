@@ -854,11 +854,17 @@ function midwaySuite(): void {
   });
   check("Sky Ride return is delivered onto the mallet", malletFed);
 
-  // 10 — ghost train: shot through the turnstile spinner is captured and
-  // carried under the field, out past the wheel
+  // 10 — ghost train: the turnstile GATES the dark ride now — closed at ball
+  // start, opened by spinning it. Reset to a known ball-start state, confirm
+  // it's closed, spin it open, then a shot through it is captured and carried
+  // under the field, out past the wheel.
+  logic.resetGame();
   state.spins = 0;
   state.drained = false;
   state.labels.length = 0;
+  check("ghost train starts closed (turnstile gated)", !logic.kickerLit("ghost"));
+  for (let i = 0; i < 10 && !logic.kickerLit("ghost"); i++) bus.emit("sensor", { kind: "spinner", id: "" });
+  check("turnstile spins open the ghost train", logic.kickerLit("ghost"));
   placeBall(0.24, 0.62, 0, -1.2);
   let rode = false;
   run(4, () => {

@@ -104,16 +104,19 @@ walling off the top half.
   The lift-hill *geometry* was never the problem — it did not need
   reshaping. (Tidebreaker's winch uses the same z-max=22 back; likely the
   same latent snag.)
-- **The ghost train is now gated by its turnstile light.** It used to
-  capture unconditionally (`kickerLit` always true), so every ball that
-  reached mid-field got subwayed to y634 — the "ball grabber" that walled
-  off the top half. Now it is **lit at ball start** (one dark-ride before it
-  must be re-earned), a ride **consumes** the light, and **relightSpins (3)
-  turnstile spins re-open it** (`rules.ghostTrain.relightSpins`). A green
-  ghost lamp at the mouth shows the lit state. Consequence: an unlit mouth
-  entry rolls back out into play instead of removing the ball, so the player
-  keeps the ball live to work the orbit / the now-rideable ramps toward the
-  top. Ride-pass qualifier unchanged (one transit still punches it).
+- **The ghost train is now gated by its turnstile.** It used to capture
+  unconditionally (`kickerLit` always true), so every ball that reached
+  mid-field got subwayed to y634 — the "ball grabber" that walled off the
+  top half. Now the turnstile gates it: it starts **CLOSED each ball**, and
+  **relightSpins (2) turnstile spins open it** for one ride, which then
+  closes it again (`rules.ghostTrain.relightSpins`). A green ghost lamp at
+  the mouth shows the open state. Consequence: the dark ride only ever takes
+  the ball when the player has opted in by working the turnstile — an
+  unopened mouth entry rolls back out into play instead of removing the
+  ball, so the ball stays live to work the orbit / the now-rideable ramps
+  toward the top. (Started lit-for-one-free-ride first; changed to
+  closed-at-start so the ghost never takes the ball uninvited.) Ride-pass
+  qualifier unchanged (one transit still punches it).
 
 **Premise:** a travelling funfair after dark. The tall scrolling playfield
 is the midway itself — the park gates and ticket booth at the bottom, the

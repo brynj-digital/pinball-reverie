@@ -49,11 +49,11 @@ export class MidwayLogic implements TableLogic {
   private boothLit = false;
   private chickenLit = false;
   private stampLit = false;
-  /** The ghost train's turnstile. Lit (open) at ball start; a ride consumes
-   * the light, then relightSpins turnstile spins re-open it — so the dark
-   * ride stops swallowing every ball that reaches mid-field (it used to be
+  /** The ghost train's turnstile. CLOSED at ball start; relightSpins turnstile
+   * spins open it for one ride, then a ride closes it again — so the dark ride
+   * only ever takes the ball when the player has opted in (it used to be
    * always-on, which walled the top half off). */
-  private ghostLit = true;
+  private ghostLit = false;
   private turnstileSpins = 0;
   private pass = new Set<string>();
   fireworksReady = false;
@@ -123,9 +123,9 @@ export class MidwayLogic implements TableLogic {
     this.swingActive = false;
     this.swingScored = false;
     this.aAt = -Infinity;
-    // the next ball starts with the dark ride open (one ride before it must
-    // be re-earned at the turnstile)
-    this.ghostLit = true;
+    // the next ball starts with the dark ride CLOSED — the turnstile must be
+    // spun to open it, so the ghost never takes the ball uninvited
+    this.ghostLit = false;
     this.turnstileSpins = 0;
     if (this.fireworksActive) {
       this.fireworksUntil = -Infinity;
