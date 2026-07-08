@@ -62,7 +62,7 @@ export const DEFAULT_TUNING: Tuning = {
   renderScale: 1,
   sfxVolume: 0.5,
   musicVolume: 0.25,
-  debugOverlay: true,
+  debugOverlay: false,
 };
 
 export function effectiveGravity(t: Tuning): number {
