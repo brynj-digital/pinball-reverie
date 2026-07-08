@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- TIDEBREAKER DMD scene: TRENCH GUTTER — the ball is swept down the lit
+       gutter channel on the flow, back into play (the subway save). Flow
+       chevrons scroll past a bright rider. 8 frames of 128x32 (style guide
+       §6): #fff=3, #888=2, #666=1, black=0. Art rows 0..22; caption row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <!-- channel walls constant per cell; chevrons scroll; rider x: 10..118 -->
+  <g transform="translate(0,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M28 10 L32 13 L28 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M56 10 L60 13 L56 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M84 10 L88 13 L84 16" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="12" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(128,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M20 10 L24 13 L20 16" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M48 10 L52 13 L48 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M76 10 L80 13 L76 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M104 10 L108 13 L104 16" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="28" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(256,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M28 10 L32 13 L28 16" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M56 10 L60 13 L56 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M84 10 L88 13 L84 16" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="44" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(384,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M20 10 L24 13 L20 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M48 10 L52 13 L48 16" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M76 10 L80 13 L76 16" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="58" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(512,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M36 10 L40 13 L36 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M64 10 L68 13 L64 16" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M92 10 L96 13 L92 16" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="72" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(640,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M52 10 L56 13 L52 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M80 10 L84 13 L80 16" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M108 10 L112 13 L108 16" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="88" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(768,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M68 10 L72 13 L68 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M96 10 L100 13 L96 16" fill="none" stroke="#888" stroke-width="1"/>
+    <circle cx="104" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(896,0)">
+    <line x1="4" y1="7" x2="124" y2="7" stroke="#888" stroke-width="1.2"/>
+    <line x1="4" y1="19" x2="124" y2="19" stroke="#888" stroke-width="1.2"/>
+    <path d="M84 10 L88 13 L84 16" fill="none" stroke="#666" stroke-width="1"/>
+    <path d="M112 10 L116 13 L112 16" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="118" cy="13" r="2.4" fill="#fff"/>
+  </g>
+</svg>

@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- MIDNIGHT MIDWAY DMD scene: PRIZE BOOTH — the captive-ball prize reveal.
+       Under the striped canopy the marquee bulbs chase, a plush prize lifts
+       off the shelf, and a sparkle bursts as it is handed over. 8 frames of
+       128x32 (style guide §6): #fff=3, #888=2, #666=1, black=0. Art rows
+       0..22; caption (prize name + points) renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <!-- f0: canopy dim, prize still on the shelf in shadow -->
+  <g transform="translate(0,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#666" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="0.9" fill="#666"/><circle cx="60" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="72" cy="1.5" r="0.9" fill="#666"/><circle cx="82" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="64" cy="19" r="3.4" fill="#666"/>
+    <line x1="52" y1="22" x2="76" y2="22" stroke="#666" stroke-width="1"/>
+  </g>
+
+  <!-- f1: bulbs warm, prize shape reads -->
+  <g transform="translate(128,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#888" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#888" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="0.9" fill="#888"/><circle cx="60" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="72" cy="1.5" r="0.9" fill="#888"/><circle cx="82" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="60" cy="14" r="1.5" fill="#666"/><circle cx="68" cy="14" r="1.5" fill="#666"/>
+    <circle cx="64" cy="17" r="3.2" fill="#666"/>
+    <line x1="52" y1="22" x2="76" y2="22" stroke="#888" stroke-width="1"/>
+  </g>
+
+  <!-- f2: prize lifts, ears clear the counter -->
+  <g transform="translate(256,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#888" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#888" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="0.9" fill="#666"/><circle cx="60" cy="1.5" r="0.9" fill="#888"/>
+    <circle cx="72" cy="1.5" r="0.9" fill="#666"/><circle cx="82" cy="1.5" r="0.9" fill="#888"/>
+    <circle cx="60" cy="13" r="1.6" fill="#888"/><circle cx="68" cy="13" r="1.6" fill="#888"/>
+    <circle cx="64" cy="16" r="3.2" fill="#888"/>
+    <circle cx="64" cy="21" r="2" fill="#666"/>
+    <line x1="52" y1="22" x2="76" y2="22" stroke="#888" stroke-width="1"/>
+  </g>
+
+  <!-- f3: rising, a first twinkle -->
+  <g transform="translate(384,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#888" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#888" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="0.9" fill="#888"/><circle cx="60" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="72" cy="1.5" r="0.9" fill="#888"/><circle cx="82" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="60" cy="12" r="1.6" fill="#888"/><circle cx="68" cy="12" r="1.6" fill="#888"/>
+    <circle cx="64" cy="15" r="3.3" fill="#888"/>
+    <circle cx="64" cy="20" r="2.2" fill="#888"/>
+    <circle cx="76" cy="10" r="0.9" fill="#666"/>
+  </g>
+
+  <!-- f4: into the light, bulbs blaze -->
+  <g transform="translate(512,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#fff" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#888" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="1" fill="#fff"/><circle cx="60" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="72" cy="1.5" r="1" fill="#fff"/><circle cx="82" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="60" cy="11" r="1.6" fill="#fff"/><circle cx="68" cy="11" r="1.6" fill="#fff"/>
+    <circle cx="64" cy="14" r="3.4" fill="#fff"/>
+    <circle cx="62.6" cy="13.5" r="0.7" fill="#666"/><circle cx="65.4" cy="13.5" r="0.7" fill="#666"/>
+    <circle cx="64" cy="19" r="2.4" fill="#fff"/>
+  </g>
+
+  <!-- f5: CLIMAX — handed over, a sparkle bursts -->
+  <g transform="translate(640,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#fff" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#888" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="1" fill="#fff"/><circle cx="60" cy="1.5" r="1" fill="#888"/>
+    <circle cx="72" cy="1.5" r="1" fill="#fff"/><circle cx="82" cy="1.5" r="1" fill="#888"/>
+    <circle cx="60" cy="11" r="1.6" fill="#fff"/><circle cx="68" cy="11" r="1.6" fill="#fff"/>
+    <circle cx="64" cy="14" r="3.4" fill="#fff"/>
+    <circle cx="62.6" cy="13.5" r="0.7" fill="#666"/><circle cx="65.4" cy="13.5" r="0.7" fill="#666"/>
+    <circle cx="64" cy="19" r="2.4" fill="#fff"/>
+    <polygon points="52,10 53,13 56,14 53,15 52,18 51,15 48,14 51,13" fill="#888"/>
+    <polygon points="77,8 78,11 81,12 78,13 77,16 76,13 73,12 76,11" fill="#888"/>
+  </g>
+
+  <!-- f6: settling on the shelf, prize won -->
+  <g transform="translate(768,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#888" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#888" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="0.9" fill="#666"/><circle cx="60" cy="1.5" r="0.9" fill="#888"/>
+    <circle cx="72" cy="1.5" r="0.9" fill="#666"/><circle cx="82" cy="1.5" r="0.9" fill="#888"/>
+    <circle cx="60" cy="12" r="1.5" fill="#888"/><circle cx="68" cy="12" r="1.5" fill="#888"/>
+    <circle cx="64" cy="15" r="3.3" fill="#888"/>
+    <circle cx="64" cy="20" r="2.2" fill="#888"/>
+  </g>
+
+  <!-- f7: rest -->
+  <g transform="translate(896,0)">
+    <line x1="46" y1="3" x2="82" y2="3" stroke="#666" stroke-width="1.4"/>
+    <path d="M46 4 L50 8 L54 4 L58 8 L62 4 L66 8 L70 4 L74 8 L78 4 L82 8" fill="none" stroke="#666" stroke-width="1"/>
+    <circle cx="48" cy="1.5" r="0.9" fill="#666"/><circle cx="60" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="72" cy="1.5" r="0.9" fill="#666"/><circle cx="82" cy="1.5" r="0.9" fill="#666"/>
+    <circle cx="60" cy="13" r="1.5" fill="#888"/><circle cx="68" cy="13" r="1.5" fill="#888"/>
+    <circle cx="64" cy="16" r="3.2" fill="#888"/>
+    <circle cx="64" cy="21" r="2" fill="#666"/>
+  </g>
+</svg>

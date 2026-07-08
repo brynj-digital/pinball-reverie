@@ -1,5 +1,5 @@
 import type { TableLogic, TableLogicCtx } from "./TableLogic";
-import { BakedDmdScene, MessageScene, fmtScore } from "../render/dmd/DmdScene";
+import { BakedDmdScene, MessageScene, SequenceScene, fmtScore } from "../render/dmd/DmdScene";
 import rules from "../../design/tables/midway/rules.json";
 
 /** Entry→exit (either direction) within this window counts as a Sky Ride loop. */
@@ -96,7 +96,14 @@ export class MidwayLogic implements TableLogic {
       if (this.ctx.scoring.muted) return;
       this.boothLit = true;
       this.punch("tower");
-      this.ctx.push(new MessageScene([["TOWER DROPPED", "PRIZE BOOTH LIT"]], 1.4), 2);
+      const frames = this.ctx.baked("tower");
+      const drop = frames
+        ? new SequenceScene([
+            new BakedDmdScene(frames, 9, "TOWER DROPPED"),
+            new MessageScene([["PRIZE BOOTH LIT"]], 1.0, true),
+          ])
+        : new MessageScene([["TOWER DROPPED", "PRIZE BOOTH LIT"]], 1.4);
+      this.ctx.push(drop, 2);
     });
   }
 
@@ -221,10 +228,22 @@ export class MidwayLogic implements TableLogic {
       );
     } else if (id === "stamp") {
       this.stampLit = false;
-      this.ctx.push(new MessageScene([["HAND STAMP", "BACK IN THE PARK"]], 1.2), 2);
+      const frames = this.ctx.baked("stamp");
+      this.ctx.push(
+        frames
+          ? new BakedDmdScene(frames, 9, "BACK IN THE PARK")
+          : new MessageScene([["HAND STAMP", "BACK IN THE PARK"]], 1.2),
+        2,
+      );
     } else if (id === "chicken") {
       this.chickenLit = false;
-      this.ctx.push(new MessageScene([["CHICKEN EXIT", "BACK TO THE QUEUE"]], 1.2), 2);
+      const frames = this.ctx.baked("chicken");
+      this.ctx.push(
+        frames
+          ? new BakedDmdScene(frames, 10, "CHICKEN EXIT")
+          : new MessageScene([["CHICKEN EXIT", "BACK TO THE QUEUE"]], 1.2),
+        2,
+      );
     }
   }
 
@@ -245,7 +264,7 @@ export class MidwayLogic implements TableLogic {
     this.chickenLit = true;
     this.ctx.bus.emit("telescope", { name: prize.name, points, spotted: last });
     // the ball sits captive under the canopy while this plays
-    const frames = this.ctx.baked("wheel");
+    const frames = this.ctx.baked("booth");
     const reveal = frames
       ? new BakedDmdScene(frames, 8, `${prize.name} ${fmtScore(points)}`)
       : new MessageScene([[prize.name, fmtScore(points)]], 1.6, true);
@@ -372,7 +391,13 @@ export class MidwayLogic implements TableLogic {
     const points = rules.points.orbit * factor;
     const label = factor > 1 ? `SKY RIDE X${factor}` : "SKY RIDE";
     if (this.ctx.scoring.award(points, label) > 0) {
-      this.ctx.push(new MessageScene([[label, fmtScore(points)]], 1.2), 1);
+      const frames = this.ctx.baked("skyride");
+      this.ctx.push(
+        frames
+          ? new BakedDmdScene(frames, 9, `${label} ${fmtScore(points)}`)
+          : new MessageScene([[label, fmtScore(points)]], 1.2),
+        1,
+      );
     }
   }
 

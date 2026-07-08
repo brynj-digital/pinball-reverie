@@ -63,7 +63,12 @@ export class TidebreakerLogic implements TableLogic {
     ctx.bus.on("bankComplete", () => {
       if (this.ctx.scoring.muted) return;
       this.banks++;
-      this.ctx.push(new MessageScene([["AIRLOCK CYCLED"]], 1.2));
+      const frames = this.ctx.baked("airlock");
+      this.ctx.push(
+        frames
+          ? new BakedDmdScene(frames, 9, "AIRLOCK CYCLED")
+          : new MessageScene([["AIRLOCK CYCLED"]], 1.2),
+      );
       this.checkReady();
     });
   }
@@ -154,7 +159,7 @@ export class TidebreakerLogic implements TableLogic {
       if (this.ctx.scoring.muted) return;
       this.ctx.scoring.award(rules.trench.points, "TRENCH RUN");
       this.ctx.scoring.bonusUnits += rules.trench.bonusUnit;
-      const frames = this.ctx.baked("sonar");
+      const frames = this.ctx.baked("trench");
       this.ctx.push(
         frames
           ? new BakedDmdScene(frames, 10, `TRENCH RUN ${fmtScore(rules.trench.points)}`)
@@ -162,10 +167,22 @@ export class TidebreakerLogic implements TableLogic {
       );
     } else if (id === "hatch") {
       this.hatchLit = false;
-      this.ctx.push(new MessageScene([["ESCAPE HATCH", "BALLAST BLOWN"]], 1.2), 2);
+      const frames = this.ctx.baked("hatch");
+      this.ctx.push(
+        frames
+          ? new BakedDmdScene(frames, 10, "BALLAST BLOWN")
+          : new MessageScene([["ESCAPE HATCH", "BALLAST BLOWN"]], 1.2),
+        2,
+      );
     } else if (id === "gutter") {
       this.gutterLit = false;
-      this.ctx.push(new MessageScene([["TRENCH GUTTER", "RIDING THE FLOW"]], 1.2), 2);
+      const frames = this.ctx.baked("gutter");
+      this.ctx.push(
+        frames
+          ? new BakedDmdScene(frames, 9, "TRENCH GUTTER")
+          : new MessageScene([["TRENCH GUTTER", "RIDING THE FLOW"]], 1.2),
+        2,
+      );
     }
   }
 
@@ -185,7 +202,7 @@ export class TidebreakerLogic implements TableLogic {
     }
     this.ctx.bus.emit("telescope", { name: haul.name, points, spotted: last });
     // the ball sits captive in the bell while this plays
-    const frames = this.ctx.baked("winch");
+    const frames = this.ctx.baked("divebell");
     const reveal = frames
       ? new BakedDmdScene(frames, 8, `${haul.name} ${fmtScore(points)}`)
       : new MessageScene([[haul.name, fmtScore(points)]], 1.6, true);
@@ -243,7 +260,7 @@ export class TidebreakerLogic implements TableLogic {
     const points = rules.points.orbit * factor;
     const label = factor > 1 ? `CURRENT X${factor}` : "CURRENT";
     if (this.ctx.scoring.award(points, label) > 0) {
-      const frames = this.ctx.baked("sonar");
+      const frames = this.ctx.baked("current");
       this.ctx.push(
         frames
           ? new BakedDmdScene(frames, 11, `${label} ${fmtScore(points)}`)

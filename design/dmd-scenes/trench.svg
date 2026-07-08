@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- TIDEBREAKER DMD scene: TRENCH RUN — the ball dives the trench-mouth
+       subway, riding the canyon floor under the field to the dive bell. A
+       bright marker travels the trench profile. 8 frames of 128x32 (style
+       guide §6): #fff=3, #888=2, #666=1, black=0. Art rows 0..22; caption 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <!-- constant canyon profile per cell; marker walks it, dipping into the
+       trench floor and up the far wall. profile: (6,7)(26,13)(42,20)-(86,20)(102,13)(122,7) -->
+  <g transform="translate(0,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="10" cy="8.2" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(128,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="26" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(256,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="40" cy="19" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(384,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="56" cy="20" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(512,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="72" cy="20" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(640,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="88" cy="19.5" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(768,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="104" cy="13" r="2.4" fill="#fff"/>
+  </g>
+  <g transform="translate(896,0)">
+    <polyline points="6,7 26,13 42,20 86,20 102,13 122,7" fill="none" stroke="#888" stroke-width="1.2"/>
+    <line x1="14" y1="12" x2="20" y2="12" stroke="#666" stroke-width="0.8"/>
+    <line x1="108" y1="12" x2="114" y2="12" stroke="#666" stroke-width="0.8"/>
+    <circle cx="118" cy="8" r="2.4" fill="#fff"/>
+    <polygon points="118,4 119.4,7 122,7.5 119.4,8 118,11 116.6,8 114,7.5 116.6,7" fill="#888"/>
+  </g>
+</svg>
