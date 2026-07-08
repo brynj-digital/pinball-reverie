@@ -32,7 +32,7 @@ their localStorage values until they hit "Reset to defaults" in the panel.
 | `renderScale` | 1 | new 2026-07-02 | Canvas resolution fraction (paint-bound perf option; Esc settings) |
 | `sfxVolume` | 0.5 | — | SFX bus |
 | `musicVolume` | 0.25 | — | Music bus |
-| `debugOverlay` | true | — | Dev overlay |
+| `debugOverlay` | **false** | was true | Dev overlay (physics bodies); off for players |
 
 ## Change log
 
@@ -43,6 +43,7 @@ their localStorage values until they hit "Reset to defaults" in the panel.
 | 2026-07-02 | `ballLinearDamping` 0.02 → 0.15 | Rallies settle sooner; ball sheds speed between hits | 26/26 simcheck, 3× 10-min soaks, 0 stuck |
 | 2026-07-02 | `ballLinearDamping` 0.15 → 0.10 | 0.15 played slightly too draggy in practice | 26/26 simcheck, 2 soaks, 0 stuck |
 | 2026-07-04 | `kickerEject` added at 1.35 | New telescope kickout scoop; speed chosen so the eject clears the scoop hood and lands mid left flipper | simcheck: kickout crosses y=0.95 at x=0.212; 3× 10-min soaks, 0 stuck |
+| 2026-07-08 | `debugOverlay` true → false | Was a dev convenience default; shipped the physics-body overlay to fresh players (visible on the public build). Off by default; still toggleable in the settings/debug panel | build passes; overlay reachable via panel |
 
 Balance watch-item: the combined 2026-07-02 changes slow the table — if
 orbits/bank shots start feeling under-rewarded, adjust point values in
