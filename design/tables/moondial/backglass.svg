@@ -54,7 +54,9 @@
   <path d="M 118 190 A 32 32 0 0 1 182 190 Z" fill="#12141f" stroke="#07080d" stroke-width="2"/>
   <path d="M 120 179 A 30 30 0 0 1 148 158" fill="none" stroke="#7f8fc9" stroke-width="1.6" opacity="0.8"/>
   <rect x="146" y="162" width="9" height="28" fill="#07080d"/>
-  <rect x="148" y="164" width="5" height="24" fill="#e0b64e" opacity="0.7"/>
+  <!-- warm light only below the barrel pivot, matching the playfield:
+       the slit above the telescope stays dark -->
+  <rect x="148" y="178" width="5" height="10" fill="#e0b64e" opacity="0.7"/>
   <!-- telescope styled exactly as the playfield's: dark barrel, brass
        edge-light, steel muzzle ring, pivot at its base inside the slit -->
   <g transform="rotate(-28 150 176)">

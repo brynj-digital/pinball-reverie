@@ -1,0 +1,301 @@
+import type { ChipWave } from "./AudioEngine";
+
+/**
+ * Song data for the ChipMusic sequencer — one original theme per table
+ * (M10). Pure data (no engine imports) so table modules stay Node-safe.
+ * Style stays in the SID-era register per plan §6; themes must be original
+ * (IP rule).
+ */
+
+/** Chord tones (midi) keyed by root name, all voiced around octave 3–4. */
+export const CH = {
+  Am: [57, 60, 64],
+  A: [57, 61, 64],
+  Bb: [58, 62, 65],
+  C: [48, 52, 55],
+  Dm: [50, 53, 57],
+  Em: [52, 55, 59],
+  E: [52, 56, 59],
+  F: [53, 57, 60],
+  G: [55, 59, 62],
+  Gm: [55, 58, 62],
+} as const;
+
+export const ROOT: Record<ChordName, number> = {
+  Am: 45,
+  A: 45,
+  Bb: 46,
+  C: 48,
+  Dm: 38,
+  Em: 40,
+  E: 40,
+  F: 41,
+  G: 43,
+  Gm: 43,
+};
+
+export type ChordName = keyof typeof CH;
+export type DrumStyle = "sparse" | "half" | "full";
+export type BassStyle = "bounce" | "pump" | "roll";
+
+/**
+ * One song section. `lead` holds `16 / leadStep` slots per bar
+ * (leadStep 2 = eighths, 1 = sixteenths): midi note = attack, 0 = rest,
+ * -1 = tie (extends the previous note). `swing` delays every odd sixteenth
+ * by that fraction of a step (Hubbard shuffle).
+ */
+export interface Section {
+  chords: ChordName[];
+  lead: number[];
+  leadStep: 1 | 2;
+  wave: ChipWave;
+  drums: DrumStyle;
+  bass: BassStyle;
+  arp: boolean;
+  leadVol: number;
+  crash: boolean;
+  swing: number;
+}
+
+export interface Song {
+  bpm: number;
+  arrangement: Section[];
+}
+
+// ────────────────────────── MOONDIAL — A minor, 104 bpm ──────────────────────────
+// Original song: verse / chorus / bridge / middle eight / solo, 60 bars
+// (~2:20) before the arrangement loops. Hubbard-technique notes are in the
+// section comments below.
+
+// prettier-ignore
+const M_VERSE: Section = {
+  chords: ["Am", "F", "C", "G", "Am", "F", "C", "G"],
+  lead: [
+    76, -1,  0,  0, 72, -1, 74, -1,   69, -1,  0,  0,  0,  0, 72, -1,
+    71, -1,  0,  0, 67, -1, 71, -1,   74, -1, 72, -1, 71, -1,  0,  0,
+    76, -1,  0,  0, 72, -1, 74, -1,   69, -1,  0,  0, 72, 74, 76, -1,
+    72, -1, 71, -1, 67, -1, 64, -1,   69, -1, -1, -1,  0,  0,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "bounce",
+  arp: true, leadVol: 0.22, crash: false, swing: 0,
+};
+
+// prettier-ignore
+const M_CHORUS: Section = {
+  chords: ["F", "G", "Am", "Em", "F", "G", "Am", "Am"],
+  lead: [
+    77, -1, 76, -1, 72, -1, 76, -1,   79, -1, 76, -1, 74, -1, 71, -1,
+    76, -1, -1, -1, 72, -1, 74, -1,   71, -1, 74, -1, 76, -1, 79, -1,
+    77, -1, 76, -1, 72, -1, 76, -1,   79, -1, 81, -1, 79, -1, 76, -1,
+    76, -1, 74, -1, 72, -1, 74, -1,   69, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/**
+ * The breather. Melody sits in the same octave as the verse/chorus — the
+ * softness comes from the triangle timbre and sparse backing, not from
+ * dropping register. Triangle has almost no harmonics, so its leadVol runs
+ * hotter than the pulse sections to sound level with them.
+ */
+// prettier-ignore
+const M_BRIDGE: Section = {
+  chords: ["Dm", "Em", "F", "G"],
+  lead: [
+    74, -1, -1, -1, 77, -1, 76, -1,   76, -1, -1, -1,  0,  0, 71, -1,
+    72, -1, 76, -1, 77, -1, 79, -1,   79, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.32, crash: false, swing: 0,
+};
+
+/**
+ * Full-energy lift, but the contrast comes from the harmony (the E-major
+ * turn) and the pump bass — the lead stays in the song's pulse family
+ * (square, not saw) so it reads as the same instrument, and the solo after
+ * it still has somewhere to go.
+ */
+// prettier-ignore
+const M_MIDDLE_EIGHT: Section = {
+  chords: ["F", "C", "Dm", "Am", "F", "C", "E", "E"],
+  lead: [
+    72, -1, 74, -1, 76, -1, 77, -1,   76, -1, -1, -1, 72, -1, 67, -1,
+    74, -1, 77, -1, 74, -1, 72, -1,   72, -1, -1, -1, 69, -1,  0,  0,
+    72, -1, 74, -1, 76, -1, 77, -1,   79, -1, -1, -1, 76, -1, 72, -1,
+    71, -1, 68, -1, 71, -1, 74, -1,   76, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "pump",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/**
+ * The Hubbard-style solo: shuffle-swung sixteenth runs (A aeolian with a
+ * chromatic F♯ passing note in bar 6) over an Am–G–F–E descent, thin
+ * 12.5%-duty lead, rolling octave bass. The held G♯ at the end pulls back
+ * to the chorus in A minor.
+ */
+// prettier-ignore
+const M_SOLO: Section = {
+  chords: ["Am", "G", "F", "E", "Am", "G", "F", "E"],
+  lead: [
+    69, 71, 72, 74, 76, 77, 76, 74,   76, -1, -1, -1, 72, -1, 74, -1,
+    74, 76, 74, 71, 67, -1, 71, -1,   74, -1, 71, 74, 79, -1, -1, -1,
+    77, 76, 77, 79, 81, -1, -1, -1,   77, -1, 76, -1, 72, -1, 76, -1,
+    76, -1, 74, -1, 71, 68, 71, -1,   64, -1, -1, -1,  0,  0,  0,  0,
+    76, 77, 76, 74, 72, 74, 72, 71,   69, -1, -1, -1, 76, -1, -1, -1,
+    79, -1, 78, 79, 81, -1, 79, -1,   74, -1, 71, -1, 67, -1, -1, -1,
+    65, 67, 69, 72, 76, 77, 76, 72,   74, -1, 72, -1, 69, -1, -1, -1,
+    68, -1, 71, -1, 76, -1, 79, -1,   80, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 1, wave: "pulse125", drums: "full", bass: "roll",
+  arp: false, leadVol: 0.2, crash: true, swing: 0.33,
+};
+
+/** Song form: V C V C bridge M8 solo C, then da capo. */
+export const MOONDIAL_SONG: Song = {
+  bpm: 104,
+  arrangement: [M_VERSE, M_CHORUS, M_VERSE, M_CHORUS, M_BRIDGE, M_MIDDLE_EIGHT, M_SOLO, M_CHORUS],
+};
+
+// ────────────────────────── TIDEBREAKER — D minor, 92 bpm ──────────────────────────
+// "Abyssal Signal": slower and sparser than Moondial — the theme is built
+// around a sonar-ping motif (a lone high D answered two beats later, like a
+// return echo). Verses run on triangle over a root-note swell; the chorus
+// (the haul) tightens into pulse with the rolling bass; the abyss bridge
+// drops the kit to almost nothing. The DIVE fiction lives in the arrangement:
+// each pass sits a shade darker than the last before the chorus surfaces.
+
+/** The descent: ping (D5) … echo (A4), long gaps, water moving underneath. */
+// prettier-ignore
+const T_VERSE: Section = {
+  chords: ["Dm", "Dm", "Bb", "C", "Dm", "Dm", "Gm", "A"],
+  lead: [
+    74, -1, -1, -1,  0,  0, 69, -1,    0,  0, 74, -1,  0,  0, 72, -1,
+    70, -1, -1, -1,  0,  0, 65, -1,    0,  0, 67, -1, 70, -1, 72, -1,
+    74, -1, -1, -1,  0,  0, 69, -1,    0,  0, 74, -1, 77, -1, 76, -1,
+    74, -1, 70, -1, 67, -1, 62, -1,   61, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.3, crash: false, swing: 0,
+};
+
+/** The haul: winch engaged — the ping motif doubled and driven. */
+// prettier-ignore
+const T_CHORUS: Section = {
+  chords: ["Dm", "Bb", "F", "C", "Dm", "Bb", "Gm", "A"],
+  lead: [
+    74, -1, 77, -1, 74, -1, 72, -1,   70, -1, 74, -1, 70, -1, 67, -1,
+    69, -1, 72, -1, 69, -1, 65, -1,   67, -1, 72, -1, 76, -1, 77, -1,
+    74, -1, 77, -1, 79, -1, 77, -1,   74, -1, 77, -1, 74, -1, 70, -1,
+    70, -1, 69, -1, 67, -1, 65, -1,   69, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.22, crash: true, swing: 0,
+};
+
+/** The abyss: kit gone, arp gone — pings in the dark over a bare root. */
+// prettier-ignore
+const T_ABYSS: Section = {
+  chords: ["Dm", "Gm", "Bb", "A"],
+  lead: [
+    74, -1, -1, -1, -1, -1,  0,  0,    0,  0, 70, -1, -1, -1,  0,  0,
+    77, -1, -1, -1,  0,  0, 74, -1,   73, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.34, crash: false, swing: 0,
+};
+
+/** Something vast passes: the low turn — F major light through the water,
+ * then the A-major pull back down into the verse. */
+// prettier-ignore
+const T_SURGE: Section = {
+  chords: ["Bb", "C", "F", "Dm", "Gm", "C", "A", "A"],
+  lead: [
+    70, -1, 72, -1, 74, -1, 77, -1,   76, -1, -1, -1, 72, -1, 69, -1,
+    70, -1, 74, -1, 70, -1, 67, -1,   65, -1, -1, -1, 62, -1,  0,  0,
+    67, -1, 70, -1, 72, -1, 74, -1,   77, -1, -1, -1, 74, -1, 72, -1,
+    73, -1, 76, -1, 73, -1, 69, -1,   69, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "half", bass: "pump",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/** Form: descent, haul, descent, haul, abyss, surge, haul — then dive again. */
+export const TIDEBREAKER_SONG: Song = {
+  bpm: 92,
+  arrangement: [T_VERSE, T_CHORUS, T_VERSE, T_CHORUS, T_ABYSS, T_SURGE, T_CHORUS],
+};
+
+// ────────────────────────── MIDNIGHT MIDWAY — C major, 158 bpm ──────────────────────────
+// "The Barker's Waltz-That-Isn't": the fastest, brightest theme in the
+// lineup — a carousel tune squared off into 4/4. Square-wave organ over an
+// oom-pah bounce bass; the chorus rolls; the middle eight is a full
+// calliope — sixteenth-note arpeggio runs on the thin pulse, the sound of
+// every ride running at once. The breather is the far, dark edge of the
+// park where the music arrives on the wind.
+
+/** The gate swings open: a jaunty organ figure walking up the C triad. */
+// prettier-ignore
+const W_VERSE: Section = {
+  chords: ["C", "F", "C", "G", "C", "F", "G", "C"],
+  lead: [
+    72, -1, 76, -1, 79, -1, 76, -1,   77, -1, 81, -1, 77, -1, 74, -1,
+    76, -1, 79, -1, 84, -1, 79, -1,   83, -1, 79, -1, 74, -1,  0,  0,
+    72, -1, 76, -1, 79, -1, 76, -1,   77, -1, 81, -1, 84, -1, 81, -1,
+    83, -1, 81, -1, 79, -1, 77, -1,   76, -1, 72, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "half", bass: "bounce",
+  arp: true, leadVol: 0.22, crash: false, swing: 0,
+};
+
+/** All lights on: the hook climbs to the top of the wheel and waves. */
+// prettier-ignore
+const W_CHORUS: Section = {
+  chords: ["F", "G", "C", "Am", "F", "G", "C", "C"],
+  lead: [
+    81, -1, 84, -1, 81, -1, 79, -1,   83, -1, 86, -1, 83, -1, 81, -1,
+    84, -1, 79, -1, 76, -1, 79, -1,   81, -1, -1, -1, 76, -1,  0,  0,
+    81, -1, 84, -1, 81, -1, 79, -1,   83, -1, 86, -1, 88, -1, 86, -1,
+    84, -1, 81, -1, 79, -1, 76, -1,   72, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/**
+ * The calliope: sixteenth-note broken-chord runs on the 12.5% pulse — a
+ * fairground organ's player-piano roll. Each bar rolls its chord up two
+ * octaves and back; the pump bass keeps the oom-pah stomping underneath.
+ */
+// prettier-ignore
+const W_CALLIOPE: Section = {
+  chords: ["C", "Am", "F", "G"],
+  lead: [
+    72, 76, 79, 84, 79, 76, 72, 76,   79, 84, 79, 76, 72, 76, 79, -1,
+    69, 72, 76, 81, 76, 72, 69, 72,   76, 81, 76, 72, 69, 72, 76, -1,
+    65, 69, 72, 77, 72, 69, 65, 69,   72, 77, 81, 77, 72, 69, 65, -1,
+    67, 71, 74, 79, 74, 71, 67, 71,   74, 79, 83, 79, 74, 71, 67, -1,
+  ],
+  leadStep: 1, wave: "pulse125", drums: "full", bass: "pump",
+  arp: false, leadVol: 0.2, crash: true, swing: 0,
+};
+
+/** The dark edge of the park: the tune drifts over on the wind, triangle
+ * and almost nothing else, before the chorus drags you back in. */
+// prettier-ignore
+const W_EDGE: Section = {
+  chords: ["Am", "F", "C", "G"],
+  lead: [
+    81, -1, -1, -1, 79, -1, 76, -1,   77, -1, -1, -1,  0,  0, 72, -1,
+    76, -1, 79, -1, 76, -1, 74, -1,   74, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.32, crash: false, swing: 0,
+};
+
+/** Form: gate, lights, gate, lights, calliope, the dark edge, lights. */
+export const MIDWAY_SONG: Song = {
+  bpm: 158,
+  arrangement: [W_VERSE, W_CHORUS, W_VERSE, W_CHORUS, W_CALLIOPE, W_EDGE, W_CHORUS],
+};

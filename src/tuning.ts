@@ -26,6 +26,8 @@ export interface Tuning {
   bumperKick: number;
   /** Impulse (N·s) a slingshot applies along its face normal. */
   slingKick: number;
+  /** Speed (m/s) the telescope scoop ejects the ball at, along KICKER.eject. */
+  kickerEject: number;
   /** Visible playfield height in metres (camera zoom). */
   cameraViewH: number;
   /**
@@ -55,6 +57,7 @@ export const DEFAULT_TUNING: Tuning = {
   plungerChargeTime: 1.1,
   bumperKick: 0.09, // Δv ≈ 1.1 m/s on an 80 g ball
   slingKick: 0.11,
+  kickerEject: 1.35, // lands mid left flipper from the scoop (simcheck-verified)
   cameraViewH: 0.75,
   renderScale: 1,
   sfxVolume: 0.5,

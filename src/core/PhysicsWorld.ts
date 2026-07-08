@@ -34,12 +34,23 @@ export const FIXED_DT = 1 / 120;
 
 /**
  * userData attached to every fixture so contacts can be routed to events.
- * Sensor kinds: drain, rollover, ramp-entry, ramp-exit, spinner.
- * Solid element kinds (emit `hit`): bumper, sling, target.
+ * Sensor kinds: drain, rollover, ramp-entry, ramp-exit, spinner, kicker,
+ * subway, lane. Solid element kinds (emit `hit`): bumper, sling, target.
+ * M11 height fields: solid fixtures may declare a full-height wall (zAll)
+ * or membership of an elevated surface (surfaceName — the band follows the
+ * local surface height, resolved by the pre-solve gate); sensors may carry
+ * a zMin/zMax admission band, checked by the event consumers.
  */
 export interface FixtureTag {
   kind: string;
   id?: string;
+  /** Full-height wall: the shell / lane wall (cabinet glass). */
+  zAll?: boolean;
+  /** Elevated-surface rail: band follows the local surface height. */
+  surfaceName?: string;
+  /** Sensor admission band (m above the playfield plane). */
+  zMin?: number;
+  zMax?: number;
 }
 
 /** Solid element kinds whose ball contacts become `hit` events. */
@@ -50,12 +61,37 @@ export class PhysicsWorld {
   private accumulator = 0;
   private postStep: (() => void)[] = [];
 
+  /**
+   * M11 height gate: return false to disable a solid ball contact this step
+   * (a rail above/below the ball). Installed by Game/the sims with the
+   * table's surfaces + the ball's HeightState. Pre-solve runs every step a
+   * contact persists and Box2D re-enables contacts each step, so the gate
+   * tracks a climbing ball with no refiltering.
+   */
+  private zGate?: (tag: FixtureTag, ballX: number, ballY: number) => boolean;
+
   constructor(
     private bus: EventBus,
     tuning: Tuning,
   ) {
     this.world = new World({ gravity: new Vec2(0, effectiveGravity(tuning)) });
     this.world.on("begin-contact", (c: Contact) => this.onBeginContact(c));
+    this.world.on("pre-solve", (c: Contact) => {
+      if (!this.zGate) return;
+      const a = c.getFixtureA();
+      const b = c.getFixtureB();
+      const ta = a.getUserData() as FixtureTag | null;
+      const tb = b.getUserData() as FixtureTag | null;
+      const ballFix = ta?.kind === "ball" ? a : tb?.kind === "ball" ? b : null;
+      if (!ballFix) return;
+      const other = (ballFix === a ? tb : ta) ?? { kind: "wall" };
+      const p = ballFix.getBody().getPosition();
+      if (!this.zGate(other, p.x, p.y)) c.setEnabled(false);
+    });
+  }
+
+  setZGate(fn: (tag: FixtureTag, ballX: number, ballY: number) => boolean): void {
+    this.zGate = fn;
   }
 
   setSlope(tuning: Tuning): void {
@@ -80,17 +116,29 @@ export class PhysicsWorld {
    * Frames consume 1–3 steps unevenly; without interpolation the ball (and
    * the camera following it) advances in visibly irregular time quanta.
    */
-  update(dt: number, beforeStep?: () => void): number {
+  update(dt: number, beforeStep?: () => void, afterStep?: () => void): number {
     this.accumulator += Math.min(dt, 0.1); // cap: avoid spiral of death on tab refocus
     while (this.accumulator >= FIXED_DT) {
       beforeStep?.();
       this.world.step(FIXED_DT, 8, 3);
       this.accumulator -= FIXED_DT;
+      // Flush between steps, not once per frame: a kick held to the end of
+      // a 3-step frame acts on a ball two steps past the contact that
+      // queued it.
+      this.flushPostStep();
+      // M11: height-state integration (support resolution, z) per step
+      afterStep?.();
     }
-    const queued = this.postStep;
-    this.postStep = [];
-    for (const fn of queued) fn();
+    this.flushPostStep(); // work queued outside stepping still runs this frame
     return this.accumulator / FIXED_DT;
+  }
+
+  private flushPostStep(): void {
+    while (this.postStep.length) {
+      const queued = this.postStep;
+      this.postStep = [];
+      for (const fn of queued) fn();
+    }
   }
 
   private onBeginContact(contact: Contact): void {
@@ -101,9 +149,44 @@ export class PhysicsWorld {
     if (!other) return;
     const sensorHit =
       contact.getFixtureA().isSensor() || contact.getFixtureB().isSensor();
-    if (sensorHit) this.bus.emit("sensor", { kind: other.kind, id: other.id });
-    else if (HIT_KINDS.has(other.kind))
+    if (sensorHit) {
+      this.bus.emit("sensor", {
+        kind: other.kind,
+        id: other.id,
+        zMin: other.zMin,
+        zMax: other.zMax,
+      });
+    } else if (HIT_KINDS.has(other.kind)) {
+      // begin-contact fires even when the pre-solve height gate disables
+      // the contact — a ball riding a ramp over a bumper must not emit a
+      // hit (or be kicked). Apply the same gate to the event.
+      if (this.zGate) {
+        const ballFix = (a?.kind === "ball" ? contact.getFixtureA() : contact.getFixtureB());
+        const p = ballFix.getBody().getPosition();
+        if (!this.zGate(other, p.x, p.y)) return;
+      }
       this.bus.emit("hit", { kind: other.kind, id: other.id ?? "" });
+    }
+  }
+
+  /**
+   * Sensor tags currently touching `body` (M11 resense: when the ball's
+   * height changes INSIDE a zone — e.g. it lands in a lane slot after a
+   * bell drop — begin-contact already fired and was height-gated away, so
+   * the consumer re-checks the touching set against the new z).
+   */
+  sensorsTouching(body: Body): FixtureTag[] {
+    const out: FixtureTag[] = [];
+    for (let ce = body.getContactList(); ce; ce = ce.next) {
+      if (!ce.contact.isTouching()) continue;
+      const fa = ce.contact.getFixtureA();
+      const fb = ce.contact.getFixtureB();
+      const other = fa.getBody() === body ? fb : fa;
+      if (!other.isSensor()) continue;
+      const tag = other.getUserData() as FixtureTag | null;
+      if (tag) out.push(tag);
+    }
+    return out;
   }
 
   private staticShapeCache: DebugShape[] | null = null;
@@ -136,11 +219,14 @@ export class PhysicsWorld {
   private collectBodyShapes(body: Body, out: DebugShape[]): void {
     for (let f = body.getFixtureList(); f; f = f.getNext()) {
       const sensor = f.isSensor();
+      // color elevated-surface rails differently in the debug overlay (M11)
+      const tag = f.getUserData() as FixtureTag | null;
+      const layer = tag?.surfaceName ? 1 : 0;
       const type = f.getType();
       if (type === "circle") {
         const s = f.getShape() as CircleShape;
         const p = body.getWorldPoint(s.m_p);
-        out.push({ type: "circle", x: p.x, y: p.y, r: s.m_radius, sensor });
+        out.push({ type: "circle", x: p.x, y: p.y, r: s.m_radius, sensor, layer });
       } else if (type === "polygon" || type === "chain") {
         const verts = (f.getShape() as PolygonShape | ChainShape).m_vertices;
         out.push({
@@ -151,6 +237,7 @@ export class PhysicsWorld {
           }),
           closed: type === "polygon",
           sensor,
+          layer,
         });
       }
     }

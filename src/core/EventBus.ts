@@ -3,16 +3,28 @@
  * DMD all communicate through here (plan §3) — no direct cross-module calls.
  */
 export interface GameEvents {
-  /** The ball touched a sensor fixture; kind/id come from the fixture tag. */
-  sensor: { kind: string; id?: string };
+  /** The ball touched a sensor fixture; kind/id come from the fixture tag.
+   * zMin/zMax (M11): the sensor's height admission band — consumers skip
+   * the event when the ball's z falls outside it. */
+  sensor: {
+    kind: string;
+    id?: string;
+    zMin?: number;
+    zMax?: number;
+  };
+  /** The ball's height support changed (M11): surface names, "field",
+   * "air" or "subway". Table logic keys ramp rides off these. */
+  surface: { from: string; to: string; x: number; y: number; z: number };
   /** The ball struck a solid scoring element (bumper, sling, drop target). */
   hit: { kind: string; id: string };
   /** One spinner rotation tick while it's spinning down. */
   spinnerTick: Record<string, never>;
   /** All targets in a bank dropped. */
   bankComplete: Record<string, never>;
-  /** Mode progression (Modes.ts): eclipse lit / started / ended. */
-  mode: { kind: "eclipseReady" | "eclipseStart" | "eclipseEnd" };
+  /** Mode progression (per-table TableLogic): kind strings are table-owned. */
+  mode: { kind: string };
+  /** Kicker award ladder step (Moondial sightings, Tidebreaker hauls). */
+  telescope: { name: string; points: number; spotted: boolean };
   /** Score changed; label describes what scored (drives HUD, later the DMD). */
   score: { points: number; total: number; label: string };
   launch: { power: number };

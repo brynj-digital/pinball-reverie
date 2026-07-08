@@ -27,6 +27,7 @@ their localStorage values until they hit "Reset to defaults" in the panel.
 | `plungerChargeTime` | 1.1 | — | Hold to full power |
 | `bumperKick` | 0.09 | — | Pop-bumper impulse |
 | `slingKick` | 0.11 | — | Slingshot impulse |
+| `kickerEject` | 1.35 | new 2026-07-04 | Telescope-scoop eject speed along `KICKER.eject` (feeds the left flipper) |
 | `cameraViewH` | 0.75 | — | Camera zoom (not physics) |
 | `renderScale` | 1 | new 2026-07-02 | Canvas resolution fraction (paint-bound perf option; Esc settings) |
 | `sfxVolume` | 0.5 | — | SFX bus |
@@ -41,6 +42,7 @@ their localStorage values until they hit "Reset to defaults" in the panel.
 | 2026-07-02 | `ballRestitution` 0.3 → 0.2, `wallRestitution` 0.25 → 0.15 | Heavier, more controlled ball; less rubber-ball chaos | 26/26 simcheck, 3× 10-min soaks, 0 stuck |
 | 2026-07-02 | `ballLinearDamping` 0.02 → 0.15 | Rallies settle sooner; ball sheds speed between hits | 26/26 simcheck, 3× 10-min soaks, 0 stuck |
 | 2026-07-02 | `ballLinearDamping` 0.15 → 0.10 | 0.15 played slightly too draggy in practice | 26/26 simcheck, 2 soaks, 0 stuck |
+| 2026-07-04 | `kickerEject` added at 1.35 | New telescope kickout scoop; speed chosen so the eject clears the scoop hood and lands mid left flipper | simcheck: kickout crosses y=0.95 at x=0.212; 3× 10-min soaks, 0 stuck |
 
 Balance watch-item: the combined 2026-07-02 changes slow the table — if
 orbits/bank shots start feeling under-rewarded, adjust point values in

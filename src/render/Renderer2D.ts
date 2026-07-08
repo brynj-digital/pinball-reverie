@@ -1,5 +1,5 @@
 import type { Camera } from "../core/Camera";
-import { BALL_RADIUS, FLIPPER, PLUNGER, flipperVerts } from "../table/geometry";
+import { BALL_RADIUS, FLIPPER, flipperVerts } from "../table/geometry";
 import type {
   EffectKind,
   Renderer,
@@ -7,33 +7,7 @@ import type {
   WorldSnapshot,
 } from "./Renderer";
 
-/** Load SVG text as an image with its intrinsic size forced to w×h px. */
-function loadSvgAt(
-  svgText: string,
-  w: number,
-  h: number,
-  onload: (img: HTMLImageElement) => void,
-  label = "svg",
-): void {
-  // strip any existing root width/height (any order/spacing), then inject
-  // ours — a single adjacency-dependent regex silently no-ops on reordered
-  // attributes and the art rasterizes blurry at intrinsic size
-  const sized = svgText
-    .replace(/(<svg[^>]*?)\s+width="[^"]*"/, "$1")
-    .replace(/(<svg[^>]*?)\s+height="[^"]*"/, "$1")
-    .replace(/<svg/, `<svg width="${w}" height="${h}"`);
-  const url = URL.createObjectURL(new Blob([sized], { type: "image/svg+xml" }));
-  const img = new Image();
-  img.onload = () => {
-    URL.revokeObjectURL(url);
-    onload(img);
-  };
-  img.onerror = () => {
-    URL.revokeObjectURL(url); // don't leak the blob URL on failure
-    console.error(`Renderer2D: ${label} image failed to load — using fallback rendering`);
-  };
-  img.src = url;
-}
+import { loadSvgAt, splitElevatedOverlay } from "./svgImage";
 
 /**
  * Canvas-2D placeholder renderer for Milestones 0–3. Reads a WorldSnapshot;
@@ -46,6 +20,14 @@ export class Renderer2D implements Renderer {
   private art?: HTMLImageElement;
   private artScale = 0; // px per metre the current art raster was built for
   private artPendingScale = 0;
+  /** Elevated-rail art (M10), stripped from the base raster and drawn as a
+   * SEMI-TRANSPARENT overlay — over the ball on the main field (it shows
+   * through the ramp plastic), under the ball on the raised layer. Without
+   * the split, a ball passing UNDER the wireform reads as riding it. */
+  private baseSvgText?: string;
+  private overlaySvgText?: string;
+  private overlayArt?: HTMLImageElement;
+  private overlayPendingScale = 0;
   private ballArt?: HTMLImageElement;
   private backglass?: HTMLImageElement;
   /** Recent ball positions for the speed-scaled motion trail. */
@@ -53,6 +35,8 @@ export class Renderer2D implements Renderer {
   private lastCharge = 0;
   private strikeAt = -Infinity; // performance.now()/1000 of the last release
   private lastOx = 0; // table centering offset (device px), for panel layout
+  private lastTop = 0; // device px reserved above the table (portrait DMD strip)
+  private portrait = false; // portrait layout: DMD strip on top, no side panel
   // frame-time diagnostics for the HUD (worst frame + slow count, trailing 2s)
   private frameTimes: number[] = [];
   private lastFrameAt = 0;
@@ -65,6 +49,9 @@ export class Renderer2D implements Renderer {
 
   init(table: TableRenderData): void {
     this.table = table;
+    const split = table.artSvgText ? splitElevatedOverlay(table.artSvgText) : undefined;
+    this.baseSvgText = split?.base ?? table.artSvgText;
+    this.overlaySvgText = split?.overlay;
     if (table.ballSvgText) {
       // one-time: 128 px is plenty for a ball that renders at ~40–90 px
       loadSvgAt(table.ballSvgText, 128, 128, (img) => (this.ballArt = img), "ball");
@@ -81,7 +68,7 @@ export class Renderer2D implements Renderer {
    * art vector-crisp at any zoom / DPR. Rebuilds only on >15% scale change.
    */
   private ensureArt(pxPerMetre: number): void {
-    if (!this.table.artSvgText) return;
+    if (!this.baseSvgText) return;
     if (this.art && Math.abs(pxPerMetre - this.artScale) / pxPerMetre < 0.15) return;
     if (this.artPendingScale === pxPerMetre) return;
     this.artPendingScale = pxPerMetre;
@@ -90,7 +77,7 @@ export class Renderer2D implements Renderer {
     // on failure loadSvgAt logs and artPendingScale stays set, intentionally
     // blocking a same-scale retry loop; a zoom/resize retries at a new scale
     loadSvgAt(
-      this.table.artSvgText,
+      this.baseSvgText,
       w,
       h,
       (img) => {
@@ -100,6 +87,10 @@ export class Renderer2D implements Renderer {
       },
       "playfield",
     );
+    if (this.overlaySvgText && this.overlayPendingScale !== pxPerMetre) {
+      this.overlayPendingScale = pxPerMetre;
+      loadSvgAt(this.overlaySvgText, w, h, (img) => (this.overlayArt = img), "overlay");
+    }
   }
 
   private dprEff = 1; // native DPR × renderScale, shared with HUD/panel layout
@@ -115,21 +106,40 @@ export class Renderer2D implements Renderer {
       canvas.height = h;
     }
 
-    // world transform: metres → pixels, camera scroll + shake, table centred
-    const s = h / camera.viewH;
+    // Portrait (taller than wide): reserve a full-width 4:1 DMD strip on top,
+    // table below — the classic layout the touch scheme is built around (style
+    // guide §8). Landscape keeps the side-panel DMD in the left void.
+    this.portrait = w < h;
+    const inset = 12; // css px around the top strip
+    // strip is a full-width 4:1 DMD plus inset padding above and below
+    this.lastTop = this.portrait
+      ? Math.round(((canvas.clientWidth - inset * 2) / 4 + inset * 2) * dpr)
+      : 0;
+    const topPx = this.lastTop;
+    const availH = h - topPx;
+
+    // world transform: metres → pixels, camera scroll + shake, table centred.
+    // Clamp scale so the table fits BOTH axes — height binds in landscape (as
+    // before), width binds on a narrow portrait phone — and always shows
+    // exactly camera.viewH metres, so vertical scroll matches across layouts.
+    const s = Math.min(availH / camera.viewH, w / this.table.width);
     const ox = (w - s * this.table.width) / 2;
+    const oy = topPx + (availH - s * camera.viewH) / 2;
     this.lastOx = ox;
 
-    // Background: the art column is opaque, so only the side margins need
-    // the void fill — a full-canvas fill would repaint ~2× the pixels.
+    // Background void fill. Landscape only needs the two side margins (the art
+    // column is opaque); portrait/letterboxed layouts get a full fill so the
+    // top strip and any vertical margin read as void.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#0c0d14";
-    if (ox > 0) {
+    if (topPx > 0 || oy > 0.5) {
+      ctx.fillRect(0, 0, w, h);
+    } else if (ox > 0) {
       ctx.fillRect(0, 0, Math.ceil(ox), h);
       ctx.fillRect(Math.floor(ox + s * this.table.width), 0, Math.ceil(ox) + 1, h);
     }
 
-    ctx.setTransform(s, 0, 0, s, ox + camera.shakeX * s, -(camera.y + camera.shakeY) * s);
+    ctx.setTransform(s, 0, 0, s, ox + camera.shakeX * s, oy - (camera.y + camera.shakeY) * s);
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -137,29 +147,7 @@ export class Renderer2D implements Renderer {
     // tall; blitting all of it rasterized ~45% wasted pixels every frame).
     this.ensureArt(s); // s is device px per metre (canvas is DPR-sized)
     if (this.art) {
-      // Quantize the slice to WHOLE source pixels and derive the destination
-      // from them: browsers snap drawImage source rects to texels, so a
-      // fractionally-moving source judders against the smooth transform.
-      // With integer source + matching dest the mapping is constant and all
-      // scroll motion comes from the transform — as smooth as a full blit.
-      const pad = 0.03 + Math.abs(camera.shakeY); // slack for shake + rounding
-      const pxPerM = this.art.height / this.table.height;
-      const sy = Math.max(0, Math.floor((camera.y - pad) * pxPerM));
-      const sh = Math.min(
-        this.art.height - sy,
-        Math.ceil((camera.viewH + 2 * pad) * pxPerM) + 2,
-      );
-      ctx.drawImage(
-        this.art,
-        0,
-        sy,
-        this.art.width,
-        sh,
-        0,
-        sy / pxPerM,
-        this.table.width,
-        sh / pxPerM,
-      );
+      this.drawArtSlice(this.art, camera);
     } else {
       ctx.fillStyle = "#1b1e2c";
       ctx.fillRect(0, 0, this.table.width, this.table.height);
@@ -228,52 +216,81 @@ export class Renderer2D implements Renderer {
     }
     this.flushGlows(); // trail ghosts, one additive batch under the ball
 
-    // ball — stainless SVG art, procedural gradient until it loads
+    // on the raised layer the translucent ramp art goes down FIRST, then
+    // the ball rides crisp on top of it (M10)
+    if (this.overlayArt && b.layer === 1) this.drawArtSlice(this.overlayArt, camera);
+
+    // ball — stainless SVG art, procedural gradient until it loads.
+    // Height (M10): raised rails scale the ball up with a drop shadow;
+    // subway transit dims and shrinks it (rolling in a sunken gutter).
+    const br = BALL_RADIUS * (1 + Math.max(0, b.h) * 8 + Math.min(0, b.h) * 4);
     ctx.save();
-    ctx.globalAlpha = b.alpha;
+    ctx.globalAlpha = b.alpha * (b.layer === -1 ? 0.55 : 1);
+    if (b.h > 0.002) {
+      // shadow cast on the field below (offset toward the key light's away side)
+      ctx.beginPath();
+      ctx.ellipse(b.x + b.h * 0.5, b.y + b.h * 0.7, BALL_RADIUS * 0.9, BALL_RADIUS * 0.6, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(7, 8, 13, ${0.35 * b.alpha})`;
+      ctx.fill();
+    }
     if (this.ballArt) {
-      ctx.drawImage(
-        this.ballArt,
-        b.x - BALL_RADIUS,
-        b.y - BALL_RADIUS,
-        BALL_RADIUS * 2,
-        BALL_RADIUS * 2,
-      );
+      ctx.drawImage(this.ballArt, b.x - br, b.y - br, br * 2, br * 2);
       // rolling cue: faint reflection smudges that rotate with the ball's spin
       ctx.save();
       ctx.translate(b.x, b.y);
       ctx.rotate(b.angle);
       ctx.strokeStyle = "rgba(35, 38, 47, 0.22)";
-      ctx.lineWidth = BALL_RADIUS * 0.3;
+      ctx.lineWidth = br * 0.3;
       ctx.beginPath();
-      ctx.arc(0, 0, BALL_RADIUS * 0.58, -0.35, 0.35);
+      ctx.arc(0, 0, br * 0.58, -0.35, 0.35);
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(0, 0, BALL_RADIUS * 0.58, Math.PI - 0.35, Math.PI + 0.35);
+      ctx.arc(0, 0, br * 0.58, Math.PI - 0.35, Math.PI + 0.35);
       ctx.stroke();
       ctx.restore();
     } else {
       const grad = ctx.createRadialGradient(
-        b.x - BALL_RADIUS * 0.35,
-        b.y - BALL_RADIUS * 0.35,
-        BALL_RADIUS * 0.15,
+        b.x - br * 0.35,
+        b.y - br * 0.35,
+        br * 0.15,
         b.x,
         b.y,
-        BALL_RADIUS,
+        br,
       );
       grad.addColorStop(0, "#ffffff");
       grad.addColorStop(0.5, "#aeb6c8");
       grad.addColorStop(1, "#565d6e");
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(b.x, b.y, BALL_RADIUS, 0, Math.PI * 2);
+      ctx.arc(b.x, b.y, br, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.restore(); // ball alpha
 
+    // the translucent elevated rails composite OVER a ground-level (or
+    // subway) ball — it stays visible through the ramp plastic but reads
+    // unmistakably as running beneath it (M10)
+    if (this.overlayArt && b.layer <= 0) this.drawArtSlice(this.overlayArt, camera);
+
     if (snap.debugShapes) this.drawDebug(snap);
 
     this.drawHud(snap, w, h, dpr);
+  }
+
+  /**
+   * Blit the visible slice of a full-table raster. Quantize the slice to
+   * WHOLE source pixels and derive the destination from them: browsers snap
+   * drawImage source rects to texels, so a fractionally-moving source
+   * judders against the smooth transform. With integer source + matching
+   * dest the mapping is constant and all scroll motion comes from the
+   * transform — as smooth as a full blit.
+   */
+  private drawArtSlice(img: HTMLImageElement, camera: Camera): void {
+    const pad = 0.03 + Math.abs(camera.shakeY); // slack for shake + rounding
+    const pxPerM = img.height / this.table.height;
+    const sy = Math.max(0, Math.floor((camera.y - pad) * pxPerM));
+    const sh = Math.min(img.height - sy, Math.ceil((camera.viewH + 2 * pad) * pxPerM) + 2);
+    this.ctx.drawImage(img, 0, sy, img.width, sh, 0, sy / pxPerM, this.table.width, sh / pxPerM);
   }
 
   private effects: { kind: EffectKind; x: number; y: number; born: number }[] = [];
@@ -310,16 +327,24 @@ export class Renderer2D implements Renderer {
   }
 
   /**
-   * Composite the DMD into the side panel (plan §4.5 landscape layout): the
-   * void left of the table if it's wide enough, else a compact strip under
-   * the fps readout. Steel bezel with a chrome top rim per the style guide.
+   * Composite the DMD. Portrait (style guide §8): a full-width 4:1 strip
+   * across the reserved top, no backglass (no room). Landscape (plan §4.5):
+   * the void left of the table if it's wide enough, else a compact strip under
+   * the fps readout, with backglass below. Steel bezel + chrome top rim.
    */
   private drawDmdPanel(dmd: HTMLCanvasElement): void {
     const { ctx } = this;
     const dpr = this.dprEff;
-    const margin = this.lastOx / dpr; // void left of the table, CSS px
+    const inset = 12;
+    const wide = this.lastOx / dpr >= 240; // landscape void wide enough for a big panel
     let w: number, x: number, y: number;
-    if (margin >= 240) {
+    if (this.portrait) {
+      // full-width strip across the top, matching the reserved lastTop band
+      w = this.canvas.clientWidth - inset * 2;
+      x = inset;
+      y = inset;
+    } else if (wide) {
+      const margin = this.lastOx / dpr;
       w = Math.min(margin - 32, 560);
       x = (margin - w) / 2;
       y = 28;
@@ -344,8 +369,9 @@ export class Renderer2D implements Renderer {
     ctx.stroke();
     ctx.drawImage(dmd, x, y, w, h);
 
-    // backglass art below the DMD when the panel is wide enough (§4.5)
-    if (this.backglass && margin >= 240) {
+    // backglass art below the DMD when the panel is wide enough (§4.5); no room
+    // for it in the portrait top strip
+    if (this.backglass && !this.portrait && wide) {
       const bw = w;
       const bh = bw * 1.2;
       const by = y + h + 22;
@@ -366,6 +392,7 @@ export class Renderer2D implements Renderer {
     if (this.lastCharge > 0.1 && charge === 0) this.strikeAt = now;
     this.lastCharge = charge;
 
+    const PLUNGER = this.table.plunger;
     const strikePhase = (now - this.strikeAt) / 0.14;
     const overshoot =
       strikePhase >= 0 && strikePhase < 1 ? Math.sin(Math.PI * strikePhase) * 0.007 : 0;
@@ -472,7 +499,7 @@ export class Renderer2D implements Renderer {
         ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(140, 107, 255, ${0.4 + 0.6 * r.lit})`;
         ctx.fill();
-        this.drawGlow(r.x, r.y, 0.032, "140, 107, 255", r.lit);
+        this.drawGlow(r.x, r.y, 0.026, "140, 107, 255", r.lit);
       } else if (!this.art) {
         ctx.beginPath();
         ctx.arc(r.x, r.y, 0.011, 0, Math.PI * 2);
@@ -482,6 +509,17 @@ export class Renderer2D implements Renderer {
         ctx.strokeStyle = "#07080d";
         ctx.stroke();
       }
+    }
+
+    // extra insert lamps (depth gauge etc.) — art carries the unlit insert;
+    // the renderer adds the lit fill + additive halo, like the rollovers
+    for (const l of el.lamps) {
+      if (l.lit <= 0.01) continue;
+      ctx.beginPath();
+      ctx.arc(l.x, l.y, 0.009, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${l.rgb}, ${0.4 + 0.6 * l.lit})`;
+      ctx.fill();
+      this.drawGlow(l.x, l.y, 0.022, l.rgb, l.lit);
     }
 
     // spinner — bar whose projected thickness fakes rotation about the lane axis
@@ -592,7 +630,15 @@ export class Renderer2D implements Renderer {
     const { ctx } = this;
     ctx.lineWidth = 0.0025;
     for (const shape of snap.debugShapes!) {
-      ctx.strokeStyle = shape.sensor ? "#ff9f43" : "#3ddc84";
+      // green = field bodies, sky = raised (layer 1), violet = subway (-1),
+      // orange = sensors — matches the tokens.css debug family
+      ctx.strokeStyle = shape.sensor
+        ? "#ff9f43"
+        : shape.layer === 1
+          ? "#59a7ff"
+          : shape.layer === -1
+            ? "#b06bff"
+            : "#3ddc84";
       ctx.beginPath();
       if (shape.type === "circle") {
         ctx.arc(shape.x, shape.y, shape.r, 0, Math.PI * 2);

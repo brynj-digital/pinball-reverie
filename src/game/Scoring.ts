@@ -1,11 +1,12 @@
 import { EventBus } from "../core/EventBus";
-import rules from "../../design/tables/moondial/rules.json";
+import type { ScoringRules } from "../table/specs";
 
 /**
  * Base scoring: element events → points, all values from the table's rules
  * JSON (plan §5e — code carries no scoring numbers). Orbit awards and modes
- * live in Modes.ts and come through award(). Bonus units accumulate from
- * moons/targets/spinner and pay out ×multiplier at end of ball.
+ * live in the table's TableLogic and come through award(). Bonus units
+ * accumulate from lanes/targets/spinner and pay out ×multiplier at end of
+ * ball.
  */
 export class Scoring {
   total = 0;
@@ -20,7 +21,10 @@ export class Scoring {
   lastLabel = "";
   lastLabelAge = Infinity;
 
-  constructor(private bus: EventBus) {
+  constructor(
+    private bus: EventBus,
+    rules: ScoringRules,
+  ) {
     const P = rules.points;
     const U = rules.bonusUnits;
     bus.on("hit", ({ kind, id }) => {
@@ -51,13 +55,15 @@ export class Scoring {
     this.lastLabelAge += dt;
   }
 
-  award(points: number, label: string): void {
-    if (this.muted) return; // also blocks Modes-driven awards (orbits) on a tilted ball
+  /** Returns the multiplied points actually added (0 while muted). */
+  award(points: number, label: string): number {
+    if (this.muted) return 0; // also blocks Modes-driven awards (orbits) on a tilted ball
     const p = Math.round(points * this.multiplier * this.eclipseFactor);
     this.total += p;
     this.lastLabel = label;
     this.lastLabelAge = 0;
     this.bus.emit("score", { points: p, total: this.total, label });
+    return p;
   }
 
   /** TILT forfeits the accrued bonus (real-machine rule). */

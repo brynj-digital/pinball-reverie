@@ -1,13 +1,11 @@
 /**
- * Entity constants for the Moondial table, in metres with y pointing DOWN
- * the table (matches screen space; gravity is +y).
+ * Shared table geometry types and the constants common to every table, in
+ * metres with y pointing DOWN the table (matches screen space; gravity +y).
  *
- * As of milestone 3.5 the table SHAPE (walls + sensors) lives in the
- * playfield SVG (design/tables/moondial/playfield.svg) and is parsed by
- * SvgCollision.ts — never hand-author collision here that duplicates drawn
- * geometry (plan §5e). This module keeps only what the code-defined dynamic
- * entities need (flippers, bumpers, slings, targets, spinner), and those
- * placements are cross-checked against the SVG's anchor-* markers at load.
+ * Per-table entity constants (bumpers, slings, kickers, …) live in
+ * src/table/defs/<id>.ts as a TableGeometry; table SHAPE (walls + sensors)
+ * lives in each table's playfield SVG parsed by SvgCollision.ts (plan §5e).
+ * Never hand-author collision here that duplicates drawn geometry.
  *
  * Pure data/math (no planck, no DOM) so physics, renderer and the headless
  * simcheck can all share it.
@@ -20,39 +18,9 @@ export interface Pt {
 export const BALL_RADIUS = 0.0135; // real pinball: 27 mm diameter
 
 /**
- * Pinball Fantasies convention: the plunger lane lives OUTSIDE the playfield
- * walls. The playfield proper is 0..0.52 with every structural element
- * mirror-symmetric about x = 0.26; the lane (0.52..0.575) is appended on the
- * right and only meets the playfield through the orbit at the top.
+ * Flipper hardware is identical on every table (same bats, same coils);
+ * only the pivot placement is per-table (TableGeometry.flippers).
  */
-export const TABLE = {
-  width: 0.575,
-  /** Right wall of the symmetric playfield = inner wall of the plunger lane. */
-  playfieldW: 0.52,
-  height: 1.05,
-  /** x of the wall separating the plunger lane from the playfield. */
-  laneWallX: 0.52,
-  /** y where the plunger lane's inner wall ends (orbit tail joins here). */
-  laneTopY: 0.3,
-  spawn: { x: 0.5475, y: 0.98 },
-} as const;
-
-/**
- * Plunger visuals: the ball rests on a saddle bar (collision, in the SVG);
- * the renderer draws the animated rod + spring assembly beneath it.
- */
-export const PLUNGER = {
-  x: 0.5475,
-  /** Centerline y of the saddle bar the ball rests on. */
-  saddleY: 1.0,
-  /** Rod tip rest y (just under the saddle). */
-  tipRestY: 0.998,
-  /** How far the tip retracts at full charge (spring keeps ~9 mm squashed height). */
-  pull: 0.02,
-  /** Spring base plate y (on the lane floor). */
-  baseY: 1.04,
-} as const;
-
 export const FLIPPER = {
   length: 0.079,
   /**
@@ -65,35 +33,9 @@ export const FLIPPER = {
   restAngle: 0.5,
   /** Total swing from down-stop to up-stop (rad). */
   sweep: 1.05,
-  // Pivot spacing sets the tip-to-tip drain gap at rest: 39 mm ≈ 1.45 ball
-  // diameters. Anything between one radius and ~1.4 diameters wedges the ball.
-  pivotL: { x: 0.171, y: 0.95 },
-  pivotR: { x: 0.349, y: 0.95 },
 } as const;
 
 export type FlipperSide = "left" | "right";
-
-/**
- * Outer arch across the top (also the orbit's outer wall). The left quarter
- * is r 0.26 about (0.26, 0.26); the top-right quarter is r 0.315 about
- * (0.26, 0.315) so it reaches over the plunger lane — both arcs share the
- * apex (0.26, 0) with a horizontal tangent, so the shell is smooth.
- */
-export const ARCH = { cx: 0.26, cy: 0.26, r: 0.26 } as const;
-export const ARCH_RIGHT = { cx: 0.26, cy: 0.315, r: 0.315 } as const;
-
-/**
- * The orbit ("ramp" of milestone 3): an inner guide wall concentric with the
- * arch plus a straight left lane, forming a channel the plunger launch rides
- * around and down the left side. Channel width 65 mm (> 38 mm rule).
- */
-export const ORBIT = {
-  r: 0.195,
-  laneX: 0.065, // inner wall of the left lane
-  laneBottomY: 0.55, // where the lane opens into the playfield
-  /** Inner arc ends at this angle (deg) and a tail runs to the plunger-lane wall top. */
-  tailAngleDeg: 40,
-} as const;
 
 export interface BumperDef {
   id: string;
@@ -101,66 +43,101 @@ export interface BumperDef {
   y: number;
   r: number;
 }
-/** Pop bumper triangle, mid-upper field, symmetric about x = 0.26. */
-export const BUMPERS: readonly BumperDef[] = [
-  { id: "1", x: 0.19, y: 0.33, r: 0.028 },
-  { id: "2", x: 0.33, y: 0.33, r: 0.028 },
-  { id: "3", x: 0.26, y: 0.425, r: 0.028 },
-];
 
 export interface SlingDef {
   id: string;
   verts: Pt[]; // CCW
   kick: Pt; // unit-ish kick direction (face normal, toward the playfield)
 }
-/** Slingshots above the inlane funnels; hypotenuse is the kicking face. */
-export const SLINGS: readonly SlingDef[] = [
-  {
-    id: "left",
-    verts: [
-      { x: 0.09, y: 0.72 },
-      { x: 0.14, y: 0.8 },
-      { x: 0.09, y: 0.8 },
-    ],
-    kick: { x: 0.848, y: -0.53 },
-  },
-  {
-    id: "right",
-    verts: [
-      { x: 0.43, y: 0.72 },
-      { x: 0.43, y: 0.8 },
-      { x: 0.38, y: 0.8 },
-    ],
-    kick: { x: -0.848, y: -0.53 },
-  },
-];
-
-/**
- * Drop-target bank on the right wall, faces pointing left. Gaps between
- * targets are 6 mm (< 13.5 mm rule); the pocket behind is sealed by wall
- * brackets above and below the bank.
- */
-export const DROP_TARGETS = {
-  x: 0.495, // center of the thin boxes, housed against the playfield's right wall
-  hw: 0.004,
-  hh: 0.018,
-  ys: [0.518, 0.56, 0.602],
-} as const;
 
 export interface RolloverDef {
   id: string;
   x: number;
   y: number;
 }
-/** Top-lane rollover insert positions (sensors live in the SVG). */
-export const ROLLOVERS: readonly RolloverDef[] = [
-  { id: "1", x: 0.16, y: 0.115 },
-  { id: "2", x: 0.26, y: 0.115 },
-  { id: "3", x: 0.36, y: 0.115 },
-];
 
-/** Spinner bar across the orbit's left lane (its trip sensor lives in the SVG). */
-export const SPINNER = { x: ORBIT.laneX / 2, y: 0.4, halfW: ORBIT.laneX / 2 } as const;
+/** Extra playfield insert lamp (e.g. Tidebreaker's depth gauge). */
+export interface LampDef {
+  id: string;
+  x: number;
+  y: number;
+  /** "r, g, b" for the renderer's additive glow. */
+  rgb: string;
+}
+
+export interface DropTargetsDef {
+  hw: number;
+  hh: number;
+  targets: { id: string; x: number; y: number }[];
+}
+
+/**
+ * Kickout scoop / kickback: trip sensor lives in the SVG (sensor-kicker-<id>);
+ * this def drives the capture → hold → eject cycle. Geometry must never trap:
+ * scoop mouths open downhill so gravity alone always returns an uncaptured
+ * ball to play — only the sensor+hold logic ever keeps a ball at `hold`.
+ */
+export interface KickerDef {
+  id: string;
+  hold: Pt;
+  eject: Pt; // direction (normalised at use)
+  holdS: number;
+  /** Post-eject window during which the sensor won't re-capture. */
+  cooldownS: number;
+  /** Eject speed (m/s); falls back to tuning.kickerEject. */
+  ejectSpeed?: number;
+}
+
+/**
+ * Scripted under-playfield transit (sensor-subway-<id> in the SVG): the ball
+ * is carried along the matching height-profile-<id> path and ejected at its
+ * far end. Physics stays planar — depth is render-only (plan §7).
+ */
+export interface SubwayDef {
+  id: string;
+  /** Travel speed along the path (m/s). */
+  speed: number;
+  /** Exit speed (m/s) along the path's final segment direction. */
+  exitSpeed: number;
+}
+
+export interface TableGeometry {
+  table: {
+    width: number;
+    /** Right wall of the playfield = inner wall of the plunger lane. */
+    playfieldW: number;
+    height: number;
+    /** x of the wall separating the plunger lane from the playfield. */
+    laneWallX: number;
+    /** y where the plunger lane's inner wall ends. */
+    laneTopY: number;
+    spawn: Pt;
+  };
+  /** Plunger visuals: rod + spring assembly under the saddle bar. */
+  plunger: {
+    x: number;
+    saddleY: number;
+    tipRestY: number;
+    pull: number;
+    baseY: number;
+  };
+  /**
+   * The lower pair every table has, plus an optional upper (third) flipper
+   * (M10+, Midway's mallet): placed by anchor-flipper-upper in the SVG,
+   * driven by the "upper" input action (defaults to the same keys as its
+   * `side`'s lower flipper). Same hardware (FLIPPER constants) as the pair.
+   */
+  flippers: { left: Pt; right: Pt; upper?: Pt & { side: FlipperSide } };
+  bumpers: readonly BumperDef[];
+  slings: readonly SlingDef[];
+  dropTargets: DropTargetsDef;
+  /** Multiplier-lane lamp indicator positions (sensors live in the SVG). */
+  rollovers: readonly RolloverDef[];
+  lamps: readonly LampDef[];
+  spinner: { x: number; y: number; halfW: number };
+  kickers: readonly KickerDef[];
+  subways: readonly SubwayDef[];
+}
 
 /**
  * Flipper bat polygon in local body space, pivot at origin, CCW winding.
@@ -183,18 +160,14 @@ export function flipperVerts(side: FlipperSide): Pt[] {
 }
 
 /*
- * Wall and sensor shapes were removed from this file at milestone 3.5 —
- * they now live in design/tables/moondial/playfield.svg as named
- * "collision-" and "sensor-" prefixed layers. The trap rules travelled too:
+ * The ball-trap rules that gate every playfield SVG (also in
+ * design/STYLE-GUIDE.md §4 — run `npm run simcheck` and `npm run soak`
+ * after ANY change to a playfield SVG):
  *
  *  - inlane guides end TANGENT to the flipper base circle, past its apex
- *    (short = pocket; below the crown = a creeping ball stalls on the hump)
  *  - every gap < 13.5 mm or > 38 mm; 13.5–38 mm wedges the ball
- *  - lane dividers end 4 mm BELOW the orbit arc line (a tip poking into the
- *    channel pockets a slow orbiting ball)
- *  - the drop-target bank is fully housed: back wall 4 mm behind the
- *    targets so the open recess is shallower than the ball radius
- *
- * These are also recorded in design/STYLE-GUIDE.md §4. Run `npm run
- * simcheck` and `npm run soak` after ANY change to the playfield SVG.
+ *  - lane dividers end 4 mm BELOW the orbit arc line
+ *  - target banks are fully housed: back wall ≤ 8 mm behind the targets so
+ *    the open recess is shallower than the ball radius
+ *  - gap rules apply PER LAYER (data-layer) — see STYLE-GUIDE §4
  */

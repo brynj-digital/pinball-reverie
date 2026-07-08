@@ -17,12 +17,15 @@
 export interface InputState {
   left: boolean;
   right: boolean;
+  /** Upper (third) flipper, on tables that have one (Midway's mallet). */
+  upper: boolean;
   plunger: boolean;
 }
 
 export type BindableAction =
   | "left"
   | "right"
+  | "upper"
   | "plunger"
   | "start"
   | "nudgeLeft"
@@ -35,6 +38,7 @@ export type Bindings = Record<BindableAction, string[]>;
 export const ACTION_LABELS: Record<BindableAction, string> = {
   left: "Left flipper",
   right: "Right flipper",
+  upper: "Upper flipper",
   plunger: "Plunger",
   start: "Start game",
   nudgeLeft: "Nudge left",
@@ -46,6 +50,9 @@ export const ACTION_LABELS: Record<BindableAction, string> = {
 export const DEFAULT_BINDINGS: Bindings = {
   left: ["ShiftLeft", "KeyZ"],
   right: ["ShiftRight", "Slash"],
+  // shares the right flipper's keys by default (traditional pinball wiring);
+  // rebind for an independent stroke
+  upper: ["ShiftRight", "Slash"],
   plunger: ["Space", "ArrowDown"],
   start: ["Enter"],
   nudgeLeft: ["ArrowLeft"],
@@ -76,11 +83,17 @@ export function prettyCode(code: string): string {
 }
 
 export class Input {
-  readonly state: InputState = { left: false, right: false, plunger: false };
+  readonly state: InputState = { left: false, right: false, upper: false, plunger: false };
   bindings: Bindings;
 
   private down = new Set<string>();
-  private pulse = { left: false, right: false };
+  // Touch backend: an on-screen control layer (TouchControls) writes here and
+  // sync() ORs it with the keyboard, so touch and keys are fully interchangeable
+  // (the plan §4.5 promise this class was scaffolded for).
+  private touch = { left: false, right: false, upper: false, plunger: false };
+  private pulse = { left: false, right: false, upper: false };
+  private capturingText = false;
+  private typed: string[] = [];
   private resetHandlers: (() => void)[] = [];
   private startHandlers: (() => void)[] = [];
   private nudgeHandlers: ((dir: "left" | "right" | "up") => void)[] = [];
@@ -92,6 +105,7 @@ export class Input {
     target.addEventListener("keyup", (e) => this.onKey(e, false));
     target.addEventListener("blur", () => {
       this.down.clear();
+      this.touch.left = this.touch.right = this.touch.upper = this.touch.plunger = false;
       this.sync();
     });
   }
@@ -113,8 +127,59 @@ export class Input {
     this.escapeHandlers.push(fn);
   }
 
+  /**
+   * While on, letter keys, Backspace, and the left/right arrows are queued as
+   * typed text (read via consumeTyped) instead of firing the actions they're
+   * bound to — Z and R would otherwise flip and reset mid-entry. Everything
+   * else keeps working.
+   */
+  setTextCapture(on: boolean): void {
+    this.capturingText = on;
+    this.typed = [];
+  }
+
+  /** Next typed character ("A"–"Z", "\b" for Backspace, "←"/"→" for the arrows). Clears on read. */
+  consumeTyped(): string | null {
+    return this.typed.shift() ?? null;
+  }
+
+  /**
+   * Touch backend — the on-screen control overlay drives the same state a key
+   * would. A flipper's rising edge latches `pulse` so a sub-frame tap still
+   * flips (and cycles a letter during initials entry), exactly like a keydown.
+   */
+  setTouchFlipper(side: "left" | "right" | "upper", on: boolean): void {
+    if (on && !this.touch[side]) this.pulse[side] = true;
+    this.touch[side] = on;
+    this.sync();
+  }
+
+  setTouchPlunger(on: boolean): void {
+    this.touch.plunger = on;
+    this.sync();
+  }
+
+  /** Fire the discrete actions through the same handlers a key would. */
+  fireStart(): void {
+    this.startHandlers.forEach((fn) => fn());
+  }
+
+  fireNudge(dir: "left" | "right" | "up"): void {
+    this.nudgeHandlers.forEach((fn) => fn(dir));
+  }
+
+  fireReset(): void {
+    this.resetHandlers.forEach((fn) => fn());
+  }
+
+  /** Drop every held touch (overlay hidden, settings opened, window blurred). */
+  releaseTouch(): void {
+    this.touch.left = this.touch.right = this.touch.upper = this.touch.plunger = false;
+    this.sync();
+  }
+
   /** True if the flipper was tapped since the last poll, even sub-frame. Clears on read. */
-  consumeTap(side: "left" | "right"): boolean {
+  consumeTap(side: "left" | "right" | "upper"): boolean {
     const was = this.pulse[side];
     this.pulse[side] = false;
     return was;
@@ -162,9 +227,30 @@ export class Input {
       this.down.delete("ShiftRight");
     }
 
+    if (isNew && this.capturingText) {
+      if (/^Key[A-Z]$/.test(e.code)) {
+        this.typed.push(e.code.slice(3));
+        this.sync();
+        return;
+      }
+      if (e.code === "Backspace") {
+        this.typed.push("\b");
+        this.sync();
+        return;
+      }
+      // slot navigation — captured so a nudge binding on the arrows (the
+      // default) can't fire while entering initials
+      if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+        this.typed.push(e.code === "ArrowLeft" ? "←" : "→");
+        this.sync();
+        return;
+      }
+    }
+
     if (isNew) {
       if (this.is("left", e.code)) this.pulse.left = true;
       if (this.is("right", e.code)) this.pulse.right = true;
+      if (this.is("upper", e.code)) this.pulse.upper = true;
       if (this.is("reset", e.code)) this.resetHandlers.forEach((fn) => fn());
       if (this.is("start", e.code)) this.startHandlers.forEach((fn) => fn());
       if (this.is("nudgeLeft", e.code)) this.nudgeHandlers.forEach((fn) => fn("left"));
@@ -179,9 +265,10 @@ export class Input {
   }
 
   private sync(): void {
-    this.state.left = this.bindings.left.some((c) => this.down.has(c));
-    this.state.right = this.bindings.right.some((c) => this.down.has(c));
-    this.state.plunger = this.bindings.plunger.some((c) => this.down.has(c));
+    this.state.left = this.touch.left || this.bindings.left.some((c) => this.down.has(c));
+    this.state.right = this.touch.right || this.bindings.right.some((c) => this.down.has(c));
+    this.state.upper = this.touch.upper || this.bindings.upper.some((c) => this.down.has(c));
+    this.state.plunger = this.touch.plunger || this.bindings.plunger.some((c) => this.down.has(c));
   }
 }
 

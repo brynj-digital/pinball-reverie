@@ -240,18 +240,18 @@
 
     <!-- moon-phase inserts in the top lanes (rollovers light these) -->
     <g id="art-inserts-moons" stroke="#07080d" stroke-width="1.5">
-      <circle cx="160" cy="95" r="11" fill="#2f2547"/>
-      <path d="M 160 84 a 11 11 0 0 0 0 22 a 8.5 11 0 0 1 0 -22 Z" fill="#8c6bff" opacity="0.35"/>
-      <circle cx="260" cy="95" r="11" fill="#2f2547"/>
-      <path d="M 260 84 a 11 11 0 0 0 0 22 Z" fill="#8c6bff" opacity="0.35"/>
-      <circle cx="360" cy="95" r="11" fill="#2f2547"/>
-      <circle cx="360" cy="95" r="8" fill="#8c6bff" opacity="0.35"/>
+      <circle cx="160" cy="88" r="11" fill="#2f2547"/>
+      <path d="M 160 77 a 11 11 0 0 0 0 22 a 8.5 11 0 0 1 0 -22 Z" fill="#8c6bff" opacity="0.35"/>
+      <circle cx="260" cy="88" r="11" fill="#2f2547"/>
+      <path d="M 260 77 a 11 11 0 0 0 0 22 Z" fill="#8c6bff" opacity="0.35"/>
+      <circle cx="360" cy="88" r="11" fill="#2f2547"/>
+      <circle cx="360" cy="88" r="8" fill="#8c6bff" opacity="0.35"/>
     </g>
     <!-- lane gleams -->
     <g fill="#d7dce8" opacity="0.04">
-      <rect x="142" y="80" width="36" height="66" rx="10"/>
-      <rect x="242" y="80" width="36" height="66" rx="10"/>
-      <rect x="342" y="80" width="36" height="66" rx="10"/>
+      <rect x="142" y="74" width="36" height="72" rx="10"/>
+      <rect x="242" y="74" width="36" height="72" rx="10"/>
+      <rect x="342" y="74" width="36" height="72" rx="10"/>
     </g>
 
     <!-- mini-comets streaking into the target bank: tapered two-tone tails
@@ -275,6 +275,33 @@
         <circle r="4" fill="#2fc9d6" stroke="#07080d" stroke-width="1"/>
         <circle cx="-1" cy="-1.2" r="1.4" fill="#d7dce8"/>
       </g>
+    </g>
+
+    <!-- telescope scoop: brass eyepiece set into the field under the orbit
+         tail; the kicker holds the ball here during the DMD observation.
+         Brass bezel per style guide §2 — the ball physically rests on it. -->
+    <g id="art-scoop">
+      <circle cx="487" cy="368" r="34" fill="#07080d"/>
+      <circle cx="487" cy="368" r="29" fill="#12141f"/>
+      <circle cx="487" cy="368" r="29" fill="none" stroke="#2c3352" stroke-width="3"/>
+      <circle cx="487" cy="368" r="32" fill="none" stroke="#9c7c2c" stroke-width="4"/>
+      <circle cx="487" cy="368" r="32" fill="none" stroke="#e0b64e" stroke-width="1.5" stroke-dasharray="5 6"/>
+      <!-- graticule ticks -->
+      <g stroke="#4a5680" stroke-width="1.5">
+        <line x1="487" y1="343" x2="487" y2="350"/>
+        <line x1="487" y1="386" x2="487" y2="393"/>
+        <line x1="462" y1="368" x2="469" y2="368"/>
+        <line x1="505" y1="368" x2="512" y2="368"/>
+      </g>
+      <!-- lens glint toward the key light (top-left, §7) -->
+      <path d="M 470 353 a 22 22 0 0 1 10 -6" stroke="#7f8fc9" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- approach chevrons on the shot line from the left flipper -->
+      <g stroke="#8c6bff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
+        <path d="M 424 502 L 437 490 L 442 507"/>
+        <path d="M 402 538 L 415 526 L 420 543"/>
+      </g>
+      <text x="452" y="446" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="11" letter-spacing="2" fill="#9c7c2c" transform="rotate(-60 452 446)">OBSERVE</text>
     </g>
 
     <!-- orbit lane arrows (shot direction: up the left lane) -->
@@ -391,6 +418,13 @@
       <path data-width="12" id="collision-wall-divider-right" d="M 305 74.3 L 305 150"/>
       <!-- drop-target bank housing -->
       <path data-width="12" id="collision-wall-bank-housing" d="M 520 490 L 503 498 L 503 622 L 520 630"/>
+      <!-- telescope scoop hood: hangs off the lane wall below the orbit tail.
+           The mouth opens down-left (68 mm to the lane wall, > 38 mm rule) so
+           gravity alone always rolls an uncaptured ball back out — only the
+           kicker sensor+hold logic ever keeps a ball here, never geometry.
+           Top face slopes down-left so a ball riding the lane wall down from
+           the orbit tail rolls off the hood instead of seating on it. -->
+      <path data-width="12" id="collision-wall-scoop" d="M 520 330 L 486 338 L 464 350 L 450 370 L 447 392"/>
       <!-- plunger saddle: the ball rests here, above the animated spring -->
       <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>
@@ -411,6 +445,7 @@
     <rect id="sensor-spinner" x="0" y="394" width="65" height="12"/>
     <rect id="sensor-ramp-entry" x="2.5" y="492" width="60" height="16"/>
     <rect id="sensor-ramp-exit" x="442" y="117" width="36" height="36"/>
+    <rect id="sensor-kicker-telescope" x="464" y="344" width="42" height="42"/>
   </g>
 
   <!-- ═══════════════ anchors (invisible placement points) ═══════════════ -->
@@ -421,5 +456,6 @@
     <circle id="anchor-bumper-1" cx="190" cy="330" r="5"/>
     <circle id="anchor-bumper-2" cx="330" cy="330" r="5"/>
     <circle id="anchor-bumper-3" cx="260" cy="425" r="5"/>
+    <circle id="anchor-kicker-telescope" cx="487" cy="368" r="5"/>
   </g>
 </svg>

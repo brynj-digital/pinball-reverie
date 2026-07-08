@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- TIDEBREAKER DMD scene: DIVE BELL — the captive-ball haul reveal. The
+       bell hangs in the murk, its lamp cone catches a salvage find rising
+       out of the dark, and the glint flares as it breaks into the light.
+       8 frames of 128x32 (style guide §6): #fff=3, #888=2, #666=1, black=0.
+       Art rows 0..22; caption (haul name + points) renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <!-- f0: bell dim, a speck of something far below -->
+  <g transform="translate(0,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#666" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#666" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#666" stroke-width="1.2"/>
+    <line x1="55" y1="13" x2="49" y2="22" stroke="#666" stroke-width="0.8"/>
+    <line x1="73" y1="13" x2="79" y2="22" stroke="#666" stroke-width="0.8"/>
+    <circle cx="64" cy="21" r="0.8" fill="#666"/>
+  </g>
+
+  <!-- f1: bell brightens, the find drifts up into the cone -->
+  <g transform="translate(128,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#666" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#888" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#888" stroke-width="1.2"/>
+    <line x1="55" y1="13" x2="48" y2="22" stroke="#666" stroke-width="0.9"/>
+    <line x1="73" y1="13" x2="80" y2="22" stroke="#666" stroke-width="0.9"/>
+    <circle cx="64" cy="20" r="1" fill="#666"/>
+  </g>
+
+  <!-- f2: a glint takes shape -->
+  <g transform="translate(256,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#888" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#888" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#888" stroke-width="1.2"/>
+    <line x1="55" y1="13" x2="48" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="73" y1="13" x2="80" y2="22" stroke="#666" stroke-width="1"/>
+    <polygon points="64,17 65,19 67,19.5 65,20 64,22 63,20 61,19.5 63,19" fill="#888"/>
+  </g>
+
+  <!-- f3: the find climbs, first rays -->
+  <g transform="translate(384,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#888" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#888" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#888" stroke-width="1.2"/>
+    <line x1="55" y1="13" x2="48" y2="22" stroke="#888" stroke-width="1"/>
+    <line x1="73" y1="13" x2="80" y2="22" stroke="#888" stroke-width="1"/>
+    <polygon points="64,14 65.2,17 68,18 65.2,19 64,22 62.8,19 60,18 62.8,17" fill="#888"/>
+    <line x1="56" y1="17" x2="58" y2="17" stroke="#666" stroke-width="0.8"/>
+    <line x1="70" y1="17" x2="72" y2="17" stroke="#666" stroke-width="0.8"/>
+  </g>
+
+  <!-- f4: breaks into the lamplight, bell rim flares -->
+  <g transform="translate(512,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#fff" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#fff" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#888" stroke-width="1.2"/>
+    <line x1="55" y1="13" x2="47" y2="22" stroke="#888" stroke-width="1"/>
+    <line x1="73" y1="13" x2="81" y2="22" stroke="#888" stroke-width="1"/>
+    <polygon points="64,12 65.6,16 70,17 65.6,18 64,22 62.4,18 58,17 62.4,16" fill="#fff"/>
+  </g>
+
+  <!-- f5: CLIMAX — the salvage flares as a four-point star -->
+  <g transform="translate(640,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#888" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#888" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#888" stroke-width="1.2"/>
+    <polygon points="64,7 66,13 72,14 66,15 64,22 62,15 56,14 62,13" fill="#fff"/>
+    <circle cx="54" cy="9" r="1" fill="#888"/><circle cx="75" cy="11" r="1" fill="#888"/>
+    <circle cx="72" cy="20" r="1" fill="#888"/>
+  </g>
+
+  <!-- f6: settling, hauled home -->
+  <g transform="translate(768,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#666" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#666" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#888" stroke-width="1.2"/>
+    <polygon points="64,10 65.6,14 70,15 65.6,16 64,20 62.4,16 58,15 62.4,14" fill="#888"/>
+    <circle cx="56" cy="11" r="0.9" fill="#666"/><circle cx="73" cy="13" r="0.9" fill="#666"/>
+  </g>
+
+  <!-- f7: rest -->
+  <g transform="translate(896,0)">
+    <circle cx="18" cy="6" r="0.9" fill="#666"/><circle cx="110" cy="9" r="0.9" fill="#666"/>
+    <circle cx="34" cy="20" r="0.9" fill="#666"/><circle cx="96" cy="18" r="0.9" fill="#666"/>
+    <line x1="64" y1="0" x2="64" y2="3" stroke="#666" stroke-width="1"/>
+    <path d="M52 13 Q52 4 64 4 Q76 4 76 13" fill="none" stroke="#666" stroke-width="1.4"/>
+    <line x1="51" y1="13" x2="77" y2="13" stroke="#666" stroke-width="1.2"/>
+    <polygon points="64,12 65.2,15 68,16 65.2,17 64,20 62.8,17 60,16 62.8,15" fill="#888"/>
+  </g>
+</svg>

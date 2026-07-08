@@ -18,6 +18,18 @@
     "windowS": 10,
     "maxStep": 3
   },
+  "telescope": {
+    "comment": "Kickout scoop: each capture awards the next sighting in order (wrapping); the last sighting also spots one orbit toward the eclipse.",
+    "holdS": 2.0,
+    "bonusUnit": 500,
+    "lastSpotsOrbit": true,
+    "sightings": [
+      { "name": "COMET", "points": 5000 },
+      { "name": "METEOR SHOWER", "points": 10000 },
+      { "name": "NEBULA", "points": 15000 },
+      { "name": "SUPERNOVA", "points": 25000 }
+    ]
+  },
   "eclipse": {
     "banksRequired": 2,
     "orbitsRequired": 3,

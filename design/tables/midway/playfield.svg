@@ -1,0 +1,779 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 575 1050" width="575" height="1050">
+  <!--
+    MIDNIGHT MIDWAY — table 3 of Pinball Reverie. A travelling funfair after
+    dark: gates at the bottom, rides stacked up the field, the ferris wheel
+    and the same moon over the skyline. Master units: 1 SVG unit = 1 mm
+    (style guide §3). Design truth: design/tables/midway/BRIEF.md; layout
+    clearance-solved against the STYLE-GUIDE §4 ball-gap rules (per layer).
+
+    Single source of truth for table shape (§5e): collision-/sensor-/anchor-/
+    height-profile- prefixed elements are parsed by src/table/SvgCollision.ts.
+    Layers: data-layer="1" walls are the COASTER circuit and the HIGH STRIKER
+    wire lane (elevated chrome wireforms); data-layer="-1" profiles are the
+    GHOST TRAIN and CHICKEN EXIT subways. The upper-right third flipper (THE
+    MALLET, anchor-flipper-upper) sits on the main layer and owns the
+    striker. Art may use any SVG features; collision paths are polylines.
+  -->
+  <defs>
+    <linearGradient id="mwSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c0f26"/>
+      <stop offset="0.45" stop-color="#2b1638"/>
+      <stop offset="1" stop-color="#3d1f4d"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.8">
+      <stop offset="0.6" stop-color="#07080d" stop-opacity="0"/>
+      <stop offset="1" stop-color="#07080d" stop-opacity="0.34"/>
+    </radialGradient>
+    <linearGradient id="chromeText" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <radialGradient id="bulbGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffdf9e" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffdf9e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="magentaGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff3e9a" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ff3e9a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ghostGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2fc9d6" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#2fc9d6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowSoft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ═══════════════ art: the park at night ═══════════════ -->
+  <g id="art-field">
+    <rect x="0" y="0" width="575" height="1050" fill="url(#mwSky)"/>
+
+    <!-- searchlight beams raking the sky from the park floor -->
+    <g>
+      <polygon points="110,660 30,20 90,16 150,655" fill="#8c6bff" opacity="0.1"/>
+      <polygon points="300,700 200,10 260,8 340,695" fill="#2fc9d6" opacity="0.08"/>
+      <polygon points="430,640 470,30 530,42 470,645" fill="#ff3e9a" opacity="0.09"/>
+    </g>
+
+    <!-- the same moon the other tables watch, over the skyline -->
+    <g opacity="0.85">
+      <circle cx="212" cy="42" r="14" fill="#aeb6c8" stroke="#07080d" stroke-width="1.5"/>
+      <path d="M 212 28 a 14 14 0 0 0 0 28 a 10 14 0 0 1 0 -28 Z" fill="#d7dce8" opacity="0.8"/>
+    </g>
+    <!-- stars + firework bursts hanging in the corners of the sky -->
+    <g fill="#7f8fc9">
+      <circle cx="90" cy="60" r="1.1" opacity="0.4"/><circle cx="150" cy="35" r="1" opacity="0.35"/>
+      <circle cx="270" cy="28" r="1.2" opacity="0.4"/><circle cx="330" cy="52" r="1" opacity="0.35"/>
+      <circle cx="410" cy="44" r="1.1" opacity="0.4"/><circle cx="470" cy="72" r="1" opacity="0.3"/>
+      <circle cx="60" cy="120" r="1" opacity="0.3"/><circle cx="520" cy="110" r="1" opacity="0.3"/>
+      <circle cx="245" cy="18" r="1" opacity="0.35"/><circle cx="370" cy="30" r="1.1" opacity="0.35"/>
+    </g>
+    <g stroke-linecap="round" opacity="0.8">
+      <g stroke="#ff3e9a" stroke-width="1.6">
+        <line x1="118" y1="86" x2="118" y2="72"/><line x1="118" y1="86" x2="129" y2="78"/>
+        <line x1="118" y1="86" x2="130" y2="90"/><line x1="118" y1="86" x2="107" y2="78"/>
+        <line x1="118" y1="86" x2="106" y2="90"/><line x1="118" y1="86" x2="118" y2="99"/>
+      </g>
+      <g stroke="#2fc9d6" stroke-width="1.4">
+        <line x1="322" y1="34" x2="322" y2="23"/><line x1="322" y1="34" x2="331" y2="27"/>
+        <line x1="322" y1="34" x2="331" y2="41"/><line x1="322" y1="34" x2="313" y2="27"/>
+        <line x1="322" y1="34" x2="313" y2="41"/>
+      </g>
+      <g stroke="#f4d27a" stroke-width="1.4">
+        <line x1="448" y1="88" x2="448" y2="77"/><line x1="448" y1="88" x2="457" y2="81"/>
+        <line x1="448" y1="88" x2="457" y2="95"/><line x1="448" y1="88" x2="439" y2="81"/>
+        <line x1="448" y1="88" x2="439" y2="95"/>
+      </g>
+    </g>
+
+    <!-- big-top valance: a striped scalloped border riding the arch crest -->
+    <g stroke="#07080d" stroke-width="0.8">
+      <path d="M 165 74 L 152 81 A 122 122 0 0 1 168 60 Z" fill="#b01860"/>
+      <path d="M 168 60 L 165 74 L 185 62 A 122 122 0 0 1 190 48 Z" fill="#3d1f4d"/>
+      <path d="M 190 48 L 185 62 L 209 52 A 122 122 0 0 1 216 42 Z" fill="#b01860"/>
+      <path d="M 216 42 L 209 52 L 235 45 A 122 122 0 0 1 243 38 Z" fill="#3d1f4d"/>
+      <path d="M 243 38 L 235 45 L 262 42 A 122 122 0 0 1 270 38 Z" fill="#b01860"/>
+      <path d="M 270 38 L 262 42 L 289 44 A 122 116 0 0 1 296 41 Z" fill="#3d1f4d"/>
+      <path d="M 296 41 L 289 44 L 315 50 A 122 122 0 0 1 322 47 Z" fill="#b01860"/>
+      <path d="M 322 47 L 315 50 L 340 60 A 122 122 0 0 1 347 58 Z" fill="#3d1f4d"/>
+      <path d="M 347 58 L 340 60 L 362 74 A 122 122 0 0 1 369 72 Z" fill="#b01860"/>
+    </g>
+    <path d="M 152 81 A 122 122 0 0 1 369 72" fill="none" stroke="#e0b64e" stroke-width="1.6"/>
+
+    <!-- bulb string under the valance -->
+    <g fill="#ffdf9e" opacity="0.85">
+      <circle cx="165" cy="76" r="1.7"/><circle cx="185" cy="64" r="1.7"/>
+      <circle cx="209" cy="54" r="1.7"/><circle cx="235" cy="47" r="1.7"/>
+      <circle cx="262" cy="44" r="1.7"/><circle cx="289" cy="46" r="1.7"/>
+      <circle cx="315" cy="52" r="1.7"/><circle cx="340" cy="62" r="1.7"/>
+    </g>
+
+    <!-- sodium wash pooling up from the midway (warm, banded) -->
+    <g fill="#ffdf9e">
+      <rect x="0" y="620" width="575" height="430" opacity="0.07"/>
+      <rect x="0" y="800" width="575" height="250" opacity="0.08"/>
+      <rect x="0" y="930" width="575" height="120" opacity="0.1"/>
+    </g>
+
+    <!-- the trodden midway: a checkered path up the middle of the park -->
+    <g opacity="0.5">
+      <polygon points="236,912 260,912 258,880 238,880" fill="#3d1f4d"/>
+      <polygon points="260,912 284,912 282,880 262,880" fill="#1c0f26"/>
+      <polygon points="238,880 258,880 257,852 241,852" fill="#1c0f26"/>
+      <polygon points="262,880 282,880 279,852 259,852" fill="#3d1f4d"/>
+      <line x1="236" y1="912" x2="241" y2="852" stroke="#9c7c2c" stroke-width="1"/>
+      <line x1="284" y1="912" x2="279" y2="852" stroke="#9c7c2c" stroke-width="1"/>
+    </g>
+
+    <!-- confetti litter, everywhere — it's been a good night -->
+    <g opacity="0.6">
+      <circle cx="120" cy="860" r="1.4" fill="#ff3e9a"/><circle cx="205" cy="895" r="1.2" fill="#2fc9d6"/>
+      <circle cx="300" cy="870" r="1.3" fill="#8c6bff"/><circle cx="395" cy="905" r="1.2" fill="#ff3e9a"/>
+      <circle cx="160" cy="700" r="1.2" fill="#2fc9d6"/><circle cx="255" cy="660" r="1.3" fill="#ff3e9a"/>
+      <circle cx="330" cy="700" r="1.2" fill="#8c6bff"/><circle cx="440" cy="760" r="1.2" fill="#2fc9d6"/>
+      <circle cx="95" cy="770" r="1.3" fill="#f4d27a"/><circle cx="230" cy="820" r="1.2" fill="#ff5555"/>
+      <circle cx="355" cy="835" r="1.3" fill="#f4d27a"/><circle cx="425" cy="870" r="1.2" fill="#8c6bff"/>
+      <circle cx="140" cy="925" r="1.3" fill="#2fc9d6"/><circle cx="370" cy="925" r="1.2" fill="#ff3e9a"/>
+      <circle cx="200" cy="620" r="1.2" fill="#f4d27a"/><circle cx="390" cy="680" r="1.3" fill="#ff5555"/>
+      <circle cx="85" cy="640" r="1.2" fill="#ff3e9a"/><circle cx="460" cy="720" r="1.2" fill="#f4d27a"/>
+    </g>
+
+    <!-- P·A·R·K lane inserts (rollovers light these) — every letter its own
+         neon; the row sits BELOW the sensor line, in the open slot space
+         (at the arch line the wall tube and bell rig bury it). Rings run
+         full-strength: the striker wireform crosses this row and a timid
+         ring vanished under the chrome -->
+    <g stroke="#07080d" stroke-width="1.5">
+      <circle cx="162" cy="132" r="11" fill="#2b1638" stroke-width="1.5"/>
+      <circle cx="225" cy="132" r="11" fill="#2b1638"/>
+      <circle cx="295" cy="132" r="11" fill="#2b1638"/>
+      <circle cx="358" cy="132" r="11" fill="#2b1638"/>
+    </g>
+    <g fill="none" stroke-width="2" opacity="0.95">
+      <circle cx="162" cy="132" r="11" stroke="#ff3e9a"/>
+      <circle cx="225" cy="132" r="11" stroke="#2fc9d6"/>
+      <circle cx="295" cy="132" r="11" stroke="#e0b64e"/>
+      <circle cx="358" cy="132" r="11" stroke="#8c6bff"/>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="12" font-weight="700" text-anchor="middle">
+      <text x="162" y="136.5" fill="#ff3e9a">P</text><text x="225" y="136.5" fill="#2fc9d6">A</text>
+      <text x="295" y="136.5" fill="#e0b64e">R</text><text x="358" y="136.5" fill="#8c6bff">K</text>
+    </g>
+    <!-- entry chevrons at the two open lane mouths (the orbit crest
+         window spans P and A only; R and K fill by lane change) -->
+    <g stroke="#e0b64e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+      <path d="M 156 88 L 162 96 L 168 88"/>
+      <path d="M 219 88 L 225 96 L 231 88"/>
+    </g>
+
+    <!-- glow pools under the bright spots -->
+    <ellipse cx="260" cy="868" rx="90" ry="34" fill="url(#bulbGlow)"/>
+    <ellipse cx="240" cy="540" rx="46" ry="30" fill="url(#ghostGlow)"/>
+    <ellipse cx="350" cy="430" rx="42" ry="28" fill="url(#bulbGlow)"/>
+  </g>
+
+  <!-- ═══════════════ art: rides + features ═══════════════ -->
+  <g id="art-motifs">
+    <!-- bumper cars: dodgem arena floor + a different neon ring per pop -->
+    <g>
+      <ellipse cx="282" cy="272" rx="118" ry="92" fill="#1c0f26" opacity="0.55"/>
+      <ellipse cx="282" cy="272" rx="118" ry="92" fill="none" stroke="#8a4d9e" stroke-width="3"/>
+      <ellipse cx="282" cy="272" rx="112" ry="86" fill="none" stroke="#2fc9d6" stroke-width="1" opacity="0.4"/>
+      <g fill="none" stroke-width="1.5" opacity="0.55">
+        <circle cx="240" cy="225" r="38" stroke="#ff3e9a" stroke-dasharray="4 6"/>
+        <circle cx="335" cy="255" r="38" stroke="#2fc9d6" stroke-dasharray="4 6"/>
+        <circle cx="272" cy="335" r="38" stroke="#f4d27a" stroke-dasharray="4 6"/>
+      </g>
+      <!-- sparks off the contact poles -->
+      <g stroke="#fff4d6" stroke-width="1.2" opacity="0.8">
+        <line x1="252" y1="196" x2="256" y2="189"/><line x1="258" y1="198" x2="264" y2="193"/>
+        <line x1="345" y1="224" x2="350" y2="217"/><line x1="282" y1="304" x2="287" y2="297"/>
+      </g>
+      <text x="282" y="188" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="3" fill="#2fc9d6" opacity="0.9">DODGEMS</text>
+    </g>
+
+    <!-- pennant bunting sagging across the arena, wall to mallet guide -->
+    <g stroke="#07080d" stroke-width="0.8">
+      <path d="M 96 168 Q 260 200 434 176" fill="none" stroke="#aeb6c8" stroke-width="1.4"/>
+      <polygon points="120,173 128,174 124,187" fill="#ff3e9a"/>
+      <polygon points="152,178 160,179 156,192" fill="#2fc9d6"/>
+      <polygon points="184,182 192,183 188,196" fill="#f4d27a"/>
+      <polygon points="216,185 224,186 220,199" fill="#8c6bff"/>
+      <polygon points="248,187 256,187 252,200" fill="#ff3e9a"/>
+      <polygon points="280,187 288,187 284,200" fill="#2fc9d6"/>
+      <polygon points="312,186 320,185 316,199" fill="#f4d27a"/>
+      <polygon points="344,184 352,183 348,196" fill="#8c6bff"/>
+      <polygon points="376,180 384,179 380,192" fill="#ff3e9a"/>
+      <polygon points="408,176 416,175 412,188" fill="#2fc9d6"/>
+    </g>
+
+    <!-- balloons drifting off a seller's cart by the left wall -->
+    <g>
+      <g stroke="#aeb6c8" stroke-width="0.8" fill="none" opacity="0.7">
+        <path d="M 100 462 q 4 22 -2 40"/>
+        <path d="M 114 452 q 2 26 -8 50"/>
+        <path d="M 88 470 q 6 18 4 32"/>
+      </g>
+      <circle cx="100" cy="452" r="9" fill="#ff3e9a" stroke="#07080d" stroke-width="1.2"/>
+      <circle cx="114" cy="442" r="9" fill="#2fc9d6" stroke="#07080d" stroke-width="1.2"/>
+      <circle cx="88" cy="460" r="9" fill="#f4d27a" stroke="#07080d" stroke-width="1.2"/>
+      <path d="M 97 447 a 5 5 0 0 1 4 -3" stroke="#fff4d6" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <path d="M 111 437 a 5 5 0 0 1 4 -3" stroke="#fff4d6" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- helter-skelter tower on the orbit's exit shoulder -->
+    <g stroke="#07080d" stroke-width="1.2">
+      <polygon points="62,548 98,548 92,640 68,640" fill="#b01860"/>
+      <g fill="#fff4d6">
+        <polygon points="64,562 96,562 95,576 65,576"/>
+        <polygon points="66,590 94,590 93,604 67,604"/>
+        <polygon points="68,618 92,618 91,632 69,632"/>
+      </g>
+      <path d="M 62 548 Q 80 534 98 548 L 94 552 Q 80 542 66 552 Z" fill="#ff5555"/>
+      <polygon points="80,522 80,536 92,532" fill="#f4d27a"/>
+      <line x1="80" y1="522" x2="80" y2="540" stroke="#aeb6c8" stroke-width="1.5"/>
+      <path d="M 96 556 Q 104 580 94 606 Q 90 622 92 638" fill="none" stroke="#2fc9d6" stroke-width="2.5" opacity="0.8"/>
+    </g>
+
+    <!-- the ferris wheel: rim, spokes, hub, five gondola inserts (lamps) -->
+    <g id="art-wheel">
+      <circle cx="315" cy="570" r="60" fill="url(#magentaGlow)"/>
+      <circle cx="315" cy="570" r="46" fill="none" stroke="#07080d" stroke-width="5"/>
+      <circle cx="315" cy="570" r="46" fill="none" stroke="#45215a" stroke-width="2.5"/>
+      <g stroke="#45215a" stroke-width="2">
+        <line x1="315" y1="570" x2="315" y2="524"/>
+        <line x1="315" y1="570" x2="358.7" y2="555.8"/>
+        <line x1="315" y1="570" x2="342" y2="607.2"/>
+        <line x1="315" y1="570" x2="288" y2="607.2"/>
+        <line x1="315" y1="570" x2="271.3" y2="555.8"/>
+      </g>
+      <!-- support A-frame down to the ground line -->
+      <path d="M 315 570 L 296 640 M 315 570 L 334 640" stroke="#45215a" stroke-width="3" fill="none"/>
+      <circle cx="315" cy="570" r="5" fill="#e0b64e" stroke="#07080d" stroke-width="1.5"/>
+      <!-- gondola cars swinging outside the ring, each its own paint job -->
+      <g stroke="#07080d" stroke-width="1">
+        <rect x="309" y="518" width="12" height="8" rx="2.5" fill="#ff3e9a"/>
+        <rect x="352" y="551" width="12" height="8" rx="2.5" fill="#2fc9d6"/>
+        <rect x="336" y="604" width="12" height="8" rx="2.5" fill="#f4d27a"/>
+        <rect x="282" y="604" width="12" height="8" rx="2.5" fill="#8c6bff"/>
+        <rect x="266" y="551" width="12" height="8" rx="2.5" fill="#ff5555"/>
+      </g>
+      <!-- gondola inserts: the bonus-X ring (lamps g1..g5 light these) -->
+      <g stroke="#07080d" stroke-width="1.5" fill="#2b1638">
+        <circle cx="315" cy="536" r="9"/><circle cx="347.3" cy="559.5" r="9"/>
+        <circle cx="335" cy="597.5" r="9"/><circle cx="295" cy="597.5" r="9"/>
+        <circle cx="282.7" cy="559.5" r="9"/>
+      </g>
+      <g fill="none" stroke="#ff3e9a" stroke-width="1.2" opacity="0.5">
+        <circle cx="315" cy="536" r="9"/><circle cx="347.3" cy="559.5" r="9"/>
+        <circle cx="335" cy="597.5" r="9"/><circle cx="295" cy="597.5" r="9"/>
+        <circle cx="282.7" cy="559.5" r="9"/>
+      </g>
+      <!-- rim bulbs -->
+      <g fill="#ffdf9e" opacity="0.85">
+        <circle cx="315" cy="524" r="1.6"/><circle cx="342" cy="533" r="1.6"/>
+        <circle cx="358.7" cy="555.8" r="1.6"/><circle cx="359" cy="584" r="1.6"/>
+        <circle cx="342" cy="607.2" r="1.6"/><circle cx="315" cy="616" r="1.6"/>
+        <circle cx="288" cy="607.2" r="1.6"/><circle cx="271" cy="584" r="1.6"/>
+        <circle cx="271.3" cy="555.8" r="1.6"/><circle cx="288" cy="533" r="1.6"/>
+      </g>
+      <text x="315" y="648" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="8" letter-spacing="2" fill="#ff3e9a" opacity="0.9">WHEEL</text>
+    </g>
+
+    <!-- ghost train: haunted facade with a toothed arch + lanterns -->
+    <g id="art-ghost">
+      <!-- marquee board over the mouth (clear of the pocket wall tube) -->
+      <rect x="212" y="452" width="56" height="14" rx="3" fill="#4e37a8" stroke="#07080d" stroke-width="1.2"/>
+      <text x="240" y="462" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="7" letter-spacing="1" fill="#fff4d6">GHOST TRAIN</text>
+      <g fill="#ffdf9e" opacity="0.85">
+        <circle cx="216" cy="456" r="1.3"/><circle cx="264" cy="456" r="1.3"/>
+        <circle cx="216" cy="462" r="1.3"/><circle cx="264" cy="462" r="1.3"/>
+      </g>
+      <rect x="216" y="482" width="48" height="58" rx="8" fill="#07080d"/>
+      <rect x="220" y="486" width="40" height="50" rx="6" fill="#1c0f26"/>
+      <!-- arch teeth -->
+      <g fill="#8c6bff" opacity="0.8">
+        <polygon points="222,487 228,487 225,495"/>
+        <polygon points="232,486 238,486 235,494"/>
+        <polygon points="242,486 248,486 245,494"/>
+        <polygon points="252,487 258,487 255,495"/>
+      </g>
+      <!-- lanterns flanking the mouth -->
+      <circle cx="212" cy="540" r="3.5" fill="#2fc9d6" opacity="0.9"/>
+      <circle cx="268" cy="540" r="3.5" fill="#2fc9d6" opacity="0.9"/>
+      <!-- ghost peeking from the arch -->
+      <g transform="translate(240 512)">
+        <circle r="18" fill="url(#ghostGlow)"/>
+        <path d="M -8 6 Q -8 -8 0 -8 Q 8 -8 8 6 L 5 3 L 2 6 L 0 3 L -2 6 L -5 3 Z"
+              fill="#2fc9d6" opacity="0.7" stroke="#07080d" stroke-width="1"/>
+        <circle cx="-3" cy="-3" r="1.4" fill="#07080d"/><circle cx="3" cy="-3" r="1.4" fill="#07080d"/>
+      </g>
+      <path d="M 200 470 q 6 -4 12 0 q 6 4 12 0" fill="none" stroke="#8c6bff" stroke-width="1.2" opacity="0.6" transform="translate(-22 44)"/>
+      <text x="196" y="560" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="2" fill="#8c6bff" transform="rotate(-90 196 560)">DARK RIDE</text>
+      <!-- approach chevrons from the right flipper -->
+      <g stroke="#ff3e9a" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
+        <path d="M 244 620.5 L 251 611.5 L 258 620.5" transform="rotate(14 251 616)"/>
+        <path d="M 254 656.5 L 261 647.5 L 268 656.5" transform="rotate(14 261 652)"/>
+      </g>
+      <!-- the tunnel, glimpsed: dashed run + two grates -->
+      <path d="M 240 500 L 262 540 L 290 572 L 318 596 L 340 612 L 330 634"
+            fill="none" stroke="#2fc9d6" stroke-width="4" stroke-dasharray="3 9" opacity="0.28"/>
+      <g stroke="#45215a" stroke-width="2">
+        <circle cx="290" cy="572" r="7" fill="#1c0f26"/>
+        <circle cx="370" cy="612" r="7" fill="#1c0f26"/>
+        <line x1="285" y1="569" x2="295" y2="575"/><line x1="365" y1="609" x2="375" y2="615"/>
+      </g>
+    </g>
+
+    <!-- prize booth: striped canopy over the kickout scoop, prizes on show -->
+    <g id="art-booth">
+      <circle cx="350" cy="448" r="26" fill="#07080d" opacity="0.35"/>
+      <g stroke="#07080d" stroke-width="1.5">
+        <path d="M 322 436 L 322 414 Q 350 398 378 414 L 378 436" fill="#ff3e9a"/>
+        <path d="M 330 409 L 330 432 M 340 405 L 340 430 M 350 404 L 350 429 M 360 405 L 360 430 M 370 409 L 370 432"
+              stroke="#1c0f26" stroke-width="4" fill="none"/>
+      </g>
+      <path d="M 322 414 Q 350 398 378 414" fill="none" stroke="#e0b64e" stroke-width="2"/>
+      <!-- scalloped gold fringe -->
+      <g fill="#f4d27a" stroke="#07080d" stroke-width="0.8">
+        <path d="M 324 434 q 4 5 8 0 q 4 5 8 0 q 4 5 8 0 q 4 5 8 0 q 4 5 8 0 q 4 5 8 0 q 4 5 4 0 L 376 430 L 324 430 Z"/>
+      </g>
+      <!-- the goods: teddy + goldfish bowl on the counter line -->
+      <g stroke="#07080d" stroke-width="0.8">
+        <circle cx="334" cy="424" r="3.2" fill="#9c7c2c"/>
+        <circle cx="331" cy="420.5" r="1.4" fill="#9c7c2c"/><circle cx="337" cy="420.5" r="1.4" fill="#9c7c2c"/>
+        <circle cx="364" cy="424" r="3.6" fill="#2fc9d6" opacity="0.8"/>
+        <path d="M 362 424 q 2 -2 4 0" stroke="#ff5555" stroke-width="1.2" fill="none"/>
+      </g>
+      <text x="392" y="480" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="2" fill="#f4d27a" transform="rotate(-72 392 480)">PRIZES</text>
+      <!-- approach chevrons from the right flipper -->
+      <g stroke="#e0b64e" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+        <path d="M 342 700.5 L 349 691.5 L 356 700.5"/>
+        <path d="M 342 664.5 L 349 655.5 L 356 664.5"/>
+      </g>
+    </g>
+
+    <!-- drop tower: recessed bank in the lane wall (targets render live),
+         candy-striped housing with a beacon on top -->
+    <g id="art-tower">
+      <path d="M 520 460 L 503 468 L 503 592 L 520 600" fill="none" stroke="#3d1f4d" stroke-width="18"/>
+      <g stroke="#ff5555" stroke-width="4" opacity="0.75">
+        <line x1="504" y1="478" x2="513" y2="474"/>
+        <line x1="504" y1="506" x2="514" y2="502"/>
+        <line x1="504" y1="534" x2="514" y2="530"/>
+        <line x1="504" y1="562" x2="514" y2="558"/>
+        <line x1="504" y1="588" x2="513" y2="585"/>
+      </g>
+      <g stroke="#fff4d6" stroke-width="4" opacity="0.6">
+        <line x1="504" y1="492" x2="514" y2="488"/>
+        <line x1="504" y1="520" x2="514" y2="516"/>
+        <line x1="504" y1="548" x2="514" y2="544"/>
+        <line x1="504" y1="575" x2="514" y2="571"/>
+      </g>
+      <circle cx="511" cy="456" r="3" fill="#ff5555" opacity="0.9"/>
+      <g fill="#ffdf9e" opacity="0.8">
+        <circle cx="516" cy="474" r="1.6"/><circle cx="516" cy="530" r="1.6"/><circle cx="516" cy="586" r="1.6"/>
+      </g>
+      <text x="510" y="530" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="3" fill="#fff4d6" transform="rotate(-90 510 530)" opacity="0.9">DROP TOWER</text>
+      <!-- approach chevrons from the left flipper -->
+      <g stroke="#ff3e9a" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+        <path d="M 400 640.5 L 407 631.5 L 414 640.5" transform="rotate(38 407 636)"/>
+        <path d="M 428 600.5 L 435 591.5 L 442 600.5" transform="rotate(38 435 596)"/>
+      </g>
+    </g>
+
+    <!-- the mallet: strike pad art under the upper flipper + callout -->
+    <g id="art-mallet">
+      <circle cx="490" cy="300" r="16" fill="#2b1638" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="490" cy="300" r="16" fill="none" stroke="#9c7c2c" stroke-width="2"/>
+      <text x="470" y="352" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="8" letter-spacing="2" fill="#9c7c2c" transform="rotate(-24 470 352)">THE MALLET</text>
+    </g>
+
+    <!-- high striker: graded ticks along the wire run + a sunburst bell -->
+    <g id="art-striker">
+      <g font-family="ui-monospace, monospace" font-size="7" opacity="0.95">
+        <text x="384" y="248" fill="#7f8fc9">WEAK</text>
+        <text x="300" y="212" fill="#2fc9d6">FAIR</text>
+        <text x="216" y="178" fill="#ff3e9a">STRONG</text>
+      </g>
+      <!-- gold sunburst behind the bell (kept tight — lane P lives beside it) -->
+      <g stroke="#e0b64e" stroke-width="1.3" opacity="0.7" stroke-linecap="round">
+        <line x1="140" y1="92" x2="140" y2="79"/><line x1="140" y1="92" x2="150" y2="83"/>
+        <line x1="140" y1="92" x2="129" y2="83"/><line x1="140" y1="92" x2="149" y2="101"/>
+        <line x1="140" y1="92" x2="131" y2="101"/>
+      </g>
+      <circle cx="140" cy="92" r="12" fill="url(#bulbGlow)"/>
+      <path d="M 132 96 A 9 9 0 0 1 148 96 L 149 99 L 131 99 Z" fill="#e0b64e" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="140" cy="101" r="1.8" fill="#f4d27a"/>
+      <text x="116" y="72" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="8" letter-spacing="1" fill="#f4d27a">DING!</text>
+    </g>
+
+    <!-- outlanes: hand stamp (kickback) and the chicken exit. Each save
+         carries a lit-when-armed insert lamp (TableGeometry.lamps drive the
+         glow) so the player can read the outlane BEFORE the ball drops -->
+    <g id="art-outlanes">
+      <rect x="12" y="948" width="28" height="20" rx="4" fill="#3d1f4d" stroke="#07080d" stroke-width="1.5"/>
+      <path d="M 26 944 L 20 934 L 32 934 Z" fill="#ff3e9a" opacity="0.8"/>
+      <circle cx="26" cy="868" r="7" fill="#2b1638" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="26" cy="868" r="7" fill="none" stroke="#ff3e9a" stroke-width="1.8" opacity="0.9"/>
+      <text x="30" y="905" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="1" fill="#b01860" transform="rotate(-90 30 905)">STAMP</text>
+      <circle cx="494" cy="893" r="7" fill="#2b1638" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="494" cy="893" r="7" fill="none" stroke="#2fc9d6" stroke-width="1.8" opacity="0.9"/>
+      <text x="492" y="845" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="8" letter-spacing="1" fill="#b01860" transform="rotate(-90 492 845)">CHICKEN EXIT</text>
+      <!-- the chicken exit tunnel, glimpsed under the apron -->
+      <path d="M 496 915 L 500 950 L 505 985 L 512 1008 L 525 1020 L 540 1015 L 547 1000 L 547.5 975"
+            fill="none" stroke="#2fc9d6" stroke-width="4" stroke-dasharray="3 9" opacity="0.22"/>
+    </g>
+
+    <!-- park gates + ticket booth behind the flipper area -->
+    <g id="art-gates" opacity="0.95">
+      <path d="M 150 902 L 150 862 L 370 862 L 370 902" fill="none" stroke="#45215a" stroke-width="5"/>
+      <path d="M 150 866 Q 260 838 370 866" fill="none" stroke="#b01860" stroke-width="5"/>
+      <path d="M 150 866 Q 260 838 370 866" fill="none" stroke="#e0b64e" stroke-width="1.5"/>
+      <!-- pennants off the gate posts -->
+      <g stroke="#07080d" stroke-width="0.7">
+        <polygon points="150,862 150,870 138,866" fill="#2fc9d6"/>
+        <polygon points="370,862 370,870 382,866" fill="#ff3e9a"/>
+      </g>
+      <g fill="#ffdf9e" opacity="0.9">
+        <circle cx="175" cy="859" r="1.6"/><circle cx="203" cy="852" r="1.6"/><circle cx="232" cy="847" r="1.6"/>
+        <circle cx="260" cy="845" r="1.6"/><circle cx="288" cy="847" r="1.6"/><circle cx="317" cy="852" r="1.6"/>
+        <circle cx="345" cy="859" r="1.6"/>
+      </g>
+      <text x="260" y="880" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="10" letter-spacing="4" fill="#f4d27a" opacity="0.9">TICKETS</text>
+    </g>
+
+    <!-- wordmark: two-line chrome marquee -->
+    <g id="art-wordmark">
+      <path d="M 96 736 L 99 745 L 108 748 L 99 751 L 96 760 L 93 751 L 84 748 L 93 745 Z" fill="#ff3e9a" opacity="0.8"/>
+      <path d="M 424 736 L 427 745 L 436 748 L 427 751 L 424 760 L 421 751 L 412 748 L 421 745 Z" fill="#ff3e9a" opacity="0.8"/>
+      <text x="260" y="750" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="26" font-weight="800" letter-spacing="4"
+            fill="#4e37a8" opacity="0.5" filter="url(#glowSoft)">MIDNIGHT</text>
+      <text x="260" y="747" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="26" font-weight="800" letter-spacing="4"
+            fill="url(#chromeText)" stroke="#07080d" stroke-width="2" paint-order="stroke">MIDNIGHT</text>
+      <text x="260" y="747" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="26" font-weight="800" letter-spacing="4"
+            fill="none" stroke="#ff3e9a" stroke-width="0.8" opacity="0.9">MIDNIGHT</text>
+      <text x="260" y="786" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="30" font-weight="800" letter-spacing="6"
+            fill="#4e37a8" opacity="0.5" filter="url(#glowSoft)">MIDWAY</text>
+      <text x="260" y="783" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="30" font-weight="800" letter-spacing="6"
+            fill="url(#chromeText)" stroke="#07080d" stroke-width="2" paint-order="stroke">MIDWAY</text>
+      <text x="260" y="783" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="30" font-weight="800" letter-spacing="6"
+            fill="none" stroke="#ff3e9a" stroke-width="0.8" opacity="0.9">MIDWAY</text>
+      <text x="260" y="806" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="5" fill="#2fc9d6" opacity="0.85">RIDE · EVERYTHING</text>
+    </g>
+
+    <!-- apron band along the drain: carnival checker -->
+    <rect x="0" y="1036" width="575" height="14" fill="#1c0f26" stroke="#07080d" stroke-width="1.5"/>
+    <g fill="#b01860">
+      <rect x="0" y="1036" width="24" height="7"/><rect x="48" y="1036" width="24" height="7"/>
+      <rect x="96" y="1036" width="24" height="7"/><rect x="144" y="1036" width="24" height="7"/>
+      <rect x="192" y="1036" width="24" height="7"/><rect x="240" y="1036" width="24" height="7"/>
+      <rect x="288" y="1036" width="24" height="7"/><rect x="336" y="1036" width="24" height="7"/>
+      <rect x="384" y="1036" width="24" height="7"/><rect x="432" y="1036" width="24" height="7"/>
+      <rect x="480" y="1036" width="24" height="7"/><rect x="528" y="1036" width="24" height="7"/>
+      <rect x="24" y="1043" width="24" height="7"/><rect x="72" y="1043" width="24" height="7"/>
+      <rect x="120" y="1043" width="24" height="7"/><rect x="168" y="1043" width="24" height="7"/>
+      <rect x="216" y="1043" width="24" height="7"/><rect x="264" y="1043" width="24" height="7"/>
+      <rect x="312" y="1043" width="24" height="7"/><rect x="360" y="1043" width="24" height="7"/>
+      <rect x="408" y="1043" width="24" height="7"/><rect x="456" y="1043" width="24" height="7"/>
+      <rect x="504" y="1043" width="24" height="7"/><rect x="552" y="1043" width="23" height="7"/>
+    </g>
+    <line x1="0" y1="1036" x2="575" y2="1036" stroke="#9c7c2c" stroke-width="1.5"/>
+  </g>
+
+  <!-- ═══════════════ art: plunger lane (the queue) ═══════════════ -->
+  <g id="art-lane">
+    <!-- turnstile at the gate end -->
+    <g stroke="#8a4d9e" stroke-width="2.5" fill="none">
+      <line x1="536" y1="420" x2="559" y2="420"/>
+      <line x1="547.5" y1="408" x2="547.5" y2="432"/>
+    </g>
+    <circle cx="547.5" cy="420" r="3" fill="#e0b64e" stroke="#07080d" stroke-width="1"/>
+    <!-- queue-barrier candy posts + rope -->
+    <g stroke="#07080d" stroke-width="0.8">
+      <rect x="530" y="470" width="4" height="14" fill="#ff5555"/>
+      <rect x="561" y="500" width="4" height="14" fill="#ff5555"/>
+      <rect x="530" y="530" width="4" height="14" fill="#ff5555"/>
+      <rect x="561" y="560" width="4" height="14" fill="#ff5555"/>
+    </g>
+    <g fill="#fff4d6" opacity="0.9">
+      <rect x="530" y="474" width="4" height="3"/><rect x="561" y="504" width="4" height="3"/>
+      <rect x="530" y="534" width="4" height="3"/><rect x="561" y="564" width="4" height="3"/>
+    </g>
+    <path d="M 532 472 Q 552 488 563 502 M 563 516 Q 542 530 532 532 M 532 546 Q 552 560 563 562"
+          fill="none" stroke="#9c7c2c" stroke-width="1.2" opacity="0.8"/>
+    <g stroke="#e0b64e" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+      <path d="M 540.5 704.5 L 547.5 695.5 L 554.5 704.5"/>
+      <path d="M 540.5 668.5 L 547.5 659.5 L 554.5 668.5"/>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#f4d27a" text-anchor="middle" opacity="0.9">
+      <text x="547.5" y="760">T</text><text x="547.5" y="780">H</text>
+      <text x="547.5" y="800">E</text>
+      <text x="547.5" y="830">Q</text><text x="547.5" y="850">U</text>
+      <text x="547.5" y="870">E</text><text x="547.5" y="890">U</text>
+      <text x="547.5" y="910">E</text>
+    </g>
+  </g>
+
+  <g id="art-vignette">
+    <rect x="0" y="0" width="575" height="1050" fill="url(#vignette)"/>
+  </g>
+
+  <!-- ═══════════════ collision (rendered as layered plum rails) ═══════════════
+       One set of paths = both physics and art. data-width feeds the physics
+       radius (width/2); data-layer="1" walls are the elevated coaster circuit
+       + high-striker wire lane (chrome wireform restroke below). -->
+  <defs>
+    <g id="collision-paths" fill="none">
+      <!-- outer shell: identical envelope to the other tables (§3) -->
+      <path data-width="12" data-z="all" id="collision-loop-shell" d="M 0 1050 L 0 260 L 1.3 234.5 L 5 209.3 L 11.2 184.5 L 19.8 160.5 L 30.7 137.4 L 43.8 115.6 L 59 95.1 L 76.2 76.2 L 95.1 59 L 115.6 43.8 L 137.4 30.7 L 160.5 19.8 L 184.5 11.2 L 209.3 5 L 234.5 1.3 L 260 0 L 290.9 1.5 L 321.5 6.1 L 351.4 13.6 L 380.5 24 L 408.5 37.2 L 435 53.1 L 459.8 71.5 L 482.7 92.3 L 503.5 115.2 L 521.9 140 L 537.8 166.5 L 551 194.5 L 561.4 223.6 L 568.9 253.5 L 573.5 284.1 L 575 315 L 575 1050 Z"/>
+      <!-- plunger lane inner wall. Its top curls into a shield over the
+           mallet pivot: the V between pivot base and wall would otherwise
+           perch a descending ball (soak-found); the shield roofs it and
+           sheds arch drops left onto the bat. -->
+      <path data-width="12" data-z="all" id="collision-wall-lane" d="M 500 272 L 520 262 L 520 1050"/>
+      <!-- the Sky Ride: orbit inner wall, left arm — the crest is OPEN over
+           the P and A lane mouths only (the lanes' feed): a fast loop rides
+           the shell straight over the window into the arch catcher, a dying
+           one drops into lane P or A and lane change spreads it to R/K.
+           Slots 3-4 stay covered: soak proved balls raining down the right
+           half land on the striker wire's ball-height mouth run and wedge
+           in the tail V at (418, 189) -->
+      <path data-width="12" id="collision-wall-orbit" d="M 65 550 L 65 260 L 66.5 236.2 L 70.8 212.8 L 78 190.1 L 87.8 168.5 L 100.3 148.2 L 115.1 129.5 L 132.1 112.8"/>
+      <!-- orbit tail: the inner wall resumes at divider-2's top (sealed
+           joint), covers the R/K mouths and descends toward the mallet;
+           the delivery gap past its end is a free pass (≥38 mm) onto the
+           bat -->
+      <path data-width="12" id="collision-wall-orbit-tail" d="M 263.4 65 L 287.1 66.9 L 310.5 71.6 L 333 79.2 L 354.5 89.4 L 374.6 102.2 L 393 117.4 L 409.4 134.7 L 430 165 L 443 200 L 443 230"/>
+      <!-- arch catcher: sealed to the shell — EVERY descending loop return
+           is deflected inward and delivered onto the mallet. The ascending
+           plunge flies OVER it off the lane's jump wedge (band ≤16). -->
+      <path data-width="12" data-z-max="16" id="collision-wall-arch-catcher" d="M 552 214 L 500 258"/>
+      <!-- P-A-R-K lane dividers, raised to the old orbit arc line: 1 and 2
+           frame the open P/A mouths (46-70 mm openings, ball 27); 2 and 3
+           join the covering wall above R/K (sealed joints, no pockets) -->
+      <path data-width="12" id="collision-wall-divider-1" d="M 190 78 L 190 150"/>
+      <path data-width="12" id="collision-wall-divider-2" d="M 260 65 L 260 150"/>
+      <path data-width="12" id="collision-wall-divider-3" d="M 330 78 L 330 150"/>
+      <!-- deflector: sheds orbit-exit balls right, away from the outlane mouth -->
+      <path data-width="12" id="collision-wall-deflector" d="M 0 585 L 40 640"/>
+      <!-- coaster underbrace: the strip beneath the lift hill dead-ends at
+           the bed's solid back (y 588.8) — balls dropping the P-lane column
+           (crest window or bell drop-off) wedged there (soak). The brace
+           sheds them LEFT into the orbit-arm corridor and on to the left
+           inlane (a right shed wedged the ghost-pocket corner — soak). It
+           continues the pocket's sloped roof from the shared corner in one
+           unbroken descent, no perch gap; riders pass 20+ mm above its top
+           (bed 47-55 mm here, rule ≥7) -->
+      <path data-width="12" id="collision-wall-coaster-underbrace" d="M 214 480 L 137 508"/>
+      <!-- inlane guides: outlane channel outside, inlane inside, each ending
+           tangent to its flipper base circle past the apex -->
+      <path data-width="12" id="collision-wall-guide-left" d="M 52 690 L 52 905 L 174.2 938.4"/>
+      <path data-width="12" id="collision-wall-guide-right" d="M 470 690 L 470 905 L 345.9 938.4"/>
+      <!-- ghost-train pocket (opens down; the subway sensor sits inside —
+           gravity alone always rolls an uncaptured ball back out). The
+           roof slopes down-left so balls landing on it shed onto the
+           underbrace instead of perching (soak) -->
+      <path data-width="12" id="collision-wall-ghost-pocket" d="M 214 545 L 214 480 L 266 468 L 266 545"/>
+      <!-- prize booth canopy: mouth opens straight down, never traps -->
+      <path data-width="12" id="collision-wall-booth-hood" d="M 323.7 451.6 L 322 442 L 323.7 432.4 L 328.6 424 L 336 417.8 L 345.1 414.4 L 354.9 414.4 L 364 417.8 L 371.4 424 L 376.3 432.4 L 378 442 L 376.3 451.6"/>
+      <!-- drop tower housing: recess brackets off the lane wall -->
+      <path data-width="12" id="collision-wall-tower-housing" d="M 520 460 L 503 468 L 503 592 L 520 600"/>
+      <!-- plunger saddle: the ball rests here, above the animated spring -->
+      <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
+    </g>
+    <g id="collision-paths-elevated" fill="none">
+      <!-- coaster circuit (layer 1): lift hill up the left-centre, the drop,
+           a second hump crossing over the dodgems, then down the right side
+           to the drop-off into the right inlane -->
+      <path data-width="12" data-surface="coaster" id="collision-wall-coaster-rail-in" d="M 189 712 L 189 650 L 189 560 L 189 470.4 L 190.7 444.2 L 195.8 425.6 L 203.4 413.4 L 215.1 406 L 234.4 401.6 L 258.9 399 L 282.7 399.9 L 311.1 403.7 L 339.9 408.5 L 369 415.3 L 390.8 420.3 L 392 420.6 L 394.5 425 L 395 450 L 394 499.8 L 394 560"/>
+      <path data-width="12" data-surface="coaster" id="collision-wall-coaster-rail-out" d="M 137 712 L 137 650 L 137 560 L 137 469.6 L 139.3 435.8 L 148.2 404.4 L 166.6 376.6 L 194.9 358 L 225.6 350.4 L 257.1 347 L 287.3 348.1 L 318.9 352.3 L 350.1 357.5 L 381 364.7 L 409.2 371.7 L 432 387.4 L 445.5 415 L 447 450 L 446 500.2 L 446 560"/>
+      <!-- high striker wire lane (layer 1): the mallet's one shot, curling up
+           from above the bat to the bell in the top-left corner -->
+      <path data-width="12" data-surface="striker" id="collision-wall-striker-rail-a" d="M 436.5 218.2 L 360.3 185.1 L 280.2 151.1 L 206.6 119.7 L 166.5 94.4 L 156.6 86"/>
+      <path data-width="12" data-surface="striker" id="collision-wall-striker-rail-b" d="M 415.5 265.8 L 339.7 232.9 L 259.8 198.9 L 183.4 166.3 L 137.5 137.6 L 123.4 126"/>
+      <!-- NO cap: the lane end past the bell is a drop-off (BRIEF: a good
+           swing DROPS INTO THE P-A-R-K LANES). The rail ends leave a 40 mm
+           exit; the ball flies off at bell height and lands in the lanes
+           or the open orbit crest below -->
+    </g>
+  </defs>
+  <!-- field walls: layered DUSK PLUM rails, kept dark so the lit ball and
+       the chrome upper level pop against them (carnival-500/300 per
+       STYLE-GUIDE §2; 12 mm body is the physical width) -->
+  <!-- ramp BACKS (M11): where a bed drops below ball height its back is
+       solid — drawn as shadowed understructure, NOT as a rail, so it reads
+       as the ramp's underside rather than a gate. Riders pass above. -->
+  <defs>
+    <g id="collision-backs" fill="none">
+      <!-- Back walls guard against a ball dropping into a ramp channel and
+           wedging against the bed's solid back. Their z-max=22 band, however,
+           also snagged CLIMBING riders: a fast climb sweeps up through the
+           low-z part of the lift hill (base z < 22) and CCD catches the wall
+           before the ball's height rises clear — coaster/striker rides
+           completed ~0% (feature-rates soak). Fix: drop the band to z-max=10
+           so only near-ground fallers (a wedged P-column drop sits at z≈0)
+           are blocked; a rider is on the ramp bed (z≥ local height) and now
+           passes. Positions unchanged. -->
+      <path data-width="12" data-z-max="10" id="collision-wall-coaster-back" d="M 137 588.8 L 189 588.8"/>
+      <path data-width="12" data-z-max="10" id="collision-wall-striker-back" d="M 258.2 198.2 L 278.6 150.4"/>
+    </g>
+  </defs>
+  <g id="art-ramp-backs" fill="none" stroke-linecap="round">
+    <g stroke="#07080d" stroke-width="12" opacity="0.85"><use href="#collision-backs"/></g>
+    <g stroke="#45215a" stroke-width="6.5"><use href="#collision-backs"/></g>
+    <g stroke="#aeb6c8" stroke-width="2" opacity="0.85"><use href="#collision-backs"/></g>
+  </g>
+  <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#07080d" stroke-width="16"><use href="#collision-paths"/></g>
+    <g stroke="#45215a" stroke-width="12"><use href="#collision-paths"/></g>
+    <g stroke="#8a4d9e" stroke-width="6.5"><use href="#collision-paths"/></g>
+    <g stroke="#d7dce8" stroke-width="2.2" opacity="0.55"><use href="#collision-paths"/></g>
+  </g>
+  <!-- elevated coaster + striker: OPEN WIREFORMS — chrome rails with
+       cross-ties and air between, per STYLE-GUIDE §2 as amended for this
+       table (two wire runs cross half the park; a Tidebreaker-style glass
+       bed here rendered as a huge grey slab that buried the dodgems, the
+       booth and the mallet). Only a whisper of glass tint remains on the
+       coaster. Renderers composite this group over the ball on the main
+       field, under it on the raised layer — that split, plus the opaque
+       chrome, stays the layer cue. -->
+  <g id="art-rails-elevated" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- neon-green glass (STYLE-GUIDE §2): rail-to-rail beds on the true
+         run geometry — barely reads on the dark field but tints the bright
+         ball whenever it passes UNDERNEATH -->
+    <g stroke="#39ff14" stroke-width="40" opacity="0.15">
+      <path d="M 163 712 L 163 650 L 163 560 L 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560"/>
+      <path d="M 455 255 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
+      <path d="M 547.5 310 L 547.5 262 L 546 205"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="40" opacity="0.03">
+      <path d="M 163 712 L 163 650 L 163 560 L 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560"/>
+      <path d="M 455 255 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
+      <path d="M 547.5 310 L 547.5 262 L 546 205"/>
+    </g>
+    <!-- the jump wedge's own chrome: side rails + rungs (it has no
+         collision walls — the lane wall and shell guide the rider) -->
+    <g stroke="#07080d" stroke-width="7"><path d="M 528 310 L 528 262 L 527 208 M 567 310 L 567 262 L 565 208"/></g>
+    <g stroke="#aeb6c8" stroke-width="4.5"><path d="M 528 310 L 528 262 L 527 208 M 567 310 L 567 262 L 565 208"/></g>
+    <g stroke="#d7dce8" stroke-width="2"><path d="M 528 310 L 528 262 L 527 208 M 567 310 L 567 262 L 565 208"/></g>
+    <g stroke="#07080d" stroke-width="4.5" opacity="0.9">
+      <path d="M 529 296 L 566 296 M 529 278 L 566 278 M 529 258 L 566 258 M 528.6 234 L 565.8 234"/>
+    </g>
+    <g stroke="#aeb6c8" stroke-width="2.2">
+      <path d="M 529 296 L 566 296 M 529 278 L 566 278 M 529 258 L 566 258 M 528.6 234 L 565.8 234"/>
+    </g>
+    <!-- cross-ties: sleepers under the coaster, rungs under the striker -->
+    <g stroke="#07080d" stroke-width="4.5" opacity="0.9">
+      <path d="M 145 698 L 181 698 M 145 670 L 181 670 M 145 642 L 181 642 M 145 614 L 181 614 M 145 586 L 181 586 M 145 558 L 181 558 M 145 530 L 181 530 M 145 502 L 181 502 M 145 474 L 181 474 M 146.6 444.9 L 182.6 447.3 M 153.6 414 L 188.2 423.7 M 175.3 379.8 L 194.9 410 M 204.9 363.5 L 213.3 398.5 M 234.6 357.4 L 238.4 393.2 M 265.1 355.2 L 263.7 391.2 M 294.7 357.1 L 289.9 392.8 M 323 361.1 L 317.1 396.6 M 351.7 366.1 L 343.5 401.1 M 379 372.4 L 370.8 407.5 M 411.8 382.2 L 391.8 412.2 M 435.1 410 L 402.9 426.1 M 438.9 445.3 L 402.9 446.5 M 438.5 474.2 L 402.5 473.5 M 438 501.8 L 402 501.8 M 438 529.8 L 402 529.8 M 438 557.8 L 402 557.8 M 438 557.8 L 402 557.8"/>
+      <path d="M 427 262.2 L 441.9 229.5 M 399.9 250.3 L 414.2 217.3 M 372.4 238.3 L 386.7 205.3 M 344.8 226.4 L 359.2 193.4 M 317.4 214.7 L 331.4 181.6 M 289.8 203 L 303.8 169.8 M 262.1 191.2 L 276.2 158.1 M 234.5 179.4 L 248.7 146.3 M 206.9 167.7 L 221.1 134.5 M 177.5 153.3 L 196.7 122.8 M 152.1 137.3 L 171.2 106.8"/>
+    </g>
+    <g stroke="#aeb6c8" stroke-width="2.2">
+      <path d="M 145 698 L 181 698 M 145 670 L 181 670 M 145 642 L 181 642 M 145 614 L 181 614 M 145 586 L 181 586 M 145 558 L 181 558 M 145 530 L 181 530 M 145 502 L 181 502 M 145 474 L 181 474 M 146.6 444.9 L 182.6 447.3 M 153.6 414 L 188.2 423.7 M 175.3 379.8 L 194.9 410 M 204.9 363.5 L 213.3 398.5 M 234.6 357.4 L 238.4 393.2 M 265.1 355.2 L 263.7 391.2 M 294.7 357.1 L 289.9 392.8 M 323 361.1 L 317.1 396.6 M 351.7 366.1 L 343.5 401.1 M 379 372.4 L 370.8 407.5 M 411.8 382.2 L 391.8 412.2 M 435.1 410 L 402.9 426.1 M 438.9 445.3 L 402.9 446.5 M 438.5 474.2 L 402.5 473.5 M 438 501.8 L 402 501.8 M 438 529.8 L 402 529.8 M 438 557.8 L 402 557.8 M 438 557.8 L 402 557.8"/>
+      <path d="M 427 262.2 L 441.9 229.5 M 399.9 250.3 L 414.2 217.3 M 372.4 238.3 L 386.7 205.3 M 344.8 226.4 L 359.2 193.4 M 317.4 214.7 L 331.4 181.6 M 289.8 203 L 303.8 169.8 M 262.1 191.2 L 276.2 158.1 M 234.5 179.4 L 248.7 146.3 M 206.9 167.7 L 221.1 134.5 M 177.5 153.3 L 196.7 122.8 M 152.1 137.3 L 171.2 106.8"/>
+    </g>
+    <!-- rail edges: OPAQUE bright chrome wire, slim so the park shows
+         through the form -->
+    <g stroke="#07080d" stroke-width="10"><use href="#collision-paths-elevated"/></g>
+    <g stroke="#aeb6c8" stroke-width="6.5"><use href="#collision-paths-elevated"/></g>
+    <g stroke="#d7dce8" stroke-width="3.2"><use href="#collision-paths-elevated"/></g>
+    <g stroke="#ffffff" stroke-width="1.2"><use href="#collision-paths-elevated"/></g>
+    <!-- marquee bulbs strung along the coaster bed -->
+    <g fill="#ffdf9e" opacity="0.7">
+      <circle cx="150" cy="640" r="1.6"/><circle cx="150" cy="580" r="1.6"/>
+      <circle cx="150" cy="520" r="1.6"/><circle cx="151" cy="462" r="1.6"/>
+      <circle cx="162" cy="418" r="1.6"/><circle cx="192" cy="393" r="1.6"/>
+      <circle cx="234" cy="385" r="1.6"/><circle cx="280" cy="385" r="1.6"/>
+      <circle cx="326" cy="392" r="1.6"/><circle cx="372" cy="400" r="1.6"/>
+      <circle cx="405" cy="412" r="1.6"/><circle cx="408" cy="450" r="1.6"/>
+      <circle cx="407" cy="510" r="1.6"/><circle cx="407" cy="570" r="1.6"/>
+      <circle cx="410" cy="628" r="1.6"/>
+    </g>
+  </g>
+
+  <!-- ═══════════════ height profiles (render height / subway guides) ═══════════════ -->
+  <g fill="none" stroke="none">
+    <!-- coaster: lift hill, drop, second hump, descent, drop-off (chained
+         segments approximate the two-crest ride; endpoints agree) -->
+    <path id="height-profile-coaster-a" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="0" data-height-to="55"
+          d="M 163 712 L 163 650 L 163 560 L 163 470"/>
+    <path id="height-profile-coaster-b" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="55" data-height-to="40"
+          d="M 163 470 L 165 440 L 172 415 L 185 395 L 205 382 L 230 376"/>
+    <path id="height-profile-coaster-c" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="40" data-height-to="38"
+          d="M 230 376 L 258 373 L 285 374 L 315 378 L 345 383 L 375 390 L 400 396"/>
+    <path id="height-profile-coaster-d" data-layer="1" data-surface="coaster" data-surface-width="52" data-height-from="38" data-height-to="34"
+          d="M 400 396 L 412 404 L 420 420 L 421 450 L 420 500 L 420 560"/>
+    <!-- the queue's jump wedge: the plunge launches off it, clearing the
+         arch catcher; a stalled plunge rolls back to the saddle -->
+    <path id="height-profile-skyjump-a" data-layer="1" data-surface="skyjump" data-surface-width="44"
+          data-height-from="0" data-height-to="28" d="M 547.5 310 L 547.5 262"/>
+    <path id="height-profile-skyjump-b" data-layer="1" data-surface="skyjump" data-surface-width="44"
+          data-height-from="28" data-height-to="28" d="M 547.5 262 L 546 205"/>
+    <!-- high striker: the tower climb to the bell -->
+    <path id="height-profile-striker" data-layer="1" data-surface="striker" data-surface-width="52" data-height-from="0" data-height-to="55"
+          d="M 455 255 L 426 242 L 350 209 L 270 175 L 195 143 L 152 116 L 140 106"/>
+    <!-- subways -->
+    <path id="height-profile-ghost" data-layer="-1" data-height-from="-8" data-height-to="-8"
+          d="M 240 500 L 262 540 L 290 572 L 318 596 L 340 612 L 330 634"/>
+    <path id="height-profile-chicken" data-layer="-1" data-height-from="-8" data-height-to="-8"
+          d="M 496 915 L 500 950 L 505 985 L 512 1008 L 525 1020 L 540 1015 L 547 1000 L 547.5 975"/>
+  </g>
+
+  <!-- ═══════════════ sensors (invisible; zones only) ═══════════════ -->
+  <g fill="none" stroke="none">
+    <rect id="sensor-drain" x="0" y="1005" width="520" height="30"/>
+    <rect id="sensor-rollover-1" data-z-max="30" x="147" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-2" data-z-max="30" x="210" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-3" data-z-max="30" x="280" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-4" data-z-max="30" x="343" y="105" width="30" height="20"/>
+    <!-- Sky Ride: entry at the bottom-left arm, exit on the descending tail -->
+    <rect id="sensor-ramp-entry" x="2.5" y="492" width="60" height="16"/>
+    <rect id="sensor-ramp-exit" x="468" y="128" width="44" height="40"/>
+    <!-- turnstile spinner across the ghost-train mouth -->
+    <rect id="sensor-spinner" x="217" y="556" width="46" height="12"/>
+    <rect id="sensor-kicker-booth" x="330" y="418" width="40" height="40"/>
+    <rect id="sensor-kicker-stamp" x="8" y="940" width="36" height="35"/>
+    <rect id="sensor-subway-ghost" x="220" y="486" width="40" height="18"/>
+    <rect id="sensor-subway-chicken" x="478" y="900" width="36" height="35"/>
+    <!-- narrow entry zone: edges kept a full ball radius clear of the lift
+         walls (same embedded-switch ghost hazard as the striker throat) -->
+    <rect id="sensor-lane-striker-a" data-z-min="4" data-z-max="32" x="372" y="211" width="40" height="30"/>
+    <rect id="sensor-lane-striker-b" data-z-min="30" data-z-max="62" x="162" y="120" width="40" height="30"/>
+  </g>
+
+  <!-- ═══════════════ anchors (invisible placement points) ═══════════════ -->
+  <g fill="none" stroke="none">
+    <circle id="anchor-flipper-left" cx="171" cy="950" r="5"/>
+    <circle id="anchor-flipper-right" cx="349" cy="950" r="5"/>
+    <circle id="anchor-flipper-upper" cx="490" cy="300" r="5"/>
+    <circle id="anchor-spawn" cx="547.5" cy="980" r="5"/>
+    <circle id="anchor-bumper-1" cx="240" cy="225" r="5"/>
+    <circle id="anchor-bumper-2" cx="335" cy="255" r="5"/>
+    <circle id="anchor-bumper-3" cx="272" cy="335" r="5"/>
+    <circle id="anchor-kicker-booth" cx="350" cy="435" r="5"/>
+    <circle id="anchor-kicker-stamp" cx="26" cy="958" r="5"/>
+  </g>
+</svg>

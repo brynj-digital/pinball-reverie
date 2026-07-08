@@ -1,0 +1,7 @@
+{
+  "projectId": "ace2c8c9-1b7e-4ab5-8df0-ab60dec1e7d5",
+  "projectName": "Pinball Reverie — game design system",
+  "shape": "assets",
+  "localDir": "design",
+  "note": "Asset-master design system (SVG/CSS/HTML previews under design/), NOT a React component library. Do NOT run the design-sync converter pipeline (no npm install / dist bundle / storybook / _ds_bundle.js generation). Sync flow: finalize_plan against localDir 'design', then write_files the changed masters to project-relative paths that mirror design/. See .design-sync/NOTES.md."
+}

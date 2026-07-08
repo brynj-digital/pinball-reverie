@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- MIDNIGHT MIDWAY DMD scene: COASTER — side-on ride: the chain lift
+       climbs the first hill, a beat at the crest, then the drop and the
+       second hump. 8 frames of 128x32 (style guide §6): #fff=3, #888=2,
+       #666=1, black=0. Art rows 0..22; caption renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <!-- the track profile is constant: two humps + supports -->
+  <g id="track" fill="none">
+    <path d="M 8 21 L 24 14 L 40 7 L 48 6 L 56 9 L 64 16 L 76 12 L 88 10 L 100 14 L 120 20"
+          stroke="#666" stroke-width="1.2"/>
+    <g stroke="#666" stroke-width="1">
+      <line x1="24" y1="14" x2="24" y2="22"/><line x1="44" y1="6" x2="44" y2="22"/>
+      <line x1="64" y1="16" x2="64" y2="22"/><line x1="88" y1="10" x2="88" y2="22"/>
+      <line x1="108" y1="17" x2="108" y2="22"/>
+    </g>
+  </g>
+  <use href="#track" x="0"/>
+  <use href="#track" x="128"/>
+  <use href="#track" x="256"/>
+  <use href="#track" x="384"/>
+  <use href="#track" x="512"/>
+  <use href="#track" x="640"/>
+  <use href="#track" x="768"/>
+  <use href="#track" x="896"/>
+  <!-- the car, climbing then dropping -->
+  <g fill="#888">
+    <rect x="12" y="17" width="6" height="3"/>
+    <rect x="150" y="13" width="6" height="3" transform="rotate(-24 153 14)"/>
+    <rect x="288" y="9" width="6" height="3" transform="rotate(-24 291 10)"/>
+    <rect x="424" y="4.5" width="6" height="3"/>
+  </g>
+  <!-- crest beat: car lit at the top -->
+  <rect x="556" y="3.5" width="6" height="3" fill="#fff"/>
+  <!-- the drop: bright car, speed lines -->
+  <g>
+    <rect x="698" y="10" width="6" height="3" fill="#fff" transform="rotate(38 701 11)"/>
+    <g stroke="#888" stroke-width="1">
+      <line x1="692" y1="6" x2="696" y2="10"/><line x1="696" y1="4" x2="701" y2="9"/>
+    </g>
+  </g>
+  <g>
+    <rect x="842" y="9" width="6" height="3" fill="#888"/>
+    <g stroke="#666" stroke-width="1">
+      <line x1="835" y1="8" x2="840" y2="9"/><line x1="835" y1="11" x2="840" y2="11"/>
+    </g>
+  </g>
+  <rect x="996" y="12" width="6" height="3" fill="#888"/>
+</svg>

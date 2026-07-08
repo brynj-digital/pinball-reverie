@@ -95,6 +95,106 @@ body {
   display: none;
 }
 
+/* 3D renderer chrome: DMD + backglass live in the DOM instead of the canvas */
+.panel3d {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 272px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.panel3d canvas,
+.panel3d img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #2c3352;
+  border-radius: 6px;
+  background: #0f0805;
+}
+
+.hud3d {
+  position: fixed;
+  left: 12px;
+  bottom: 10px;
+  z-index: 5;
+  color: #4a5680;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+/* Touch controls (plan §4.5, style guide §8): transparent pointer zones over
+   the playfield. The root is a sibling of the canvas inside #app so it survives
+   the 2D↔3D canvas swap. Root ignores pointers; only the zones opt back in. */
+.touch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8; /* above the canvas, below settings(20)/table-select(15) */
+  pointer-events: none;
+}
+
+.touch-zone {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none; /* suppress browser scroll/zoom/double-tap */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* lower-left / lower-right halves = flippers (violet signature hue) */
+.touch-flipper {
+  bottom: 0;
+  height: 40%;
+  width: 50%;
+  background: rgba(140, 107, 255, 0.1); /* --violet-400 @ 10% */
+  transition: background 0.06s;
+}
+
+.touch-flipper-left {
+  left: 0;
+  border-top-right-radius: 22px;
+}
+
+.touch-flipper-right {
+  right: 0;
+  border-top-left-radius: 22px;
+}
+
+.touch-flipper.active {
+  background: rgba(140, 107, 255, 0.22);
+}
+
+/* bottom-right drag zone = plunger (cyan), stacked above the right flipper */
+.touch-plunger {
+  right: 0;
+  bottom: 0;
+  width: 22%;
+  height: 20%;
+  z-index: 2;
+  border: 1.5px dashed rgba(47, 201, 214, 0.55); /* --cyan-400 */
+  border-radius: 8px 0 0 0;
+  background: rgba(47, 201, 214, 0.08);
+  transition: background 0.06s;
+}
+
+.touch-plunger.active {
+  background: rgba(47, 201, 214, 0.24);
+}
+
+/* open table area above the flippers = swipe-to-nudge (no visible chrome) */
+.touch-nudge {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+}
+
 .settings-overlay {
   position: fixed;
   inset: 0;
@@ -173,4 +273,90 @@ body {
   color: #4a5680;
   font-size: 11px;
   text-align: center;
+}
+
+/* Attract-mode table select (M10): one backglass card per table; the brass
+   focus ring is the "this one plays" cue, unfocused cabinets sit dim */
+.tablesel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 8, 13, 0.78);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 15;
+}
+
+.tablesel-overlay h2 {
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #dfe4ff;
+}
+
+.tablesel-row {
+  display: flex;
+  gap: 26px;
+}
+
+.tablesel-card {
+  width: min(240px, 38vw);
+  padding: 10px 10px 12px;
+  background: #141724;
+  border: 1px solid #2c3352;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0.55;
+  transform: scale(0.94);
+  transition:
+    opacity 0.15s,
+    transform 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.tablesel-card.focused {
+  opacity: 1;
+  transform: scale(1);
+  border-color: #e0b64e;
+  box-shadow: 0 0 20px rgba(224, 182, 78, 0.28);
+}
+
+.tablesel-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  background: #0f0805;
+}
+
+.tablesel-name {
+  margin-top: 9px;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #dfe4ff;
+}
+
+.tablesel-tag {
+  margin-top: 2px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #8790b3;
+}
+
+.tablesel-score {
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #e0b64e;
+}
+
+.tablesel-hint {
+  color: #4a5680;
+  font-size: 12px;
+  letter-spacing: 0.12em;
 }

@@ -1,3 +1,6 @@
 node_modules/
 dist/
 *.local
+
+# scratch probes / one-off instrumentation (kept local, never committed)
+*.tmp.ts

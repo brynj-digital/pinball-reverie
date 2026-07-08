@@ -19,7 +19,7 @@ kept deliberately:
   outline-less flat design, no photorealism, no soft ambient blur.
 - **Saturation lives in the accents.** Compositions are ~70% field/steel
   darks, ~20% chrome/steel mids, ≤10% neon (`magenta / cyan / violet /
-  brass`). The dark field is what makes lamps read as *lit*.
+  green / brass`). The dark field is what makes lamps read as *lit*.
 - **Could-be-real.** Every drawn element must be plausible on a physical
   machine: printed playfield art, plastic inserts, lamps, screened metal.
 
@@ -28,13 +28,68 @@ kept deliberately:
 See [tokens.css](tokens.css) and [previews/colors.html](previews/colors.html).
 Families: **field** (playfield darks), **steel** (blue structure), **chrome**
 (ball/rails/bezels), **brass** (flippers, warm mechanicals), **neon** accents
-(magenta / cyan / violet + alert red), **DMD amber** (5-level ramp), and
+(magenta / cyan / green / violet + alert red), **DMD amber** (5-level ramp), and
 **debug** (green bodies / orange sensors — engineering overlay only, never in
 shipped art; these exact values are what the in-game debug overlay draws).
 
 Accent discipline: violet is the signature hue (logo glow, premium inserts);
 magenta and cyan are feature colors; brass is reserved for things the ball
 physically touches (flippers, kickers, rails).
+
+Per-table field variants (added 2026-07-05): a table may cast the field
+family toward its theme — Tidebreaker uses the **abyss** ramp
+(`--abyss-700/800/900`, blue-green) with cyan as its feature color;
+Midnight Midway uses the **carnival** ramp (`--carnival-700/800/900`, warm
+plum dusk) with magenta as its feature color. Any new variant adds its
+tokens here first, keeps `--ink`/steel/chrome/brass unchanged, and stays
+within the §1 saturation discipline.
+
+**Marquee bulb** (added 2026-07-05 for table 3): `--bulb-200/400`, an
+incandescent white-gold reserved for bulb strings, ride marquees and
+chase-lamp rows — tiny lit points, never area fills, so the §1 neon budget
+holds. It is not brass (brass stays ball-touch only) and not DMD amber
+(display glass only).
+
+**Midway runs the accent budget hot** (amended 2026-07-05, per the table 3
+brief and direction): a funfair at night is *loud* — Midnight Midway may
+push accents to ~15–20% of the composition and use the whole neon family
+at once (pennant bunting, balloons, painted gondola cars, letter-coloured
+inserts, candy stripes, `--alert-400` on beacons/barber posts). The
+discipline that survives: saturation lives in MANY SMALL SHAPES and lit
+points over the dark plum field — never large saturated area fills — so
+lamps and the ball still pop. Moondial and Tidebreaker keep the ≤10% rule.
+
+**Elevated structure may be an OPEN WIREFORM** (amended 2026-07-05, table
+3): where a glass bed would cross busy field art (Midway's coaster and
+striker cut across half the park), the elevated run may drop the bed and
+read as slim chrome wires with cross-ties and air between — plus a LIGHT
+glass tint (~0.09, ≤30 mm): near-invisible on the dark field but it tints
+the bright ball passing underneath, the depth cue the open wires alone
+can't give. The layer cue that must survive is the
+compositing split (over the ball on the field, under it when raised) plus
+the opaque chrome; Tidebreaker's edge-hugging ramp keeps its full glass
+bed.
+
+**Walls and rails are themed per table, not global** (amended 2026-07-05):
+each table's shell/wall restroke palette comes from its field variant —
+Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
+(`--abyss-500/300`), Midnight Midway layers dusk plum
+(`--carnival-500/300`) — always over a 16 mm ink base with a `chrome-200`
+core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
+structure reads as glass between chrome** on every table: the edge wires
+are OPAQUE bright chrome, and only the ramp BED between them — a wide
+translucent wash (~0.15) spanning the full rail-to-rail interior along
+the height profiles — semi-transparent fluorescent ramp plastic. **The
+glass TINT is per-table, matching the field variant** (amended 2026-07-05
+by direction): DAYGLO green (`--green-400` #39ff14) is the default —
+Moondial and Midway use it — while Tidebreaker's glass is abyssal
+`--cyan-400` #2fc9d6. The SVG wash and `TableSpec.theme.rampGlass3d` must
+carry the same hue. Renderers composite the
+`art-rails-elevated` group separately — over the ball on the main field
+(the ball shows through the bed, disappears behind the wires), under it on
+the raised layer — so which level the ball is on is always unambiguous.
+The 3D renderer builds the same split: opaque chrome tubes plus a
+translucent bed ribbon riding each layer-1 height profile.
 
 ## 3. Master units & scale
 
@@ -43,10 +98,14 @@ physically touches (flippers, kickers, rails).
   0.575 × 1.05 m. The SVG→fixture parser divides by 1000 — no other scale
   factor anywhere.
 - **The launch lane lives outside the playfield** (Pinball Fantasies
-  convention): the playfield proper is `0..520` with every structural
-  element mirror-symmetric about `x = 260`; the plunger lane occupies
+  convention): the playfield proper is `0..520`; the plunger lane occupies
   `520..575` and meets the playfield only through the orbit at the top.
-  Never let the lane push elements off-centre.
+  The outer envelope, flipper pair, and drain stay centred on `x = 260`,
+  and the lane must never push the layout off-centre. Interior structure
+  may be asymmetric when the shot design calls for it — Moondial is
+  mirror-symmetric; Tidebreaker deliberately is not. *(Amended 2026-07-05
+  for table 2; the original rule read "every structural element
+  mirror-symmetric about x = 260".)*
 - The ball is **27 mm** diameter. Draw at true scale; if a detail is
   illegible at 27 mm ball scale, simplify the detail, don't enlarge the part.
 - Line weights at master scale: wall guides **12 mm**, part outlines **2 mm**,
@@ -90,6 +149,63 @@ Two invariants from the physics work (see `src/table/geometry.ts`):
 2. **Inlane guides end tangent to the flipper base circle** (r 12 mm around
    the flipper anchor), past its apex — never short of it (pocket) and never
    below the crown (a creeping ball stalls on the hump).
+
+### Surfaces & height (M11, plan §7a — supersedes the M10 layer trick, 2026-07-05)
+
+Planar physics gains one real scalar: the ball's height `z`. Ramps are
+SURFACES the ball genuinely rides — it attaches where a surface meets its
+height, feels the slope (climbs decelerate, stalls roll back out of the
+mouth), and flies off drop-offs ballistically. There are no layer-switch
+sensors; entry and exit are geometry.
+
+- A **`height-profile-<name>`** polyline carries **`data-height-from`** /
+  **`data-height-to`** (mm relative to the playfield surface, negative =
+  below; linear in arc length). Profiles carrying **`data-surface`** (plus
+  **`data-surface-width`**, mm, the footprint width) group into one
+  physical surface; chain several profiles to shape crests and dips.
+  **`data-layer`** remains on paths/profiles purely as a RENDER hint
+  (1 = elevated wireform styling, −1 = subway).
+- A collision wall carrying the same **`data-surface`** is that run's rail:
+  it touches the ball only near the LOCAL surface height (one climbing rail
+  is low at its mouth, high at its crest). Plain walls are field furniture
+  (~ball height). **`data-z="all"`** marks full-height walls — the shell
+  and plunger-lane wall, i.e. the cabinet glass.
+- Sensors may carry **`data-z-min`/`data-z-max`** (mm): admission bands
+  (a ramp's spinner ignores ground balls; lanes under a wireform ignore
+  riders). Set band edges ~4 mm looser than the geometric height at the
+  zone edge — begin-contact fires when the ball's EDGE touches, when its
+  centre is still a half-ball short of the zone.
+- **Mouths point down-table** (the roll-back must fall OUT), and their
+  attach zone (local height ≤ 4 mm) must sit clear of posts and bats — an
+  attach zone against furniture is a pocket. **Descents end in the air**:
+  finish the profile at ≥ 12 mm over a clear landing zone and let the ball
+  drop; a rail that descends to ground level through live field traffic
+  genuinely blocks it (it is physically there now).
+- **Every climb gets a BACK** (added after M11 play): where the bed sits
+  below ball height (local h < 28 mm) its underside is solid — a ball
+  dropping in behind the ramp must deflect, not fall through the throat.
+  Author a `collision-wall-<name>-back` across the channel at the h ≈ 28
+  point, spanning rail to rail, with **`data-z-max="22"`** (walls accept
+  explicit `data-z-min`/`data-z-max` bands): ground balls bounce off it,
+  riders pass above. Check its end caps against neighbouring furniture for
+  the §4 gap bands. **Caution (Midway 2026-07-06):** on a shallow lift hill
+  the bed is still low near the back's location, so a *fast* climber sweeps
+  up through the sub-22 mm band and CCD snags it on the back before its
+  height clears — the ramp completes ~0 % of aimed shots, worse the harder
+  you hit it. If a `feature-rates` probe shows climbers stalling at the
+  back, **drop the band to `data-z-max="10"`** (blocks only near-ground
+  z≈0 fallers; lets the rider, whose base sits at the local bed height,
+  pass). Reserve the full `22` for backs sitting where the bed is already
+  steep/high enough that riders are well clear when in CCD reach.
+- Rails crossing over field furniture keep the local surface height at
+  least ~7 mm above that furniture's top (ball tops clear rails at
+  local-height − 1 mm).
+- Subways stay scripted transits below the field (no surface, no walls).
+- An upper (third) flipper is placed by **`anchor-flipper-upper`**; its
+  side/pivot lives in the table's defs like the lower pair.
+- The two invariants above apply **per height stratum**: gaps are measured
+  between surfaces the ball can touch at the same height, and simcheck/soak
+  must be able to flag a ball trapped on a ramp or in a subway.
 
 ## 5. Type
 
@@ -149,10 +265,27 @@ See [previews/layouts.html](previews/layouts.html).
 - **Portrait:** DMD strip (4:1) full-width at top, table below at native
   aspect; touch zones: lower left/right halves = flippers, drag zone
   bottom-right = plunger.
+- **Touch controls (added 2026-07-08):** a transparent overlay of pointer
+  zones, shown on touch devices (Auto) or forced On/Off in settings; keyboard
+  and touch are interchangeable through the same `Input`. Flipper zones use
+  `--violet-400` at ~10% (→22% while held); the plunger zone is a dashed
+  `--cyan-400` box (hold to charge, release to launch). Two conventions beyond
+  the coarse zones above: the **right flipper zone also works the upper
+  flipper** where a table has one (Midway's mallet), mirroring the default
+  keyboard wiring; and a **swipe on the open table area = nudge** (dominant
+  axis → left/right/up; a downward flick is not a nudge). No discrete
+  upper-flipper or nudge buttons — the zone model stays two-handed. Zones are
+  the same in portrait and landscape (positioned by viewport fraction).
 - **Landscape:** table in a full-height center column; left panel carries the
   table logo + DMD; right panel carries score, ball number, bonus, and tilt
   lamps. Panels are `--field-700` cards on `--void` with steel rules.
 - Surplus space is always `--void` with the standard vignette.
+- **Table select (added 2026-07-05, M10):** the backglass IS the table's
+  selection card — the attract-mode table browser shows one backglass per
+  registered table on a `--field-700` card; the focused card carries an
+  brass (`--brass-400`) ring, unfocused cabinets sit dim. No dedicated
+  select-screen art: a new table becomes selectable by shipping its
+  backglass. Chrome text follows §5; hints in steel.
 
 ## 9. Per-asset checklist
 

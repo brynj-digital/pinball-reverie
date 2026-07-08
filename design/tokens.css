@@ -11,6 +11,27 @@
   --field-700: #262a3e; /* raised panels, aprons */
   --ink: #07080d; /* every outline */
 
+  /* field, abyssal variant — Tidebreaker's blue-green field ramp
+     (added 2026-07-05 per the table 2 brief; STYLE-GUIDE §2) */
+  --abyss-900: #0b1e27; /* trench floor / deep shadow */
+  --abyss-800: #143240; /* abyssal field base */
+  --abyss-700: #1c4356; /* sunlit-water panels, upper field */
+  --abyss-500: #143641; /* verdigris wall/rail body (steel-500 analog) */
+  --abyss-300: #37707e; /* verdigris wall/rail highlight (steel-300 analog) */
+
+  /* field, carnival variant — Midnight Midway's warm plum field ramp
+     (added 2026-07-05 per the table 3 brief; STYLE-GUIDE §2) */
+  --carnival-900: #1c0f26; /* park-edge dark / deep shadow */
+  --carnival-800: #2b1638; /* midway field base */
+  --carnival-700: #3d1f4d; /* lit panels, ride aprons */
+  --carnival-500: #45215a; /* plum wall/rail body (steel-500 analog) */
+  --carnival-300: #8a4d9e; /* plum wall/rail highlight (steel-300 analog) */
+
+  /* marquee bulb — incandescent white-gold for bulb strings and chase lamps
+     (added 2026-07-05; NOT brass — brass stays ball-touch only) */
+  --bulb-200: #fff4d6; /* hot filament core */
+  --bulb-400: #ffdf9e; /* glow body */
+
   /* steel blues — guides, rails, secondary structure */
   --steel-300: #7f8fc9;
   --steel-500: #4a5680;
@@ -33,6 +54,9 @@
   --magenta-600: #b01860;
   --cyan-400: #2fc9d6;
   --cyan-600: #147986;
+  --green-400: #39ff14; /* DAYGLO green: default elevated ramp glass (M11 beds);
+                           ramp glass is per-table — Tidebreaker uses cyan-400 */
+  --green-600: #1cae0d;
   --violet-400: #8c6bff; /* the Reverie signature hue */
   --violet-600: #4e37a8;
   --alert-400: #ff5555; /* tilt, danger lamps */
@@ -48,4 +72,6 @@
   /* debug overlay — engineering only, never in shipped art */
   --debug-body: #3ddc84;
   --debug-sensor: #ff9f43;
+  --debug-raised: #59a7ff; /* layer 1 bodies (ramps, habitrails) */
+  --debug-subway: #b06bff; /* layer -1 bodies */
 }
