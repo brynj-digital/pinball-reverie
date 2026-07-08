@@ -26,6 +26,13 @@ import {
   fmtScore,
 } from "../render/dmd/DmdScene";
 import { SettingsPanel } from "../ui/SettingsPanel";
+import {
+  TouchControls,
+  loadTouchPref,
+  resolveTouchEnabled,
+  saveTouchPref,
+  type TouchPref,
+} from "../ui/TouchControls";
 import { TableSelect } from "../ui/TableSelect";
 import { TABLE_ORDER, saveTableId } from "../table/specs";
 import { bakeDmdFrames } from "../render/dmd/bake";
@@ -104,6 +111,8 @@ export class Game {
   private view3d: View3D = loadView3D();
   private renderSwapBusy = false;
   private input: Input;
+  private touch: TouchControls;
+  private touchPref: TouchPref = loadTouchPref();
 
   private panel: TuningPanel;
   private appliedTuningVersion = -1; // force one application on the first frame
@@ -234,6 +243,16 @@ export class Game {
     this.renderer.init(this.table.renderData);
     if (this.renderMode === "3d") void this.applyRenderMode("3d", true);
     this.input = new Input();
+    // Touch overlay: a sibling of the canvas in #app so it survives the 2D↔3D
+    // canvas swap (applyRenderMode replaces the canvas node). Hidden unless the
+    // resolved preference wants it. Midway's mallet (flippers.upper) shares the
+    // right zone, matching the default keyboard wiring.
+    this.touch = new TouchControls(
+      this.input,
+      canvas.parentElement ?? document.body,
+      spec.geometry.flippers.upper != null,
+    );
+    this.touch.setEnabled(resolveTouchEnabled(this.touchPref));
     this.input.onReset(() => {
       // mid-drain the respawn would zero drainTimer and skip onBallLost —
       // a free ball; also inert while paused or outside play/attract
@@ -262,6 +281,9 @@ export class Game {
       this.input,
       (open) => {
         this.paused = open;
+        // hide the touch zones behind the overlay so a held flipper can't stick
+        if (open) this.touch.setEnabled(false);
+        else this.touch.setEnabled(resolveTouchEnabled(this.touchPref));
       },
       {
         get: () => this.renderMode,
@@ -280,6 +302,14 @@ export class Game {
         },
       },
       spec.id,
+      {
+        get: () => this.touchPref,
+        set: (pref) => {
+          this.touchPref = pref;
+          saveTouchPref(pref);
+          this.touch.setEnabled(resolveTouchEnabled(pref));
+        },
+      },
     );
     // Table select (M10): attract-phase browsing of the backglass cards.
     // Confirming the installed table just starts the game; confirming the

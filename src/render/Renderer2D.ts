@@ -35,6 +35,8 @@ export class Renderer2D implements Renderer {
   private lastCharge = 0;
   private strikeAt = -Infinity; // performance.now()/1000 of the last release
   private lastOx = 0; // table centering offset (device px), for panel layout
+  private lastTop = 0; // device px reserved above the table (portrait DMD strip)
+  private portrait = false; // portrait layout: DMD strip on top, no side panel
   // frame-time diagnostics for the HUD (worst frame + slow count, trailing 2s)
   private frameTimes: number[] = [];
   private lastFrameAt = 0;
@@ -104,21 +106,40 @@ export class Renderer2D implements Renderer {
       canvas.height = h;
     }
 
-    // world transform: metres → pixels, camera scroll + shake, table centred
-    const s = h / camera.viewH;
+    // Portrait (taller than wide): reserve a full-width 4:1 DMD strip on top,
+    // table below — the classic layout the touch scheme is built around (style
+    // guide §8). Landscape keeps the side-panel DMD in the left void.
+    this.portrait = w < h;
+    const inset = 12; // css px around the top strip
+    // strip is a full-width 4:1 DMD plus inset padding above and below
+    this.lastTop = this.portrait
+      ? Math.round(((canvas.clientWidth - inset * 2) / 4 + inset * 2) * dpr)
+      : 0;
+    const topPx = this.lastTop;
+    const availH = h - topPx;
+
+    // world transform: metres → pixels, camera scroll + shake, table centred.
+    // Clamp scale so the table fits BOTH axes — height binds in landscape (as
+    // before), width binds on a narrow portrait phone — and always shows
+    // exactly camera.viewH metres, so vertical scroll matches across layouts.
+    const s = Math.min(availH / camera.viewH, w / this.table.width);
     const ox = (w - s * this.table.width) / 2;
+    const oy = topPx + (availH - s * camera.viewH) / 2;
     this.lastOx = ox;
 
-    // Background: the art column is opaque, so only the side margins need
-    // the void fill — a full-canvas fill would repaint ~2× the pixels.
+    // Background void fill. Landscape only needs the two side margins (the art
+    // column is opaque); portrait/letterboxed layouts get a full fill so the
+    // top strip and any vertical margin read as void.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = "#0c0d14";
-    if (ox > 0) {
+    if (topPx > 0 || oy > 0.5) {
+      ctx.fillRect(0, 0, w, h);
+    } else if (ox > 0) {
       ctx.fillRect(0, 0, Math.ceil(ox), h);
       ctx.fillRect(Math.floor(ox + s * this.table.width), 0, Math.ceil(ox) + 1, h);
     }
 
-    ctx.setTransform(s, 0, 0, s, ox + camera.shakeX * s, -(camera.y + camera.shakeY) * s);
+    ctx.setTransform(s, 0, 0, s, ox + camera.shakeX * s, oy - (camera.y + camera.shakeY) * s);
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
 
@@ -306,16 +327,24 @@ export class Renderer2D implements Renderer {
   }
 
   /**
-   * Composite the DMD into the side panel (plan §4.5 landscape layout): the
-   * void left of the table if it's wide enough, else a compact strip under
-   * the fps readout. Steel bezel with a chrome top rim per the style guide.
+   * Composite the DMD. Portrait (style guide §8): a full-width 4:1 strip
+   * across the reserved top, no backglass (no room). Landscape (plan §4.5):
+   * the void left of the table if it's wide enough, else a compact strip under
+   * the fps readout, with backglass below. Steel bezel + chrome top rim.
    */
   private drawDmdPanel(dmd: HTMLCanvasElement): void {
     const { ctx } = this;
     const dpr = this.dprEff;
-    const margin = this.lastOx / dpr; // void left of the table, CSS px
+    const inset = 12;
+    const wide = this.lastOx / dpr >= 240; // landscape void wide enough for a big panel
     let w: number, x: number, y: number;
-    if (margin >= 240) {
+    if (this.portrait) {
+      // full-width strip across the top, matching the reserved lastTop band
+      w = this.canvas.clientWidth - inset * 2;
+      x = inset;
+      y = inset;
+    } else if (wide) {
+      const margin = this.lastOx / dpr;
       w = Math.min(margin - 32, 560);
       x = (margin - w) / 2;
       y = 28;
@@ -340,8 +369,9 @@ export class Renderer2D implements Renderer {
     ctx.stroke();
     ctx.drawImage(dmd, x, y, w, h);
 
-    // backglass art below the DMD when the panel is wide enough (§4.5)
-    if (this.backglass && margin >= 240) {
+    // backglass art below the DMD when the panel is wide enough (§4.5); no room
+    // for it in the portrait top strip
+    if (this.backglass && !this.portrait && wide) {
       const bw = w;
       const bh = bw * 1.2;
       const by = y + h + 22;

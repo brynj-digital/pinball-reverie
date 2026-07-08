@@ -265,6 +265,17 @@ See [previews/layouts.html](previews/layouts.html).
 - **Portrait:** DMD strip (4:1) full-width at top, table below at native
   aspect; touch zones: lower left/right halves = flippers, drag zone
   bottom-right = plunger.
+- **Touch controls (added 2026-07-08):** a transparent overlay of pointer
+  zones, shown on touch devices (Auto) or forced On/Off in settings; keyboard
+  and touch are interchangeable through the same `Input`. Flipper zones use
+  `--violet-400` at ~10% (→22% while held); the plunger zone is a dashed
+  `--cyan-400` box (hold to charge, release to launch). Two conventions beyond
+  the coarse zones above: the **right flipper zone also works the upper
+  flipper** where a table has one (Midway's mallet), mirroring the default
+  keyboard wiring; and a **swipe on the open table area = nudge** (dominant
+  axis → left/right/up; a downward flick is not a nudge). No discrete
+  upper-flipper or nudge buttons — the zone model stays two-handed. Zones are
+  the same in portrait and landscape (positioned by viewport fraction).
 - **Landscape:** table in a full-height center column; left panel carries the
   table logo + DMD; right panel carries score, ball number, bonus, and tilt
   lamps. Panels are `--field-700` cards on `--void` with steel rules.

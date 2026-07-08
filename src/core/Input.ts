@@ -87,6 +87,10 @@ export class Input {
   bindings: Bindings;
 
   private down = new Set<string>();
+  // Touch backend: an on-screen control layer (TouchControls) writes here and
+  // sync() ORs it with the keyboard, so touch and keys are fully interchangeable
+  // (the plan §4.5 promise this class was scaffolded for).
+  private touch = { left: false, right: false, upper: false, plunger: false };
   private pulse = { left: false, right: false, upper: false };
   private capturingText = false;
   private typed: string[] = [];
@@ -101,6 +105,7 @@ export class Input {
     target.addEventListener("keyup", (e) => this.onKey(e, false));
     target.addEventListener("blur", () => {
       this.down.clear();
+      this.touch.left = this.touch.right = this.touch.upper = this.touch.plunger = false;
       this.sync();
     });
   }
@@ -136,6 +141,41 @@ export class Input {
   /** Next typed character ("A"–"Z", "\b" for Backspace, "←"/"→" for the arrows). Clears on read. */
   consumeTyped(): string | null {
     return this.typed.shift() ?? null;
+  }
+
+  /**
+   * Touch backend — the on-screen control overlay drives the same state a key
+   * would. A flipper's rising edge latches `pulse` so a sub-frame tap still
+   * flips (and cycles a letter during initials entry), exactly like a keydown.
+   */
+  setTouchFlipper(side: "left" | "right" | "upper", on: boolean): void {
+    if (on && !this.touch[side]) this.pulse[side] = true;
+    this.touch[side] = on;
+    this.sync();
+  }
+
+  setTouchPlunger(on: boolean): void {
+    this.touch.plunger = on;
+    this.sync();
+  }
+
+  /** Fire the discrete actions through the same handlers a key would. */
+  fireStart(): void {
+    this.startHandlers.forEach((fn) => fn());
+  }
+
+  fireNudge(dir: "left" | "right" | "up"): void {
+    this.nudgeHandlers.forEach((fn) => fn(dir));
+  }
+
+  fireReset(): void {
+    this.resetHandlers.forEach((fn) => fn());
+  }
+
+  /** Drop every held touch (overlay hidden, settings opened, window blurred). */
+  releaseTouch(): void {
+    this.touch.left = this.touch.right = this.touch.upper = this.touch.plunger = false;
+    this.sync();
   }
 
   /** True if the flipper was tapped since the last poll, even sub-frame. Clears on read. */
@@ -225,10 +265,10 @@ export class Input {
   }
 
   private sync(): void {
-    this.state.left = this.bindings.left.some((c) => this.down.has(c));
-    this.state.right = this.bindings.right.some((c) => this.down.has(c));
-    this.state.upper = this.bindings.upper.some((c) => this.down.has(c));
-    this.state.plunger = this.bindings.plunger.some((c) => this.down.has(c));
+    this.state.left = this.touch.left || this.bindings.left.some((c) => this.down.has(c));
+    this.state.right = this.touch.right || this.bindings.right.some((c) => this.down.has(c));
+    this.state.upper = this.touch.upper || this.bindings.upper.some((c) => this.down.has(c));
+    this.state.plunger = this.touch.plunger || this.bindings.plunger.some((c) => this.down.has(c));
   }
 }
 

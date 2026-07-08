@@ -2,6 +2,7 @@ import { saveTuning, type Tuning } from "../tuning";
 import { TuningPanel } from "../debug/TuningPanel";
 import type { RenderMode, View3D } from "../render/Renderer";
 import { TABLE_ORDER, TABLE_SPECS, saveTableId, type TableId } from "../table/specs";
+import type { TouchPref } from "./TouchControls";
 import {
   ACTION_LABELS,
   Input,
@@ -42,6 +43,7 @@ export class SettingsPanel {
     private renderMode: { get: () => RenderMode; set: (mode: RenderMode) => Promise<void> },
     private view3d: { get: () => View3D; set: (view: View3D) => void },
     private tableId: TableId,
+    private touch: { get: () => TouchPref; set: (pref: TouchPref) => void },
   ) {
     this.root = document.createElement("div");
     this.root.className = "settings-overlay";
@@ -62,6 +64,7 @@ export class SettingsPanel {
     card.appendChild(this.tableRow());
     card.appendChild(this.rendererRow());
     card.appendChild(this.view3dRow());
+    card.appendChild(this.touchRow());
     card.appendChild(this.tuningVisibleRow());
 
     const keysTitle = document.createElement("h3");
@@ -188,6 +191,29 @@ export class SettingsPanel {
     label();
     btn.onclick = () => {
       this.tuningPanel.setVisible(!this.tuningPanel.visible);
+      label();
+    };
+    this.valueRefreshers.push(label);
+    row.append(span, btn);
+    return row;
+  }
+
+  /**
+   * On-screen touch controls: Auto (show on touch devices) / On / Off. Cycles
+   * on click; the setter persists and shows/hides the overlay live.
+   */
+  private touchRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "key-row";
+    const span = document.createElement("span");
+    span.textContent = "Touch controls";
+    const btn = document.createElement("button");
+    const LABELS: Record<TouchPref, string> = { auto: "AUTO", on: "ON", off: "OFF" };
+    const NEXT: Record<TouchPref, TouchPref> = { auto: "on", on: "off", off: "auto" };
+    const label = () => (btn.textContent = LABELS[this.touch.get()]);
+    label();
+    btn.onclick = () => {
+      this.touch.set(NEXT[this.touch.get()]);
       label();
     };
     this.valueRefreshers.push(label);
