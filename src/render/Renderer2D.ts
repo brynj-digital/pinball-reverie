@@ -141,7 +141,10 @@ export class Renderer2D implements Renderer {
     // centring only acts when the whole table fits (viewH capped at tableH).
     const s = Math.min(availH / camera.viewH, w / this.table.width);
     const ox = (w - s * this.table.width) / 2;
-    const oy = topPx + (availH - s * camera.viewH) / 2;
+    // Portrait pins the table flush under the DMD strip — any surplus (whole
+    // table fits) becomes void below the drain, never a gap between the DMD
+    // and the table top. Landscape centres in the side-panel layout as before.
+    const oy = this.portrait ? topPx : topPx + (availH - s * camera.viewH) / 2;
     this.lastOx = ox;
 
     // Background void fill. Landscape only needs the two side margins (the art

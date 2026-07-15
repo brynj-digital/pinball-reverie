@@ -14,6 +14,9 @@ body {
   display: block;
   width: 100vw;
   height: 100vh;
+  /* mobile: size to the dynamic viewport so the DMD strip stays pinned to the
+     visible top and the flippers aren't cut off behind the browser toolbar */
+  height: 100dvh;
 }
 
 .tuning-panel {
