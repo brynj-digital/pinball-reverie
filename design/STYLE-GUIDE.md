@@ -268,8 +268,13 @@ See [previews/layouts.html](previews/layouts.html).
 - **Touch controls (added 2026-07-08):** a transparent overlay of pointer
   zones, shown on touch devices (Auto) or forced On/Off in settings; keyboard
   and touch are interchangeable through the same `Input`. Flipper zones use
-  `--violet-400` at ~10% (→22% while held); the plunger zone is a dashed
-  `--cyan-400` box (hold to charge, release to launch). Two conventions beyond
+  `--violet-400` at ~10% (→22% while held); the plunger zone (hold to charge,
+  release to launch) carries **no visible chrome** — like the nudge zone, its
+  hit area is invisible so nothing sits permanently over the playfield corner
+  (removed 2026-07-14) — and it **captures pointers only while the ball is in
+  the shooter lane** during play (always outside play, where the plunger
+  button starts/confirms); otherwise corner touches fall through to the right
+  flipper beneath it. Two conventions beyond
   the coarse zones above: the **right flipper zone also works the upper
   flipper** where a table has one (Midway's mallet), mirroring the default
   keyboard wiring; and a **swipe on the open table area = nudge** (dominant

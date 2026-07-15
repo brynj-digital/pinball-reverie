@@ -135,6 +135,49 @@ try {
     });
     check("plunger tap in attract reaches Input (opens table browser)", browserOpen);
 
+    // ── plunger-zone gating: captures only while the ball is at the plunger ──
+    // Confirm the focused (installed) table → startGame; the ball spawns on
+    // the plunger, so the zone must still capture. Synthetic events with an
+    // explicit hold (like the flipper check above) — the plunger has no
+    // sub-frame tap latch, so a real tap's timing would be luck.
+    const gate = await page.evaluate(async () => {
+      const z = document.querySelector<HTMLElement>(".touch-plunger")!;
+      const r = z.getBoundingClientRect();
+      const opts = {
+        pointerId: 1, // Chromium's always-live mouse pointer — any other id
+        // makes the handler's setPointerCapture throw on synthetic events
+        clientX: r.x + r.width / 2,
+        clientY: r.y + r.height / 2,
+        bubbles: true,
+      };
+      const hold = async (ms: number) => {
+        z.dispatchEvent(new PointerEvent("pointerdown", opts));
+        await new Promise((res) => setTimeout(res, ms));
+        z.dispatchEvent(new PointerEvent("pointerup", opts));
+      };
+      await hold(150); // confirm the focused table → play, ball in lane
+      await new Promise((res) => setTimeout(res, 700));
+      const activeInLane = getComputedStyle(z).pointerEvents !== "none";
+      await hold(1500); // full charge → release launches the ball up the lane
+      // once the ball leaves the lane the zone must go inert, and the corner
+      // must hit-test through to the right flipper underneath
+      for (let i = 0; i < 40; i++) {
+        await new Promise((res) => setTimeout(res, 100));
+        if (getComputedStyle(z).pointerEvents === "none") {
+          const under = document.elementFromPoint(opts.clientX, opts.clientY);
+          return {
+            activeInLane,
+            wentInert: true,
+            fellThrough: !!under?.classList.contains("touch-flipper-right"),
+          };
+        }
+      }
+      return { activeInLane, wentInert: false, fellThrough: false };
+    });
+    check("plunger zone captures while the ball rests in the lane", gate.activeInLane);
+    check("plunger zone goes inert once the ball leaves the lane", gate.wentInert);
+    check("inert corner falls through to the right flipper", gate.fellThrough);
+
     await page.screenshot({ path: join(shots, "portrait.png") });
     check("no console/page errors in portrait", errs.length === 0, errs.slice(0, 3).join(" | "));
     await ctx.close();

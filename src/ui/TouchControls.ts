@@ -60,6 +60,9 @@ const SWIPE_MAX_MS = 500;
 export class TouchControls {
   private root: HTMLDivElement;
   private enabled = false;
+  private plungerZone!: HTMLDivElement; // assigned in buildPlungerZone (ctor)
+  private releasePlunger: () => void = () => {};
+  private plungerActive = true;
 
   constructor(
     private input: Input,
@@ -85,6 +88,20 @@ export class TouchControls {
     this.enabled = on;
     this.root.style.display = on ? "block" : "none";
     if (!on) this.input.releaseTouch();
+  }
+
+  /**
+   * The plunger zone sits over the right flipper's corner, so it only
+   * captures pointers while the plunger can actually act — Game gates this
+   * on the ball sitting in the shooter lane (always on outside play, where
+   * the plunger button starts/confirms). Inert, touches fall through to the
+   * flipper zone below; a hold in flight is force-released so it can't stick.
+   */
+  setPlungerZoneActive(on: boolean): void {
+    if (on === this.plungerActive) return;
+    this.plungerActive = on;
+    this.plungerZone.style.pointerEvents = on ? "auto" : "none";
+    if (!on) this.releasePlunger();
   }
 
   private buildFlipperZone(side: "left" | "right"): void {
@@ -115,10 +132,17 @@ export class TouchControls {
   private buildPlungerZone(): void {
     const zone = document.createElement("div");
     zone.className = "touch-zone touch-plunger";
+    this.plungerZone = zone;
     const active = new Set<number>();
     const press = (on: boolean) => {
       this.input.setTouchPlunger(on);
       zone.classList.toggle("active", on);
+    };
+    // deactivation mid-hold clears the gesture; the eventual pointerup finds
+    // an empty set and no-ops (release() only fires on a successful delete)
+    this.releasePlunger = () => {
+      active.clear();
+      press(false);
     };
     zone.addEventListener("pointerdown", (e) => {
       zone.setPointerCapture(e.pointerId);

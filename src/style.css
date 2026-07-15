@@ -170,21 +170,15 @@ body {
   background: rgba(140, 107, 255, 0.22);
 }
 
-/* bottom-right drag zone = plunger (cyan), stacked above the right flipper */
+/* bottom-right drag zone = plunger, stacked above the right flipper. No
+   visible chrome (like the nudge zone) — the hold-to-charge hit area is there
+   but invisible, so nothing sits permanently over the playfield corner. */
 .touch-plunger {
   right: 0;
   bottom: 0;
   width: 22%;
   height: 20%;
   z-index: 2;
-  border: 1.5px dashed rgba(47, 201, 214, 0.55); /* --cyan-400 */
-  border-radius: 8px 0 0 0;
-  background: rgba(47, 201, 214, 0.08);
-  transition: background 0.06s;
-}
-
-.touch-plunger.active {
-  background: rgba(47, 201, 214, 0.24);
 }
 
 /* open table area above the flippers = swipe-to-nudge (no visible chrome) */
@@ -193,6 +187,36 @@ body {
   left: 0;
   right: 0;
   height: 60%;
+}
+
+/* Attract-screen options button — the touch route into settings (Esc's job on
+   keyboard). Above the table-select carousel (15), below settings (20). 44px
+   hit target per the touch-zone sizing rule. Colors reuse the settings-card
+   chrome + violet signature hue — nothing new for the style guide. */
+.attract-gear {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 16;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: rgba(20, 23, 36, 0.75);
+  border: 1px solid #2c3352;
+  border-radius: 50%;
+  color: #aab2d0;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.attract-gear:hover,
+.attract-gear:active {
+  color: #dfe4ff;
+  border-color: rgba(140, 107, 255, 0.6);
 }
 
 .settings-overlay {

@@ -58,6 +58,14 @@ const TILT_LIMIT = 3;
 type Phase = "attract" | "play" | "initials" | "gameOver";
 const INITIALS_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 
+/** Inline gear glyph for the attract-screen options button (Feather
+ * "settings" outline — strokes only, tinted via currentColor). */
+const GEAR_SVG =
+  '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" ' +
+  'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<circle cx="12" cy="12" r="3.2"/>' +
+  '<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+
 /** Persisted separately from Tuning: a display mode, not physics feel —
  * the tuning panel's reset-to-defaults must not flip the renderer. */
 const RENDER_MODE_KEY = "pinball-render-mode-v1";
@@ -142,6 +150,8 @@ export class Game {
   private gameOverUntil = 0;
   private settings: SettingsPanel;
   private tableSelect: TableSelect;
+  private gearBtn: HTMLButtonElement;
+  private gearVisible = false;
   private paused = false;
   private attractT = 0;
   // high-score initials entry state (phase "initials")
@@ -324,9 +334,31 @@ export class Game {
       (name) => this.audio.sfx(name),
     );
     this.input.onEscape(() => {
-      if (this.tableSelect.open) this.tableSelect.hide();
-      else this.settings.toggle();
+      // Options live on the attract / table-select step only. Esc there backs
+      // out of the carousel if it's up, otherwise toggles the settings overlay.
+      // In play Esc is a plain pause toggle (no overlay); during initials entry
+      // and game-over it does nothing.
+      if (this.phase === "attract") {
+        if (this.tableSelect.open) this.tableSelect.hide();
+        else this.settings.toggle();
+      } else if (this.phase === "play") {
+        this.paused = !this.paused;
+      }
     });
+    // Options gear (touch parity): Esc has no touch equivalent, so the attract
+    // screen shows a tappable gear. It sits above the table-select carousel
+    // (z-index) so options stay reachable through the whole select step; the
+    // update loop shows/hides it as the phase changes.
+    this.gearBtn = document.createElement("button");
+    this.gearBtn.className = "attract-gear";
+    this.gearBtn.title = "Options (Esc)";
+    this.gearBtn.setAttribute("aria-label", "Options");
+    this.gearBtn.innerHTML = GEAR_SVG;
+    this.gearBtn.style.display = "none"; // first update() shows it in attract
+    this.gearBtn.onclick = () => {
+      if (this.phase === "attract" && !this.paused) this.settings.toggle();
+    };
+    document.body.appendChild(this.gearBtn);
 
     this.scoreScene = new ScoreScene(() => ({
       score: this.scoring.total,
@@ -492,8 +524,17 @@ export class Game {
       }
     }
 
-    // settings open: freeze the game but keep drawing it; drain any tap
-    // pulses so keys pressed behind the overlay don't fire on resume
+    // options gear lives on the attract/table-select step only; hidden while
+    // the settings overlay is up (paused) and everywhere else
+    const gearOn = this.phase === "attract" && !this.paused;
+    if (gearOn !== this.gearVisible) {
+      this.gearVisible = gearOn;
+      this.gearBtn.style.display = gearOn ? "" : "none";
+    }
+
+    // paused (settings overlay open in attract, or Esc pause in play): freeze
+    // the game but keep drawing it; drain any tap pulses so keys pressed while
+    // frozen don't fire on resume
     if (this.paused) {
       this.input.consumeTap("left");
       this.input.consumeTap("right");
@@ -562,6 +603,11 @@ export class Game {
       if (!browsing) this.startGame();
       else if (plungerEdge) this.tableSelect.confirm();
     }
+    // The touch plunger zone overlaps the right flipper's corner: capture
+    // pointers only while a press could do something — ball at the plunger
+    // during play, or any other phase (start / table-select / initials
+    // confirm). Otherwise corner touches fall through to the right flipper.
+    this.touch.setPlungerZoneActive(this.phase !== "play" || this.ballInLane());
 
     for (const b of this.bumpers) b.update(dt);
     for (const sl of this.slings) sl.update(dt);
@@ -633,10 +679,16 @@ export class Game {
     this.renderer.drawFrame(this.snapshot(), this.camera);
   }
 
-  private updatePlunger(dt: number, held: boolean, t: Tuning): void {
+  /** Ball is in the shooter lane, where the plunger can act on it. Gates both
+   * plunger charging and the touch plunger zone's pointer capture. */
+  private ballInLane(): boolean {
     const g = this.spec.geometry.table;
     const p = this.ball.body.getPosition();
-    const inLane = p.x > g.laneWallX && p.y > g.laneTopY;
+    return p.x > g.laneWallX && p.y > g.laneTopY;
+  }
+
+  private updatePlunger(dt: number, held: boolean, t: Tuning): void {
+    const inLane = this.ballInLane();
 
     if (held && inLane) {
       this.charging = true;
