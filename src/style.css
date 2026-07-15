@@ -233,6 +233,7 @@ body {
 }
 
 .settings-card {
+  position: relative;
   width: 340px;
   padding: 18px 22px;
   background: #141724;
@@ -241,6 +242,33 @@ body {
   border-radius: 8px;
   color: #aab2d0;
   font-size: 12px;
+}
+
+/* Close button — the touch counterpart to Esc. 44px hit target per the
+   touch-zone sizing rule; glyph-only so it reads as chrome, not a key row. */
+.settings-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #aab2d0;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-close:hover,
+.settings-close:active {
+  color: #dfe4ff;
 }
 
 .settings-card h2 {

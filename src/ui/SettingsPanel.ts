@@ -60,6 +60,16 @@ export class SettingsPanel {
     title.textContent = "Settings";
     card.appendChild(title);
 
+    // touch route out of the panel — Esc doesn't exist on mobile
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "settings-close";
+    closeBtn.setAttribute("aria-label", "Close settings");
+    closeBtn.textContent = "✕";
+    closeBtn.onclick = () => {
+      if (this.open) this.toggle();
+    };
+    card.appendChild(closeBtn);
+
     card.appendChild(this.sliderRow("SFX volume", "sfxVolume", 0));
     card.appendChild(this.sliderRow("Music volume", "musicVolume", 0));
     // performance option: fewer pixels to paint at the cost of sharpness.
