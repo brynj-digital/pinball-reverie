@@ -5,6 +5,8 @@ vertically-scrolling playfields, realistic planar physics (Planck.js at a fixed 
 128×32 amber dot-matrix display for score and event animations, and original chiptune audio.
 Three original tables ship in the lineup: **Moondial**, **Tidebreaker**, and **Midnight Midway**.
 
+**▶ Play it now: [brynj-digital.github.io/pinball-reverie](https://brynj-digital.github.io/pinball-reverie/)** — deployed from `main` via GitHub Pages.
+
 ```
 npm install
 npm run dev      # Vite dev server

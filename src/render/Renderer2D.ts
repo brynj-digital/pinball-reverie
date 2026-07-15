@@ -95,6 +95,24 @@ export class Renderer2D implements Renderer {
 
   private dprEff = 1; // native DPR × renderScale, shared with HUD/panel layout
 
+  /** Css px reserved above the table in portrait: a full-width 4:1 DMD strip
+   * plus inset padding above and below (style guide §8). 0 in landscape. */
+  private topStripCss(cssW: number, cssH: number): number {
+    const inset = 12;
+    return cssW < cssH ? (cssW - inset * 2) / 4 + inset * 2 : 0;
+  }
+
+  effectiveViewH(baseViewH: number): number {
+    const cssW = this.canvas.clientWidth;
+    const cssH = this.canvas.clientHeight;
+    if (!cssW || !cssH || !this.table) return baseViewH;
+    const availH = cssH - this.topStripCss(cssW, cssH);
+    // Metres visible when width binds the scale; ≤ baseViewH whenever height
+    // binds, so the max() only acts on narrow (width-bound) screens.
+    const widthBound = availH * (this.table.width / cssW);
+    return Math.min(this.table.height, Math.max(baseViewH, widthBound));
+  }
+
   drawFrame(snap: WorldSnapshot, camera: Camera): void {
     const { ctx, canvas } = this;
     const dpr = (window.devicePixelRatio || 1) * (snap.renderScale || 1);
@@ -110,18 +128,17 @@ export class Renderer2D implements Renderer {
     // table below — the classic layout the touch scheme is built around (style
     // guide §8). Landscape keeps the side-panel DMD in the left void.
     this.portrait = w < h;
-    const inset = 12; // css px around the top strip
-    // strip is a full-width 4:1 DMD plus inset padding above and below
-    this.lastTop = this.portrait
-      ? Math.round(((canvas.clientWidth - inset * 2) / 4 + inset * 2) * dpr)
-      : 0;
+    this.lastTop = Math.round(
+      this.topStripCss(canvas.clientWidth, canvas.clientHeight) * dpr,
+    );
     const topPx = this.lastTop;
     const availH = h - topPx;
 
     // world transform: metres → pixels, camera scroll + shake, table centred.
-    // Clamp scale so the table fits BOTH axes — height binds in landscape (as
-    // before), width binds on a narrow portrait phone — and always shows
-    // exactly camera.viewH metres, so vertical scroll matches across layouts.
+    // Clamp scale so the table fits BOTH axes — height binds in landscape,
+    // width binds on a narrow portrait phone. Game sizes camera.viewH via
+    // effectiveViewH(), so the window normally fills availH exactly; vertical
+    // centring only acts when the whole table fits (viewH capped at tableH).
     const s = Math.min(availH / camera.viewH, w / this.table.width);
     const ox = (w - s * this.table.width) / 2;
     const oy = topPx + (availH - s * camera.viewH) / 2;
