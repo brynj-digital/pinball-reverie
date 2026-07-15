@@ -308,6 +308,7 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(7, 8, 13, 0.78);
+  touch-action: none; /* keep horizontal swipes as pointermoves, not browser pans */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -326,10 +327,20 @@ body {
 .tablesel-row {
   display: flex;
   gap: 26px;
+  /* three cards outgrow a phone: clip (no native scroll — it would fight the
+     swipe gesture) and let applyFocus scrollIntoView-center the lit card;
+     the padding keeps the focus glow clear of the clip edges */
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 24px 24px;
+  /* being a scroll container makes the row the end of the touch-action
+     chain — restate none here or card swipes die in pointercancel */
+  touch-action: none;
 }
 
 .tablesel-card {
   width: min(240px, 38vw);
+  min-width: 168px; /* stop flex-shrink: past this the row clips and the lit card centres instead */
   padding: 10px 10px 12px;
   background: #141724;
   border: 1px solid #2c3352;

@@ -3,9 +3,15 @@ import { fmtScore } from "../render/dmd/DmdScene";
 import { HighScores } from "../game/HighScores";
 import { TABLE_ORDER, TABLE_SPECS, type TableId } from "../table/specs";
 import { TABLE_ASSETS } from "../table/assets";
+import { touchAvailable } from "./TouchControls";
 
 /** Abandoned browsing returns to plain attract after this long. */
 const IDLE_CLOSE_S = 12;
+
+// Swipe thresholds shared with TouchControls' nudge gesture: shorter is a
+// tap, slower is a resting finger.
+const SWIPE_MIN_PX = 34;
+const SWIPE_MAX_MS = 500;
 
 /**
  * Attract-mode table select (M10): the choice is made from the backglass
@@ -25,6 +31,7 @@ export class TableSelect {
   private focused: TableId;
   private idleTimer: number | undefined;
   private switching = false;
+  private swipeConsumed = false;
 
   constructor(
     private current: TableId,
@@ -70,6 +77,12 @@ export class TableSelect {
 
       card.onclick = () => {
         if (!this.open || this.switching) return;
+        // a swipe ends with the browser synthesizing a click on whichever
+        // card the finger lifted over — that lift must not focus/confirm
+        if (this.swipeConsumed) {
+          this.swipeConsumed = false;
+          return;
+        }
         if (this.focused === id) this.confirm();
         else this.focus(id);
       };
@@ -81,7 +94,37 @@ export class TableSelect {
     this.hint.className = "tablesel-hint";
     this.root.appendChild(this.hint);
 
+    this.attachSwipe();
     document.body.appendChild(this.root);
+  }
+
+  /**
+   * Touch: a horizontal flick anywhere on the overlay cycles the focus,
+   * carousel-style — swipe left pulls in the next table, right the previous.
+   * Same thresholds as the nudge gesture; one cycle per gesture. No pointer
+   * capture: card taps must keep targeting the cards.
+   */
+  private attachSwipe(): void {
+    const gestures = new Map<number, { x: number; y: number; t: number; fired: boolean }>();
+    this.root.addEventListener("pointerdown", (e) => {
+      this.swipeConsumed = false;
+      gestures.set(e.pointerId, { x: e.clientX, y: e.clientY, t: performance.now(), fired: false });
+    });
+    this.root.addEventListener("pointermove", (e) => {
+      const g = gestures.get(e.pointerId);
+      if (!g || g.fired || !this.open || this.switching) return;
+      const dx = e.clientX - g.x;
+      const dy = e.clientY - g.y;
+      if (Math.hypot(dx, dy) < SWIPE_MIN_PX) return;
+      g.fired = true; // spend the gesture — slow or vertical never re-arms
+      if (performance.now() - g.t > SWIPE_MAX_MS) return;
+      if (Math.abs(dx) <= Math.abs(dy)) return;
+      this.swipeConsumed = true; // eat the click this lift will synthesize
+      this.cycle(dx < 0 ? 1 : -1);
+    });
+    const end = (e: PointerEvent) => gestures.delete(e.pointerId);
+    this.root.addEventListener("pointerup", end);
+    this.root.addEventListener("pointercancel", end);
   }
 
   show(): void {
@@ -89,7 +132,9 @@ export class TableSelect {
     this.open = true;
     this.focused = this.current; // always reopen on what's installed
     this.applyFocus();
-    this.hint.textContent = "FLIPPERS CHOOSE · PLUNGER PLAYS · ESC BACKS OUT";
+    this.hint.textContent = touchAvailable()
+      ? "SWIPE OR TAP TO CHOOSE · TAP THE LIT TABLE TO PLAY"
+      : "FLIPPERS CHOOSE · PLUNGER PLAYS · ESC BACKS OUT";
     this.root.style.display = "flex";
     this.sfx("rollover");
     this.armIdleClose();
@@ -130,7 +175,13 @@ export class TableSelect {
   }
 
   private applyFocus(): void {
-    for (const [id, card] of this.cards) card.classList.toggle("focused", id === this.focused);
+    for (const [id, card] of this.cards) {
+      card.classList.toggle("focused", id === this.focused);
+      // the row clips on narrow screens (no native scroll — it would fight
+      // the swipe gesture), so keep the lit card centred in view ourselves
+      if (id === this.focused)
+        card.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    }
   }
 
   private armIdleClose(): void {
