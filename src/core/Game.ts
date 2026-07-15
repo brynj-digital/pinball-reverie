@@ -26,6 +26,7 @@ import {
   fmtScore,
 } from "../render/dmd/DmdScene";
 import { SettingsPanel } from "../ui/SettingsPanel";
+import { PauseOverlay } from "../ui/PauseOverlay";
 import {
   TouchControls,
   loadTouchPref,
@@ -177,6 +178,7 @@ export class Game {
   private tilted = false;
   private gameOverUntil = 0;
   private settings: SettingsPanel;
+  private pauseOverlay: PauseOverlay;
   private tableSelect: TableSelect;
   private gearBtn: HTMLButtonElement;
   private gearVisible = false;
@@ -360,6 +362,10 @@ export class Game {
         },
       },
     );
+    this.pauseOverlay = new PauseOverlay(
+      () => this.setPaused(false),
+      () => this.exitGame(),
+    );
     // Table select (M10): attract-phase browsing of the backglass cards.
     // Confirming the installed table just starts the game; confirming the
     // other one persists + reloads — same contract as the settings row.
@@ -375,13 +381,13 @@ export class Game {
     this.input.onEscape(() => {
       // Options live on the attract / table-select step only. Esc there backs
       // out of the carousel if it's up, otherwise toggles the settings overlay.
-      // In play Esc is a plain pause toggle (no overlay); during initials entry
-      // and game-over it does nothing.
+      // In play Esc toggles the pause overlay (resume / exit game); during
+      // initials entry and game-over it does nothing.
       if (this.phase === "attract") {
         if (this.tableSelect.open) this.tableSelect.hide();
         else this.settings.toggle();
       } else if (this.phase === "play") {
-        this.paused = !this.paused;
+        this.setPaused(!this.paused);
       }
     });
     // Options gear (touch parity): Esc has no touch equivalent, so the attract
@@ -774,6 +780,35 @@ export class Game {
     this.plungerCharge = 0;
     this.charging = false;
     this.bus.emit("ballSpawn", {});
+  }
+
+  /** In-play pause: freeze the world and show the pause card. Touch zones
+   * hide while frozen so a held flipper can't stick across the pause — the
+   * same rule the settings overlay applies. */
+  private setPaused(on: boolean): void {
+    if (this.paused === on) return;
+    this.paused = on;
+    this.pauseOverlay.setOpen(on);
+    this.touch.setEnabled(on ? false : resolveTouchEnabled(this.touchPref));
+  }
+
+  /** Abandon the current game from the pause overlay: straight back to
+   * attract. The score is forfeited — no bonus collect, no high-score entry;
+   * a quit game isn't a completed one. */
+  private exitGame(): void {
+    if (this.phase !== "play") return;
+    this.setPaused(false);
+    this.music.stop();
+    this.tilted = false;
+    this.tiltBob = 0;
+    this.scoring.muted = false;
+    this.drainSaverEligible = false;
+    this.ballStarted = false;
+    this.saverUntil = -Infinity;
+    this.respawn();
+    this.phase = "attract";
+    this.dmdQueue.clear();
+    this.dmdQueue.setIdle(this.attractScene);
   }
 
   private startGame(): void {
