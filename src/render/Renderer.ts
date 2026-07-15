@@ -103,6 +103,14 @@ export interface Renderer {
   spawnEffect(kind: EffectKind, x: number, y: number): void;
   /** Camera style for renderers that have one (Renderer3D). */
   setView3D?(view: View3D): void;
+  /**
+   * Table-metres of height this renderer actually shows for a requested view
+   * height. Renderer2D grows it when width binds the scale (narrow screens) —
+   * without this the camera clamps to a window smaller than the screen and
+   * scroll extremes expose void past the table edges. Game feeds the result
+   * into `camera.viewH`; renderers without the method show exactly the base.
+   */
+  effectiveViewH?(baseViewH: number): number;
   /** Release GPU/DOM resources when the renderer is swapped out. */
   dispose?(): void;
 }

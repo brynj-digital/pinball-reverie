@@ -669,7 +669,14 @@ export class Game {
     this.dmdQueue.update(dt, this.dmd);
     this.dmd.render();
 
-    this.camera.viewH = Math.min(t.cameraViewH, g.table.height);
+    // Base window from tuning, widened to what the renderer really shows when
+    // width binds its scale (narrow screens) — keeps the scroll clamp at the
+    // true table edges instead of exposing void past them.
+    const baseViewH = Math.min(t.cameraViewH, g.table.height);
+    this.camera.viewH = Math.min(
+      this.renderer.effectiveViewH?.(baseViewH) ?? baseViewH,
+      g.table.height,
+    );
     const a = this.renderAlpha;
     this.camera.follow(
       this.prevBall.y + (this.ball.body.getPosition().y - this.prevBall.y) * a,
