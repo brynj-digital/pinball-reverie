@@ -343,8 +343,13 @@
       <path data-width="12" id="collision-wall-divider-1" d="M 190 82 L 190 150"/>
       <path data-width="12" id="collision-wall-divider-2" d="M 260 69 L 260 150"/>
       <path data-width="12" id="collision-wall-divider-3" d="M 330 82 L 330 150"/>
-      <!-- deflector: sheds orbit-exit balls right, away from the outlane mouth -->
-      <path data-width="12" id="collision-wall-deflector" d="M 0 585 L 40 640"/>
+      <!-- deflector chevron: the top face still sheds orbit-exit balls right,
+           away from the outlane mouth; the underside mirrors the launcher
+           run-out angle (the orbit wall's 409→520 segment, slope ~1.5) so the
+           hatch kickback grazes it at ~12° and runs OUT up-field instead of
+           being blocked flat (a single segment can't do both jobs — the two
+           faces need opposite slopes) -->
+      <path data-width="12" id="collision-wall-deflector" d="M 0 598 L 34 619 L 0 670"/>
       <!-- inlane guides: outlane channel outside, inlane inside, each ending
            tangent to its flipper base circle past the apex -->
       <path data-width="12" id="collision-wall-guide-left" d="M 52 690 L 52 905 L 174.2 938.4"/>

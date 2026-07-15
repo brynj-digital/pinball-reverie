@@ -631,10 +631,13 @@ function tidebreakerSuite(): void {
     if (hatchFired && !hatch.holding) kickMinY = Math.min(kickMinY, ball.body.getPosition().y);
   });
   // (the ball may legitimately drain again later — flippers are down; the
-  // save itself is the kickback firing it back above the sling line)
+  // save itself is the kickback firing it back above the sling line. The
+  // 0.60 bar is above the deflector chevron: an eject that clips the
+  // barrier and skims flat duds out around y≈0.64 — the old 0.72 bar let
+  // that pass because the hold point alone sits at y=0.68)
   check(
     "lit hatch kickback saves the ball",
-    hatchFired && kickMinY < 0.72,
+    hatchFired && kickMinY < 0.6,
     `minY=${kickMinY.toFixed(3)}`,
   );
   check("hatch consumes its light", !logic.kickerLit("hatch"));
