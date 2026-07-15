@@ -578,8 +578,12 @@
       <path data-width="12" id="collision-wall-divider-1" d="M 190 78 L 190 150"/>
       <path data-width="12" id="collision-wall-divider-2" d="M 260 65 L 260 150"/>
       <path data-width="12" id="collision-wall-divider-3" d="M 330 78 L 330 150"/>
-      <!-- deflector: sheds orbit-exit balls right, away from the outlane mouth -->
-      <path data-width="12" id="collision-wall-deflector" d="M 0 585 L 40 640"/>
+      <!-- deflector chevron (as on Tidebreaker): the top face still sheds
+           orbit-exit balls right, away from the outlane mouth; the underside
+           mirrors the launcher run-out angle (slope ~1.5) so the stamp
+           kickback firing up the outlane grazes it and runs OUT up-field
+           instead of being stopped dead -->
+      <path data-width="12" id="collision-wall-deflector" d="M 0 598 L 34 619 L 0 670"/>
       <!-- coaster underbrace: the strip beneath the lift hill dead-ends at
            the bed's solid back (y 588.8) — balls dropping the P-lane column
            (crest window or bell drop-off) wedged there (soak). The brace

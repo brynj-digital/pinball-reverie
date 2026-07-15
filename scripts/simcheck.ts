@@ -938,7 +938,9 @@ function midwaySuite(): void {
     if (stamp.holding) stampFired = true;
     if (stampFired && !stamp.holding) kickMinY = Math.min(kickMinY, ball.body.getPosition().y);
   });
-  check("lit stamp kickback saves the ball", stampFired && kickMinY < 0.72, `minY=${kickMinY.toFixed(3)}`);
+  // (0.60 bar as on Tidebreaker: an eject stopped dead by the deflector
+  // duds out at y≈0.654, which the old 0.72 bar let pass)
+  check("lit stamp kickback saves the ball", stampFired && kickMinY < 0.6, `minY=${kickMinY.toFixed(3)}`);
   check("stamp consumes its light", !logic.kickerLit("stamp"));
 
   // 14 — the mallet: a skill-drop down the guide lands on the bat; a flip
