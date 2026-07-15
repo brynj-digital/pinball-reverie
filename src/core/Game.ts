@@ -26,6 +26,7 @@ import {
   fmtScore,
 } from "../render/dmd/DmdScene";
 import { SettingsPanel } from "../ui/SettingsPanel";
+import { PauseOverlay } from "../ui/PauseOverlay";
 import {
   TouchControls,
   loadTouchPref,
@@ -78,6 +79,30 @@ function loadRenderMode(): RenderMode {
   }
 }
 
+/**
+ * Per-renderer resolution scale (fraction of native DPI, 0.5–1) — a device-fit
+ * display option like the render mode, persisted outside Tuning for the same
+ * reason: a tuning reset must not change how sharp the picture is. 3D defaults
+ * lower because its per-pixel cost (fragment shading + the bloom chain) dwarfs
+ * the 2D raster pass, while perspective + bloom hide the softness that would
+ * smear the 2D renderer's crisp line art.
+ */
+const RENDER_SCALE_KEYS: Record<RenderMode, string> = {
+  "2d": "pinball-render-scale-2d-v1",
+  "3d": "pinball-render-scale-3d-v1",
+};
+const RENDER_SCALE_DEFAULTS: Record<RenderMode, number> = { "2d": 1, "3d": 0.75 };
+
+function loadRenderScale(mode: RenderMode): number {
+  try {
+    const v = parseFloat(localStorage.getItem(RENDER_SCALE_KEYS[mode]) ?? "");
+    if (v >= 0.5 && v <= 1) return v;
+  } catch {
+    // storage unavailable — fall through to the default
+  }
+  return RENDER_SCALE_DEFAULTS[mode];
+}
+
 /** 3D camera style (tilted chase vs top-down classic), persisted like it. */
 const VIEW3D_KEY = "pinball-3d-view-v1";
 
@@ -116,6 +141,10 @@ export class Game {
   private camera: Camera;
   private renderer: Renderer;
   private renderMode: RenderMode = loadRenderMode();
+  private renderScale: Record<RenderMode, number> = {
+    "2d": loadRenderScale("2d"),
+    "3d": loadRenderScale("3d"),
+  };
   private view3d: View3D = loadView3D();
   private renderSwapBusy = false;
   private input: Input;
@@ -149,6 +178,7 @@ export class Game {
   private tilted = false;
   private gameOverUntil = 0;
   private settings: SettingsPanel;
+  private pauseOverlay: PauseOverlay;
   private tableSelect: TableSelect;
   private gearBtn: HTMLButtonElement;
   private gearVisible = false;
@@ -300,6 +330,17 @@ export class Game {
         set: (mode) => this.applyRenderMode(mode),
       },
       {
+        get: () => this.renderScale[this.renderMode],
+        set: (v) => {
+          this.renderScale[this.renderMode] = v;
+          try {
+            localStorage.setItem(RENDER_SCALE_KEYS[this.renderMode], String(v));
+          } catch {
+            // storage unavailable — the scale just won't persist
+          }
+        },
+      },
+      {
         get: () => this.view3d,
         set: (view) => {
           this.view3d = view;
@@ -321,6 +362,10 @@ export class Game {
         },
       },
     );
+    this.pauseOverlay = new PauseOverlay(
+      () => this.setPaused(false),
+      () => this.exitGame(),
+    );
     // Table select (M10): attract-phase browsing of the backglass cards.
     // Confirming the installed table just starts the game; confirming the
     // other one persists + reloads — same contract as the settings row.
@@ -336,13 +381,13 @@ export class Game {
     this.input.onEscape(() => {
       // Options live on the attract / table-select step only. Esc there backs
       // out of the carousel if it's up, otherwise toggles the settings overlay.
-      // In play Esc is a plain pause toggle (no overlay); during initials entry
-      // and game-over it does nothing.
+      // In play Esc toggles the pause overlay (resume / exit game); during
+      // initials entry and game-over it does nothing.
       if (this.phase === "attract") {
         if (this.tableSelect.open) this.tableSelect.hide();
         else this.settings.toggle();
       } else if (this.phase === "play") {
-        this.paused = !this.paused;
+        this.setPaused(!this.paused);
       }
     });
     // Options gear (touch parity): Esc has no touch equivalent, so the attract
@@ -737,6 +782,35 @@ export class Game {
     this.bus.emit("ballSpawn", {});
   }
 
+  /** In-play pause: freeze the world and show the pause card. Touch zones
+   * hide while frozen so a held flipper can't stick across the pause — the
+   * same rule the settings overlay applies. */
+  private setPaused(on: boolean): void {
+    if (this.paused === on) return;
+    this.paused = on;
+    this.pauseOverlay.setOpen(on);
+    this.touch.setEnabled(on ? false : resolveTouchEnabled(this.touchPref));
+  }
+
+  /** Abandon the current game from the pause overlay: straight back to
+   * attract. The score is forfeited — no bonus collect, no high-score entry;
+   * a quit game isn't a completed one. */
+  private exitGame(): void {
+    if (this.phase !== "play") return;
+    this.setPaused(false);
+    this.music.stop();
+    this.tilted = false;
+    this.tiltBob = 0;
+    this.scoring.muted = false;
+    this.drainSaverEligible = false;
+    this.ballStarted = false;
+    this.saverUntil = -Infinity;
+    this.respawn();
+    this.phase = "attract";
+    this.dmdQueue.clear();
+    this.dmdQueue.setIdle(this.attractScene);
+  }
+
   private startGame(): void {
     this.tableSelect.hide();
     this.audio.sfx("start");
@@ -977,7 +1051,7 @@ export class Game {
       plungerCharge: this.plungerCharge,
       fps: this.fps,
       jsMs: this.jsMs,
-      renderScale: this.tuning.renderScale,
+      renderScale: this.renderScale[this.renderMode],
       dmd: this.dmd.canvas,
       debugShapes: this.tuning.debugOverlay ? this.physics.collectDebugShapes() : undefined,
     };

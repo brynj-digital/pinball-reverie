@@ -14,6 +14,9 @@ body {
   display: block;
   width: 100vw;
   height: 100vh;
+  /* mobile: size to the dynamic viewport so the DMD strip stays pinned to the
+     visible top and the flippers aren't cut off behind the browser toolbar */
+  height: 100dvh;
 }
 
 .tuning-panel {
@@ -299,12 +302,39 @@ body {
   text-align: center;
 }
 
+/* In-play pause card: settings chrome, just narrower. Exit is the
+   destructive choice, so only it warms up on hover (brass accent). */
+.pause-card {
+  width: 240px;
+  text-align: center;
+}
+
+.pause-card h2 {
+  text-align: center;
+}
+
+.pause-card .settings-reset {
+  margin-top: 0;
+  padding: 7px;
+}
+
+.pause-card .pause-exit {
+  margin-top: 8px;
+}
+
+.pause-card .pause-exit:hover,
+.pause-card .pause-exit:active {
+  border-color: rgba(224, 182, 78, 0.6);
+  color: #e0b64e;
+}
+
 /* Attract-mode table select (M10): one backglass card per table; the brass
    focus ring is the "this one plays" cue, unfocused cabinets sit dim */
 .tablesel-overlay {
   position: fixed;
   inset: 0;
   background: rgba(7, 8, 13, 0.78);
+  touch-action: none; /* keep horizontal swipes as pointermoves, not browser pans */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -323,10 +353,20 @@ body {
 .tablesel-row {
   display: flex;
   gap: 26px;
+  /* three cards outgrow a phone: clip (no native scroll — it would fight the
+     swipe gesture) and let applyFocus scrollIntoView-center the lit card;
+     the padding keeps the focus glow clear of the clip edges */
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 24px 24px;
+  /* being a scroll container makes the row the end of the touch-action
+     chain — restate none here or card swipes die in pointercancel */
+  touch-action: none;
 }
 
 .tablesel-card {
   width: min(240px, 38vw);
+  min-width: 168px; /* stop flex-shrink: past this the row clips and the lit card centres instead */
   padding: 10px 10px 12px;
   background: #141724;
   border: 1px solid #2c3352;
