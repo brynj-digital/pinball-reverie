@@ -3,6 +3,7 @@ import { TuningPanel } from "../debug/TuningPanel";
 import type { RenderMode, View3D } from "../render/Renderer";
 import { TABLE_ORDER, TABLE_SPECS, saveTableId, type TableId } from "../table/specs";
 import type { TouchPref } from "./TouchControls";
+import { hapticsAvailable } from "./Haptics";
 import {
   ACTION_LABELS,
   Input,
@@ -45,6 +46,7 @@ export class SettingsPanel {
     private view3d: { get: () => View3D; set: (view: View3D) => void },
     private tableId: TableId,
     private touch: { get: () => TouchPref; set: (pref: TouchPref) => void },
+    private haptics: { get: () => boolean; set: (on: boolean) => void },
   ) {
     this.root = document.createElement("div");
     this.root.className = "settings-overlay";
@@ -68,6 +70,8 @@ export class SettingsPanel {
     card.appendChild(this.rendererRow());
     card.appendChild(this.view3dRow());
     card.appendChild(this.touchRow());
+    // no Vibration API (iOS/desktop) → the row would be a dead switch; omit it
+    if (hapticsAvailable()) card.appendChild(this.hapticsRow());
     card.appendChild(this.tuningVisibleRow());
 
     const keysTitle = document.createElement("h3");
@@ -219,6 +223,24 @@ export class SettingsPanel {
     label();
     btn.onclick = () => {
       this.touch.set(NEXT[this.touch.get()]);
+      label();
+    };
+    this.valueRefreshers.push(label);
+    row.append(span, btn);
+    return row;
+  }
+
+  /** Vibration ticks on touch flips/plunges/nudges (only shown where supported). */
+  private hapticsRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "key-row";
+    const span = document.createElement("span");
+    span.textContent = "Haptics";
+    const btn = document.createElement("button");
+    const label = () => (btn.textContent = this.haptics.get() ? "ON" : "OFF");
+    label();
+    btn.onclick = () => {
+      this.haptics.set(!this.haptics.get());
       label();
     };
     this.valueRefreshers.push(label);

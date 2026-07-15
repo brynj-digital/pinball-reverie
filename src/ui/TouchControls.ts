@@ -12,6 +12,7 @@
  * switch and orientation changes.
  */
 import type { Input } from "../core/Input";
+import type { Haptics } from "./Haptics";
 
 export type TouchPref = "auto" | "on" | "off";
 
@@ -68,6 +69,7 @@ export class TouchControls {
     private input: Input,
     container: HTMLElement,
     private hasUpper: boolean,
+    private haptics: Haptics,
   ) {
     this.root = document.createElement("div");
     this.root.className = "touch-overlay";
@@ -114,6 +116,7 @@ export class TouchControls {
       // mirroring the default keyboard wiring (upper shares the right keys)
       if (side === "right" && this.hasUpper) this.input.setTouchFlipper("upper", on);
       zone.classList.toggle("active", on);
+      if (on) this.haptics.tick();
     };
     zone.addEventListener("pointerdown", (e) => {
       zone.setPointerCapture(e.pointerId);
@@ -150,8 +153,14 @@ export class TouchControls {
       active.add(e.pointerId);
       e.preventDefault();
     });
+    // tick on the release, not the press — that's when the ball launches.
+    // The force-release path clears `active` first, so an aborted hold
+    // (plunger zone deactivated mid-gesture) never buzzes.
     const release = (e: PointerEvent) => {
-      if (active.delete(e.pointerId) && active.size === 0) press(false);
+      if (active.delete(e.pointerId) && active.size === 0) {
+        press(false);
+        this.haptics.tick();
+      }
     };
     zone.addEventListener("pointerup", release);
     zone.addEventListener("pointercancel", release);
@@ -181,8 +190,13 @@ export class TouchControls {
       }
       // dominant axis: sideways → left/right, upward → up (a downward flick,
       // like pulling the plunger, isn't a nudge)
-      if (Math.abs(dx) > Math.abs(dy)) this.input.fireNudge(dx < 0 ? "left" : "right");
-      else if (dy < 0) this.input.fireNudge("up");
+      if (Math.abs(dx) > Math.abs(dy)) {
+        this.input.fireNudge(dx < 0 ? "left" : "right");
+        this.haptics.nudge();
+      } else if (dy < 0) {
+        this.input.fireNudge("up");
+        this.haptics.nudge();
+      }
       g.fired = true;
     });
     const end = (e: PointerEvent) => gestures.delete(e.pointerId);

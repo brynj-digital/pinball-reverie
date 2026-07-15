@@ -34,6 +34,7 @@ import {
   saveTouchPref,
   type TouchPref,
 } from "../ui/TouchControls";
+import { Haptics, saveHapticsPref } from "../ui/Haptics";
 import { TableSelect } from "../ui/TableSelect";
 import { TABLE_ORDER, saveTableId } from "../table/specs";
 import { bakeDmdFrames } from "../render/dmd/bake";
@@ -150,6 +151,7 @@ export class Game {
   private input: Input;
   private touch: TouchControls;
   private touchPref: TouchPref = loadTouchPref();
+  private haptics = new Haptics();
 
   private panel: TuningPanel;
   private appliedTuningVersion = -1; // force one application on the first frame
@@ -291,6 +293,7 @@ export class Game {
       this.input,
       canvas.parentElement ?? document.body,
       spec.geometry.flippers.upper != null,
+      this.haptics,
     );
     this.touch.setEnabled(resolveTouchEnabled(this.touchPref));
     this.input.onReset(() => {
@@ -359,6 +362,13 @@ export class Game {
           this.touchPref = pref;
           saveTouchPref(pref);
           this.touch.setEnabled(resolveTouchEnabled(pref));
+        },
+      },
+      {
+        get: () => this.haptics.enabled,
+        set: (on) => {
+          this.haptics.enabled = on;
+          saveHapticsPref(on);
         },
       },
     );
