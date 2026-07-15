@@ -29,7 +29,6 @@ their localStorage values until they hit "Reset to defaults" in the panel.
 | `slingKick` | 0.11 | — | Slingshot impulse |
 | `kickerEject` | 1.35 | new 2026-07-04 | Telescope-scoop eject speed along `KICKER.eject` (feeds the left flipper) |
 | `cameraViewH` | 0.75 | — | Camera zoom (not physics) |
-| `renderScale` | 1 | new 2026-07-02 | Canvas resolution fraction (paint-bound perf option; Esc settings) |
 | `sfxVolume` | 0.5 | — | SFX bus |
 | `musicVolume` | 0.25 | — | Music bus |
 | `debugOverlay` | **false** | was true | Dev overlay (physics bodies); off for players |
@@ -44,6 +43,7 @@ their localStorage values until they hit "Reset to defaults" in the panel.
 | 2026-07-02 | `ballLinearDamping` 0.15 → 0.10 | 0.15 played slightly too draggy in practice | 26/26 simcheck, 2 soaks, 0 stuck |
 | 2026-07-04 | `kickerEject` added at 1.35 | New telescope kickout scoop; speed chosen so the eject clears the scoop hood and lands mid left flipper | simcheck: kickout crosses y=0.95 at x=0.212; 3× 10-min soaks, 0 stuck |
 | 2026-07-08 | `debugOverlay` true → false | Was a dev convenience default; shipped the physics-body overlay to fresh players (visible on the public build). Off by default; still toggleable in the settings/debug panel | build passes; overlay reachable via panel |
+| 2026-07-15 | `renderScale` removed from Tuning | Now a per-renderer display setting in Game (`pinball-render-scale-2d-v1` = 1, `-3d-v1` = 0.75) like the render mode, so tuning resets can't change sharpness. 3D defaults lower: bloom + fragment shading cost far more per pixel, and the 3D look hides the softness that would smear 2D line art. Old `renderScale` values in saved tuning are ignored (fresh per-mode defaults apply) | build passes; slider edits the active renderer's value |
 
 Balance watch-item: the combined 2026-07-02 changes slow the table — if
 orbits/bank shots start feeling under-rewarded, adjust point values in

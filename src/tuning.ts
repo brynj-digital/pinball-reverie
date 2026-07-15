@@ -30,11 +30,6 @@ export interface Tuning {
   kickerEject: number;
   /** Visible playfield height in metres (camera zoom). */
   cameraViewH: number;
-  /**
-   * Canvas resolution as a fraction of native DPI (0.5–1). Lower = fewer
-   * pixels to paint — the lever for paint-bound machines. 1 = full sharpness.
-   */
-  renderScale: number;
   sfxVolume: number;
   musicVolume: number;
   debugOverlay: boolean;
@@ -59,7 +54,6 @@ export const DEFAULT_TUNING: Tuning = {
   slingKick: 0.11,
   kickerEject: 1.35, // lands mid left flipper from the scoop (simcheck-verified)
   cameraViewH: 0.75,
-  renderScale: 1,
   sfxVolume: 0.5,
   musicVolume: 0.25,
   debugOverlay: false,

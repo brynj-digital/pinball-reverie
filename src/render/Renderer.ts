@@ -76,7 +76,8 @@ export interface WorldSnapshot {
   fps: number;
   /** Smoothed JS cost per frame (ms) — splits game code from browser paint. */
   jsMs: number;
-  /** Canvas resolution fraction of native DPI (performance option). */
+  /** Canvas resolution fraction of native DPI — the active renderer's value
+   * of the per-mode performance option (Game persists one per RenderMode). */
   renderScale: number;
   /**
    * The DMD's offscreen canvas (plan §5b): the DMD subsystem owns and paints

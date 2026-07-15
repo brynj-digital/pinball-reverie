@@ -78,6 +78,30 @@ function loadRenderMode(): RenderMode {
   }
 }
 
+/**
+ * Per-renderer resolution scale (fraction of native DPI, 0.5–1) — a device-fit
+ * display option like the render mode, persisted outside Tuning for the same
+ * reason: a tuning reset must not change how sharp the picture is. 3D defaults
+ * lower because its per-pixel cost (fragment shading + the bloom chain) dwarfs
+ * the 2D raster pass, while perspective + bloom hide the softness that would
+ * smear the 2D renderer's crisp line art.
+ */
+const RENDER_SCALE_KEYS: Record<RenderMode, string> = {
+  "2d": "pinball-render-scale-2d-v1",
+  "3d": "pinball-render-scale-3d-v1",
+};
+const RENDER_SCALE_DEFAULTS: Record<RenderMode, number> = { "2d": 1, "3d": 0.75 };
+
+function loadRenderScale(mode: RenderMode): number {
+  try {
+    const v = parseFloat(localStorage.getItem(RENDER_SCALE_KEYS[mode]) ?? "");
+    if (v >= 0.5 && v <= 1) return v;
+  } catch {
+    // storage unavailable — fall through to the default
+  }
+  return RENDER_SCALE_DEFAULTS[mode];
+}
+
 /** 3D camera style (tilted chase vs top-down classic), persisted like it. */
 const VIEW3D_KEY = "pinball-3d-view-v1";
 
@@ -116,6 +140,10 @@ export class Game {
   private camera: Camera;
   private renderer: Renderer;
   private renderMode: RenderMode = loadRenderMode();
+  private renderScale: Record<RenderMode, number> = {
+    "2d": loadRenderScale("2d"),
+    "3d": loadRenderScale("3d"),
+  };
   private view3d: View3D = loadView3D();
   private renderSwapBusy = false;
   private input: Input;
@@ -298,6 +326,17 @@ export class Game {
       {
         get: () => this.renderMode,
         set: (mode) => this.applyRenderMode(mode),
+      },
+      {
+        get: () => this.renderScale[this.renderMode],
+        set: (v) => {
+          this.renderScale[this.renderMode] = v;
+          try {
+            localStorage.setItem(RENDER_SCALE_KEYS[this.renderMode], String(v));
+          } catch {
+            // storage unavailable — the scale just won't persist
+          }
+        },
       },
       {
         get: () => this.view3d,
@@ -977,7 +1016,7 @@ export class Game {
       plungerCharge: this.plungerCharge,
       fps: this.fps,
       jsMs: this.jsMs,
-      renderScale: this.tuning.renderScale,
+      renderScale: this.renderScale[this.renderMode],
       dmd: this.dmd.canvas,
       debugShapes: this.tuning.debugOverlay ? this.physics.collectDebugShapes() : undefined,
     };

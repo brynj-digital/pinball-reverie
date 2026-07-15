@@ -41,6 +41,7 @@ export class SettingsPanel {
     private input: Input,
     private onOpenChange: (open: boolean) => void,
     private renderMode: { get: () => RenderMode; set: (mode: RenderMode) => Promise<void> },
+    private renderScale: { get: () => number; set: (v: number) => void },
     private view3d: { get: () => View3D; set: (view: View3D) => void },
     private tableId: TableId,
     private touch: { get: () => TouchPref; set: (pref: TouchPref) => void },
@@ -59,8 +60,10 @@ export class SettingsPanel {
 
     card.appendChild(this.sliderRow("SFX volume", "sfxVolume", 0));
     card.appendChild(this.sliderRow("Music volume", "musicVolume", 0));
-    // performance option: fewer pixels to paint at the cost of sharpness
-    card.appendChild(this.sliderRow("Render scale", "renderScale", 0.5));
+    // performance option: fewer pixels to paint at the cost of sharpness.
+    // Stored per renderer (the slider edits the ACTIVE mode's value): 3D's
+    // per-pixel cost is far higher and its look hides the softness better.
+    card.appendChild(this.renderScaleRow());
     card.appendChild(this.tableRow());
     card.appendChild(this.rendererRow());
     card.appendChild(this.view3dRow());
@@ -170,7 +173,9 @@ export class SettingsPanel {
     btn.onclick = async () => {
       btn.textContent = "SWITCHING…"; // 3D loads as its own chunk
       await this.renderMode.set(this.renderMode.get() === "3d" ? "2d" : "3d");
-      label();
+      // re-read everything: the render-scale slider now shows the other
+      // renderer's value
+      this.valueRefreshers.forEach((fn) => fn());
     };
     this.valueRefreshers.push(label);
     row.append(span, btn);
@@ -240,9 +245,27 @@ export class SettingsPanel {
     return row;
   }
 
+  /** Resolution scale for the active renderer (persisted per mode by Game). */
+  private renderScaleRow(): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "vol-row";
+    const span = document.createElement("span");
+    span.textContent = "Render scale";
+    const input = document.createElement("input");
+    input.type = "range";
+    input.min = "0.5";
+    input.max = "1";
+    input.step = "0.05";
+    input.value = String(this.renderScale.get());
+    this.valueRefreshers.push(() => (input.value = String(this.renderScale.get())));
+    input.oninput = () => this.renderScale.set(parseFloat(input.value));
+    row.append(span, input);
+    return row;
+  }
+
   private sliderRow(
     label: string,
-    key: "sfxVolume" | "musicVolume" | "renderScale",
+    key: "sfxVolume" | "musicVolume",
     min: number,
   ): HTMLElement {
     const row = document.createElement("div");
