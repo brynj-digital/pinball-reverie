@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 32" width="768" height="32">
-  <!-- NIGHT WAVES DMD scene: STATIC — dead air; the picture dissolves into
+  <!-- SMALL HOURS DMD scene: STATIC — dead air; the picture dissolves into
        white noise with a rolling dropout band. 6 frames of 128x32 (style
        guide §6). Art rows 0..22; caption renders from row 24. -->
   <rect width="768" height="32" fill="#000"/>

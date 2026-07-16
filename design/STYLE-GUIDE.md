@@ -43,7 +43,7 @@ Midnight Midway uses the **carnival** ramp (`--carnival-700/800/900`, warm
 plum dusk) with magenta as its feature color; The Night Mail uses the
 **smoke** ramp (`--smoke-700/800/900`, cold iron/soot slate-green — added
 2026-07-15 per the table 4 brief) with **signal green** (`--green-400/600`)
-as its feature color; Night Waves uses the **rooftop** ramp
+as its feature color; Small Hours uses the **rooftop** ramp
 (`--rooftop-700/800/900`, sodium-washed asphalt umber — added 2026-07-16
 per the table 5 brief) with **transmitter amber** (`--amber-400/600`) as
 its feature color. Any new variant adds its
@@ -91,7 +91,7 @@ each table's shell/wall restroke palette comes from its field variant —
 Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 (`--abyss-500/300`), Midnight Midway layers dusk plum
 (`--carnival-500/300`), The Night Mail layers wet slate
-(`--smoke-500/300`), Night Waves layers warm asphalt
+(`--smoke-500/300`), Small Hours layers warm asphalt
 (`--rooftop-500/300`) — always over a 16 mm ink base with a `chrome-200`
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
@@ -101,7 +101,7 @@ the height profiles — semi-transparent fluorescent ramp plastic. **The
 glass TINT is per-table, matching the field variant** (amended 2026-07-05
 by direction): DAYGLO green (`--green-400` #39ff14) is the default —
 Moondial and Midway use it — while Tidebreaker's glass is abyssal
-`--cyan-400` #2fc9d6 and Night Waves' is transmitter `--amber-400`
+`--cyan-400` #2fc9d6 and Small Hours' is transmitter `--amber-400`
 #ffa028 (2026-07-16, per the table 5 brief). The SVG wash and `TableSpec.theme.rampGlass3d` must
 carry the same hue. Renderers composite the
 `art-rails-elevated` group separately — over the ball on the main field
@@ -306,7 +306,7 @@ See [previews/materials.html](previews/materials.html).
 - **Table accent (2026-07-16):** each table names one neon pair as its
   element-lamp accent, carried by `TableSpec.theme` so both renderers stay in
   step — Moondial `violet-400/600`, Tidebreaker `cyan-400/600`, Midnight
-  Midway `magenta-400/600`, The Night Mail `green-400/600`, Night Waves
+  Midway `magenta-400/600`, The Night Mail `green-400/600`, Small Hours
   `amber-400/600`. Slings and drop
   targets draw their coloured light from it; new per-table element lamps
   should too before inventing a new colour.

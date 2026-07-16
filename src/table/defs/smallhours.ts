@@ -1,13 +1,13 @@
 import type { TableSpec } from "../specs";
 import type { TableGeometry } from "../geometry";
-import { NightWavesLogic } from "../../game/nightwaves";
-import rules from "../../../design/tables/nightwaves/rules.json";
+import { SmallHoursLogic } from "../../game/smallhours";
+import rules from "../../../design/tables/smallhours/rules.json";
 
 /**
- * Night Waves (table 5, rooftop pirate radio) entity constants — metres,
- * y down. Table SHAPE lives in design/tables/nightwaves/playfield.svg (plan
+ * Small Hours (table 5, rooftop pirate radio) entity constants — metres,
+ * y down. Table SHAPE lives in design/tables/smallhours/playfield.svg (plan
  * §5e); placements are cross-checked against its anchor-* markers at load.
- * Design truth: design/tables/nightwaves/BRIEF.md.
+ * Design truth: design/tables/smallhours/BRIEF.md.
  *
  * Deliberately asymmetric (STYLE-GUIDE §3 as amended): the LEFT flipper
  * owns the station — the Aerial Run (straight up) and the Fader Bank
@@ -138,14 +138,14 @@ const GEOMETRY: TableGeometry = {
   discs: [{ id: "deck", x: 0.32, y: 0.64, r: 0.034, grip: 8, maxAccel: 30 }],
 };
 
-export const NIGHTWAVES_SPEC: TableSpec = {
-  id: "nightwaves",
-  name: "NIGHT WAVES",
+export const SMALLHOURS_SPEC: TableSpec = {
+  id: "smallhours",
+  name: "SMALL HOURS",
   tagline: "ON AIR TILL DAWN",
   geometry: GEOMETRY,
   scoring: rules,
-  createLogic: (ctx) => new NightWavesLogic(ctx),
-  highScoreKey: "pinball-highscores-nightwaves-v1",
+  createLogic: (ctx) => new SmallHoursLogic(ctx),
+  highScoreKey: "pinball-highscores-smallhours-v1",
   // warm asphalt field walls (rooftop-500/300 blend); the aerial run stays
   // chrome; ramp glass is transmitter amber (STYLE-GUIDE §2, table 5)
   theme: {

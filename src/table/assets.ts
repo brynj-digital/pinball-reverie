@@ -13,7 +13,7 @@ import {
   MIDWAY_SONG,
   MOONDIAL_SONG,
   NIGHTMAIL_SONG,
-  NIGHTWAVES_SONG,
+  SMALLHOURS_SONG,
   TIDEBREAKER_SONG,
 } from "../audio/songs";
 
@@ -25,8 +25,8 @@ import midwayPlayfield from "../../design/tables/midway/playfield.svg?raw";
 import midwayBackglass from "../../design/tables/midway/backglass.svg?raw";
 import nightmailPlayfield from "../../design/tables/nightmail/playfield.svg?raw";
 import nightmailBackglass from "../../design/tables/nightmail/backglass.svg?raw";
-import nightwavesPlayfield from "../../design/tables/nightwaves/playfield.svg?raw";
-import nightwavesBackglass from "../../design/tables/nightwaves/backglass.svg?raw";
+import smallhoursPlayfield from "../../design/tables/smallhours/playfield.svg?raw";
+import smallhoursBackglass from "../../design/tables/smallhours/backglass.svg?raw";
 
 import orbitScene from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierScene from "../../design/dmd-scenes/multiplier.svg?raw";
@@ -133,9 +133,9 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
     },
     song: NIGHTMAIL_SONG,
   },
-  nightwaves: {
-    playfieldSvg: nightwavesPlayfield,
-    backglassSvg: nightwavesBackglass,
+  smallhours: {
+    playfieldSvg: smallhoursPlayfield,
+    backglassSvg: smallhoursBackglass,
     dmdScenes: {
       dial: { svg: dialScene, frames: 8 },
       mast: { svg: mastScene, frames: 8 },
@@ -144,6 +144,6 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       static: { svg: staticScene, frames: 6 },
       dawn: { svg: dawnScene, frames: 9 },
     },
-    song: NIGHTWAVES_SONG,
+    song: SMALLHOURS_SONG,
   },
 };

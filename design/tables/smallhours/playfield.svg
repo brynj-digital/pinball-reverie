@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 575 1050" width="575" height="1050">
   <!--
-    NIGHT WAVES — table 5 of Pinball Reverie. A pirate radio station on a
+    SMALL HOURS — table 5 of Pinball Reverie. A pirate radio station on a
     rooftop above the sleeping city, midnight until dawn: the transmitter
     mast on the parapet at the top, the neighbours' aerials mid-field, the
     studio at the flippers. Master units: 1 SVG unit = 1 mm (style guide
-    §3). Design truth: design/tables/nightwaves/BRIEF.md; layout
+    §3). Design truth: design/tables/smallhours/BRIEF.md; layout
     clearance-solved against the STYLE-GUIDE §4 ball-gap rules.
 
     This file is the single source of truth for table shape (§5e):
@@ -302,13 +302,13 @@
       <path d="M 445 548 L 448 557 L 457 560 L 448 563 L 445 572 L 442 563 L 433 560 L 442 557 Z" fill="#ffa028" opacity="0.7"/>
       <text x="330" y="570" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="26" font-weight="800" letter-spacing="2"
-            fill="#4e37a8" opacity="0.5" filter="url(#glowSoft)">NIGHT WAVES</text>
+            fill="#4e37a8" opacity="0.5" filter="url(#glowSoft)">SMALL HOURS</text>
       <text x="330" y="566" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="26" font-weight="800" letter-spacing="2"
-            fill="url(#chromeText)" stroke="#07080d" stroke-width="2" paint-order="stroke">NIGHT WAVES</text>
+            fill="url(#chromeText)" stroke="#07080d" stroke-width="2" paint-order="stroke">SMALL HOURS</text>
       <text x="330" y="566" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="26" font-weight="800" letter-spacing="2"
-            fill="none" stroke="#ffa028" stroke-width="0.8" opacity="0.9">NIGHT WAVES</text>
+            fill="none" stroke="#ffa028" stroke-width="0.8" opacity="0.9">SMALL HOURS</text>
       <text x="330" y="588" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="9" letter-spacing="4" fill="#a68d5c">ON · AIR · TILL · DAWN</text>
     </g>

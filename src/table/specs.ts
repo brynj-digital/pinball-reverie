@@ -4,7 +4,7 @@ import { MOONDIAL_SPEC } from "./defs/moondial";
 import { TIDEBREAKER_SPEC } from "./defs/tidebreaker";
 import { MIDWAY_SPEC } from "./defs/midway";
 import { NIGHTMAIL_SPEC } from "./defs/nightmail";
-import { NIGHTWAVES_SPEC } from "./defs/nightwaves";
+import { SMALLHOURS_SPEC } from "./defs/smallhours";
 
 /** Scoring values every table's rules JSON must carry (Scoring.ts reads these). */
 export interface ScoringRules {
@@ -55,14 +55,14 @@ export interface TableSpec {
   };
 }
 
-export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail" | "nightwaves";
+export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail" | "smallhours";
 
 export const TABLE_SPECS: Record<TableId, TableSpec> = {
   moondial: MOONDIAL_SPEC,
   tidebreaker: TIDEBREAKER_SPEC,
   midway: MIDWAY_SPEC,
   nightmail: NIGHTMAIL_SPEC,
-  nightwaves: NIGHTWAVES_SPEC,
+  smallhours: SMALLHOURS_SPEC,
 };
 
 export const TABLE_ORDER: TableId[] = [
@@ -70,7 +70,7 @@ export const TABLE_ORDER: TableId[] = [
   "tidebreaker",
   "midway",
   "nightmail",
-  "nightwaves",
+  "smallhours",
 ];
 
 const TABLE_KEY = "pinball-table-v1";
@@ -79,6 +79,11 @@ const TABLE_KEY = "pinball-table-v1";
 export function loadTableId(): TableId {
   try {
     const raw = localStorage.getItem(TABLE_KEY);
+    // 2026-07-17: table 5 renamed Night Waves -> Small Hours (id smallhours)
+    if (raw === "nightwaves") {
+      saveTableId("smallhours");
+      return "smallhours";
+    }
     if (raw && raw in TABLE_SPECS) return raw as TableId;
   } catch {
     // storage unavailable

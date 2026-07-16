@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
-  <!-- NIGHT WAVES backglass: shown in the landscape side panel above the
+  <!-- SMALL HOURS backglass: shown in the landscape side panel above the
        DMD and as the table-select card (§4.5/§8). Chrome-horizon wordmark,
        the rooftop shack and its transmitter mast over the sleeping city,
        signal rings going out, the same moon. Rooftop field ramp +
@@ -137,13 +137,13 @@
   <g>
     <text x="150" y="306" text-anchor="middle" font-family="ui-monospace, monospace"
           font-size="30" font-weight="800" letter-spacing="2"
-          fill="#4e37a8" opacity="0.55" filter="url(#nwGlow)">NIGHT WAVES</text>
+          fill="#4e37a8" opacity="0.55" filter="url(#nwGlow)">SMALL HOURS</text>
     <text x="150" y="303" text-anchor="middle" font-family="ui-monospace, monospace"
           font-size="30" font-weight="800" letter-spacing="2"
-          fill="url(#nwChrome)" stroke="#07080d" stroke-width="2" paint-order="stroke">NIGHT WAVES</text>
+          fill="url(#nwChrome)" stroke="#07080d" stroke-width="2" paint-order="stroke">SMALL HOURS</text>
     <text x="150" y="303" text-anchor="middle" font-family="ui-monospace, monospace"
           font-size="30" font-weight="800" letter-spacing="2"
-          fill="none" stroke="#ffa028" stroke-width="0.8" opacity="0.9">NIGHT WAVES</text>
+          fill="none" stroke="#ffa028" stroke-width="0.8" opacity="0.9">SMALL HOURS</text>
     <text x="150" y="328" text-anchor="middle" font-family="ui-monospace, monospace"
           font-size="9" letter-spacing="4" fill="#a68d5c">ON · AIR · TILL · DAWN</text>
   </g>

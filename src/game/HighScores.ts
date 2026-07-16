@@ -22,6 +22,10 @@ export class HighScores {
             this.scores = (JSON.parse(old) as number[])
               .slice(0, MAX)
               .map((score) => ({ initials: "---", score }));
+        } else if (this.key === "pinball-highscores-smallhours-v1") {
+          // migrate the table-5 rename (Night Waves -> Small Hours, 2026-07-17)
+          const old = localStorage.getItem("pinball-highscores-nightwaves-v1");
+          if (old) this.scores = (JSON.parse(old) as ScoreEntry[]).slice(0, MAX);
         }
       }
     } catch {

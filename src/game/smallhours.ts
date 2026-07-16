@@ -2,7 +2,7 @@ import type { TableLogic, TableLogicCtx } from "./TableLogic";
 import type { DmdScene } from "../render/dmd/DmdScene";
 import type { DotMatrix } from "../render/dmd/DotMatrix";
 import { BakedDmdScene, MessageScene, SequenceScene, fmtScore } from "../render/dmd/DmdScene";
-import rules from "../../design/tables/nightwaves/rules.json";
+import rules from "../../design/tables/smallhours/rules.json";
 
 /** Entry→exit (either direction) within this window counts as a City Sweep. */
 const SWEEP_PAIR_WINDOW = 3.5;
@@ -10,7 +10,7 @@ const LANE_IDS = ["1", "2", "3", "4"] as const;
 
 /**
  * REQUEST SHOW — the DMD video mode (the SIGNAL BOX pattern). Pure display:
- * NightWavesLogic owns every timer and outcome (the headless sims have no
+ * SmallHoursLogic owns every timer and outcome (the headless sims have no
  * DMD, so the mode must resolve without this scene ever updating). The
  * scene draws the groove, the five requests, the needle, and the cue lever.
  */
@@ -59,7 +59,7 @@ class RequestShowScene implements DmdScene {
 }
 
 /**
- * The Night Waves ruleset (design truth in the table's BRIEF.md), values
+ * The Small Hours ruleset (design truth in the table's BRIEF.md), values
  * from the table's rules JSON:
  *
  * - THE CLOCK: completing W-A-V-E advances one hour (1 AM → 5 AM); the
@@ -95,7 +95,7 @@ class RequestShowScene implements DmdScene {
  * - Combos and running modes die with the ball; hours, letters, callers
  *   and lit saves persist across balls, reset per game.
  */
-export class NightWavesLogic implements TableLogic {
+export class SmallHoursLogic implements TableLogic {
   private now = 0;
   // sweep pair
   private entryAt = -Infinity;
