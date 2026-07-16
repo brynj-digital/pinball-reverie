@@ -134,5 +134,11 @@ export const MIDWAY_SPEC: TableSpec = {
   createLogic: (ctx) => new MidwayLogic(ctx),
   highScoreKey: "pinball-highscores-midway-v1",
   // dusk plum field walls (carnival-500/300 blend); wireforms stay chrome
-  theme: { rail3d: 0x45215a, rail3dElevated: 0xbdc9dc, rampGlass3d: 0x39ff14 },
+  theme: {
+    rail3d: 0x45215a,
+    rail3dElevated: 0xbdc9dc,
+    rampGlass3d: 0x39ff14,
+    accent: 0xff3e9a, // carnival magenta element lamps
+    accentDeep: 0xb01860,
+  },
 };

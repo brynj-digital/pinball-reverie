@@ -55,7 +55,8 @@
   --chrome-600: #565d6e;
   --chrome-800: #23262f;
 
-  /* brass — flippers, kickers, warm mechanicals */
+  /* brass — flippers and kicker/plunger mechanicals ONLY (2026-07-16:
+     slings + drop targets moved to rubber / table-accent plastic — §7) */
   --brass-300: #f4d27a;
   --brass-400: #e0b64e;
   --brass-600: #9c7c2c;

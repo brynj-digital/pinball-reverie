@@ -8,6 +8,7 @@ import type {
 } from "./Renderer";
 
 import { loadSvgAt, splitElevatedOverlay } from "./svgImage";
+import { hexColor, rgbTriplet, roundCorners } from "./shape";
 
 /**
  * Canvas-2D placeholder renderer for Milestones 0–3. Reads a WorldSnapshot;
@@ -30,6 +31,11 @@ export class Renderer2D implements Renderer {
   private overlayPendingScale = 0;
   private ballArt?: HTMLImageElement;
   private backglass?: HTMLImageElement;
+  /** Table-accent element-lamp colour (STYLE-GUIDE §7), derived from the
+   * theme in init(). Defaults = Moondial violet for theme-less dev tables. */
+  private accentHex = "#8c6bff";
+  private accentDeepHex = "#4e37a8";
+  private accentRgb = "140, 107, 255";
   /** Recent ball positions for the speed-scaled motion trail. */
   private trail: { x: number; y: number }[] = [];
   private lastCharge = 0;
@@ -49,6 +55,11 @@ export class Renderer2D implements Renderer {
 
   init(table: TableRenderData): void {
     this.table = table;
+    if (table.theme) {
+      this.accentHex = hexColor(table.theme.accent);
+      this.accentDeepHex = hexColor(table.theme.accentDeep);
+      this.accentRgb = rgbTriplet(table.theme.accent);
+    }
     const split = table.artSvgText ? splitElevatedOverlay(table.artSvgText) : undefined;
     this.baseSvgText = split?.base ?? table.artSvgText;
     this.overlaySvgText = split?.overlay;
@@ -566,49 +577,62 @@ export class Renderer2D implements Renderer {
     ctx.fill();
     ctx.stroke();
 
-    // slingshots — brass triangles, flash whitens with an additive halo
+    // slingshots — rubber over a table-accent lamp (STYLE-GUIDE §7): the
+    // chrome-800 body rounds the physics triangle's corners (render-side
+    // only; the fixture keeps its sharp verts), a steel rim marks the
+    // striking face, and the centroid insert fires the accent on a kick
     for (const s of el.slings) {
-      if (s.flash > 0.01) {
-        const cx = s.verts.reduce((a, p) => a + p.x, 0) / s.verts.length;
-        const cy = s.verts.reduce((a, p) => a + p.y, 0) / s.verts.length;
-        this.drawGlow(cx, cy, 0.06, "244, 210, 122", s.flash);
-      }
-      const ys = s.verts.map((p) => p.y);
-      const grad = ctx.createLinearGradient(0, Math.min(...ys), 0, Math.max(...ys));
-      grad.addColorStop(0, "#f4d27a");
-      grad.addColorStop(0.5, "#e0b64e");
-      grad.addColorStop(1, "#9c7c2c");
+      const cx = s.verts.reduce((a, p) => a + p.x, 0) / s.verts.length;
+      const cy = s.verts.reduce((a, p) => a + p.y, 0) / s.verts.length;
       ctx.beginPath();
-      s.verts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+      roundCorners(s.verts, 0.012).forEach((p, i) =>
+        i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y),
+      );
       ctx.closePath();
-      ctx.fillStyle = s.flash > 0.01 ? `rgba(255, 240, 200, ${0.6 + 0.4 * s.flash})` : grad;
+      ctx.fillStyle = "#23262f";
       ctx.fill();
       ctx.lineWidth = 0.003;
       ctx.strokeStyle = "#07080d";
       ctx.stroke();
-      // rim light along the striking face (apex → second vertex)
+      // steel-300 rim along the striking face (apex → second vertex), ends
+      // pulled in so the line dies into the rounded corners
+      const ex = s.verts[1].x - s.verts[0].x;
+      const ey = s.verts[1].y - s.verts[0].y;
+      const elen = Math.hypot(ex, ey) || 1;
+      const inset = Math.min(0.009, elen * 0.2);
       ctx.beginPath();
-      ctx.moveTo(s.verts[0].x, s.verts[0].y);
-      ctx.lineTo(s.verts[1].x, s.verts[1].y);
-      ctx.strokeStyle = "rgba(255, 246, 214, 0.7)";
+      ctx.moveTo(s.verts[0].x + (ex / elen) * inset, s.verts[0].y + (ey / elen) * inset);
+      ctx.lineTo(s.verts[1].x - (ex / elen) * inset, s.verts[1].y - (ey / elen) * inset);
+      ctx.strokeStyle = "rgba(127, 143, 201, 0.8)";
       ctx.lineWidth = 0.0025;
       ctx.lineCap = "round";
       ctx.stroke();
+      // accent lamp insert: unlit = accent at 30%, kick = full + halo (§7)
+      ctx.beginPath();
+      ctx.arc(cx, cy, 0.0095, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${this.accentRgb}, ${0.3 + 0.7 * s.flash})`;
+      ctx.fill();
+      ctx.lineWidth = 0.0015;
+      ctx.strokeStyle = "#07080d";
+      ctx.stroke();
+      this.drawGlow(cx, cy, 0.055, this.accentRgb, 0.12 + 0.88 * s.flash);
     }
 
-    // drop targets — brass faces lit from the playfield side; dropped = dim outline
+    // drop targets — table-accent plastic faces (STYLE-GUIDE §7) with a
+    // faint standing glow; dropped = dim outline
     for (const t of el.targets) {
       ctx.beginPath();
       ctx.rect(t.x - t.hw, t.y - t.hh, t.hw * 2, t.hh * 2);
       if (t.up) {
         const tg = ctx.createLinearGradient(t.x - t.hw, 0, t.x + t.hw, 0);
-        tg.addColorStop(0, "#f4d27a");
-        tg.addColorStop(1, "#9c7c2c");
+        tg.addColorStop(0, this.accentHex);
+        tg.addColorStop(1, this.accentDeepHex);
         ctx.fillStyle = tg;
         ctx.fill();
         ctx.lineWidth = 0.002;
         ctx.strokeStyle = "#07080d";
         ctx.stroke();
+        this.drawGlow(t.x, t.y, Math.max(t.hw, t.hh) * 2.2, this.accentRgb, 0.16);
       } else {
         ctx.lineWidth = 0.0015;
         ctx.strokeStyle = "#2c3352";

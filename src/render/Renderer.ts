@@ -22,8 +22,16 @@ export interface TableRenderData {
   backglassSvgText?: string;
   /** Plunger assembly placement (per-table; drawn by the renderer). */
   plunger: { x: number; saddleY: number; tipRestY: number; pull: number; baseY: number };
-  /** Per-table 3D material tints (wall art colors live in the SVG). */
-  theme?: { rail3d: number; rail3dElevated: number; rampGlass3d: number };
+  /** Per-table material tints (wall art colors live in the SVG). The
+   * `accent` pair is the table's element-lamp colour (STYLE-GUIDE §7) —
+   * used by slings/drop targets in both renderers. */
+  theme?: {
+    rail3d: number;
+    rail3dElevated: number;
+    rampGlass3d: number;
+    accent: number;
+    accentDeep: number;
+  };
 }
 
 export interface BallSnapshot {

@@ -8,6 +8,7 @@ import { BALL_RADIUS, FLIPPER, type FlipperSide, type Pt } from "../table/geomet
 import { heightAt, parseTableSvg } from "../table/SvgCollision";
 import { buildSurfaces } from "../table/Surfaces";
 import { loadSvgAt, splitElevatedOverlay } from "./svgImage";
+import { roundCorners } from "./shape";
 import type {
   EffectKind,
   Renderer,
@@ -73,8 +74,7 @@ const PALETTE = {
   rail: 0xbdc9dc,
   bumper: 0x123339,
   bumperGlow: 0x35e0d6,
-  sling: 0xd9b24a,
-  target: 0xe0b64e,
+  slingBody: 0x23262f, // rubber (STYLE-GUIDE §7) — the lamp colour is the table accent
   rollover: 0x8f7bff,
   ball: 0xe8ecf2,
   effect: { flash: 0xffd27a, launch: 0x9a6cff, drain: 0xff5a4a } as Record<EffectKind, number>,
@@ -735,19 +735,22 @@ export class Renderer3D implements Renderer {
       this.scene.add(body, cap, rim, light);
     }
 
-    const slingTex = brassTexture("v");
+    // table-accent element lamps (STYLE-GUIDE §7) — slings and drop targets
+    // carry the table's neon pair, not the flipper brass
+    const accent = this.table.theme?.accent ?? 0x8c6bff;
+    const accentDeep = this.table.theme?.accentDeep ?? 0x4e37a8;
     for (const s of snap.elements.slings) {
       const mat = new THREE.MeshStandardMaterial({
-        map: slingTex,
-        emissive: PALETTE.sling,
-        emissiveIntensity: 0,
-        metalness: 0.3,
-        roughness: 0.5,
+        color: PALETTE.slingBody, // rubber body; the accent light lives in the emissive
+        emissive: accent,
+        emissiveIntensity: 0.12,
+        metalness: 0.05,
+        roughness: 0.8,
       });
-      // rubber-ring corners — the raw physics triangle is razor-sharp; 8 mm
-      // because the up-table apex is acute and a smaller fillet still reads
-      // pointed through the quadratic's tight midpoint
-      const mesh = extrudeFlat(roundCorners(s.verts, 0.008), 0.018, mat);
+      // rubber-ring corners — the raw physics triangle is razor-sharp; 12 mm
+      // (up from 8, 2026-07-16 "too angular" feedback) because the acute
+      // up-table apex still reads pointed through the quadratic's midpoint
+      const mesh = extrudeFlat(roundCorners(s.verts, 0.012), 0.018, mat);
       mesh.position.y = 0.001;
       mesh.castShadow = true;
       this.slingMats.push(mat);
@@ -755,8 +758,8 @@ export class Renderer3D implements Renderer {
     }
 
     const targetMat = new THREE.MeshStandardMaterial({
-      color: PALETTE.target,
-      emissive: PALETTE.target,
+      color: accentDeep,
+      emissive: accent,
       emissiveIntensity: 0.25,
       roughness: 0.45,
     });
@@ -913,7 +916,8 @@ export class Renderer3D implements Renderer {
       this.bumperLights[i].intensity = b.flash * 0.05;
     });
     snap.elements.slings.forEach((s, i) => {
-      this.slingMats[i].emissiveIntensity = s.flash * 1.6;
+      // idle 0.12 keeps the lamp faintly powered; a kick flares the accent
+      this.slingMats[i].emissiveIntensity = 0.12 + s.flash * 1.6;
     });
     snap.elements.targets.forEach((t, i) => {
       const mesh = this.targetMeshes[i];
@@ -1216,54 +1220,22 @@ function flipperShapePts(side: FlipperSide): Pt[] {
   return pts.map((p) => ({ x: -p.x, y: p.y })).reverse();
 }
 
-/** Round each polygon corner with a quadratic arc of ~radius (clamped so
- * short edges keep some straight run). Render-side only — physics keeps the
- * sharp verts; the rounding stays inside them, never wider. */
-function roundCorners(pts: readonly Pt[], radius: number, steps = 6): Pt[] {
-  const n = pts.length;
-  const out: Pt[] = [];
-  for (let i = 0; i < n; i++) {
-    const prev = pts[(i + n - 1) % n];
-    const cur = pts[i];
-    const next = pts[(i + 1) % n];
-    const la = Math.hypot(prev.x - cur.x, prev.y - cur.y);
-    const lb = Math.hypot(next.x - cur.x, next.y - cur.y);
-    const rr = Math.min(radius, 0.35 * la, 0.35 * lb);
-    const ax = cur.x + ((prev.x - cur.x) / la) * rr;
-    const ay = cur.y + ((prev.y - cur.y) / la) * rr;
-    const bx = cur.x + ((next.x - cur.x) / lb) * rr;
-    const by = cur.y + ((next.y - cur.y) / lb) * rr;
-    for (let s = 0; s <= steps; s++) {
-      const t = s / steps;
-      const u = 1 - t;
-      out.push({
-        x: u * u * ax + 2 * u * t * cur.x + t * t * bx,
-        y: u * u * ay + 2 * u * t * cur.y + t * t * by,
-      });
-    }
-  }
-  return out;
-}
-
 /**
  * The 2D renderer's approved brass ramp (#f4d27a → #e0b64e → #9c7c2c) baked
  * to a small gradient texture. extrudeFlat planar-maps UVs over the shape's
  * bbox, so "u" runs along its x extent (flipper base→tip; "u-rev" for the
- * mirrored right bat) and "v" down its y extent (sling top→bottom, matching
- * the 2D fill's light-from-up-table read).
+ * mirrored right bat). Flippers only — slings left brass on 2026-07-16 (§7).
  */
-function brassTexture(dir: "u" | "u-rev" | "v"): THREE.CanvasTexture {
+function brassTexture(dir: "u" | "u-rev"): THREE.CanvasTexture {
   const cnv = document.createElement("canvas");
   cnv.width = cnv.height = 64;
   const ctx = cnv.getContext("2d")!;
   const grad =
     dir === "u"
       ? ctx.createLinearGradient(0, 0, 64, 0)
-      : dir === "u-rev"
-        ? ctx.createLinearGradient(64, 0, 0, 0)
-        : ctx.createLinearGradient(0, 64, 0, 0); // v = 0 is the canvas bottom
+      : ctx.createLinearGradient(64, 0, 0, 0);
   grad.addColorStop(0, "#f4d27a");
-  grad.addColorStop(dir === "v" ? 0.5 : 0.55, "#e0b64e");
+  grad.addColorStop(0.55, "#e0b64e");
   grad.addColorStop(1, "#9c7c2c");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 64, 64);

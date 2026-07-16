@@ -133,5 +133,11 @@ export const TIDEBREAKER_SPEC: TableSpec = {
   highScoreKey: "pinball-highscores-tidebreaker-v1",
   // dark verdigris field walls (abyss-300/500 blend); habitrail stays chrome;
   // ramp glass is cyan-400 abyssal blue, not the dayglo default (STYLE-GUIDE §2)
-  theme: { rail3d: 0x2d5a66, rail3dElevated: 0xbdc9dc, rampGlass3d: 0x2fc9d6 },
+  theme: {
+    rail3d: 0x2d5a66,
+    rail3dElevated: 0xbdc9dc,
+    rampGlass3d: 0x2fc9d6,
+    accent: 0x2fc9d6, // abyssal cyan element lamps
+    accentDeep: 0x147986,
+  },
 };

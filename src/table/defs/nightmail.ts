@@ -162,5 +162,11 @@ export const NIGHTMAIL_SPEC: TableSpec = {
   highScoreKey: "pinball-highscores-nightmail-v1",
   // wet-slate field walls (smoke-500/300 blend); the incline wireform stays
   // chrome; ramp glass is the dayglo default (STYLE-GUIDE §2)
-  theme: { rail3d: 0x35503f, rail3dElevated: 0xbdc9dc, rampGlass3d: 0x39ff14 },
+  theme: {
+    rail3d: 0x35503f,
+    rail3dElevated: 0xbdc9dc,
+    rampGlass3d: 0x39ff14,
+    accent: 0x39ff14, // signal-green element lamps
+    accentDeep: 0x1cae0d,
+  },
 };

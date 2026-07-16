@@ -41,9 +41,17 @@ export interface TableSpec {
    * the 3D rail materials in step. Elevated wireforms stay chrome on every
    * table — the material split is the layer cue. `rampGlass3d` tints the
    * translucent bed between the wires and must match the SVG's
-   * art-rails-elevated wash (STYLE-GUIDE §2).
+   * art-rails-elevated wash (STYLE-GUIDE §2). `accent`/`accentDeep` are the
+   * table's element-lamp pair (STYLE-GUIDE §7, a neon-400/600 token pair) —
+   * sling lamps and drop-target plastic in BOTH renderers draw from them.
    */
-  theme: { rail3d: number; rail3dElevated: number; rampGlass3d: number };
+  theme: {
+    rail3d: number;
+    rail3dElevated: number;
+    rampGlass3d: number;
+    accent: number;
+    accentDeep: number;
+  };
 }
 
 export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail";

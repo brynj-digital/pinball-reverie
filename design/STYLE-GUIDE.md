@@ -275,10 +275,27 @@ See [previews/materials.html](previews/materials.html).
   highlight offset ≈ −35% of radius in x and y. One highlight per object.
 - **Ball:** 3-stop radial chrome (`chrome-50 → chrome-400 → chrome-600`),
   center offset to the key light, plus one crisp small `chrome-50` highlight.
-- **Flippers / brass mechanicals:** 3-stop brass ramp along the bat, 2 mm ink
-  outline, thin `brass-300` rim light on the striking face.
+- **Flippers / kicker mechanicals (brass):** 3-stop brass ramp along the bat,
+  2 mm ink outline, thin `brass-300` rim light on the striking face. Brass is
+  reserved for the flippers and kicker/plunger mechanicals — slingshots and
+  drop targets are explicitly NOT brass (amended 2026-07-16; they used to
+  share the flipper ramp and read as one material).
 - **Rubbers / posts:** near-black (`chrome-800`) with a `--steel-300` top rim
   arc — rubber reads by its rim, not its body.
+- **Slingshots (2026-07-16):** rubber material, not brass — `chrome-800` body
+  with the `--steel-300` rim along the striking face, corners rounded ~12 mm
+  (render-side only; physics keeps the sharp verts and the rounding stays
+  inside them). A **table-accent lamp insert** sits at the centroid: unlit =
+  accent at 30%, kick = full token + additive halo (the standard insert rule).
+- **Drop targets (2026-07-16):** table-accent plastic faces (accent-600 →
+  accent-400 ramp toward the key light) with a faint accent glow while
+  standing; dropped = the dim `steel-700` outline, unchanged.
+- **Table accent (2026-07-16):** each table names one neon pair as its
+  element-lamp accent, carried by `TableSpec.theme` so both renderers stay in
+  step — Moondial `violet-400/600`, Tidebreaker `cyan-400/600`, Midnight
+  Midway `magenta-400/600`, The Night Mail `green-400/600`. Slings and drop
+  targets draw their coloured light from it; new per-table element lamps
+  should too before inventing a new colour.
 - **Playfield:** `field-800` base; `field-900` occlusion pooling along walls;
   8% corner vignette; art printed *into* the field sits 10% desaturated so
   physical parts pop above it.
