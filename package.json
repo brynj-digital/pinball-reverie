@@ -10,6 +10,7 @@
     "entcheck": "tsx scripts/entity-check.ts",
     "simcheck": "tsx scripts/simcheck.ts",
     "soak": "tsx scripts/soak.ts",
+    "icons": "tsx scripts/make-icons.ts",
     "verify:touch": "tsx scripts/verify-touch.ts"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "playwright": "^1.61.1",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^1.3.0"
   }
 }

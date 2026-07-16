@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Pinball Reverie app icon master (PWA home-screen / install icon).
+       Full-bleed void field so one master serves both "any" and "maskable"
+       purposes: the ball + flipper sit inside the central 80% safe circle.
+       Palette: tokens.css only — chrome ball per design/ball.svg, brass
+       flipper, void/field background. Rasterized to public/icons/ by
+       `npm run icons` (scripts/make-icons.ts). -->
+  <defs>
+    <radialGradient id="fieldGlow" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0" stop-color="#1b1e2c"/>
+      <stop offset="0.7" stop-color="#12141f"/>
+      <stop offset="1" stop-color="#0c0d14"/>
+    </radialGradient>
+    <radialGradient id="ballChrome" cx="0.38" cy="0.32" r="0.9">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#565d6e"/>
+    </radialGradient>
+    <linearGradient id="flipperBrass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4d27a"/>
+      <stop offset="0.45" stop-color="#e0b64e"/>
+      <stop offset="1" stop-color="#9c7c2c"/>
+    </linearGradient>
+    <clipPath id="ballClip"><circle cx="256" cy="212" r="126"/></clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#fieldGlow)"/>
+
+  <!-- flipper: brass bat mid-flip, tip toward the ball it just sent up -->
+  <g>
+    <path d="M 168 394 L 336 338" stroke="#07080d" stroke-width="72" stroke-linecap="round" fill="none"/>
+    <path d="M 168 394 L 336 338" stroke="url(#flipperBrass)" stroke-width="60" stroke-linecap="round" fill="none"/>
+    <path d="M 172 382 L 326 330" stroke="#f4d27a" stroke-width="12" stroke-linecap="round" fill="none" opacity="0.8"/>
+    <circle cx="168" cy="394" r="16" fill="#9c7c2c" stroke="#07080d" stroke-width="4"/>
+  </g>
+
+  <!-- the ball: chrome radial base, mirrored environment, two speculars
+       (design/ball.svg scaled up; violet cast swapped for the field tone) -->
+  <circle cx="256" cy="212" r="126" fill="url(#ballChrome)"/>
+  <g clip-path="url(#ballClip)">
+    <ellipse cx="256" cy="245" rx="138" ry="48" fill="#23262f" opacity="0.28"/>
+    <ellipse cx="218" cy="269" rx="90" ry="57" fill="#2c3352" opacity="0.3"/>
+    <ellipse cx="256" cy="148" rx="103" ry="44" fill="#ffffff" opacity="0.4"/>
+    <ellipse cx="256" cy="302" rx="86" ry="32" fill="#d7dce8" opacity="0.18"/>
+    <ellipse cx="230" cy="320" rx="90" ry="34" fill="#e0b64e" opacity="0.14"/>
+  </g>
+  <circle cx="256" cy="212" r="126" fill="none" stroke="#07080d" stroke-width="6"/>
+  <circle cx="215" cy="165" r="23" fill="#ffffff"/>
+  <circle cx="293" cy="146" r="10" fill="#ffffff" opacity="0.85"/>
+</svg>
