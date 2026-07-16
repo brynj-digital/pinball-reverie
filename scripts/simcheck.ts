@@ -466,6 +466,81 @@ function moondialSuite(): void {
     rig.scoring.bonusUnits === 5 * moondialRules.telescope.bonusUnit,
     `units=${rig.scoring.bonusUnits}`,
   );
+
+  // 9 — THE GNOMON (differentiation pass): the centre post rises with the
+  // saver and seals the tip gap; retracted, the same drop drains
+  {
+    const rig2 = buildRig("moondial");
+    rig2.flippers[0].update(false, rig2.t);
+    rig2.flippers[1].update(false, rig2.t);
+    rig2.flags.saver = true;
+    rig2.run(0.2); // let the blade swap settle
+    rig2.state.drained = false;
+    rig2.placeBall(0.26, 0.915);
+    rig2.run(3);
+    const postP = rig2.ball.body.getPosition();
+    const onPost = { x: postP.x, y: postP.y }; // copy — planck positions are live refs
+    check(
+      "gnomon up: tip-gap drop rests on the post, no drain",
+      !rig2.state.drained && onPost.y < 1.0,
+      `rest=(${onPost.x.toFixed(3)}, ${onPost.y.toFixed(3)})`,
+    );
+    // a single flip must recover the resting ball (the post pocket is
+    // reachable — dead-centre it balances, so nudge it a hair off-axis as
+    // any real arrival would be, then flip the near flipper)
+    rig2.placeBall(0.263, 0.945);
+    rig2.run(1.5);
+    let peak = 1.05;
+    rig2.run(0.6, () => {
+      rig2.flippers[1].update(true, rig2.t);
+      peak = Math.min(peak, rig2.ball.body.getPosition().y);
+    });
+    check(
+      "gnomon up: a single flip recovers the resting ball",
+      peak < onPost.y - 0.05,
+      `peak=${peak.toFixed(3)}`,
+    );
+    rig2.flippers[0].update(false, rig2.t);
+    rig2.flippers[1].update(false, rig2.t);
+    rig2.flags.saver = false;
+    rig2.run(0.5);
+    rig2.state.drained = false;
+    rig2.placeBall(0.26, 0.915);
+    rig2.run(3);
+    check("gnomon down: the same drop drains", rig2.state.drained);
+  }
+
+  // 10 — FIRST LIGHT skill shot: a soft plunge pays and spots a moon lane;
+  // a full plunge does not
+  {
+    const rig3 = buildRig("moondial");
+    rig3.flippers[0].update(false, rig3.t);
+    rig3.flippers[1].update(false, rig3.t);
+    const logic3 = rig3.logic as MoondialLogic;
+    rig3.run(2); // settle on the saddle
+    rig3.ball.body.setLinearVelocity(new Vec2(0, -1.2)); // soft plunge
+    rig3.run(3);
+    check(
+      "soft plunge pays FIRST LIGHT and spots a moon lane",
+      rig3.scoring.total === moondialRules.skill.points && logic3.laneLit("1") > 0,
+      `total=${rig3.scoring.total}`,
+    );
+    const after = rig3.scoring.total;
+    rig3.ball.body.setLinearVelocity(new Vec2(0, -1.2));
+    rig3.run(3);
+    check("FIRST LIGHT is once per ball", rig3.scoring.total === after, `total=${rig3.scoring.total}`);
+    const rig4 = buildRig("moondial");
+    rig4.flippers[0].update(false, rig4.t);
+    rig4.flippers[1].update(false, rig4.t);
+    rig4.run(2);
+    rig4.ball.body.setLinearVelocity(new Vec2(0, -rig4.t.plungerMaxSpeed));
+    let sawSkillAward = false;
+    rig4.bus.on("score", ({ label }) => {
+      if (label === "FIRST LIGHT") sawSkillAward = true;
+    });
+    rig4.run(3);
+    check("full plunge does not qualify", !sawSkillAward);
+  }
 }
 
 // ═══════════════════════════ TIDEBREAKER ═══════════════════════════

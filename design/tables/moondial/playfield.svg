@@ -428,6 +428,18 @@
       <!-- plunger saddle: the ball rests here, above the animated spring -->
       <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>
+    <!-- THE GNOMON (differentiation pass 2026-07-17): retractable centre post
+         between the flipper tips — the sundial's gnomon, risen when its
+         shadow matters (ball-saver live, LUNAR ECLIPSE running). A diverter
+         with an inert "down" blade (a sliver parked in the sealed void under
+         the plunger saddle — unreachable by any ball). Post edges sit 15 mm
+         off the resting flipper tips: the ball can't pass beside it and
+         rests ON it between the tips, always recoverable by a flip (the
+         wedge rule is for static geometry; the tips sweep this pocket). -->
+    <g id="diverter-paths" fill="none">
+      <path data-width="9" id="collision-diverter-gnomon-up" d="M 260 990 L 260 1004"/>
+      <path data-width="4" id="collision-diverter-gnomon-down" d="M 545 1025 L 549 1025"/>
+    </g>
   </defs>
   <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
     <g stroke="#07080d" stroke-width="16"><use href="#collision-paths"/></g>
@@ -446,6 +458,11 @@
     <rect id="sensor-ramp-entry" x="2.5" y="492" width="60" height="16"/>
     <rect id="sensor-ramp-exit" x="442" y="117" width="36" height="36"/>
     <rect id="sensor-kicker-telescope" x="464" y="344" width="42" height="42"/>
+    <!-- FIRST LIGHT skill band (STYLE-GUIDE §4): a soft plunge peaking here
+         arrives slow (probe: crossings at y500 run 0.25-0.71 m/s for
+         roll-back plunges, >=0.88 for lane-exiting ones; threshold 0.75 in
+         rules.skill.maxSpeed) -->
+    <rect id="sensor-skill-firstlight" x="526" y="440" width="43" height="60"/>
   </g>
 
   <!-- ═══════════════ anchors (invisible placement points) ═══════════════ -->

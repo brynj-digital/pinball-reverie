@@ -30,6 +30,12 @@
       { "name": "SUPERNOVA", "points": 25000 }
     ]
   },
+  "skill": {
+    "comment": "FIRST LIGHT (differentiation pass): a soft plunge peaking in the sensor-skill-firstlight band (fires at <= maxSpeed m/s) pays points and spots one moon lane. Once per ball.",
+    "maxSpeed": 0.75,
+    "points": 15000,
+    "bonusUnit": 500
+  },
   "eclipse": {
     "banksRequired": 2,
     "orbitsRequired": 3,

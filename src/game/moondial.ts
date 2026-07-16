@@ -17,6 +17,10 @@ const ORBIT_PAIR_WINDOW = 3.5;
  *   list (wrapping); the last sighting also spots one orbit toward lighting
  *   the eclipse. Progression persists across balls, resets per game.
  * - MOON LANES: light all three to raise the bonus multiplier (max ×5).
+ * - THE GNOMON (differentiation pass): the centre post rises while the
+ *   ball-saver is live and during the eclipse (diverterBlade below).
+ * - FIRST LIGHT (skill shot): a soft plunge peaking in the lane band pays
+ *   skill.points and spots one moon lane. Once per ball.
  * - Combos and any running eclipse end with the ball.
  *
  * Owns the table's DMD narration too (M10: per-table logic behind the
@@ -35,6 +39,7 @@ export class MoondialLogic implements TableLogic {
   private eclipseUntil = -Infinity;
   private eclipseWasActive = false;
   private litMoons = new Set<string>();
+  private skillUsed = false;
 
   constructor(private ctx: TableLogicCtx) {
     ctx.bus.on("sensor", ({ kind }) => {
@@ -84,6 +89,7 @@ export class MoondialLogic implements TableLogic {
 
   /** Ball drained: combos and any running eclipse die with it. */
   endBall(): void {
+    this.skillUsed = false;
     this.orbitStep = 0;
     this.lastOrbitAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -106,6 +112,10 @@ export class MoondialLogic implements TableLogic {
 
   /** Moon lanes: light all three to raise the bonus multiplier (max ×5). */
   onRollover(id: string): void {
+    this.spotMoon(id);
+  }
+
+  private spotMoon(id: string): void {
     this.litMoons.add(id);
     if (this.litMoons.size === 3) {
       this.litMoons.clear();
@@ -134,6 +144,27 @@ export class MoondialLogic implements TableLogic {
 
   kickerLit(): boolean {
     return true; // the telescope scoop is always live
+  }
+
+  /** THE GNOMON rises while the saver is live and during the eclipse. */
+  diverterBlade(id: string): string {
+    if (id !== "gnomon") return "down";
+    return (this.ctx.saverActive?.() ?? false) || this.eclipseActive ? "up" : "down";
+  }
+
+  /** FIRST LIGHT: soft plunge peaking in the lane band. Once per ball. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "firstlight" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "FIRST LIGHT");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["FIRST LIGHT", fmtScore(points)]], 1.4, true), 2);
+    // spot one unlit moon lane (completion logic shared with onRollover)
+    const unlit = ["1", "2", "3"].find((m) => !this.litMoons.has(m));
+    if (unlit) this.spotMoon(unlit);
   }
 
   /** Telescope scoop capture: award the next sighting in the logbook. */

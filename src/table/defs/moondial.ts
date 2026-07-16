@@ -90,6 +90,12 @@ const GEOMETRY: TableGeometry = {
     },
   ],
   subways: [],
+  /**
+   * THE GNOMON (differentiation pass): retractable centre post between the
+   * flipper tips, risen while the ball-saver is live and during LUNAR
+   * ECLIPSE. "down" is an inert sliver in the sealed under-saddle void.
+   */
+  diverters: [{ id: "gnomon", blades: ["up", "down"], initial: "down" }],
 };
 
 export const MOONDIAL_SPEC: TableSpec = {
