@@ -149,6 +149,8 @@ export class Renderer3D implements Renderer {
   private lastW = 0;
   private lastH = 0;
   private lastDpr = 0;
+  /** Canvas height below the portrait DMD strip (css px; = lastH in landscape). */
+  private lastAvailH = 1;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({
@@ -166,6 +168,26 @@ export class Renderer3D implements Renderer {
 
   setView3D(view: View3D): void {
     this.view = view;
+  }
+
+  /** Css px reserved above the table in portrait: the DOM DMD strip
+   * (.panel3d spans the width at 4:1 plus its insets) — the same band
+   * Renderer2D reserves (style guide §8). 0 in landscape. */
+  private topStripCss(cssW: number, cssH: number): number {
+    const inset = 12;
+    return cssW < cssH ? (cssW - inset * 2) / 4 + inset * 2 : 0;
+  }
+
+  effectiveViewH(baseViewH: number): number {
+    const cssW = this.canvas.clientWidth;
+    const cssH = this.canvas.clientHeight;
+    if (!cssW || !cssH || !this.table) return baseViewH;
+    const availH = cssH - this.topStripCss(cssW, cssH);
+    // Metres visible when width binds the scale (same rule as Renderer2D):
+    // exact for the flat ortho view; the tilted view starts from the same
+    // window and drawFrame pulls its camera back to cover the width.
+    const widthBound = availH * (this.table.width / cssW);
+    return Math.min(this.table.height, Math.max(baseViewH, widthBound));
   }
 
   init(table: TableRenderData): void {
@@ -924,7 +946,7 @@ export class Renderer3D implements Renderer {
       // fog off — depth is uniform straight down, it would only wash the art
       this.scene.fog = null;
       const halfH = camera.viewH / 2;
-      const halfW = halfH * (this.lastW / Math.max(1, this.lastH));
+      const halfW = halfH * (this.lastW / this.lastAvailH);
       this.camFlat.left = -halfW;
       this.camFlat.right = halfW;
       this.camFlat.top = halfH;
@@ -943,10 +965,19 @@ export class Renderer3D implements Renderer {
       // the flipper/drain area off the bottom of the screen.
       this.scene.fog = this.fog;
       const focusZ = camera.y + camera.viewH * 0.62;
+      // These factors were solved for a landscape frustum; on a narrow
+      // (portrait) canvas the horizontal wedge is thinner than the table, so
+      // pull the camera back along its boom until the window-bottom ground
+      // line (view-space depth ≈ 1.126·viewH at k = 1) spans the table width.
+      const tanHalfW = Math.tan((this.cam3.fov * Math.PI) / 360) * this.cam3.aspect;
+      const k = Math.max(
+        1,
+        (this.table.width / 2 + 0.012) / (tanHalfW * camera.viewH * 1.126),
+      );
       this.cam3.position.set(
         cx + camera.shakeX,
-        camera.viewH * 1.13 + camera.shakeY,
-        focusZ + camera.viewH * 0.69,
+        camera.viewH * 1.13 * k + camera.shakeY,
+        focusZ + camera.viewH * 0.69 * k,
       );
       this.cam3.lookAt(cx, 0, focusZ);
       this.renderPass!.camera = this.cam3;
@@ -980,7 +1011,17 @@ export class Renderer3D implements Renderer {
     this.composer?.setPixelRatio(dpr);
     this.composer?.setSize(w, h);
     this.bloom?.setSize(w * dpr, h * dpr);
-    this.cam3.aspect = w / h;
+    // Portrait: the DOM DMD strip owns the top band. Both cameras frame the
+    // scroll window against the region BELOW it — the virtual view is
+    // w × availH and the canvas extends `strip` px above it, so the strip
+    // covers table-top overdraw, never the window itself.
+    const strip = this.topStripCss(w, h);
+    this.lastAvailH = Math.max(1, h - strip);
+    for (const cam of [this.cam3, this.camFlat]) {
+      if (strip > 0) cam.setViewOffset(w, this.lastAvailH, 0, -strip, w, h);
+      else cam.clearViewOffset();
+    }
+    this.cam3.aspect = w / this.lastAvailH;
     this.cam3.updateProjectionMatrix();
   }
 

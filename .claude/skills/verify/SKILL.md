@@ -51,8 +51,29 @@ import { chromium } from "/home/bryn/projects/pinball-reverie/node_modules/playw
 
 ## Gotchas
 
+- **Headless screenshots of the WebGL (3D-mode) canvas are unreliable** —
+  the compositor shows the playfield canvas cropped/blank even when the GL
+  frame is correct (bites hardest when the drawing buffer ≠ CSS size ×
+  deviceScaleFactor, i.e. renderScale ≠ 1, but matched sizes aren't safe
+  either). DOM chrome (panels, DMD strip, overlays) screenshots fine. To
+  verify 3D canvas *content*: launch headed (`chromium.launch({ headless:
+  false })` works under WSLg), or read truth from the buffer with
+  `gl.readPixels` right after a render in the same `evaluate`. The 2D
+  canvas doesn't have this problem.
+
 - A card/element clipped outside the viewport can't be CDP-tapped at its
   rect centre — clamp tap coords to the visible part.
 - After any physics or playfield-SVG change also run `npm run simcheck`
   and `npm run soak` (CLAUDE.md rule) — but they are not a substitute for
   driving the UI.
+- Headless 3D mode runs on software GL at only a few frames/sec during
+  startup, so throttled per-frame DOM updates (e.g. the `.hud3d` line,
+  refreshed every 0.25s of accumulated frame-dt) land seconds after load —
+  poll for the state you expect instead of racing it with a fixed sleep.
+- The 2D renderer's HUD text is canvas-drawn: assert it by counting pixels
+  that exactly match its fill color `#8790b3` (tolerance ~10; the color is
+  in no art token, so the baseline is zero) — loose tolerances match the
+  playfield art's blue-grays.
+- Concurrent Claude sessions share this checkout and may rebuild `dist/`
+  mid-run — if results look stale or inconsistent, rebuild yourself and
+  re-run.

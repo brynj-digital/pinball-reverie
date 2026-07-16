@@ -121,6 +121,40 @@ body {
   background: #0f0805;
 }
 
+/* Short landscape (phone on its side): the desktop panel is too big — slim
+   it, and below ~420px drop the backglass entirely (the 2D renderer's own
+   no-room rule), keeping just the DMD in the top-left void. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .panel3d {
+    width: 208px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 420px) {
+  .panel3d img {
+    display: none;
+  }
+}
+
+/* Portrait (style guide §8): the side panel becomes the full-width 4:1 DMD
+   strip the 2D renderer reserves on top — Renderer3D.effectiveViewH keeps the
+   same band clear above the table, so the strip and the playfield never
+   overlap. No room for the backglass, exactly like the 2D portrait layout. */
+@media (orientation: portrait) {
+  .panel3d {
+    top: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    padding: 12px;
+    background: #0c0d14;
+  }
+
+  .panel3d img {
+    display: none;
+  }
+}
+
 .hud3d {
   position: fixed;
   left: 12px;
