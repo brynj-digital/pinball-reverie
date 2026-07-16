@@ -114,6 +114,80 @@ function profile(
   check("diverter: selected blade is solid", blockedB.y < 0.5, `y=${blockedB.y.toFixed(3)}`);
 }
 
+// ─────────────── Diverter: inert (off-field) blade ───────────────
+// The retractable-post pattern (Moondial's gnomon, the Sump's floodgate):
+// one blade is the feature, the other a tiny sliver parked where no ball
+// can reach — selecting it is how a diverter "retracts". Prove the sliver
+// is a legal blade and that the post position is genuinely open while the
+// sliver is selected.
+{
+  const { t, pw, ball, place, run } = makeRig();
+  const blades = [
+    {
+      diverter: "gnomon",
+      blade: "up",
+      pts: [
+        { x: 0.24, y: 0.5 },
+        { x: 0.28, y: 0.5 },
+      ],
+      radius: 0.005,
+    },
+    {
+      // inert sliver: 4 mm chain tucked at the rig edge, unreachable
+      diverter: "gnomon",
+      blade: "down",
+      pts: [
+        { x: 0.02, y: 0.02 },
+        { x: 0.024, y: 0.02 },
+      ],
+      radius: 0.002,
+    },
+  ];
+  const dv = new Diverter(pw.world, pw, {
+    id: "gnomon",
+    blades: ["up", "down"],
+    initial: "down",
+  }, blades, t);
+
+  const step = () =>
+    pw.update(
+      FIXED_DT,
+      () => ball.height.applyForces(ball.body),
+      () => {
+        const p = ball.body.getPosition();
+        ball.height.step(FIXED_DT, p.x, p.y);
+      },
+    );
+
+  place(0.26, 0.4, 0, 0.5);
+  run(1.0, step);
+  check(
+    "diverter: inert blade leaves the post position open",
+    ball.body.getPosition().y > 0.55,
+    `y=${ball.body.getPosition().y.toFixed(3)}`,
+  );
+
+  dv.setBlade("up");
+  place(0.26, 0.4, 0, 0.5);
+  run(1.0, step);
+  check(
+    "diverter: post rises when selected",
+    ball.body.getPosition().y < 0.5,
+    `y=${ball.body.getPosition().y.toFixed(3)}`,
+  );
+
+  // retract under a ball parked NEXT to the post (not overlapping): the
+  // swap must go through immediately — deferral is only for overlap.
+  dv.setBlade("down");
+  place(0.26, 0.4, 0, 0.5);
+  run(1.0, step);
+  check(
+    "diverter: post retracts and the lane reopens",
+    ball.body.getPosition().y > 0.55,
+    `y=${ball.body.getPosition().y.toFixed(3)}`,
+  );
+}
+
 // ───────────────────────────── Lift ─────────────────────────────
 {
   const { pw, ball, place, run } = makeRig();

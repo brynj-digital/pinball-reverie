@@ -251,6 +251,26 @@ sensors; entry and exit are geometry.
   between surfaces the ball can touch at the same height, and simcheck/soak
   must be able to flag a ball trapped on a ramp or in a subway.
 
+### Differentiation-pass conventions (2026-07-17)
+
+- **Skill shots** (`sensor-skill-<name>`): a sensor band partway up the
+  shooter lane, spanning the lane's width. The table's logic awards it when
+  a soft plunge PEAKS inside the band — the band fires
+  `TableLogic.onSkillShot(id, speed)` with the ball's speed at that
+  instant; a soft plunge arrives slow near its apex, a full plunge rips
+  through fast, and the qualifying threshold lives in the table's rules
+  (`skillMaxSpeed`, typically ~1.2 m/s — probe per table). One skill sensor
+  per table, named for its fiction (`firstlight`, `sounding`, `signal`, …).
+  Pure SVG + rules — every table should carry one.
+- **No copy-paste kit.** New tables must NOT inherit another table's sling
+  vertex set, scoop position, scoop eject hand, or spinner placement
+  verbatim unless their brief argues the reuse (the proven outlane-throat
+  geometry is the standing exception — trap-safe clearances may be copied).
+  The 2026-07-16 audit found tables 2–5 sharing a byte-identical bottom
+  third and one shared scoop spot `(272,450)`; identity lives exactly in
+  the geometry the player touches most, so diverge there first. Eject hand
+  is a per-table design choice (`KickerDef.eject` is already per-kicker).
+
 ## 5. Type
 
 See [previews/typography.html](previews/typography.html).

@@ -384,6 +384,11 @@ export class Game {
             delay: 0.15 + i * 0.5,
           });
       },
+      saverActive: () =>
+        this.phase === "play" &&
+        this.ballStarted &&
+        this.gameTime < this.saverUntil &&
+        !this.tilted,
       lockBall: (kickerId, berth) => {
         if (this.phase !== "play") return false;
         const k = this.kickers.find((k) => k.def.id === kickerId);
@@ -655,6 +660,11 @@ export class Game {
           this.audio.sfx("scoop");
           this.logic.onCapture?.(id);
         }
+      } else if (kind === "skill" && id) {
+        if (this.phase === "play" && !this.tilted) {
+          const v = sBall.body.getLinearVelocity();
+          this.logic.onSkillShot?.(id, Math.hypot(v.x, v.y));
+        }
       } else if (kind === "rollover" && id) {
         this.rolloverLit.set(id, 1);
         this.audio.sfx("rollover");
@@ -685,7 +695,8 @@ export class Game {
         this.audio.sfx("bumper");
       } else if (kind === "sling") {
         const sl = this.slings.find((s) => s.def.id === id);
-        if (sl?.kick(hBall, this.physics, this.tuning.slingKick)) {
+        const slingBoost = this.logic.slingBoost?.() ?? 1;
+        if (sl?.kick(hBall, this.physics, this.tuning.slingKick * slingBoost)) {
           const c = sl.def.verts.reduce(
             (a, p) => ({ x: a.x + p.x / 3, y: a.y + p.y / 3 }),
             { x: 0, y: 0 },

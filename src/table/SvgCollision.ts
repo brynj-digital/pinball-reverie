@@ -114,6 +114,7 @@ const SENSOR_KINDS = [
   "kicker",
   "target",
   "lift",
+  "skill",
 ];
 
 const MM = 1 / 1000;

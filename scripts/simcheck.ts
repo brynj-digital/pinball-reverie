@@ -80,10 +80,13 @@ function buildRig(id: TableId) {
   const scoring = new Scoring(bus, spec.scoring);
   // magnet captures notify logic, as in Game (snag awards + light consume)
   for (const m of magnets) m.onCapture = () => logic.onCapture?.(m.def.id);
+  // suites toggle this to test saver-gated geometry (Moondial's gnomon)
+  const flags = { saver: false };
   const logic: TableLogic = spec.createLogic({
     bus,
     scoring,
     sfx: () => {},
+    saverActive: () => flags.saver,
     shake: () => {},
     push: () => {},
     baked: () => undefined,
@@ -146,11 +149,16 @@ function buildRig(id: TableId) {
       if (l && logic.kickerLit(sid) && l.capture(ball)) logic.onCapture?.(sid);
     }
     if (kind === "rollover" && sid) logic.onRollover(sid);
+    if (kind === "skill" && sid) {
+      const sv = ball.body.getLinearVelocity();
+      logic.onSkillShot?.(sid, Math.hypot(sv.x, sv.y));
+    }
   });
   bus.on("hit", ({ kind, id: hid }) => {
     state.hits.push(`${kind}:${hid}`);
     if (kind === "bumper") bumpers.find((b) => b.def.id === hid)?.kick(ball, pw, t.bumperKick);
-    if (kind === "sling") slings.find((s) => s.def.id === hid)?.kick(ball, pw, t.slingKick);
+    if (kind === "sling")
+      slings.find((s) => s.def.id === hid)?.kick(ball, pw, t.slingKick * (logic.slingBoost?.() ?? 1));
     if (kind === "target") bank.onHit(hid);
   });
   bus.on("spinnerTick", () => state.spins++);
@@ -209,7 +217,7 @@ function buildRig(id: TableId) {
   }
 
   const wallR = parseTableSvg(svgText).walls[0].radius;
-  return { spec, g, t, bus, pw, ball, flippers, bumpers, slings, bank, spinner, kickers, subways, diverters, lifts, magnets, discs, scoring, logic, state, run, placeBall, wallR };
+  return { spec, g, t, bus, pw, ball, flippers, bumpers, slings, bank, spinner, kickers, subways, diverters, lifts, magnets, discs, scoring, logic, state, flags, run, placeBall, wallR };
 }
 
 // ═══════════════════════════ MOONDIAL ═══════════════════════════

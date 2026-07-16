@@ -88,10 +88,15 @@ for (const tableId of tables) {
   const scoring = new Scoring(bus, spec.scoring);
   // real table logic drives lit-state (hatch/gutter light up and consume
   // exactly as in the game, so the soak exercises both outlane behaviours)
+  // stand-in ball-saver window: live for 8 s after each (re)launch, so
+  // saver-gated geometry (Moondial's gnomon) gets soak coverage in both states
+  let lastLaunch = -Infinity;
+  let simNow = 0;
   const logic = spec.createLogic({
     bus,
     scoring,
     sfx: () => {},
+    saverActive: () => simNow - lastLaunch < 8,
     shake: () => {},
     push: () => {},
     baked: () => undefined,
@@ -131,10 +136,15 @@ for (const tableId of tables) {
       if (l && logic.kickerLit(id) && l.capture(ball)) logic.onCapture?.(id);
     }
     if (kind === "rollover" && id) logic.onRollover(id);
+    if (kind === "skill" && id) {
+      const sv = ball.body.getLinearVelocity();
+      logic.onSkillShot?.(id, Math.hypot(sv.x, sv.y));
+    }
   });
   bus.on("hit", ({ kind, id }) => {
     if (kind === "bumper") bumpers.find((b) => b.def.id === id)?.kick(ball, pw, t.bumperKick);
-    if (kind === "sling") slings.find((s) => s.def.id === id)?.kick(ball, pw, t.slingKick);
+    if (kind === "sling")
+      slings.find((s) => s.def.id === id)?.kick(ball, pw, t.slingKick * (logic.slingBoost?.() ?? 1));
     if (kind === "target") bank.onHit(id);
   });
 
@@ -163,6 +173,7 @@ for (const tableId of tables) {
 
   for (let step = 0, steps = SIM_SECONDS / FIXED_DT; step < steps; step++) {
     const now = step * FIXED_DT;
+    simNow = now;
 
     // random flipper pattern: taps and holds, 0.05–1.5 s per state
     for (let i = 0; i < flippers.length; i++) {
@@ -184,6 +195,7 @@ for (const tableId of tables) {
       // sample the real plunger range so the soak covers what players can do
       const launch = t.plungerMinSpeed + rand() * (t.plungerMaxSpeed - t.plungerMinSpeed);
       ball.body.setLinearVelocity(new Vec2(0, -launch));
+      lastLaunch = now;
       launches++;
     }
 

@@ -1,6 +1,6 @@
 # Table differentiation plan
 
-**Status: proposed (2026-07-16), not yet scheduled.** Companion briefs:
+**Status: in execution (Phase 0 shipped 2026-07-17).** Companion briefs:
 `design/tables/{sump,glasshouse,summit,thunderhead}/BRIEF.md`. This plan
 covers (A) a **retrofit pass** giving each built table a structural
 differentiator, and (B) **tables 6–9**, each of which breaks one piece
@@ -71,11 +71,11 @@ left/right/upper.
 
 | # | Task | Size | Notes |
 |---|---|---|---|
-| 0.1 | **Confirm per-kicker eject vector.** CLAUDE.md says speed is `tuning.kickerEject`; kickbacks already eject up while scoops eject to the left flipper, so direction should be per-def — verify, and if any part is global, add a per-kicker override. Retrofits 1.4/1.5 and all new tables assume it. | S | entcheck |
-| 0.2 | **Inert diverter blade.** The gnomon (1.1) and the floodgate (M13) want a Diverter where one "blade" is effectively absent. Blade paths are arbitrary SVG, so an off-field sliver inside a wall should already work — prove it in entcheck rather than discovering it in soak. | S | entcheck |
-| 0.3 | **`TableLogic.slingBoost?()` hook** (optional multiplier on sling kick impulse, polled like `kickerLit`/`diverterBlade`). Wanted by 1.5 (Small Hours' TUNED slings); trivially ignored by other tables. | S | entcheck + simcheck |
-| 0.4 | **Skill-shot pattern note in STYLE-GUIDE §4**: a `sensor-skill-<id>` band partway up the shooter lane, awarded by TableLogic on a soft plunge that peaks inside it. Pure SVG + rules — no engine change; the guide entry is so five tables author it consistently. | S | docs |
-| 0.5 | **"No copy-paste kit" authoring rule in STYLE-GUIDE §4**: new tables must diverge sling verts, scoop positions and eject hands from the existing set unless a brief argues otherwise. Codifies the lesson so table 10 doesn't regress. | S | docs |
+| 0.1 | **DONE (verified 2026-07-17):** eject direction is per-kicker (`KickerDef.eject`) and speed per-kicker (`ejectSpeed?`, tuning fallback) — no engine change needed. ~~Confirm per-kicker eject vector.~~ CLAUDE.md says speed is `tuning.kickerEject`; kickbacks already eject up while scoops eject to the left flipper, so direction should be per-def — verify, and if any part is global, add a per-kicker override. Retrofits 1.4/1.5 and all new tables assume it. | S | entcheck |
+| 0.2 | **DONE (2026-07-17, entcheck "gnomon" cases):** an off-field sliver blade is legal; post rises/retracts cleanly. ~~Inert diverter blade.~~ The gnomon (1.1) and the floodgate (M13) want a Diverter where one "blade" is effectively absent. Blade paths are arbitrary SVG, so an off-field sliver inside a wall should already work — prove it in entcheck rather than discovering it in soak. | S | entcheck |
+| 0.3 | **DONE (2026-07-17):** `TableLogic.slingBoost?()` multiplies the kick impulse in Game AND all three sims. ~~hook~~ (optional multiplier on sling kick impulse, polled like `kickerLit`/`diverterBlade`). Wanted by 1.5 (Small Hours' TUNED slings); trivially ignored by other tables. | S | entcheck + simcheck |
+| 0.4 | **DONE (2026-07-17, STYLE-GUIDE §4 "Differentiation-pass conventions"):** ~~Skill-shot pattern note~~: a `sensor-skill-<id>` band partway up the shooter lane, awarded by TableLogic on a soft plunge that peaks inside it. Pure SVG + rules — no engine change; the guide entry is so five tables author it consistently. | S | docs |
+| 0.5 | **DONE (2026-07-17, same §4 block):** ~~"No copy-paste kit" authoring rule~~: new tables must diverge sling verts, scoop positions and eject hands from the existing set unless a brief argues otherwise. Codifies the lesson so table 10 doesn't regress. | S | docs |
 
 ## 4. Phase 1 — the retrofit pass (one PR per table)
 
