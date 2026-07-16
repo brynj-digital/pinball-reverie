@@ -41,6 +41,7 @@ export class TidebreakerLogic implements TableLogic {
   leviathanReady = false;
   private leviathanUntil = -Infinity;
   private leviathanWasActive = false;
+  private skillUsed = false;
 
   /** A haul only counts when the ramp was boarded at the mouth (both ends
    * of the winch circuit sit at ground height). */
@@ -88,6 +89,7 @@ export class TidebreakerLogic implements TableLogic {
   }
 
   endBall(): void {
+    this.skillUsed = false;
     this.currentStep = 0;
     this.lastCurrentAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -113,6 +115,10 @@ export class TidebreakerLogic implements TableLogic {
 
   /** D-I-V-E lanes: all four advance the depth gauge + light the hatch. */
   onRollover(id: string): void {
+    this.spotLane(id);
+  }
+
+  private spotLane(id: string): void {
     this.litLanes.add(id);
     if (this.litLanes.size === 4) {
       this.litLanes.clear();
@@ -134,6 +140,21 @@ export class TidebreakerLogic implements TableLogic {
 
   laneLit(id: string): number {
     return this.litLanes.has(id) ? 0.55 : 0;
+  }
+
+  /** SOUNDING: soft plunge peaking in the lane band. Once per ball. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "sounding" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "SOUNDING");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["SOUNDING", fmtScore(points)]], 1.4, true), 2);
+    // spot one unlit D-I-V-E lane (completion logic shared with onRollover)
+    const unlit = ["1", "2", "3", "4"].find((m) => !this.litLanes.has(m));
+    if (unlit) this.spotLane(unlit);
   }
 
   /** Depth-gauge inserts g1..g5 lit up to the reached stage; the outlane

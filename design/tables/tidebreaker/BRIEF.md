@@ -1,8 +1,28 @@
 # Tidebreaker — Table 2 design brief
 
-**Status: v1 built (2026-07-05).** `playfield.svg` + `rules.json` +
-`src/table/defs/tidebreaker.ts` are now the specifics; this brief remains
-the design intent. Deltas from the concept, found during clearance-solving
+**Status: v1 built (2026-07-05); differentiation pass 2026-07-17.**
+`playfield.svg` + `rules.json` + `src/table/defs/tidebreaker.ts` are now
+the specifics; this brief remains the design intent.
+
+Differentiation pass (2026-07-17, plan item 1.2 — the first table off the
+shared kit, STYLE-GUIDE §4 no-copy-paste rule):
+
+- **PRESSURE SLINGS** — the hull flexing under depth: the lineup-shared
+  sling vertex set is replaced with longer, lower rigs (tips +5 mm, base
+  dropped to y 810) and a flatter, harder kick `(±0.91, −0.415)` vs the
+  shared `(±0.848, −0.53)`. Grown DOWN and OUT only: raising the top edge
+  15 mm clipped the winch habitrail's landing path (simcheck caught the
+  drop-off no longer reaching the left inlane).
+- **The airlock is now L-O-C-K** — four hatch-bolt targets (the lineup's
+  first 4-bank), grown UPWARD (4th target y 401, housing to y 373):
+  the ground below y 555 is the orbit channel's exit and can't take a
+  longer recess.
+- **SOUNDING** — the skill shot (STYLE-GUIDE §4 pattern):
+  `sensor-skill-sounding` y 440–500 in the shooter lane, ≤ 0.75 m/s,
+  pays 15,000 + one spotted D-I-V-E lane, once per ball. Same
+  probe-verified separation as Moondial's FIRST LIGHT (identical lane).
+
+Deltas from the concept, found during clearance-solving
 and simcheck/soak:
 
 - **The airlock moved.** A mid-field diagonal bank sat inside the winch

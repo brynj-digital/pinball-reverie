@@ -209,9 +209,9 @@
 
     <!-- airlock bank recess (targets render live; art carries the housing) -->
     <g id="art-airlock">
-      <path d="M 65 415 L 82 423 L 82 547 L 65 555" fill="none" stroke="#262a3e" stroke-width="18"/>
+      <path d="M 65 373 L 82 381 L 82 547 L 65 555" fill="none" stroke="#262a3e" stroke-width="18"/>
       <g fill="#e0b64e" opacity="0.8">
-        <circle cx="78" cy="432" r="1.6"/><circle cx="78" cy="485" r="1.6"/><circle cx="78" cy="538" r="1.6"/>
+        <circle cx="78" cy="390" r="1.6"/><circle cx="78" cy="432" r="1.6"/><circle cx="78" cy="485" r="1.6"/><circle cx="78" cy="538" r="1.6"/>
       </g>
       <text x="72" y="487" text-anchor="middle" font-family="ui-monospace, monospace"
             font-size="10" letter-spacing="3" fill="#9c7c2c" transform="rotate(-90 72 487)">AIRLOCK</text>
@@ -360,7 +360,7 @@
       <!-- dive bell hood: mouth opens down-left, never traps -->
       <path data-width="12" id="collision-wall-bell-hood" d="M 316 460 L 314.3 453.7 L 311.8 444.9 L 308 437 L 302.6 431.3 L 296 426.6 L 289 423 L 281.9 420.5 L 274.4 419.1 L 267 419 L 259.3 420.5 L 251.7 423.3 L 245 427 L 239.5 432.3 L 235 438.6 L 232 443"/>
       <!-- airlock housing: recess brackets off the orbit wall -->
-      <path data-width="12" id="collision-wall-bank-housing" d="M 65 415 L 82 423 L 82 547 L 65 555"/>
+      <path data-width="12" id="collision-wall-bank-housing" d="M 65 373 L 82 381 L 82 547 L 65 555"/>
       <!-- plunger saddle: the ball rests here, above the animated spring -->
       <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
     </g>
@@ -437,6 +437,7 @@
 
   <!-- ═══════════════ sensors (invisible; zones only) ═══════════════ -->
   <g fill="none" stroke="none">
+    <rect id="sensor-skill-sounding" x="526" y="440" width="43" height="60"/>
     <rect id="sensor-drain" x="0" y="1005" width="520" height="30"/>
     <rect id="sensor-rollover-1" x="147" y="105" width="30" height="20"/>
     <rect id="sensor-rollover-2" x="210" y="105" width="30" height="20"/>

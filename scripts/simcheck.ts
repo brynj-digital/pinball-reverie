@@ -802,6 +802,37 @@ function tidebreakerSuite(): void {
     "leviathan ends after its duration",
     state.modeEvents.includes("leviathanEnd") && !logic.leviathanActive && rig.scoring.eclipseFactor === 1,
   );
+
+  // SOUNDING skill shot (differentiation pass): soft plunge pays and spots
+  // a D-I-V-E lane; a full plunge does not qualify
+  {
+    const rigS = buildRig("tidebreaker");
+    rigS.flippers[0].update(false, rigS.t);
+    rigS.flippers[1].update(false, rigS.t);
+    rigS.run(2); // settle on the saddle
+    rigS.ball.body.setLinearVelocity(new Vec2(0, -1.2)); // soft plunge
+    let sawSounding = false;
+    rigS.bus.on("score", ({ label }) => {
+      if (label === "SOUNDING") sawSounding = true;
+    });
+    rigS.run(3);
+    check(
+      "soft plunge pays SOUNDING and spots a lane",
+      sawSounding && (rigS.logic as TidebreakerLogic).laneLit("1") > 0,
+      `total=${rigS.scoring.total}`,
+    );
+    const rigF = buildRig("tidebreaker");
+    rigF.flippers[0].update(false, rigF.t);
+    rigF.flippers[1].update(false, rigF.t);
+    rigF.run(2);
+    let sawFull = false;
+    rigF.bus.on("score", ({ label }) => {
+      if (label === "SOUNDING") sawFull = true;
+    });
+    rigF.ball.body.setLinearVelocity(new Vec2(0, -rigF.t.plungerMaxSpeed));
+    rigF.run(3);
+    check("full plunge does not qualify (tidebreaker)", !sawFull);
+  }
 }
 
 // ═══════════════════════════ MIDNIGHT MIDWAY ═══════════════════════════
