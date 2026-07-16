@@ -100,7 +100,7 @@ export function surfaceGradientAt(s: Surface, x: number, y: number): { gx: numbe
   return best ? { gx: best.gx, gy: best.gy } : { gx: 0, gy: 0 };
 }
 
-export type SupportName = "field" | "air" | "subway" | string;
+export type SupportName = "field" | "air" | "subway" | "lift" | string;
 
 /**
  * The ball's height state machine. Step order per fixed physics step:
@@ -122,7 +122,8 @@ export class HeightState {
   constructor(private surfaces: readonly Surface[]) {}
 
   get supportName(): SupportName {
-    if (this.transitDepth !== null) return "subway";
+    // scripted transits: subways carry below the field, lifts (M12) above
+    if (this.transitDepth !== null) return this.transitDepth >= 0 ? "lift" : "subway";
     if (this.airborne) return "air";
     return this.support ? this.support.name : "field";
   }
@@ -136,14 +137,32 @@ export class HeightState {
     return this.support !== null || (this.airborne && this.z > 0.012);
   }
 
-  /** Scripted under-field transit (Subway). */
+  /** Scripted transit (Subway below the field, Lift above it). */
   beginTransit(depth: number): void {
     this.setState(null, false, depth, depth);
+  }
+
+  /** Update a running transit's height (M12 Lift: the carry climbs its
+   * profile). No support-change event — it is the same transit. */
+  transitTo(depth: number): void {
+    if (this.transitDepth === null) return;
+    this.transitDepth = depth;
+    this.z = depth;
   }
 
   endTransit(): void {
     if (this.transitDepth === null) return;
     this.setState(null, false, null, 0);
+  }
+
+  /** End a scripted transit in the AIR at its current height (M12 Lift:
+   * the summit release is a real ballistic drop — the ball falls and lands
+   * on the best surface below, per M11). */
+  endTransitAirborne(): void {
+    if (this.transitDepth === null) return;
+    const z = Math.max(0, this.transitDepth);
+    this.vz = 0;
+    this.setState(null, z > 0, null, z);
   }
 
   reset(): void {

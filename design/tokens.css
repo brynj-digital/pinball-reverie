@@ -27,8 +27,19 @@
   --carnival-500: #45215a; /* plum wall/rail body (steel-500 analog) */
   --carnival-300: #8a4d9e; /* plum wall/rail highlight (steel-300 analog) */
 
-  /* marquee bulb — incandescent white-gold for bulb strings and chase lamps
-     (added 2026-07-05; NOT brass — brass stays ball-touch only) */
+  /* field, smoke variant — The Night Mail's cold iron/soot field ramp:
+     coal smoke and wet slate under moonlight (added 2026-07-15 per the
+     table 4 brief; STYLE-GUIDE §2) */
+  --smoke-900: #101613; /* moor dark / deep shadow */
+  --smoke-800: #1a241e; /* smoke field base */
+  --smoke-700: #263629; /* lit panels, canopy aprons */
+  --smoke-500: #2c4434; /* slate wall/rail body (steel-500 analog) */
+  --smoke-300: #6e937f; /* slate wall/rail highlight (steel-300 analog) */
+
+  /* marquee bulb — incandescent white-gold for bulb strings, chase lamps,
+     platform gas lamps and lit carriage windows
+     (added 2026-07-05, scope widened 2026-07-15; NOT brass — brass stays
+     ball-touch only) */
   --bulb-200: #fff4d6; /* hot filament core */
   --bulb-400: #ffdf9e; /* glow body */
 

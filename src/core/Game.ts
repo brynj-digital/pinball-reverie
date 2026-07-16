@@ -11,6 +11,10 @@ import { DropTargetBank } from "../entities/DropTargetBank";
 import { Spinner } from "../entities/Spinner";
 import { Kicker } from "../entities/Kicker";
 import { Subway } from "../entities/Subway";
+import { Diverter } from "../entities/Diverter";
+import { Lift } from "../entities/Lift";
+import { Magnet } from "../entities/Magnet";
+import { Disc } from "../entities/Disc";
 import { Scoring } from "../game/Scoring";
 import type { TableLogic } from "../game/TableLogic";
 import { HighScores } from "../game/HighScores";
@@ -20,6 +24,7 @@ import {
   AttractScene,
   BakedDmdScene,
   InitialsScene,
+  MatchScene,
   MessageScene,
   ScoreScene,
   SequenceScene,
@@ -171,6 +176,21 @@ export class Game {
   private physics: PhysicsWorld;
   private table: DevTable;
   private ball: Ball;
+  /**
+   * M12 multiball: extra balls live only during play (spawned via the
+   * TableLogicCtx.addBalls seam, e.g. the Night Mail's DEPARTURE). Each is
+   * a full Ball (own body + HeightState); they drain silently and the run
+   * ends only when the LAST ball drains (the primary promotes from here).
+   */
+  private extraBalls: Ball[] = [];
+  private prevExtras: { x: number; y: number; angle: number }[] = [];
+  /** Physically-locked balls, parked at their berths out of play (M12 —
+   * the Night Mail's siding wagons). They persist across balls within a
+   * game (classic machines keep locked balls locked) and rejoin play as
+   * multiball extras via releaseLocks. */
+  private lockedBerths: { ball: Ball; x: number; y: number }[] = [];
+  private nextBallId = 1;
+  private spawnQueue: { at: { x: number; y: number }; v: { x: number; y: number }; delay: number }[] = [];
   private flippers: Flipper[];
   private bumpers: Bumper[];
   private slings: Slingshot[];
@@ -178,6 +198,10 @@ export class Game {
   private spinner: Spinner;
   private kickers: Kicker[];
   private subways: Subway[];
+  private diverters: Diverter[];
+  private lifts: Lift[];
+  private magnets: Magnet[];
+  private discs: Disc[];
   private scoring: Scoring;
   private logic: TableLogic;
   private rolloverLit = new Map<string, number>();
@@ -263,22 +287,16 @@ export class Game {
     this.table.renderData.ballSvgText = ballSvgRaw;
     this.table.renderData.backglassSvgText = assets.backglassSvg;
     this.ball = new Ball(this.physics.world, this.tuning, g.table.spawn, this.table.surfaces);
-    // M11 height gate: rails only touch a ball at their height
-    this.physics.setZGate((tag, x, y) =>
-      contactApplies(tag, this.table.surfaces, x, y, this.ball.height.z),
-    );
+    // M11 height gate: rails only touch a ball at their height. M12: the
+    // contact's own ball resolves by its fixture tag (multiball); parked
+    // lock balls gate at their own (ground) height.
+    this.physics.setZGate((tag, x, y, ballTag) => {
+      const locked = this.lockedBerths.find((L) => L.ball.id === ballTag?.ballId);
+      const z = locked ? locked.ball.height.z : this.ballById(ballTag?.ballId).height.z;
+      return contactApplies(tag, this.table.surfaces, x, y, z);
+    });
     // support changes drive table logic (ramp rides) + sensor resense
-    this.ball.height.onChange = (from, to) => {
-      const p = this.ball.body.getPosition();
-      this.bus.emit("surface", { from, to, x: p.x, y: p.y, z: this.ball.height.z });
-      for (const tag of this.physics.sensorsTouching(this.ball.body)) {
-        if (
-          (tag.zMin !== undefined || tag.zMax !== undefined) &&
-          sensorApplies(tag, this.ball.height.z)
-        )
-          this.bus.emit("sensor", { kind: tag.kind, id: tag.id, zMin: tag.zMin, zMax: tag.zMax });
-      }
-    };
+    this.wireBallEvents(this.ball);
     this.prevBall = { x: g.table.spawn.x, y: g.table.spawn.y, angle: 0 };
     this.flippers = [
       new Flipper(this.physics.world, this.table.body, "left", this.tuning, g.flippers.left),
@@ -313,6 +331,34 @@ export class Game {
       };
       return s;
     });
+    // M12 entities (absent on pre-Night-Mail tables)
+    this.diverters = (g.diverters ?? []).map(
+      (def) => new Diverter(this.physics.world, this.physics, def, this.table.diverterBlades, this.tuning),
+    );
+    this.lifts = (g.lifts ?? []).map((def) => {
+      const path = this.table.profiles.find((p) => p.name === def.id)!;
+      const l = new Lift(def, path);
+      const exit = path.pts[path.pts.length - 1];
+      l.onEject = () => {
+        this.renderer.spawnEffect("flash", exit.x, exit.y);
+        this.audio.sfx("kickout");
+      };
+      return l;
+    });
+    this.magnets = (g.magnets ?? []).map((def) => {
+      const m = new Magnet(def);
+      m.onCapture = () => {
+        this.audio.sfx("scoop");
+        this.logic.onCapture?.(def.id);
+      };
+      m.onRelease = () => {
+        this.renderer.spawnEffect("flash", def.x, def.y);
+        this.camera.shake(0.0012); // the coil dumps the ball, cabinet-felt
+        this.audio.sfx("kickout");
+      };
+      return m;
+    });
+    this.discs = (g.discs ?? []).map((def) => new Disc(def));
     this.scoring = new Scoring(this.bus, spec.scoring);
     this.logic = spec.createLogic({
       bus: this.bus,
@@ -321,6 +367,83 @@ export class Game {
       shake: (mag) => this.camera.shake(mag),
       push: (scene, prio) => this.dmdQueue.push(scene, prio),
       baked: (key) => this.baked.get(key),
+      holdScoop: (id, open) => {
+        const k = this.kickers.find((k) => k.def.id === id);
+        if (open) k?.beginExtendedHold();
+        else k?.release();
+      },
+      addBalls: (n, at, v) => {
+        if (this.phase !== "play") return;
+        for (let i = 0; i < n; i++)
+          this.spawnQueue.push({
+            at: at ?? { x: g.table.spawn.x, y: g.table.spawn.y },
+            v: v ?? { x: 0, y: 0 },
+            delay: 0.15 + i * 0.5,
+          });
+      },
+      lockBall: (kickerId, berth) => {
+        if (this.phase !== "play") return false;
+        const k = this.kickers.find((k) => k.def.id === kickerId);
+        const b = k?.heldBall;
+        if (!k || !b) return false;
+        k.cancel(); // pre-hold: no gravity change has happened yet
+        // the transfer mutates the world (and may create a served ball) —
+        // defer past the locked contact callback that reported the capture
+        this.physics.queuePostStep(() => {
+          if (this.lockedBerths.some((L) => L.ball === b)) return;
+          b.body.setGravityScale(0);
+          b.body.setLinearVelocity(new Vec2(0, 0));
+          this.lockedBerths.push({ ball: b, x: berth.x, y: berth.y });
+          if (b === this.ball) {
+            if (this.extraBalls.length > 0) {
+              // an extra takes over as the live primary
+              const next = this.extraBalls.shift()!;
+              this.prevExtras.shift();
+              this.ball = next;
+            } else {
+              // serve a fresh ball to the plunger
+              const nb = new Ball(
+                this.physics.world,
+                this.tuning,
+                g.table.spawn,
+                this.table.surfaces,
+                this.nextBallId++,
+              );
+              this.wireBallEvents(nb);
+              this.ball = nb;
+              this.bus.emit("ballSpawn", {});
+            }
+            const p = this.ball.body.getPosition();
+            this.prevBall.x = p.x;
+            this.prevBall.y = p.y;
+            this.prevBall.angle = this.ball.body.getAngle();
+          } else {
+            const i = this.extraBalls.indexOf(b);
+            if (i >= 0) {
+              this.extraBalls.splice(i, 1);
+              this.prevExtras.splice(i, 1);
+            }
+          }
+        });
+        this.audio.sfx("bank");
+        return true;
+      },
+      releaseLocks: () => {
+        const n = this.lockedBerths.length;
+        for (let i = 0; i < this.lockedBerths.length; i++) {
+          const L = this.lockedBerths[i];
+          L.ball.body.setGravityScale(1);
+          // shove each wagon out with a slight stagger so they don't stack
+          L.ball.body.setLinearVelocity(new Vec2(0.2 + 0.1 * i, 1.1 + 0.25 * i));
+          this.extraBalls.push(L.ball);
+          const p = L.ball.body.getPosition();
+          this.prevExtras.push({ x: p.x, y: p.y, angle: L.ball.body.getAngle() });
+          this.renderer.spawnEffect("flash", L.x, L.y);
+        }
+        this.lockedBerths.length = 0;
+        if (n > 0) this.audio.sfx("kickout");
+        return n;
+      },
     });
     this.camera = new Camera(g.table.width, g.table.height, this.tuning.cameraViewH);
     // always boot on the 2D renderer (synchronous); if 3D was persisted the
@@ -494,31 +617,38 @@ export class Game {
     bake("gameover", gameoverSceneSvg, 8);
     for (const [key, scene] of Object.entries(assets.dmdScenes)) bake(key, scene.svg, scene.frames);
 
-    this.bus.on("sensor", ({ kind, id, zMin, zMax }) => {
+    this.bus.on("sensor", ({ kind, id, zMin, zMax, ballId }) => {
+      if (this.isLocked(ballId)) return; // parked wagons trip nothing
+      const sBall = this.ballById(ballId);
       // M11: a sensor with a height band only admits balls within it
-      if (!sensorApplies({ zMin, zMax }, this.ball.height.z)) return;
+      if (!sensorApplies({ zMin, zMax }, sBall.height.z)) return;
       // Drain starts a short visible fall-out (ball keeps simulating, fades,
       // then respawns) instead of teleporting away the instant the sensor
       // fires — the sensor sits above the floor, mid-drop. A captive ball is
       // exempt: outlane-saving subways (Tidebreaker's gutter, Midway's
       // chicken exit) legitimately carry the ball through the drain zone.
-      if (
-        kind === "drain" &&
-        this.drainTimer <= 0 &&
-        !this.kickers.some((k) => k.holding) &&
-        !this.subways.some((s) => s.active)
-      ) {
-        this.startDrain();
-      } else if (kind === "spinner") this.spinner.trip(this.ball.body.getLinearVelocity().y);
+      // M12 multiball: a drained EXTRA just leaves the game; the primary
+      // draining with extras alive promotes one instead of ending the ball.
+      if (kind === "drain" && !this.ballCaptive(sBall)) {
+        if (sBall !== this.ball) this.removeExtra(sBall);
+        else if (this.extraBalls.length > 0) this.promoteExtra();
+        else if (this.drainTimer <= 0) this.startDrain();
+      } else if (kind === "spinner") this.spinner.trip(sBall.body.getLinearVelocity().y);
       else if (kind === "kicker" && id) {
         const k = this.kickers.find((k) => k.def.id === id);
-        if (k && this.logic.kickerLit(id) && k.capture()) {
+        if (k && this.logic.kickerLit(id) && k.capture(sBall)) {
           this.audio.sfx("scoop");
           this.logic.onCapture?.(id);
         }
       } else if (kind === "subway" && id) {
         const s = this.subways.find((s) => s.def.id === id);
-        if (s && this.logic.kickerLit(id) && s.capture()) {
+        if (s && this.logic.kickerLit(id) && s.capture(sBall)) {
+          this.audio.sfx("scoop");
+          this.logic.onCapture?.(id);
+        }
+      } else if (kind === "lift" && id) {
+        const l = this.lifts.find((l) => l.def.id === id);
+        if (l && this.logic.kickerLit(id) && l.capture(sBall)) {
           this.audio.sfx("scoop");
           this.logic.onCapture?.(id);
         }
@@ -539,18 +669,20 @@ export class Game {
         this.saverUntil = this.gameTime + BALL_SAVER_S;
       }
     });
-    this.bus.on("hit", ({ kind, id }) => {
+    this.bus.on("hit", ({ kind, id, ballId }) => {
+      if (this.isLocked(ballId)) return; // parked wagons trip nothing
+      const hBall = this.ballById(ballId);
       // Element hits get flash + glow + sfx but NO camera shake: shake means
       // "the cabinet moved", which only player nudges and the tilt do — a
       // ball striking a bumper doesn't move a real machine.
       if (kind === "bumper") {
         const b = this.bumpers.find((b) => b.def.id === id);
-        b?.kick(this.ball, this.physics, this.tuning.bumperKick);
+        b?.kick(hBall, this.physics, this.tuning.bumperKick);
         if (b) this.renderer.spawnEffect("flash", b.def.x, b.def.y);
         this.audio.sfx("bumper");
       } else if (kind === "sling") {
         const sl = this.slings.find((s) => s.def.id === id);
-        if (sl?.kick(this.ball, this.physics, this.tuning.slingKick)) {
+        if (sl?.kick(hBall, this.physics, this.tuning.slingKick)) {
           const c = sl.def.verts.reduce(
             (a, p) => ({ x: a.x + p.x / 3, y: a.y + p.y / 3 }),
             { x: 0, y: 0 },
@@ -726,17 +858,40 @@ export class Game {
 
     for (const b of this.bumpers) b.update(dt);
     for (const sl of this.slings) sl.update(dt);
-    let ballCaptive = false;
-    for (const k of this.kickers) {
-      k.update(dt, this.ball, t);
-      if (k.holding) ballCaptive = true;
+    // M12 multiball: serve queued extra balls (staggered releases)
+    if (this.spawnQueue.length && this.phase === "play") {
+      for (const q of this.spawnQueue) q.delay -= dt;
+      while (this.spawnQueue.length && this.spawnQueue[0].delay <= 0)
+        this.spawnExtra(this.spawnQueue.shift()!);
     }
-    for (const sub of this.subways) {
-      sub.update(dt, this.ball);
-      if (sub.active) ballCaptive = true;
+    const live = this.liveBalls();
+    for (const k of this.kickers) k.update(dt, t);
+    for (const sub of this.subways) sub.update(dt);
+    for (const l of this.lifts) l.update(dt);
+    for (const m of this.magnets) {
+      m.lit = this.phase === "play" && !this.tilted && (this.logic.magnetLit?.(m.def.id) ?? false);
+      m.update(dt, live);
     }
-    // a captive ball must not eat the ball-saver window (-Infinity stays put)
-    if (ballCaptive) this.saverUntil += dt;
+    for (const d of this.discs) {
+      d.spin = this.logic.discSpin?.(d.def.id) ?? 0;
+      d.update(dt);
+    }
+    for (const dv of this.diverters)
+      dv.setBlade(this.logic.diverterBlade?.(dv.def.id) ?? dv.def.initial, live);
+    // parked lock balls ease to their berths and stay put (gravity off);
+    // live-ball knocks displace them for a beat, then they settle back
+    for (const L of this.lockedBerths) {
+      const b = L.ball.body;
+      const p = b.getPosition();
+      const kk = Math.min(1, dt * 8);
+      b.setTransform(new Vec2(p.x + (L.x - p.x) * kk, p.y + (L.y - p.y) * kk), b.getAngle());
+      b.setLinearVelocity(new Vec2(0, 0));
+      b.setAngularVelocity(0);
+    }
+    // a captive PRIMARY must not eat the ball-saver window (-Infinity stays
+    // put); a held multiball extra doesn't freeze the game's clock
+    const primaryCaptive = this.ballCaptive(this.ball);
+    if (primaryCaptive) this.saverUntil += dt;
     this.targetBank.update(dt);
     this.spinner.update(dt);
     this.scoring.update(dt);
@@ -750,29 +905,49 @@ export class Game {
         this.prevBall.x = bp.x;
         this.prevBall.y = bp.y;
         this.prevBall.angle = this.ball.body.getAngle();
+        for (let i = 0; i < this.extraBalls.length; i++) {
+          const p = this.extraBalls[i].body.getPosition();
+          this.prevExtras[i].x = p.x;
+          this.prevExtras[i].y = p.y;
+          this.prevExtras[i].angle = this.extraBalls[i].body.getAngle();
+        }
         for (let i = 0; i < this.flippers.length; i++)
           this.prevFlipAngles[i] = this.flippers[i].body.getAngle();
         // M11: climbs decelerate, drops accelerate — the support surface's
-        // slope feeds back into the plane
-        this.ball.height.applyForces(this.ball.body);
+        // slope feeds back into the plane (every live ball)
+        const stepBalls = this.liveBalls();
+        for (const b of stepBalls) b.height.applyForces(b.body);
+        // M12 field forces (Box2D clears forces per step, so per-frame
+        // application would starve multi-step frames)
+        for (const m of this.magnets) m.applyForces(stepBalls);
+        for (const d of this.discs) d.applyForces(stepBalls);
       },
       () => {
-        const bp = this.ball.body.getPosition();
-        const bv = this.ball.body.getLinearVelocity();
-        this.ball.height.step(FIXED_DT, bp.x, bp.y, Math.hypot(bv.x, bv.y));
+        for (const b of this.liveBalls()) {
+          const bp = b.body.getPosition();
+          const bv = b.body.getLinearVelocity();
+          b.height.step(FIXED_DT, bp.x, bp.y, Math.hypot(bv.x, bv.y));
+        }
       },
     );
 
     // Out-of-bounds net: no legitimate route leads off the table (the shell
     // is full-height since M11), so a ball outside the envelope is always a
     // bug escapee. It can never reach the drain sensor out there — count it
-    // as a drain instead of soft-locking.
-    if (this.drainTimer <= 0 && !ballCaptive) {
-      const bp = this.ball.body.getPosition();
+    // as a drain instead of soft-locking. Multiball extras just leave.
+    if (this.drainTimer <= 0) {
       const m = 0.03;
-      if (bp.x < -m || bp.x > g.table.width + m || bp.y < -m || bp.y > g.table.height + m) {
-        this.ball.height.reset();
-        this.startDrain();
+      for (const b of this.liveBalls()) {
+        const bp = b.body.getPosition();
+        const oob =
+          bp.x < -m || bp.x > g.table.width + m || bp.y < -m || bp.y > g.table.height + m;
+        if (!oob || this.ballCaptive(b)) continue;
+        if (b !== this.ball) this.removeExtra(b);
+        else if (this.extraBalls.length > 0) this.promoteExtra();
+        else {
+          b.height.reset();
+          this.startDrain();
+        }
       }
     }
 
@@ -793,10 +968,20 @@ export class Game {
       g.table.height,
     );
     const a = this.renderAlpha;
-    this.camera.follow(
-      this.prevBall.y + (this.ball.body.getPosition().y - this.prevBall.y) * a,
-      dt,
-    );
+    // M12 multiball: follow the ball nearest the flippers (danger-first),
+    // ignoring anything waiting in the shooter lane
+    let followY = this.prevBall.y + (this.ball.body.getPosition().y - this.prevBall.y) * a;
+    if (this.extraBalls.length > 0) {
+      const cand: number[] = [];
+      if (this.ball.body.getPosition().x < g.table.laneWallX) cand.push(followY);
+      for (let i = 0; i < this.extraBalls.length; i++) {
+        const p = this.extraBalls[i].body.getPosition();
+        if (p.x < g.table.laneWallX)
+          cand.push(this.prevExtras[i].y + (p.y - this.prevExtras[i].y) * a);
+      }
+      if (cand.length > 0) followY = Math.max(...cand);
+    }
+    this.camera.follow(followY, dt);
 
     this.renderer.drawFrame(this.snapshot(), this.camera);
   }
@@ -836,10 +1021,120 @@ export class Game {
     this.audio.sfx("drain");
   }
 
+  /** All live balls, primary first (M12 multiball; locked berths excluded). */
+  private liveBalls(): Ball[] {
+    return this.extraBalls.length === 0 ? [this.ball] : [this.ball, ...this.extraBalls];
+  }
+
+  /** Surface-change events + banded-sensor resense for one ball — every
+   * ball (initial primary, multiball extras, lock-served) gets the same
+   * wiring, reporting its own id. */
+  private wireBallEvents(b: Ball): void {
+    b.height.onChange = (from, to) => {
+      const p = b.body.getPosition();
+      this.bus.emit("surface", { from, to, x: p.x, y: p.y, z: b.height.z });
+      for (const tag of this.physics.sensorsTouching(b.body)) {
+        if (
+          (tag.zMin !== undefined || tag.zMax !== undefined) &&
+          sensorApplies(tag, b.height.z)
+        )
+          this.bus.emit("sensor", {
+            kind: tag.kind,
+            id: tag.id,
+            zMin: tag.zMin,
+            zMax: tag.zMax,
+            ballId: b.id,
+          });
+      }
+    };
+  }
+
+  /** Is this event ball parked in a lock berth (its events are inert)? */
+  private isLocked(ballId?: number): boolean {
+    return ballId !== undefined && this.lockedBerths.some((L) => L.ball.id === ballId);
+  }
+
+  /** Tear down the lock rack (new game / exit — NOT between balls: locked
+   * wagons persist across drains like a real machine's lock lane). */
+  private clearLocks(): void {
+    for (const L of this.lockedBerths) {
+      const dead = L.ball;
+      this.physics.queuePostStep(() => dead.destroy(this.physics.world));
+    }
+    this.lockedBerths.length = 0;
+  }
+
+  /** Resolve a fixture/event ball id to its live Ball (primary fallback). */
+  private ballById(id?: number): Ball {
+    if (id === undefined || id === this.ball.id) return this.ball;
+    return this.extraBalls.find((b) => b.id === id) ?? this.ball;
+  }
+
+  /** Is this specific ball scripted-captive right now (drain/OOB exempt)? */
+  private ballCaptive(b: Ball): boolean {
+    return (
+      this.kickers.some((k) => k.holds(b)) ||
+      this.subways.some((s) => s.carries(b)) ||
+      this.lifts.some((l) => l.carries(b)) ||
+      this.magnets.some((m) => m.holds(b))
+    );
+  }
+
+  /** Serve one multiball extra (from TableLogicCtx.addBalls, staggered). */
+  private spawnExtra(q: { at: { x: number; y: number }; v: { x: number; y: number } }): void {
+    const b = new Ball(this.physics.world, this.tuning, q.at, this.table.surfaces, this.nextBallId++);
+    b.body.setLinearVelocity(new Vec2(q.v.x, q.v.y));
+    this.wireBallEvents(b);
+    this.extraBalls.push(b);
+    this.prevExtras.push({ x: q.at.x, y: q.at.y, angle: 0 });
+    this.renderer.spawnEffect("flash", q.at.x, q.at.y);
+    this.audio.sfx("kickout");
+  }
+
+  /** A drained/escaped multiball extra leaves the game (destroy deferred —
+   * the world is locked during the contact callback that reports it). */
+  private removeExtra(b: Ball): void {
+    const i = this.extraBalls.indexOf(b);
+    if (i < 0) return;
+    this.extraBalls.splice(i, 1);
+    this.prevExtras.splice(i, 1);
+    this.renderer.spawnEffect("drain", b.body.getPosition().x, 1.0);
+    this.physics.queuePostStep(() => b.destroy(this.physics.world));
+  }
+
+  /** The primary drained mid-multiball: an extra takes over seamlessly —
+   * the run ends only when the LAST ball drains. */
+  private promoteExtra(): void {
+    const old = this.ball;
+    const next = this.extraBalls.shift()!;
+    this.prevExtras.shift();
+    this.ball = next;
+    const p = next.body.getPosition();
+    this.prevBall.x = p.x;
+    this.prevBall.y = p.y;
+    this.prevBall.angle = next.body.getAngle();
+    this.renderer.spawnEffect("drain", old.body.getPosition().x, 1.0);
+    this.physics.queuePostStep(() => old.destroy(this.physics.world));
+  }
+
+  /** Tear down multiball (ball end / respawn / exit). */
+  private clearExtras(): void {
+    this.spawnQueue.length = 0;
+    for (const b of this.extraBalls) {
+      const dead = b;
+      this.physics.queuePostStep(() => dead.destroy(this.physics.world));
+    }
+    this.extraBalls.length = 0;
+    this.prevExtras.length = 0;
+  }
+
   private respawn(): void {
     // never leave a respawned ball gravity-less or mid-transit
-    for (const k of this.kickers) k.cancel(this.ball);
-    for (const sub of this.subways) sub.cancel(this.ball);
+    for (const k of this.kickers) k.cancel();
+    for (const sub of this.subways) sub.cancel();
+    for (const l of this.lifts) l.cancel();
+    for (const m of this.magnets) m.cancel();
+    this.clearExtras();
     this.ball.reset();
     // don't lerp across the teleport
     const spawn = this.spec.geometry.table.spawn;
@@ -868,6 +1163,7 @@ export class Game {
   private exitGame(): void {
     if (this.phase !== "play") return;
     this.setPaused(false);
+    this.clearLocks();
     this.music.stop();
     this.tilted = false;
     this.tiltBob = 0;
@@ -886,6 +1182,7 @@ export class Game {
     this.audio.sfx("start");
     this.music.start();
     this.scoring.reset();
+    this.clearLocks(); // stale wagons from an abandoned/finished game
     this.logic.resetGame();
     this.phase = "play";
     this.ballNum = 1;
@@ -898,6 +1195,25 @@ export class Game {
     this.dmdQueue.clear();
     this.dmdQueue.setIdle(this.scoreScene);
     this.dmdQueue.push(new MessageScene([["BALL 1", "GOOD LUCK"]], 1.6));
+  }
+
+  /**
+   * Classic end-of-game match (M12): the board settles on a random multiple
+   * of ten; the player's last two score digits matching it wins a "free
+   * game" (ceremonial — no coin economy; the knocker moment is the award).
+   * ~10% operator odds when the score can match at all. Returns the scene
+   * and its duration for the caller's game-over timing.
+   */
+  private makeMatchScene(): { scene: MatchScene; dur: number } {
+    const player = this.scoring.total % 100;
+    const canWin = player % 10 === 0;
+    const win = canWin && Math.random() < 0.1;
+    let final = win ? player : Math.floor(Math.random() * 10) * 10;
+    if (!win && final === player) final = (final + 10) % 100;
+    const scene = new MatchScene(player, final, win, () =>
+      this.audio.sfx(win ? "start" : "target"),
+    );
+    return { scene, dur: MatchScene.duration(win) };
   }
 
   /** End of the drain fall-out: saver, next ball, or game over. */
@@ -935,6 +1251,7 @@ export class Game {
     const bonusPage: string[][] = bonus > 0 ? [["BONUS", fmtScore(bonus)]] : [];
     if (this.ballNum >= BALLS_PER_GAME) {
       this.music.stop();
+      this.clearLocks(); // no wagons parked through attract mode
       this.audio.sfx("gameOver");
       this.respawn();
       if (this.highScores.qualifies(this.scoring.total)) {
@@ -956,6 +1273,9 @@ export class Game {
           parts.push(new MessageScene(bonusPage, 1.8));
           dur += 1.8;
         }
+        const match = this.makeMatchScene();
+        parts.push(match.scene);
+        dur += match.dur;
         const goFrames = this.baked.get("gameover");
         if (goFrames) {
           // moonset scene, score as the top caption row
@@ -1020,11 +1340,17 @@ export class Game {
       this.audio.sfx("bank");
       this.input.setTextCapture(false);
       this.phase = "gameOver";
+      // match runs after the entry (it interrupted the classic order to
+      // collect initials first); then the high-score card
+      const match = this.makeMatchScene();
       this.dmdQueue.push(
-        new MessageScene([["HIGH SCORE", `${initials}  ${fmtScore(this.pendingScore)}`]], 2.4),
+        new SequenceScene([
+          match.scene,
+          new MessageScene([["HIGH SCORE", `${initials}  ${fmtScore(this.pendingScore)}`]], 2.4),
+        ]),
         3,
       );
-      this.gameOverUntil = this.gameTime + 2.7;
+      this.gameOverUntil = this.gameTime + match.dur + 2.7;
     }
   }
 
@@ -1037,7 +1363,8 @@ export class Game {
         : dir === "right"
           ? new Vec2(0.02, -0.008)
           : new Vec2(0, -0.024);
-    this.ball.body.applyLinearImpulse(imp, this.ball.body.getPosition(), true);
+    for (const b of this.liveBalls())
+      b.body.applyLinearImpulse(imp, b.body.getPosition(), true);
     this.camera.shake(0.006);
     this.tiltBob += 1;
     if (this.tiltBob > TILT_LIMIT) {
@@ -1078,6 +1405,36 @@ export class Game {
         h: this.ball.height.z,
         layer: this.ball.layer,
       },
+      // M12 multiball extras + parked lock balls (empty outside multiball)
+      extraBalls: [
+        ...this.extraBalls.map((b, i) => {
+          const bp = b.body.getPosition();
+          const bv = b.body.getLinearVelocity();
+          return {
+            x: lerp(this.prevExtras[i].x, bp.x),
+            y: lerp(this.prevExtras[i].y, bp.y),
+            angle: lerp(this.prevExtras[i].angle, b.body.getAngle()),
+            vx: bv.x,
+            vy: bv.y,
+            alpha: 1,
+            h: b.height.z,
+            layer: b.layer,
+          };
+        }),
+        ...this.lockedBerths.map((L) => {
+          const bp = L.ball.body.getPosition();
+          return {
+            x: bp.x,
+            y: bp.y,
+            angle: L.ball.body.getAngle(),
+            vx: 0,
+            vy: 0,
+            alpha: 1,
+            h: 0,
+            layer: 0,
+          };
+        }),
+      ],
       flippers: this.flippers.map((f, i) => {
         const fp = f.body.getPosition();
         return {
@@ -1114,6 +1471,26 @@ export class Game {
               : this.logic.lamp(l.id),
         })),
         spinner: { ...g.spinner, angle: this.spinner.angle, spin: this.spinner.spin01 },
+        // M12 (empty arrays on pre-Night-Mail tables)
+        diverters: this.diverters.map((d) => ({
+          id: d.def.id,
+          blade: d.blade,
+          pts: d.bladePts(d.blade),
+        })),
+        magnets: this.magnets.map((m) => ({
+          x: m.def.x,
+          y: m.def.y,
+          r: m.def.captureRadius,
+          lit: m.lit,
+          holding: m.holding,
+        })),
+        discs: this.discs.map((d) => ({
+          x: d.def.x,
+          y: d.def.y,
+          r: d.def.r,
+          angle: d.angle,
+          spinning: d.spin !== 0,
+        })),
       },
       score: this.scoring.total,
       scoreLabel: this.scoring.lastLabel,

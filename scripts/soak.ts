@@ -19,6 +19,10 @@ import { DropTargetBank } from "../src/entities/DropTargetBank";
 import { Spinner } from "../src/entities/Spinner";
 import { Kicker } from "../src/entities/Kicker";
 import { Subway } from "../src/entities/Subway";
+import { Diverter } from "../src/entities/Diverter";
+import { Lift } from "../src/entities/Lift";
+import { Magnet } from "../src/entities/Magnet";
+import { Disc } from "../src/entities/Disc";
 import { Scoring } from "../src/game/Scoring";
 import { contactApplies, sensorApplies } from "../src/table/Surfaces";
 import { TABLE_SPECS, TABLE_ORDER, type TableId } from "../src/table/specs";
@@ -72,6 +76,15 @@ for (const tableId of tables) {
   const subways = g.subways.map(
     (d) => new Subway(d, table.profiles.find((p) => p.name === d.id)!),
   );
+  // M12 entities, wired as in Game (dormant on tables without defs)
+  const diverters = (g.diverters ?? []).map(
+    (d) => new Diverter(pw.world, pw, d, table.diverterBlades, t),
+  );
+  const lifts = (g.lifts ?? []).map(
+    (d) => new Lift(d, table.profiles.find((p) => p.name === d.id)!),
+  );
+  const magnets = (g.magnets ?? []).map((d) => new Magnet(d));
+  const discs = (g.discs ?? []).map((d) => new Disc(d));
   const scoring = new Scoring(bus, spec.scoring);
   // real table logic drives lit-state (hatch/gutter light up and consume
   // exactly as in the game, so the soak exercises both outlane behaviours)
@@ -82,22 +95,40 @@ for (const tableId of tables) {
     shake: () => {},
     push: () => {},
     baked: () => undefined,
+    holdScoop: (id, open) => {
+      const k = kickers.find((k) => k.def.id === id);
+      if (open) k?.beginExtendedHold();
+      else k?.release();
+    },
   });
+
+  // magnet captures notify logic, as in Game (snag awards + light consume)
+  for (const m of magnets) m.onCapture = () => logic.onCapture?.(m.def.id);
 
   let drainFlag = false;
   bus.on("sensor", ({ kind, id, zMin, zMax }) => {
     if (!sensorApplies({ zMin, zMax }, ball.height.z)) return;
     // captive balls are exempt, as in Game: saving subways cross the drain zone
-    if (kind === "drain" && !kickers.some((k) => k.holding) && !subways.some((s) => s.active))
+    if (
+      kind === "drain" &&
+      !kickers.some((k) => k.holding) &&
+      !subways.some((s) => s.active) &&
+      !lifts.some((l) => l.active) &&
+      !magnets.some((m) => m.holding)
+    )
       drainFlag = true;
     if (kind === "spinner") spinner.trip(ball.body.getLinearVelocity().y);
     if (kind === "kicker" && id) {
       const k = kickers.find((k) => k.def.id === id);
-      if (k && logic.kickerLit(id) && k.capture()) logic.onCapture?.(id);
+      if (k && logic.kickerLit(id) && k.capture(ball)) logic.onCapture?.(id);
     }
     if (kind === "subway" && id) {
       const s = subways.find((s) => s.def.id === id);
-      if (s && logic.kickerLit(id) && s.capture()) logic.onCapture?.(id);
+      if (s && logic.kickerLit(id) && s.capture(ball)) logic.onCapture?.(id);
+    }
+    if (kind === "lift" && id) {
+      const l = lifts.find((l) => l.def.id === id);
+      if (l && logic.kickerLit(id) && l.capture(ball)) logic.onCapture?.(id);
     }
     if (kind === "rollover" && id) logic.onRollover(id);
   });
@@ -115,8 +146,10 @@ for (const tableId of tables) {
   const stuck: { x: number; y: number; time: number; kind: string }[] = [];
 
   const resetBall = () => {
-    for (const k of kickers) k.cancel(ball);
-    for (const s of subways) s.cancel(ball);
+    for (const k of kickers) k.cancel();
+    for (const s of subways) s.cancel();
+    for (const l of lifts) l.cancel();
+    for (const m of magnets) m.cancel();
     ball.reset();
   };
 
@@ -156,7 +189,11 @@ for (const tableId of tables) {
 
     pw.update(
       FIXED_DT,
-      () => ball.height.applyForces(ball.body),
+      () => {
+        ball.height.applyForces(ball.body);
+        for (const m of magnets) m.applyForces([ball]);
+        for (const d of discs) d.applyForces([ball]);
+      },
       () => {
         const bp = ball.body.getPosition();
         const bv = ball.body.getLinearVelocity();
@@ -164,8 +201,18 @@ for (const tableId of tables) {
       },
     );
     bank.update(FIXED_DT);
-    for (const k of kickers) k.update(FIXED_DT, ball, t);
-    for (const s of subways) s.update(FIXED_DT, ball);
+    for (const k of kickers) k.update(FIXED_DT, t);
+    for (const s of subways) s.update(FIXED_DT);
+    for (const l of lifts) l.update(FIXED_DT);
+    for (const m of magnets) {
+      m.lit = logic.magnetLit?.(m.def.id) ?? false;
+      m.update(FIXED_DT, [ball]);
+    }
+    for (const d of discs) {
+      d.spin = logic.discSpin?.(d.def.id) ?? 0;
+      d.update(FIXED_DT);
+    }
+    for (const dv of diverters) dv.setBlade(logic.diverterBlade?.(dv.def.id) ?? dv.def.initial, [ball]);
     spinner.update(FIXED_DT);
     scoring.update(FIXED_DT);
     logic.update(FIXED_DT);
@@ -220,8 +267,15 @@ for (const tableId of tables) {
 
     // stuck = motionless outside the lane. No flipper-state condition: the
     // random pattern toggles each flipper within 1.5 s, so a ball motionless
-    // for the whole window cannot be resting on a flipper.
-    if (!inLane && speed < 0.015) {
+    // for the whole window cannot be resting on a flipper. Scripted holds
+    // (magnet, a lift's dwell, a kicker's extended video-mode hold) are
+    // legitimate stillness — exempt, like the drain guard; their own
+    // cooldown/eject logic guarantees release.
+    const scriptedHold =
+      magnets.some((m) => m.holding) ||
+      lifts.some((l) => l.active) ||
+      kickers.some((k) => k.holding);
+    if (!inLane && speed < 0.015 && !scriptedHold) {
       stillTime += FIXED_DT;
       if (stillTime >= STUCK_WINDOW) {
         stuck.push({ x: p.x, y: p.y, time: now, kind: `STUCK L${ball.layer}` });

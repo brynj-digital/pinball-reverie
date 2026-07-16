@@ -33,20 +33,25 @@ Families: **field** (playfield darks), **steel** (blue structure), **chrome**
 shipped art; these exact values are what the in-game debug overlay draws).
 
 Accent discipline: violet is the signature hue (logo glow, premium inserts);
-magenta and cyan are feature colors; brass is reserved for things the ball
-physically touches (flippers, kickers, rails).
+magenta, cyan and green are feature colors; brass is reserved for things the
+ball physically touches (flippers, kickers, rails).
 
 Per-table field variants (added 2026-07-05): a table may cast the field
 family toward its theme — Tidebreaker uses the **abyss** ramp
 (`--abyss-700/800/900`, blue-green) with cyan as its feature color;
 Midnight Midway uses the **carnival** ramp (`--carnival-700/800/900`, warm
-plum dusk) with magenta as its feature color. Any new variant adds its
+plum dusk) with magenta as its feature color; The Night Mail uses the
+**smoke** ramp (`--smoke-700/800/900`, cold iron/soot slate-green — added
+2026-07-15 per the table 4 brief) with **signal green** (`--green-400/600`)
+as its feature color. Any new variant adds its
 tokens here first, keeps `--ink`/steel/chrome/brass unchanged, and stays
 within the §1 saturation discipline.
 
-**Marquee bulb** (added 2026-07-05 for table 3): `--bulb-200/400`, an
-incandescent white-gold reserved for bulb strings, ride marquees and
-chase-lamp rows — tiny lit points, never area fills, so the §1 neon budget
+**Marquee bulb** (added 2026-07-05 for table 3; scope widened 2026-07-15
+for table 4): `--bulb-200/400`, an
+incandescent white-gold reserved for bulb strings, ride marquees,
+chase-lamp rows, platform gas lamps and lit carriage windows — tiny lit
+points, never area fills, so the §1 neon budget
 holds. It is not brass (brass stays ball-touch only) and not DMD amber
 (display glass only).
 
@@ -74,7 +79,8 @@ bed.
 each table's shell/wall restroke palette comes from its field variant —
 Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 (`--abyss-500/300`), Midnight Midway layers dusk plum
-(`--carnival-500/300`) — always over a 16 mm ink base with a `chrome-200`
+(`--carnival-500/300`), The Night Mail layers wet slate
+(`--smoke-500/300`) — always over a 16 mm ink base with a `chrome-200`
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
 are OPAQUE bright chrome, and only the ramp BED between them — a wide
@@ -121,6 +127,7 @@ prefix; everything else is art. Curves are flattened to ≤1 mm chord error.
 |---|---|---|
 | `collision-wall-<name>` | solid open chain | path polyline + stroke-width |
 | `collision-loop-<name>` | solid closed chain | closed path polyline + stroke-width |
+| `collision-diverter-<id>-<blade>` | diverter blade (M12): swappable — one blade of `<id>` solid at a time, owned by the Diverter entity | path polyline + data-width |
 | `sensor-<kind>-<name>` | non-solid scoring zone | closed path → sensor fixture |
 | `anchor-<entity>[-<which>]` | placement point for a code-defined body | circle center |
 | `art-…` or unprefixed | visual only | ignored by parser |
@@ -136,10 +143,34 @@ body / 6.5 steel-300 / 2.2 chrome-200 core) where the 12 mm body is the
 physical width.
 
 Sensor kinds: `drain`, `ramp-entry`, `ramp-exit`, `rollover`, `lane`,
-`kicker`, `spinner`, `target`. Required anchors per table:
+`kicker`, `spinner`, `target`, `subway`, `lift`. Required anchors per table:
 `anchor-flipper-left`, `anchor-flipper-right`, `anchor-plunger`,
 `anchor-spawn`; dynamic elements (bumpers, drop targets, spinner) each get a
-numbered anchor (`anchor-bumper-1`).
+numbered anchor (`anchor-bumper-1`); placed M12 entities are anchor-checked
+too (`anchor-magnet-<id>` at the core, `anchor-disc-<id>` at the centre).
+
+M12 entity conventions (added 2026-07-15, built ahead of table 4 per the
+Night Mail brief §8):
+
+- **Diverter** — one `collision-diverter-<id>-<blade>` path per blade
+  (blade names single-segment; same data-width / data-z rules as walls);
+  exactly one blade is solid at a time. Author blade geometries so a ball
+  resting against the solid blade is never INSIDE another blade's path —
+  the swap doesn't push, and a ball overlapping a freshly-created blade is
+  ejected by the solver. Every drawn blade must be claimed by the table's
+  `DiverterDef` (load-time check, both directions).
+- **Lift** — `sensor-lift-<id>` trips the capture at the foot;
+  `height-profile-<id>` (no `data-surface` — the ball can't free-ride a
+  lift) is the carry path, climbing hFrom→hTo. The release is AIRBORNE at
+  hTo: the §4 descent rule applies to the landing zone (clear, or a summit
+  surface at matching height), and the profile's far end must sit clear of
+  furniture the falling ball could wedge against.
+- **Magnet** — force + capture only, no fixture; `anchor-magnet-<id>`
+  marks the core, art carries the pole cap (brass — the ball touches it).
+  Reach is ground-level only: riders and transits pass unpulled.
+- **Disc** — force only, no fixture; `anchor-disc-<id>` marks the centre,
+  art carries the turntable face. Flush with the field: it must never be
+  drawn as raised (nothing gates collision over it).
 
 Two invariants from the physics work (see `src/table/geometry.ts`):
 

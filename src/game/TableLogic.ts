@@ -20,6 +20,33 @@ export interface TableLogicCtx {
   push: (scene: DmdScene, prio?: number) => void;
   /** Baked per-table DMD frames by scene key (undefined until loaded). */
   baked: (key: string) => Uint8Array[] | undefined;
+  /**
+   * Extended kicker hold (M12 video modes): `open` keeps the named scoop's
+   * hold alive past its holdS until called again with false — the ball sits
+   * captive while an input-driven DMD scene runs. Logic must pair every
+   * open with a close on a TIMER it owns (never on scene completion — the
+   * headless sims have no DMD, and an unclosed hold is a stuck ball).
+   */
+  holdScoop?: (id: string, open: boolean) => void;
+  /**
+   * Serve extra balls (M12 multiball): n balls released from `at` with
+   * initial velocity `v` (defaults: the plunger spawn, at rest), staggered
+   * so they don't overlap. Play phase only; extras drain silently and the
+   * ball ends when the LAST one drains. Absent in the headless sims —
+   * modes must remain playable single-ball (the frenzy still runs).
+   */
+  addBalls?: (n: number, at?: { x: number; y: number }, v?: { x: number; y: number }) => void;
+  /**
+   * Physical ball lock (M12): transfer the ball a kicker is currently
+   * holding into a visible parked berth (the locked ball leaves play; a
+   * fresh ball is served to the plunger if it was the last live one).
+   * Returns false when nothing was held / not in play. Absent in the sims —
+   * logic must keep a virtual-lock path (clunk-and-release) as fallback.
+   */
+  lockBall?: (kickerId: string, berth: { x: number; y: number }) => boolean;
+  /** Release every parked lock into play as multiball extras; returns how
+   * many were released (top up with addBalls for a fixed-count multiball). */
+  releaseLocks?: () => number;
 }
 
 export interface TableLogic {
@@ -53,4 +80,13 @@ export interface TableLogic {
    * lane-change: tables may rotate their lit rollover lanes on it.
    */
   onFlipper?(side: "left" | "right"): void;
+  /**
+   * Which blade of a diverter should be solid right now (M12, polled per
+   * frame). Absent hook or unknown name: the def's `initial` blade holds.
+   */
+  diverterBlade?(id: string): string;
+  /** Whether a magnet is armed right now (M12; default unlit = inert). */
+  magnetLit?(id: string): boolean;
+  /** A rotating disc's spin rate, signed rad/s (M12; default 0 = parked). */
+  discSpin?(id: string): number;
 }

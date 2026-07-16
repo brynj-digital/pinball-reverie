@@ -236,13 +236,34 @@ export class Renderer2D implements Renderer {
     }
     this.flushGlows(); // trail ghosts, one additive batch under the ball
 
-    // on the raised layer the translucent ramp art goes down FIRST, then
-    // the ball rides crisp on top of it (M10)
-    if (this.overlayArt && b.layer === 1) this.drawArtSlice(this.overlayArt, camera);
+    // Compositing vs the translucent elevated rails (M10): ground/subway
+    // balls go UNDER the overlay (visible through the ramp plastic),
+    // elevated balls ride crisp on top. M12 multiball: every live ball
+    // sorts into the same two passes.
+    const balls = [b, ...snap.extraBalls];
+    for (const eb of balls) if (eb.layer <= 0) this.drawOneBall(eb);
+    if (this.overlayArt) this.drawArtSlice(this.overlayArt, camera);
+    for (const eb of balls) if (eb.layer === 1) this.drawOneBall(eb);
 
-    // ball — stainless SVG art, procedural gradient until it loads.
-    // Height (M10): raised rails scale the ball up with a drop shadow;
-    // subway transit dims and shrinks it (rolling in a sunken gutter).
+    if (snap.debugShapes) this.drawDebug(snap);
+
+    this.drawHud(snap, w, h, dpr);
+  }
+
+  /**
+   * One ball — stainless SVG art, procedural gradient until it loads.
+   * Height (M10/M11): raised rails scale the ball up with a drop shadow;
+   * subway transit dims and shrinks it (rolling in a sunken gutter).
+   */
+  private drawOneBall(b: {
+    x: number;
+    y: number;
+    angle: number;
+    alpha: number;
+    h: number;
+    layer: number;
+  }): void {
+    const { ctx } = this;
     const br = BALL_RADIUS * (1 + Math.max(0, b.h) * 8 + Math.min(0, b.h) * 4);
     ctx.save();
     ctx.globalAlpha = b.alpha * (b.layer === -1 ? 0.55 : 1);
@@ -286,15 +307,6 @@ export class Renderer2D implements Renderer {
       ctx.fill();
     }
     ctx.restore(); // ball alpha
-
-    // the translucent elevated rails composite OVER a ground-level (or
-    // subway) ball — it stays visible through the ramp plastic but reads
-    // unmistakably as running beneath it (M10)
-    if (this.overlayArt && b.layer <= 0) this.drawArtSlice(this.overlayArt, camera);
-
-    if (snap.debugShapes) this.drawDebug(snap);
-
-    this.drawHud(snap, w, h, dpr);
   }
 
   /**
@@ -643,6 +655,61 @@ export class Renderer2D implements Renderer {
         ctx.fillStyle = `rgba(255, 255, 255, ${0.35 * b.flash})`;
         ctx.fill();
       }
+    }
+
+    // M12 diverters — the SOLID blade drawn as a steel gate over the art
+    // (the art carries the housing; the moving blade must track physics)
+    for (const dv of el.diverters) {
+      if (dv.pts.length < 2) continue;
+      ctx.beginPath();
+      dv.pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+      ctx.lineCap = "round";
+      ctx.lineWidth = 0.007;
+      ctx.strokeStyle = "#07080d";
+      ctx.stroke();
+      ctx.lineWidth = 0.004;
+      ctx.strokeStyle = "#4a5680";
+      ctx.stroke();
+      ctx.lineWidth = 0.0015;
+      ctx.strokeStyle = "#d7dce8";
+      ctx.stroke();
+    }
+
+    // M12 magnets — brass core cap (ball-touch, per the guide); armed = green
+    // signal glow, holding = hot
+    for (const m of el.magnets) {
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 0.007, 0, Math.PI * 2);
+      const mg = ctx.createRadialGradient(m.x - 0.002, m.y - 0.002, 0.001, m.x, m.y, 0.007);
+      mg.addColorStop(0, "#f4d27a");
+      mg.addColorStop(1, "#9c7c2c");
+      ctx.fillStyle = mg;
+      ctx.fill();
+      ctx.lineWidth = 0.0015;
+      ctx.strokeStyle = "#07080d";
+      ctx.stroke();
+      if (m.holding) this.drawGlow(m.x, m.y, 0.035, "255, 255, 255", 0.8);
+      else if (m.lit) this.drawGlow(m.x, m.y, 0.028, "57, 255, 20", 0.55);
+    }
+
+    // M12 discs — flush steel turntable: rim ring + rotating spoke marks
+    // (art may carry a richer face; this keeps the rotation readable)
+    for (const d of el.discs) {
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.lineWidth = 0.003;
+      ctx.strokeStyle = "#2c3352";
+      ctx.stroke();
+      ctx.lineWidth = 0.0015;
+      ctx.strokeStyle = "#7f8fc9";
+      for (let i = 0; i < 4; i++) {
+        const a = d.angle + (i * Math.PI) / 2;
+        ctx.beginPath();
+        ctx.moveTo(d.x + Math.cos(a) * d.r * 0.35, d.y + Math.sin(a) * d.r * 0.35);
+        ctx.lineTo(d.x + Math.cos(a) * d.r * 0.9, d.y + Math.sin(a) * d.r * 0.9);
+        ctx.stroke();
+      }
+      if (d.spinning) this.drawGlow(d.x, d.y, d.r * 1.3, "127, 143, 201", 0.25);
     }
   }
 

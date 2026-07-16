@@ -18,11 +18,16 @@ import { DropTargetBank } from "../src/entities/DropTargetBank";
 import { Spinner } from "../src/entities/Spinner";
 import { Kicker } from "../src/entities/Kicker";
 import { Subway } from "../src/entities/Subway";
+import { Diverter } from "../src/entities/Diverter";
+import { Lift } from "../src/entities/Lift";
+import { Magnet } from "../src/entities/Magnet";
+import { Disc } from "../src/entities/Disc";
 import { Scoring } from "../src/game/Scoring";
 import type { TableLogic } from "../src/game/TableLogic";
 import { MoondialLogic } from "../src/game/moondial";
 import { TidebreakerLogic } from "../src/game/tidebreaker";
 import { MidwayLogic } from "../src/game/midway";
+import { NightMailLogic } from "../src/game/nightmail";
 import { FLIPPER } from "../src/table/geometry";
 import { TABLE_SPECS, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
@@ -62,7 +67,18 @@ function buildRig(id: TableId) {
   const subways = g.subways.map(
     (d) => new Subway(d, table.profiles.find((p) => p.name === d.id)!),
   );
+  // M12 entities, wired as in Game (dormant on tables without defs)
+  const diverters = (g.diverters ?? []).map(
+    (d) => new Diverter(pw.world, pw, d, table.diverterBlades, t),
+  );
+  const lifts = (g.lifts ?? []).map(
+    (d) => new Lift(d, table.profiles.find((p) => p.name === d.id)!),
+  );
+  const magnets = (g.magnets ?? []).map((d) => new Magnet(d));
+  const discs = (g.discs ?? []).map((d) => new Disc(d));
   const scoring = new Scoring(bus, spec.scoring);
+  // magnet captures notify logic, as in Game (snag awards + light consume)
+  for (const m of magnets) m.onCapture = () => logic.onCapture?.(m.def.id);
   const logic: TableLogic = spec.createLogic({
     bus,
     scoring,
@@ -70,6 +86,11 @@ function buildRig(id: TableId) {
     shake: () => {},
     push: () => {},
     baked: () => undefined,
+    holdScoop: (id, open) => {
+      const k = kickers.find((k) => k.def.id === id);
+      if (open) k?.beginExtendedHold();
+      else k?.release();
+    },
   });
 
   // event capture + the same wiring Game does
@@ -95,7 +116,13 @@ function buildRig(id: TableId) {
     if (!sensorApplies({ zMin, zMax }, ball.height.z)) return;
     state.sensors.push(sid ? `${kind}:${sid}` : kind);
     // captive balls are exempt, as in Game: saving subways cross the drain zone
-    if (kind === "drain" && !kickers.some((k) => k.holding) && !subways.some((s) => s.active))
+    if (
+      kind === "drain" &&
+      !kickers.some((k) => k.holding) &&
+      !subways.some((s) => s.active) &&
+      !lifts.some((l) => l.active) &&
+      !magnets.some((m) => m.holding)
+    )
       state.drained = true;
     if (kind === "spinner") spinner.trip(ball.body.getLinearVelocity().y);
     if (kind === "kicker" && sid) {
@@ -106,12 +133,16 @@ function buildRig(id: TableId) {
       // which catches at the outlane bottom but fires from the chute above).
       const k = kickers.find((k) => k.def.id === sid);
       const p = ball.body.getPosition();
-      if (k && p.x < g.table.laneWallX && logic.kickerLit(sid) && k.capture())
+      if (k && p.x < g.table.laneWallX && logic.kickerLit(sid) && k.capture(ball))
         logic.onCapture?.(sid);
     }
     if (kind === "subway" && sid) {
       const s = subways.find((s) => s.def.id === sid);
-      if (s && logic.kickerLit(sid) && s.capture()) logic.onCapture?.(sid);
+      if (s && logic.kickerLit(sid) && s.capture(ball)) logic.onCapture?.(sid);
+    }
+    if (kind === "lift" && sid) {
+      const l = lifts.find((l) => l.def.id === sid);
+      if (l && logic.kickerLit(sid) && l.capture(ball)) logic.onCapture?.(sid);
     }
     if (kind === "rollover" && sid) logic.onRollover(sid);
   });
@@ -131,7 +162,11 @@ function buildRig(id: TableId) {
     for (let i = 0; i < steps; i++) {
       pw.update(
         FIXED_DT,
-        () => ball.height.applyForces(ball.body),
+        () => {
+          ball.height.applyForces(ball.body);
+          for (const m of magnets) m.applyForces([ball]);
+          for (const d of discs) d.applyForces([ball]);
+        },
         () => {
           const p = ball.body.getPosition();
           const v = ball.body.getLinearVelocity();
@@ -139,8 +174,18 @@ function buildRig(id: TableId) {
         },
       );
       bank.update(FIXED_DT);
-      for (const k of kickers) k.update(FIXED_DT, ball, t);
-      for (const s of subways) s.update(FIXED_DT, ball);
+      for (const k of kickers) k.update(FIXED_DT, t);
+      for (const s of subways) s.update(FIXED_DT);
+      for (const l of lifts) l.update(FIXED_DT);
+      for (const m of magnets) {
+        m.lit = logic.magnetLit?.(m.def.id) ?? false;
+        m.update(FIXED_DT, [ball]);
+      }
+      for (const d of discs) {
+        d.spin = logic.discSpin?.(d.def.id) ?? 0;
+        d.update(FIXED_DT);
+      }
+      for (const dv of diverters) dv.setBlade(logic.diverterBlade?.(dv.def.id) ?? dv.def.initial, [ball]);
       spinner.update(FIXED_DT);
       scoring.update(FIXED_DT);
       logic.update(FIXED_DT);
@@ -151,8 +196,10 @@ function buildRig(id: TableId) {
   }
 
   function placeBall(x: number, y: number, vx = 0, vy = 0): void {
-    for (const k of kickers) k.cancel(ball);
-    for (const s of subways) s.cancel(ball);
+    for (const k of kickers) k.cancel();
+    for (const s of subways) s.cancel();
+    for (const l of lifts) l.cancel();
+    for (const m of magnets) m.cancel();
     ball.height.reset();
     ball.body.setGravityScale(1);
     ball.body.setTransform(new Vec2(x, y), 0);
@@ -161,7 +208,7 @@ function buildRig(id: TableId) {
   }
 
   const wallR = parseTableSvg(svgText).walls[0].radius;
-  return { spec, g, t, bus, pw, ball, flippers, bumpers, slings, bank, spinner, kickers, subways, scoring, logic, state, run, placeBall, wallR };
+  return { spec, g, t, bus, pw, ball, flippers, bumpers, slings, bank, spinner, kickers, subways, diverters, lifts, magnets, discs, scoring, logic, state, run, placeBall, wallR };
 }
 
 // ═══════════════════════════ MOONDIAL ═══════════════════════════
@@ -1044,10 +1091,324 @@ function midwaySuite(): void {
   );
 }
 
+// ═══════════════════════════ THE NIGHT MAIL ═══════════════════════════
+function nightmailSuite(): void {
+  console.log("\n── nightmail ──");
+  const rig = buildRig("nightmail");
+  const { g, t, bus, ball, state, run, placeBall, wallR } = rig;
+  const logic = rig.logic as NightMailLogic;
+  const sorting = rig.kickers.find((k) => k.def.id === "sorting")!;
+  const banker = rig.kickers.find((k) => k.def.id === "banker")!;
+  const siding = rig.kickers.find((k) => k.def.id === "siding")!;
+  const lift = rig.lifts[0];
+  const magnet = rig.magnets[0];
+  const points = rig.diverters[0];
+  rig.flippers[0].update(false, t);
+  rig.flippers[1].update(false, t);
+
+  // 1 — settles on the plunger saddle (shared envelope)
+  run(2);
+  {
+    const p = ball.body.getPosition();
+    const restY = g.plunger.saddleY - wallR - 0.0135;
+    check(
+      "ball settles ON the plunger saddle",
+      Math.abs(p.y - restY) < 0.004 && p.x > g.table.laneWallX,
+      `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 2 — full launch with the points at MAIN rides the whole Main Line into
+  // the bottom-left channel, ticking the signal-wire spinner on the way
+  check("points boot on the MAIN blade", points.blade === "main");
+  ball.body.setLinearVelocity(new Vec2(0, -t.plungerMaxSpeed));
+  let minY = g.table.height;
+  let minX = g.table.width;
+  run(3, () => {
+    const p = ball.body.getPosition();
+    minY = Math.min(minY, p.y);
+    minX = Math.min(minX, p.x);
+  });
+  check("launch reaches top of table", minY < 0.3, `minY=${minY.toFixed(3)}`);
+  check("launch completes the Main Line into the left lane", minX < 0.07, `minX=${minX.toFixed(3)}`);
+  check("signal-wire spinner ticks on the launch", state.spins > 0, `ticks=${state.spins}`);
+
+  // 3 — drain fires through the centre gap
+  placeBall(0.26, 1.0);
+  run(0.5);
+  check("drain sensor fires", state.drained);
+
+  // 4 — the points thrown to BRANCH divert the same launch onto the
+  // exchange lane (a signal-lever target hit toggles the blade)
+  bus.emit("hit", { kind: "target", id: "1" });
+  run(0.1);
+  check("a lever hit throws the points to BRANCH", points.blade === "branch");
+  state.sensors.length = 0;
+  state.drained = false;
+  placeBall(0.5475, 0.97, 0, -t.plungerMaxSpeed);
+  run(4);
+  check(
+    "branched launch arrives on the exchange lane",
+    state.sensors.includes("lane:branch"),
+    `sensors=${state.sensors.filter((s) => !s.startsWith("drain")).slice(0, 6).join(",")}`,
+  );
+  bus.emit("hit", { kind: "target", id: "1" }); // back to MAIN
+  run(0.1);
+
+  // 5 — signal gantry: three cross-shots drop the bank and light LOCK
+  state.bankDone = false;
+  for (const tgt of g.dropTargets.targets) {
+    placeBall(0.16, tgt.y, -1.5, 0);
+    run(0.5);
+  }
+  check("gantry bank drops", state.bankDone && rig.bank.targets.every((x) => !x.up));
+  check("bank completion lights LOCK", logic.kickerLit("siding"));
+  run(1.5);
+  check("gantry resets after delay", rig.bank.targets.every((x) => x.up));
+
+  // 6 — coupling: a lane ball with LOCK lit is captured at the siding
+  state.labels.length = 0;
+  placeBall(0.094, 0.2, 0, 0.4);
+  let coupled = false;
+  run(3, () => {
+    if (siding.holding) coupled = true;
+  });
+  check("lit siding couples a wagon", coupled, `held=${coupled}`);
+  check("coupling consumes LOCK", !logic.kickerLit("siding"));
+
+  // 7 — the exchange: spinner spins arm the hook, the hook snags a lane
+  // ball at speed, holds, and flings it on down the lane
+  for (let i = 0; i < 8; i++) bus.emit("spinnerTick", {});
+  run(0.1);
+  check("spins arm the exchange", magnet.lit);
+  state.labels.length = 0;
+  placeBall(0.094, 0.2, 0, 1.0);
+  let snagged = false;
+  run(4, () => {
+    if (magnet.holding) snagged = true;
+  });
+  check("the mail hook snags the lane ball", snagged && state.labels.includes("MAIL SNAGGED"));
+  check("the snag consumes the light", !logic.magnetLit());
+
+  // 8 — the incline: a left-flipper-strength shot into the throat is
+  // captured, carried to the summit at height, and released ballistically
+  state.labels.length = 0;
+  placeBall(0.355, 0.75, 0, -1.5);
+  let carried = false;
+  let maxZ = 0;
+  run(8, () => {
+    if (lift.active) carried = true;
+    maxZ = Math.max(maxZ, ball.height.z);
+  });
+  check("incline captures and carries", carried && state.labels.includes("BANKING ENGINE"));
+  check("the carry really climbs", maxZ > 0.025, `maxZ=${(maxZ * 1000).toFixed(0)}mm`);
+  check("summit release returns to ground", !lift.active && ball.height.z === 0, `z=${ball.height.z}`);
+
+  // 9 — sorting office: capture, mailbag award, loop line lights
+  rig.scoring.reset();
+  logic.resetGame();
+  state.labels.length = 0;
+  placeBall(0.272, 0.56, 0, -1.1);
+  let sortCaught = false;
+  run(1, () => {
+    if (sorting.holding) sortCaught = true;
+  });
+  check("sorting office captures the shot", sortCaught && state.sensors.includes("kicker:sorting"));
+  let ejectX = NaN;
+  run(4, () => {
+    const p = ball.body.getPosition();
+    if (Number.isNaN(ejectX) && !sorting.holding && p.y >= 0.95) ejectX = p.x;
+  });
+  check(
+    "sorting kickout feeds the left flipper",
+    !sorting.holding && ejectX > 0.05 && ejectX < 0.27,
+    `crossed y=0.95 at x=${Number.isNaN(ejectX) ? "never" : ejectX.toFixed(3)}`,
+  );
+  check("first item awarded (POSTCARD)", state.labels.includes("POSTCARD"));
+  check("sorting capture lights the loop line", logic.kickerLit("loop"));
+
+  // 10 — loop line (lit): the right outlane dives under the field and
+  // resurfaces at the roundhouse turntable
+  state.drained = false;
+  placeBall(0.494, 0.75);
+  let looped = false;
+  let outX = NaN;
+  let outY = NaN;
+  run(6, () => {
+    if (ball.layer === -1) looped = true;
+    if (looped && ball.layer === 0 && Number.isNaN(outX)) {
+      outX = ball.body.getPosition().x;
+      outY = ball.body.getPosition().y;
+    }
+  });
+  check(
+    "lit loop line saves the outlane ball to the turntable",
+    looped && Math.abs(outX - 0.18) < 0.05 && Math.abs(outY - 0.64) < 0.06,
+    `resurfaced at (${outX.toFixed(3)}, ${outY.toFixed(3)})`,
+  );
+  check("loop consumes its light", !logic.kickerLit("loop"));
+
+  // 11 — traps: seams, tip gap, guide creeps, unlit outlanes, and every
+  // new pocket this table introduces. Points deterministically at MAIN
+  // (the gantry test's odd toggle count left them at BRANCH).
+  if (points.blade !== "main") bus.emit("hit", { kind: "target", id: "1" });
+  run(0.1);
+  for (const [label, x, y] of [
+    ["left seam drop", 0.178, 0.915],
+    ["right seam drop", 0.342, 0.915],
+    ["tip gap drop", 0.26, 0.915],
+    ["left guide creep", 0.113, 0.912],
+    ["right guide creep", 0.407, 0.912],
+    ["left outlane (banker unlit)", 0.026, 0.75],
+    ["right outlane (loop unlit)", 0.494, 0.75],
+    ["deflector wedge", 0.02, 0.6],
+    ["sorting mouth dead drop", 0.24, 0.5],
+    // 0.11, not 0.105: the raised lever faces sit at x=0.094 and a ball
+    // centre closer than 0.1075 spawns overlapping them (solver ejection)
+    ["gantry recess drop", 0.11, 0.47],
+    ["incline throat dead drop", 0.355, 0.66],
+    ["exchange lane dead drop", 0.094, 0.25],
+    ["points mouth dead drop", 0.125, 0.14],
+    ["turntable rest", 0.18, 0.64],
+    ["siding pocket drop", 0.095, 0.36],
+  ] as const) {
+    state.drained = false;
+    placeBall(x, y);
+    run(10);
+    const p = ball.body.getPosition();
+    check(`${label} does not trap the ball`, state.drained, `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)}) layer=${ball.layer}`);
+  }
+
+  // 12 — buffer bumper kicks
+  placeBall(0.205, 0.185, 0, 0.8);
+  let maxSpeed = 0;
+  run(0.4, () => {
+    const v = ball.body.getLinearVelocity();
+    maxSpeed = Math.max(maxSpeed, Math.hypot(v.x, v.y));
+  });
+  check(
+    "buffer bumper fires and kicks",
+    state.hits.some((h) => h === "bumper:1") && maxSpeed > 1.0,
+    `maxSpeed=${maxSpeed.toFixed(2)}`,
+  );
+
+  // 13 — M-A-I-L lane rollover fires + timetable advances
+  placeBall(0.225, 0.07);
+  run(1);
+  check("A lane rollover fires", state.sensors.includes("rollover:2"));
+  for (const id of ["1", "2", "3", "4"]) bus.emit("sensor", { kind: "rollover", id });
+  check(
+    "M-A-I-L advances the timetable + lights the banker",
+    logic.kickerLit("banker") && rig.scoring.multiplier === 2,
+  );
+
+  // 14 — the banker kickback saves a left-outlane ball
+  state.drained = false;
+  placeBall(0.026, 0.8);
+  let bankerFired = false;
+  let kickMinY = 1.1;
+  run(4, () => {
+    if (banker.holding) bankerFired = true;
+    if (bankerFired && !banker.holding) kickMinY = Math.min(kickMinY, ball.body.getPosition().y);
+  });
+  check("lit banker kickback saves the ball", bankerFired && kickMinY < 0.6, `minY=${kickMinY.toFixed(3)}`);
+  check("banker consumes its light", !logic.kickerLit("banker"));
+
+  // 14b — a REAL express: right-flipper-strength shot up the left channel
+  // rides over the apex cover (past both M-A-I-L window mouths) and exits
+  // top-right — the aimed signature shot must survive the lane windows.
+  // Pin the points at MAIN first: physical target grazes in earlier tests
+  // throw them, and a BRANCH express diverting is the table working.
+  if (points.blade !== "main") bus.emit("hit", { kind: "target", id: "1" });
+  run(0.1);
+  state.labels.length = 0;
+  state.sensors.length = 0;
+  placeBall(0.0325, 0.53, 0, -2.3);
+  run(3);
+  check(
+    "aimed express clears the M-A-I-L windows",
+    state.sensors.includes("ramp-entry") && state.sensors.includes("ramp-exit"),
+    `sensors=${state.sensors.filter((s) => s.startsWith("ramp")).join(",")}`,
+  );
+  check("aimed express scores", state.labels.some((l) => l.startsWith("EXPRESS")));
+
+  // 15 — express run pair + DEPARTURE/CONNECTION, synthetically
+  placeBall(0.5475, 0.95); // park on the saddle away from all sensors
+  run(1.5);
+  state.labels.length = 0;
+  const syntheticExpress = () => {
+    bus.emit("sensor", { kind: "ramp-entry" });
+    run(0.1);
+    bus.emit("sensor", { kind: "ramp-exit" });
+    run(0.1);
+  };
+  syntheticExpress();
+  // 14b's real express may still be inside the combo window → EXPRESS X2
+  check("express pair scores", state.labels.some((l) => l.startsWith("EXPRESS")));
+  // couple three wagons: bank + a captured siding ball each time
+  for (let w = 0; w < 3; w++) {
+    bus.emit("bankComplete", {});
+    placeBall(0.094, 0.2, 0, 0.4);
+    run(4); // capture + hold + eject + fall away
+  }
+  check("three couplings start DEPARTURE", state.modeEvents.includes("departureStart"));
+  check("departure doubles scoring", rig.scoring.eclipseFactor === 2);
+  run(0.1);
+  check("the turntable spins during departure", rig.discs[0].spin > 0);
+  state.labels.length = 0;
+  const bladeBefore = points.blade;
+  syntheticExpress();
+  check("express pays jackpot during departure", state.labels.includes("EXPRESS JACKPOT"));
+  run(0.1);
+  check("jackpot throws the points", points.blade !== bladeBefore);
+  run(26);
+  check(
+    "departure ends after its duration",
+    state.modeEvents.includes("departureEnd") && rig.scoring.eclipseFactor === 1,
+  );
+  // wizard: TERMINUS (4 more M-A-I-L sets) + a snag + the departure above
+  for (let round = 0; round < 4; round++)
+    for (const id of ["1", "2", "3", "4"]) bus.emit("sensor", { kind: "rollover", id });
+  check("timetable reaches TERMINUS (multiplier capped ×6)", rig.scoring.multiplier === 6);
+  for (let i = 0; i < 8; i++) bus.emit("spinnerTick", {});
+  placeBall(0.094, 0.2, 0, 1.0);
+  run(4); // snag + fling + fall away
+  check("connection lights after terminus + departure + snag", state.modeEvents.includes("connectionReady"));
+  state.drained = false;
+  placeBall(0.272, 0.56, 0, -1.1);
+  run(2);
+  check("the sorting office starts THE CONNECTION", state.modeEvents.includes("connectionStart"));
+  check("connection doubles scoring", rig.scoring.eclipseFactor === 2);
+  run(31);
+  check(
+    "connection ends after its duration",
+    state.modeEvents.includes("connectionEnd") && rig.scoring.eclipseFactor === 1,
+  );
+
+  // 16 — SIGNAL BOX: the strongbox lights it; the next scoop capture holds
+  // the ball for the mode's whole duration (extended hold), then releases
+  logic.resetGame();
+  rig.scoring.reset();
+  for (let i = 0; i < 3; i++) {
+    placeBall(0.272, 0.56, 0, -1.1);
+    run(4); // capture + award + eject (postcard, letters, parcel)
+  }
+  state.labels.length = 0;
+  placeBall(0.272, 0.56, 0, -1.1);
+  run(4);
+  check("fourth capture awards the STRONGBOX", state.labels.includes("STRONGBOX"));
+  placeBall(0.272, 0.56, 0, -1.1);
+  run(4); // capture; signal box holds past the 2s holdS
+  check("SIGNAL BOX holds the ball past holdS", sorting.holding);
+  run(9);
+  check("SIGNAL BOX releases on its timer", !sorting.holding);
+}
+
 const which = process.argv[2] as TableId | undefined;
 if (!which || which === "moondial") moondialSuite();
 if (!which || which === "tidebreaker") tidebreakerSuite();
 if (!which || which === "midway") midwaySuite();
+if (!which || which === "nightmail") nightmailSuite();
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

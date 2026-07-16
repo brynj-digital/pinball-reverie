@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- THE NIGHT MAIL DMD scene: COUPLING — buffer view. Two wagon ends close in
+       from left and right, buffers slam together in an impact star, the
+       screw chain drops between the hooks and the rake settles coupled.
+       8 frames of 128x32 (style guide §6): #fff=3, #888=2, #666=1,
+       black=0. Art rows 0..22; caption renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <g transform="translate(0,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="0" y="5" width="26" height="15" fill="#666"/>
+    <line x1="0" y1="5" x2="26" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="26" y1="5" x2="26" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="26" y="11" width="4" height="3" fill="#888"/>
+    <line x1="26" y1="17" x2="29" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="16" cy="19.5" r="2" fill="#888"/>
+    <circle cx="4" cy="19.5" r="2" fill="#888"/>
+    <rect x="102" y="5" width="26" height="15" fill="#666"/>
+    <line x1="102" y1="5" x2="128" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="102" y1="5" x2="102" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="98" y="11" width="4" height="3" fill="#888"/>
+    <line x1="102" y1="17" x2="99" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="112" cy="19.5" r="2" fill="#888"/>
+    <circle cx="124" cy="19.5" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(128,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="0" y="5" width="38" height="15" fill="#666"/>
+    <line x1="0" y1="5" x2="38" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="38" y1="5" x2="38" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="38" y="11" width="4" height="3" fill="#888"/>
+    <line x1="38" y1="17" x2="41" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="28" cy="19.5" r="2" fill="#888"/>
+    <circle cx="16" cy="19.5" r="2" fill="#888"/>
+    <circle cx="4" cy="19.5" r="2" fill="#888"/>
+    <rect x="90" y="5" width="38" height="15" fill="#666"/>
+    <line x1="90" y1="5" x2="128" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="90" y1="5" x2="90" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="86" y="11" width="4" height="3" fill="#888"/>
+    <line x1="90" y1="17" x2="87" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="100" cy="19.5" r="2" fill="#888"/>
+    <circle cx="112" cy="19.5" r="2" fill="#888"/>
+    <circle cx="124" cy="19.5" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(256,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="8" y="5" width="42" height="15" fill="#666"/>
+    <line x1="8" y1="5" x2="50" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="50" y1="5" x2="50" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="50" y="11" width="4" height="3" fill="#888"/>
+    <line x1="50" y1="17" x2="53" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="40" cy="19.5" r="2" fill="#888"/>
+    <circle cx="28" cy="19.5" r="2" fill="#888"/>
+    <circle cx="16" cy="19.5" r="2" fill="#888"/>
+    <rect x="78" y="5" width="42" height="15" fill="#666"/>
+    <line x1="78" y1="5" x2="120" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="78" y1="5" x2="78" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="74" y="11" width="4" height="3" fill="#888"/>
+    <line x1="78" y1="17" x2="75" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="88" cy="19.5" r="2" fill="#888"/>
+    <circle cx="100" cy="19.5" r="2" fill="#888"/>
+    <circle cx="112" cy="19.5" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(384,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="18" y="5" width="42" height="15" fill="#666"/>
+    <line x1="18" y1="5" x2="60" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="60" y1="5" x2="60" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="60" y="11" width="4" height="3" fill="#888"/>
+    <line x1="60" y1="17" x2="63" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="50" cy="19.5" r="2" fill="#888"/>
+    <circle cx="38" cy="19.5" r="2" fill="#888"/>
+    <circle cx="26" cy="19.5" r="2" fill="#888"/>
+    <rect x="68" y="5" width="42" height="15" fill="#666"/>
+    <line x1="68" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="68" y1="5" x2="68" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="64" y="11" width="4" height="3" fill="#888"/>
+    <line x1="68" y1="17" x2="65" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="78" cy="19.5" r="2" fill="#888"/>
+    <circle cx="90" cy="19.5" r="2" fill="#888"/>
+    <circle cx="102" cy="19.5" r="2" fill="#888"/>
+    <circle cx="64" cy="12.5" r="1.5" fill="#fff"/>
+    <line x1="64" y1="7" x2="64" y2="10" stroke="#fff" stroke-width="1"/>
+    <line x1="64" y1="15" x2="64" y2="18" stroke="#fff" stroke-width="1"/>
+    <line x1="58" y1="9" x2="61" y2="11" stroke="#fff" stroke-width="1"/>
+    <line x1="67" y1="14" x2="70" y2="16" stroke="#fff" stroke-width="1"/>
+    <line x1="58" y1="16" x2="61" y2="14" stroke="#fff" stroke-width="1"/>
+    <line x1="67" y1="11" x2="70" y2="9" stroke="#fff" stroke-width="1"/>
+  </g>
+  <g transform="translate(512,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="19" y="5" width="42" height="15" fill="#666"/>
+    <line x1="19" y1="5" x2="61" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="61" y1="5" x2="61" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="61" y="11" width="4" height="3" fill="#888"/>
+    <line x1="61" y1="17" x2="64" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="51" cy="19.5" r="2" fill="#888"/>
+    <circle cx="39" cy="19.5" r="2" fill="#888"/>
+    <circle cx="27" cy="19.5" r="2" fill="#888"/>
+    <rect x="67" y="5" width="42" height="15" fill="#666"/>
+    <line x1="67" y1="5" x2="109" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="67" y1="5" x2="67" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="63" y="11" width="4" height="3" fill="#888"/>
+    <line x1="67" y1="17" x2="64" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="77" cy="19.5" r="2" fill="#888"/>
+    <circle cx="89" cy="19.5" r="2" fill="#888"/>
+    <circle cx="101" cy="19.5" r="2" fill="#888"/>
+    <circle cx="64" cy="12.5" r="1" fill="#888"/>
+    <line x1="59" y1="10" x2="61" y2="11.5" stroke="#666" stroke-width="0.8"/>
+    <line x1="67" y1="13.5" x2="69" y2="15" stroke="#666" stroke-width="0.8"/>
+    <circle cx="63.5" cy="13" r="0.8" fill="#888"/>
+    <circle cx="64" cy="15.5" r="0.8" fill="#888"/>
+  </g>
+  <g transform="translate(640,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="18" y="5" width="42" height="15" fill="#666"/>
+    <line x1="18" y1="5" x2="60" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="60" y1="5" x2="60" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="60" y="11" width="4" height="3" fill="#888"/>
+    <line x1="60" y1="17" x2="63" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="50" cy="19.5" r="2" fill="#888"/>
+    <circle cx="38" cy="19.5" r="2" fill="#888"/>
+    <circle cx="26" cy="19.5" r="2" fill="#888"/>
+    <rect x="68" y="5" width="42" height="15" fill="#666"/>
+    <line x1="68" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="68" y1="5" x2="68" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="64" y="11" width="4" height="3" fill="#888"/>
+    <line x1="68" y1="17" x2="65" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="78" cy="19.5" r="2" fill="#888"/>
+    <circle cx="90" cy="19.5" r="2" fill="#888"/>
+    <circle cx="102" cy="19.5" r="2" fill="#888"/>
+    <circle cx="63" cy="18.7" r="0.8" fill="#fff"/>
+    <circle cx="63.5" cy="19.8" r="0.8" fill="#fff"/>
+    <circle cx="64" cy="20.4" r="0.8" fill="#fff"/>
+    <circle cx="64.5" cy="19.8" r="0.8" fill="#fff"/>
+    <circle cx="65" cy="18.7" r="0.8" fill="#fff"/>
+  </g>
+  <g transform="translate(768,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="18" y="5" width="42" height="15" fill="#666"/>
+    <line x1="18" y1="5" x2="60" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="60" y1="5" x2="60" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="60" y="11" width="4" height="3" fill="#888"/>
+    <line x1="60" y1="17" x2="63" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="50" cy="19.5" r="2" fill="#888"/>
+    <circle cx="38" cy="19.5" r="2" fill="#888"/>
+    <circle cx="26" cy="19.5" r="2" fill="#888"/>
+    <rect x="68" y="5" width="42" height="15" fill="#666"/>
+    <line x1="68" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="68" y1="5" x2="68" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="64" y="11" width="4" height="3" fill="#888"/>
+    <line x1="68" y1="17" x2="65" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="78" cy="19.5" r="2" fill="#888"/>
+    <circle cx="90" cy="19.5" r="2" fill="#888"/>
+    <circle cx="102" cy="19.5" r="2" fill="#888"/>
+    <circle cx="63" cy="18.7" r="0.8" fill="#888"/>
+    <circle cx="63.5" cy="19.8" r="0.8" fill="#888"/>
+    <circle cx="64" cy="20.4" r="0.8" fill="#888"/>
+    <circle cx="64.5" cy="19.8" r="0.8" fill="#888"/>
+    <circle cx="65" cy="18.7" r="0.8" fill="#888"/>
+  </g>
+  <g transform="translate(896,0)">
+    <line x1="0" y1="21.5" x2="128" y2="21.5" stroke="#666" stroke-width="1"/>
+    <rect x="18" y="5" width="42" height="15" fill="#666"/>
+    <line x1="18" y1="5" x2="60" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="60" y1="5" x2="60" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="60" y="11" width="4" height="3" fill="#888"/>
+    <line x1="60" y1="17" x2="63" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="50" cy="19.5" r="2" fill="#888"/>
+    <circle cx="38" cy="19.5" r="2" fill="#888"/>
+    <circle cx="26" cy="19.5" r="2" fill="#888"/>
+    <rect x="68" y="5" width="42" height="15" fill="#666"/>
+    <line x1="68" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="68" y1="5" x2="68" y2="20" stroke="#888" stroke-width="1.2"/>
+    <rect x="64" y="11" width="4" height="3" fill="#888"/>
+    <line x1="68" y1="17" x2="65" y2="18.5" stroke="#888" stroke-width="0.8"/>
+    <circle cx="78" cy="19.5" r="2" fill="#888"/>
+    <circle cx="90" cy="19.5" r="2" fill="#888"/>
+    <circle cx="102" cy="19.5" r="2" fill="#888"/>
+    <circle cx="63" cy="18.7" r="0.8" fill="#888"/>
+    <circle cx="63.5" cy="19.8" r="0.8" fill="#888"/>
+    <circle cx="64" cy="20.4" r="0.8" fill="#888"/>
+    <circle cx="64.5" cy="19.8" r="0.8" fill="#888"/>
+    <circle cx="65" cy="18.7" r="0.8" fill="#888"/>
+  </g>
+</svg>

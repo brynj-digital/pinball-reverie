@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- THE NIGHT MAIL DMD scene: SORTING — inside the sorting carriage. Letters
+       are tossed up from the mailbag into the pigeonhole rack; each slot
+       flashes bright as it is filled. Mailbag award ladder. 8 frames of
+       128x32 (style guide §6): #fff=3, #888=2, #666=1, black=0.
+       Art rows 0..22; caption renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <g transform="translate(0,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+    <rect x="20" y="18.5" width="4" height="3" fill="#fff"/>
+  </g>
+  <g transform="translate(128,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+    <rect x="36" y="13.5" width="4" height="3" fill="#fff"/>
+    <line x1="22" y1="20.5" x2="25" y2="21.5" stroke="#666" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(256,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+    <rect x="55" y="8" width="4" height="3" fill="#fff"/>
+    <line x1="22" y1="20.5" x2="25" y2="21.5" stroke="#666" stroke-width="0.8"/>
+    <line x1="38" y1="15.5" x2="41" y2="16.5" stroke="#666" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(384,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+    <rect x="69" y="4.5" width="4" height="3" fill="#fff"/>
+    <line x1="38" y1="15.5" x2="41" y2="16.5" stroke="#666" stroke-width="0.8"/>
+    <line x1="57" y1="10" x2="60" y2="11" stroke="#666" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(512,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="#fff"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+  </g>
+  <g transform="translate(640,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="#888"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+    <rect x="24" y="18" width="4" height="3" fill="#fff"/>
+  </g>
+  <g transform="translate(768,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="#666"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+    <rect x="40" y="13" width="4" height="3" fill="#fff"/>
+    <line x1="26" y1="20" x2="29" y2="21" stroke="#666" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(896,0)">
+    <rect x="22" y="1" width="86" height="15" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="3" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="24" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="36" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="48" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="60" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="84" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="96" y="10" width="10" height="5" fill="none" stroke="#666" stroke-width="0.8"/>
+    <rect x="72" y="3" width="10" height="5" fill="#666"/>
+    <rect x="48" y="10" width="10" height="5" fill="#fff"/>
+    <line x1="0" y1="20" x2="128" y2="20" stroke="#666" stroke-width="1"/>
+    <rect x="4" y="15" width="12" height="7" fill="#666"/>
+    <circle cx="10" cy="14.5" r="2" fill="#666"/>
+  </g>
+</svg>

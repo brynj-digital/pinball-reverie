@@ -1,0 +1,490 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 575 1050" width="575" height="1050">
+  <!--
+    THE NIGHT MAIL — table 4 of Pinball Reverie. An overnight mail train
+    racing the dawn: terminus + roundhouse at the bottom, the goods yard and
+    summit junction at the top, the moor between. Master units: 1 SVG unit =
+    1 mm (style guide §3). Design truth: design/tables/nightmail/BRIEF.md;
+    layout clearance-solved against the STYLE-GUIDE §4 ball-gap rules.
+
+    This file is the single source of truth for table shape (§5e):
+    collision-/sensor-/anchor-/height-profile- prefixed elements are parsed
+    into physics by src/table/SvgCollision.ts. The collision strokes ARE the
+    drawn walls. M12 entities: collision-diverter-points-main/-branch are
+    the two blades of THE POINTS (one solid at a time, owned by the Diverter
+    entity); sensor-lift-incline + height-profile-incline drive the banking-
+    engine lift (a scripted carry — the profile has no data-surface, the
+    ball cannot free-ride it); anchor-magnet-hook is the mail-exchange
+    magnet; anchor-disc-turntable is the roundhouse disc (force field only,
+    flush with the field). Art may use any SVG features; collision paths
+    are polylines only.
+  -->
+  <defs>
+    <linearGradient id="smokeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#263629"/>
+      <stop offset="0.45" stop-color="#1a241e"/>
+      <stop offset="1" stop-color="#101613"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.8">
+      <stop offset="0.6" stop-color="#07080d" stop-opacity="0"/>
+      <stop offset="1" stop-color="#07080d" stop-opacity="0.34"/>
+    </radialGradient>
+    <linearGradient id="chromeText" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <radialGradient id="signalGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#39ff14" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#39ff14" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="lampGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffdf9e" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#ffdf9e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowSoft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ═══════════════ art: the moor at night ═══════════════ -->
+  <g id="art-field">
+    <rect x="0" y="0" width="575" height="1050" fill="url(#smokeGrad)"/>
+
+    <!-- the same moon the whole lineup shares, over the summit -->
+    <g opacity="0.85">
+      <circle cx="453" cy="40" r="15" fill="#aeb6c8" stroke="#07080d" stroke-width="1.5"/>
+      <path d="M 453 25 a 15 15 0 0 0 0 30 a 11 15 0 0 1 0 -30 Z" fill="#d7dce8" opacity="0.8"/>
+    </g>
+    <!-- thin cloud streaks under the moon -->
+    <g stroke="#6e937f" stroke-width="2" fill="none" opacity="0.3">
+      <path d="M 400 62 q 24 -6 48 0 q 18 5 36 0"/>
+      <path d="M 418 74 q 20 -5 40 0"/>
+    </g>
+
+    <!-- moor ridgelines, darker with distance -->
+    <g stroke="#07080d" stroke-width="1.5">
+      <path d="M 60 250 Q 150 216 250 236 Q 350 254 470 224 L 470 300 L 60 300 Z" fill="#101613" opacity="0.5"/>
+      <path d="M 60 330 Q 180 300 300 322 Q 410 340 500 316 L 500 420 L 60 420 Z" fill="#0e130f" opacity="0.45"/>
+    </g>
+
+    <!-- smoke plume drifting off the line -->
+    <g fill="#6e937f" opacity="0.25">
+      <circle cx="300" cy="560" r="7"/><circle cx="312" cy="544" r="9"/>
+      <circle cx="328" cy="524" r="11"/><circle cx="348" cy="502" r="13"/>
+    </g>
+
+    <!-- night drizzle: steel-toned specks, denser low -->
+    <g fill="#6e937f">
+      <circle cx="110" cy="210" r="1" opacity="0.3"/><circle cx="330" cy="180" r="1.1" opacity="0.3"/>
+      <circle cx="470" cy="240" r="1" opacity="0.25"/><circle cx="220" cy="300" r="1" opacity="0.3"/>
+      <circle cx="140" cy="420" r="1.2" opacity="0.35"/><circle cx="390" cy="330" r="1" opacity="0.3"/>
+      <circle cx="300" cy="500" r="1.1" opacity="0.35"/><circle cx="90" cy="620" r="1.3" opacity="0.4"/>
+      <circle cx="210" cy="600" r="1" opacity="0.35"/><circle cx="420" cy="560" r="1.2" opacity="0.4"/>
+      <circle cx="160" cy="680" r="1.1" opacity="0.4"/><circle cx="350" cy="660" r="1.3" opacity="0.4"/>
+      <circle cx="250" cy="810" r="1.2" opacity="0.45"/><circle cx="450" cy="700" r="1" opacity="0.35"/>
+      <circle cx="60" cy="760" r="1.2" opacity="0.4"/><circle cx="310" cy="860" r="1.1" opacity="0.45"/>
+      <circle cx="180" cy="880" r="1.3" opacity="0.45"/><circle cx="410" cy="880" r="1" opacity="0.4"/>
+      <circle cx="545" cy="420" r="1.1" opacity="0.3"/><circle cx="548" cy="640" r="1" opacity="0.3"/>
+    </g>
+    <!-- signal-green points of light along the line (the ≤10% neon) -->
+    <g fill="#39ff14">
+      <circle cx="80" cy="480" r="1.5" opacity="0.5"/><circle cx="240" cy="545" r="1.3" opacity="0.45"/>
+      <circle cx="430" cy="620" r="1.5" opacity="0.5"/><circle cx="330" cy="770" r="1.4" opacity="0.45"/>
+      <circle cx="220" cy="920" r="1.5" opacity="0.5"/>
+    </g>
+    <!-- gas-lamp warm points (bulb tokens; platform edges, carriage windows) -->
+    <g fill="#ffdf9e">
+      <circle cx="140" cy="760" r="1.6" opacity="0.55"/><circle cx="390" cy="940" r="1.5" opacity="0.5"/>
+      <circle cx="100" cy="880" r="1.5" opacity="0.5"/><circle cx="470" cy="750" r="1.4" opacity="0.45"/>
+    </g>
+
+    <!-- sleepers: faint track ties up the centre of the moor -->
+    <g stroke="#0e130f" stroke-width="3" opacity="0.5">
+      <line x1="238" y1="640" x2="272" y2="640"/><line x1="238" y1="666" x2="272" y2="666"/>
+      <line x1="238" y1="692" x2="272" y2="692"/><line x1="238" y1="718" x2="272" y2="718"/>
+      <line x1="238" y1="744" x2="272" y2="744"/><line x1="238" y1="770" x2="272" y2="770"/>
+    </g>
+  </g>
+
+  <!-- ═══════════════ art: features ═══════════════ -->
+  <g id="art-motifs">
+    <!-- M·A·I·L lane inserts (rollovers light these) -->
+    <g stroke="#07080d" stroke-width="1.5">
+      <circle cx="162" cy="88" r="11" fill="#1a241e"/>
+      <circle cx="225" cy="88" r="11" fill="#1a241e"/>
+      <circle cx="295" cy="88" r="11" fill="#1a241e"/>
+      <circle cx="358" cy="88" r="11" fill="#1a241e"/>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="13" font-weight="700"
+       fill="#39ff14" text-anchor="middle" opacity="0.85">
+      <text x="162" y="93">M</text><text x="225" y="93">A</text>
+      <text x="295" y="93">I</text><text x="358" y="93">L</text>
+    </g>
+
+    <!-- THE POINTS: junction lamps + labels at the summit mouth -->
+    <g id="art-points">
+      <circle cx="120" cy="92" r="16" fill="url(#signalGlow)" stroke="none"/>
+      <circle cx="120" cy="92" r="6" fill="#101613" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="146" cy="152" r="6" fill="#101613" stroke="#07080d" stroke-width="1.5"/>
+      <text x="98" y="78" font-family="ui-monospace, monospace" font-size="9"
+            letter-spacing="1" fill="#6e937f">MAIN</text>
+      <text x="150" y="170" font-family="ui-monospace, monospace" font-size="9"
+            letter-spacing="1" fill="#6e937f">BRANCH</text>
+      <text x="70" y="196" font-family="ui-monospace, monospace" font-size="10"
+            letter-spacing="2" fill="#2c4434" transform="rotate(-52 70 196)">THE POINTS</text>
+    </g>
+
+    <!-- goods-yard buffers: sonar rings become coupling rings -->
+    <g fill="none" stroke="#39ff14" opacity="0.22" stroke-width="1.5">
+      <circle cx="210" cy="245" r="40" stroke-dasharray="4 6"/>
+      <circle cx="320" cy="232" r="40" stroke-dasharray="4 6"/>
+      <circle cx="245" cy="345" r="40" stroke-dasharray="4 6"/>
+    </g>
+    <text x="262" y="196" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="10" letter-spacing="3" fill="#2c4434">GOODS YARD</text>
+
+    <!-- the exchange lane: lineside apparatus + the mail-hook magnet -->
+    <g id="art-exchange">
+      <!-- hook gantry posts along the lane -->
+      <g fill="#263629" stroke="#07080d" stroke-width="1.5">
+        <rect x="70" y="238" width="7" height="18" rx="2"/>
+        <rect x="70" y="318" width="7" height="18" rx="2"/>
+      </g>
+      <!-- the magnet pole cap: brass — the ball touches it -->
+      <circle cx="94" cy="290" r="16" fill="url(#lampGlow)" stroke="none"/>
+      <circle cx="94" cy="290" r="7" fill="#e0b64e" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="94" cy="290" r="3" fill="#9c7c2c"/>
+      <text x="112" y="252" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="2" fill="#6e937f" transform="rotate(-80 112 252)">EXCHANGE</text>
+      <!-- pouch on the lineside frame -->
+      <path d="M 74 270 q -6 6 0 12 l 5 -6 Z" fill="#2c4434" stroke="#07080d" stroke-width="1"/>
+    </g>
+
+    <!-- coupling siding: where wagons wait (locks) -->
+    <g id="art-siding">
+      <g stroke="#07080d" stroke-width="1.5" fill="#1a241e">
+        <rect x="76" y="352" width="38" height="26" rx="4"/>
+      </g>
+      <g stroke="#2c4434" stroke-width="2" fill="none">
+        <line x1="80" y1="360" x2="110" y2="360"/><line x1="80" y1="370" x2="110" y2="370"/>
+      </g>
+      <text x="121" y="392" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="1" fill="#6e937f" transform="rotate(-90 121 392)">SIDING</text>
+    </g>
+
+    <!-- the sorting office: TPO carriage roundel, mouth down-left.
+         The kicker holds the ball here while the DMD sorts the mail. -->
+    <g id="art-sorting">
+      <circle cx="272" cy="446" r="40" fill="#07080d"/>
+      <circle cx="272" cy="446" r="34" fill="#1a241e"/>
+      <circle cx="272" cy="446" r="34" fill="none" stroke="#2c4434" stroke-width="3"/>
+      <circle cx="272" cy="446" r="38" fill="none" stroke="#9c7c2c" stroke-width="4"/>
+      <circle cx="272" cy="446" r="38" fill="none" stroke="#e0b64e" stroke-width="1.5" stroke-dasharray="5 6"/>
+      <!-- carriage window band -->
+      <g fill="#ffdf9e" opacity="0.7">
+        <rect x="254" y="438" width="8" height="7" rx="1"/><rect x="268" y="438" width="8" height="7" rx="1"/>
+        <rect x="282" y="438" width="8" height="7" rx="1"/>
+      </g>
+      <path d="M 254 430 a 24 24 0 0 1 11 -7" stroke="#6e937f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <g stroke="#39ff14" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
+        <path d="M 252 499.5 L 259 490.5 L 266 499.5" transform="rotate(11 259 495)"/>
+        <path d="M 245 536.5 L 252 527.5 L 259 536.5" transform="rotate(11 252 532)"/>
+      </g>
+      <text x="318" y="516" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="11" letter-spacing="2" fill="#9c7c2c" transform="rotate(-70 318 516)">SORTING OFFICE</text>
+    </g>
+
+    <!-- signal gantry recess (targets render live; art carries the housing) -->
+    <g id="art-gantry">
+      <path d="M 65 415 L 82 423 L 82 547 L 65 555" fill="none" stroke="#263629" stroke-width="18"/>
+      <g fill="#39ff14" opacity="0.7">
+        <circle cx="78" cy="432" r="1.6"/><circle cx="78" cy="485" r="1.6"/><circle cx="78" cy="538" r="1.6"/>
+      </g>
+      <text x="72" y="487" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="10" letter-spacing="2" fill="#9c7c2c" transform="rotate(-90 72 487)">SIGNALS</text>
+      <g stroke="#e0b64e" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+        <path d="M 161 624.5 L 168 615.5 L 175 624.5" transform="rotate(-29 168 620)"/>
+        <path d="M 183 664.5 L 190 655.5 L 197 664.5" transform="rotate(-29 190 660)"/>
+      </g>
+    </g>
+
+    <!-- the incline: banking-engine foot + shot chevrons -->
+    <g id="art-incline">
+      <g stroke="#39ff14" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
+        <path d="M 348 777.5 L 355 768.5 L 362 777.5"/>
+        <path d="M 348 745.5 L 355 736.5 L 362 745.5"/>
+      </g>
+      <text x="404" y="672" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="10" letter-spacing="2" fill="#2c4434" transform="rotate(-84 404 672)">INCLINE</text>
+      <!-- the banking engine waits at the foot -->
+      <g transform="translate(355 706)">
+        <rect x="-12" y="-8" width="24" height="16" rx="3" fill="#1a241e" stroke="#07080d" stroke-width="1.5"/>
+        <circle cx="-6" cy="8" r="3.4" fill="#23262f" stroke="#07080d" stroke-width="1"/>
+        <circle cx="6" cy="8" r="3.4" fill="#23262f" stroke="#07080d" stroke-width="1"/>
+        <rect x="-4" y="-14" width="8" height="7" fill="#263629" stroke="#07080d" stroke-width="1"/>
+        <circle cx="8" cy="-4" r="1.6" fill="#ffdf9e"/>
+      </g>
+    </g>
+
+    <!-- the roundhouse turntable (disc renders live; art carries the pit) -->
+    <g id="art-turntable">
+      <circle cx="180" cy="640" r="38" fill="#101613" stroke="#07080d" stroke-width="2"/>
+      <circle cx="180" cy="640" r="34" fill="#1a241e" stroke="#2c4434" stroke-width="2"/>
+      <line x1="150" y1="640" x2="210" y2="640" stroke="#2c4434" stroke-width="2"/>
+      <line x1="180" y1="610" x2="180" y2="670" stroke="#2c4434" stroke-width="2"/>
+      <text x="137" y="695" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="1" fill="#2c4434" transform="rotate(-90 137 695)">ROUNDHOUSE</text>
+    </g>
+
+    <!-- timetable inserts down the centreline (lamps light these) -->
+    <g id="art-timetable">
+      <line x1="255" y1="612" x2="255" y2="778" stroke="#2c3352" stroke-width="2"/>
+      <g stroke="#07080d" stroke-width="1.5" fill="#1a241e">
+        <circle cx="255" cy="625" r="9"/><circle cx="255" cy="660" r="9"/>
+        <circle cx="255" cy="695" r="9"/><circle cx="255" cy="730" r="9"/>
+        <circle cx="255" cy="765" r="9"/>
+      </g>
+      <g font-family="ui-monospace, monospace" font-size="8" fill="#6e937f">
+        <text x="270" y="628">KETTLEBECK</text><text x="270" y="663">MARROWMOOR</text>
+        <text x="270" y="698">COLDFELL</text><text x="270" y="733">GLASSWATER</text>
+        <text x="270" y="768">TERMINUS</text>
+      </g>
+    </g>
+
+    <!-- outlanes: the banker kickback + the loop line. Save inserts are lit
+         while armed so the player reads the outlane before the ball drops -->
+    <g id="art-outlanes">
+      <rect x="12" y="948" width="28" height="20" rx="4" fill="#263629" stroke="#07080d" stroke-width="1.5"/>
+      <path d="M 26 944 L 20 934 L 32 934 Z" fill="#39ff14" opacity="0.8"/>
+      <circle cx="26" cy="868" r="7" fill="#101613" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="26" cy="868" r="7" fill="none" stroke="#39ff14" stroke-width="1.8" opacity="0.9"/>
+      <text x="30" y="905" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="1" fill="#2c4434" transform="rotate(-90 30 905)">BANKER</text>
+      <circle cx="494" cy="838" r="7" fill="#101613" stroke="#07080d" stroke-width="1.5"/>
+      <circle cx="494" cy="838" r="7" fill="none" stroke="#39ff14" stroke-width="1.8" opacity="0.9"/>
+      <text x="492" y="884" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="9" letter-spacing="1" fill="#2c4434" transform="rotate(-90 492 884)">LOOP LINE</text>
+      <!-- loop-line tunnel, glimpsed under the apron on its way to the turntable -->
+      <path d="M 496 920 L 490 950 L 478 980 L 460 1000 L 430 1013 L 390 1021 L 340 1026 L 290 1028 L 240 1026 L 205 1010 L 190 960 L 182 860 L 179 760 L 180 660 L 180 640"
+            fill="none" stroke="#39ff14" stroke-width="4" stroke-dasharray="3 9" opacity="0.18"/>
+    </g>
+
+    <!-- the terminus: platform canopy + waiting train behind the flippers -->
+    <g id="art-terminus" opacity="0.9">
+      <path d="M 150 900 Q 200 872 262 868 L 356 872 Q 408 882 440 902 L 430 918 Q 380 900 300 896 L 200 900 Q 168 906 158 914 Z"
+            fill="#101613" stroke="#07080d" stroke-width="2"/>
+      <g fill="#ffdf9e" opacity="0.6">
+        <rect x="222" y="880" width="7" height="6" rx="1"/><rect x="240" y="879" width="7" height="6" rx="1"/>
+        <rect x="258" y="878" width="7" height="6" rx="1"/><rect x="276" y="878" width="7" height="6" rx="1"/>
+        <rect x="294" y="879" width="7" height="6" rx="1"/><rect x="312" y="880" width="7" height="6" rx="1"/>
+      </g>
+      <g fill="#ffdf9e">
+        <circle cx="180" cy="872" r="2" opacity="0.8"/><circle cx="352" cy="874" r="2" opacity="0.8"/>
+      </g>
+    </g>
+
+    <!-- wordmark -->
+    <g id="art-wordmark">
+      <path d="M 96 586 L 99 595 L 108 598 L 99 601 L 96 610 L 93 601 L 84 598 L 93 595 Z" fill="#39ff14" opacity="0.7"/>
+      <path d="M 424 586 L 427 595 L 436 598 L 427 601 L 424 610 L 421 601 L 412 598 L 421 595 Z" fill="#39ff14" opacity="0.7"/>
+      <text x="260" y="600" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="30" font-weight="800" letter-spacing="3"
+            fill="#4e37a8" opacity="0.5" filter="url(#glowSoft)">THE NIGHT MAIL</text>
+      <text x="260" y="596" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="30" font-weight="800" letter-spacing="3"
+            fill="url(#chromeText)" stroke="#07080d" stroke-width="2" paint-order="stroke">THE NIGHT MAIL</text>
+      <text x="260" y="596" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="30" font-weight="800" letter-spacing="3"
+            fill="none" stroke="#39ff14" stroke-width="0.8" opacity="0.9">THE NIGHT MAIL</text>
+      <text x="260" y="620" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="10" letter-spacing="5" fill="#6e937f">RACING · THE · DAWN</text>
+    </g>
+
+    <!-- apron band along the drain -->
+    <rect x="0" y="1036" width="575" height="14" fill="#263629" stroke="#07080d" stroke-width="1.5"/>
+    <line x1="0" y1="1039" x2="575" y2="1039" stroke="#9c7c2c" stroke-width="1.5"/>
+  </g>
+
+  <!-- ═══════════════ art: plunger lane (platform 1) ═══════════════ -->
+  <g id="art-lane">
+    <g fill="#ffdf9e" opacity="0.6">
+      <circle cx="547.5" cy="430" r="2"/><circle cx="547.5" cy="500" r="2"/>
+      <circle cx="547.5" cy="570" r="2"/>
+    </g>
+    <g stroke="#e0b64e" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+      <path d="M 540.5 704.5 L 547.5 695.5 L 554.5 704.5"/>
+      <path d="M 540.5 668.5 L 547.5 659.5 L 554.5 668.5"/>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="#9c7c2c" text-anchor="middle">
+      <text x="547.5" y="750">P</text><text x="547.5" y="770">L</text>
+      <text x="547.5" y="790">A</text><text x="547.5" y="810">T</text>
+      <text x="547.5" y="830">F</text><text x="547.5" y="850">O</text>
+      <text x="547.5" y="870">R</text><text x="547.5" y="890">M</text>
+      <text x="547.5" y="915">1</text>
+    </g>
+  </g>
+
+  <g id="art-vignette">
+    <rect x="0" y="0" width="575" height="1050" fill="url(#vignette)"/>
+  </g>
+
+  <!-- ═══════════════ collision (rendered as layered slate rails) ═══════════════
+       One set of paths = both physics and art. data-width feeds the physics
+       radius (width/2). The orbit inner wall is SPLIT at the summit: the gap
+       between its two halves is THE POINTS mouth, closed by whichever
+       diverter blade is solid. -->
+  <defs>
+    <g id="collision-paths" fill="none">
+      <!-- outer shell: identical envelope to Moondial (centred per §3) -->
+      <path data-width="12" data-z="all" id="collision-loop-shell" d="M 0 1050 L 0 260 L 1.3 234.5 L 5 209.3 L 11.2 184.5 L 19.8 160.5 L 30.7 137.4 L 43.8 115.6 L 59 95.1 L 76.2 76.2 L 95.1 59 L 115.6 43.8 L 137.4 30.7 L 160.5 19.8 L 184.5 11.2 L 209.3 5 L 234.5 1.3 L 260 0 L 290.9 1.5 L 321.5 6.1 L 351.4 13.6 L 380.5 24 L 408.5 37.2 L 435 53.1 L 459.8 71.5 L 482.7 92.3 L 503.5 115.2 L 521.9 140 L 537.8 166.5 L 551 194.5 L 561.4 223.6 L 568.9 253.5 L 573.5 284.1 L 575 315 L 575 1050 Z"/>
+      <!-- plunger lane inner wall -->
+      <path data-width="12" data-z="all" id="collision-wall-lane" d="M 520 300 L 520 1050"/>
+      <!-- the Main Line: orbit inner wall, in two halves around the Points
+           mouth (the removed arc between them is the diverter's main blade) -->
+      <path data-width="12" id="collision-wall-orbit-left" d="M 65 550 L 65 260 L 66.5 236.2 L 70.8 212.8 L 78 190.1 L 87.8 168.5 L 100 148"/>
+      <!-- The M-A-I-L WINDOWS (playability pass, Midway's crest-window
+           pattern refined): TWO mouths flank a kept APEX COVER — a full
+           window swallowed every orbit (the ball needs the inner wall's
+           support exactly at the apex, where it is slowest). Fast Main
+           Line orbits carry across the ~41-44 mm flank openings; a dying
+           crest ball (or the incline's summit drop) sags in over A or I.
+           Stub/cover ends seal against the divider tops per the 4 mm rule. -->
+      <path data-width="12" id="collision-wall-orbit-right" d="M 151 98 L 171.5 86.3 L 185 80"/>
+      <path data-width="12" id="collision-wall-orbit-apex" d="M 239.6 66.1 L 263.4 65 L 287.1 66.9"/>
+      <path data-width="12" id="collision-wall-orbit-upper" d="M 338 81 L 354.5 89.4 L 374.6 102.2 L 393 117.4 L 409.4 134.7 L 520 300"/>
+      <!-- M-A-I-L lane dividers, starting 4 mm below the orbit arc line -->
+      <path data-width="12" id="collision-wall-divider-1" d="M 190 82 L 190 150"/>
+      <path data-width="12" id="collision-wall-divider-2" d="M 260 69 L 260 150"/>
+      <path data-width="12" id="collision-wall-divider-3" d="M 330 82 L 330 150"/>
+      <!-- exchange-lane inner wall: its top is a FUNNEL hanging off
+           divider-1's foot — everything shed through the points mouth
+           (blade-deflected or sprayed via the M lane) rolls down its face
+           onto the lane, past the mail hook and the siding, flaring out at
+           the foot. (Consequence: the M lane feeds by lane-change and
+           branch spray only — the funnel seals its bottom mouth.) -->
+      <path data-width="12" id="collision-wall-exchange" d="M 190 150 L 150 190 L 132 230 L 124 280 L 120 330 L 126 375 L 140 400"/>
+      <!-- deflector chevron above the left outlane (both faces per table 2) -->
+      <path data-width="12" id="collision-wall-deflector" d="M 0 598 L 34 619 L 0 670"/>
+      <!-- inlane guides: outlane channel outside, inlane inside, each ending
+           tangent to its flipper base circle past the apex -->
+      <path data-width="12" id="collision-wall-guide-left" d="M 52 690 L 52 905 L 174.2 938.4"/>
+      <path data-width="12" id="collision-wall-guide-right" d="M 470 690 L 470 905 L 345.9 938.4"/>
+      <!-- sorting-office hood: mouth opens down-left, never traps -->
+      <path data-width="12" id="collision-wall-sorting-hood" d="M 316 460 L 314.3 453.7 L 311.8 444.9 L 308 437 L 302.6 431.3 L 296 426.6 L 289 423 L 281.9 420.5 L 274.4 419.1 L 267 419 L 259.3 420.5 L 251.7 423.3 L 245 427 L 239.5 432.3 L 235 438.6 L 232 443"/>
+      <!-- signal gantry housing: recess brackets off the orbit wall -->
+      <path data-width="12" id="collision-wall-bank-housing" d="M 65 415 L 82 423 L 82 547 L 65 555"/>
+      <!-- incline throat: an open-ended funnel; a stalled ball rolls back
+           out of the bottom (the lift capture is sensor + script only) -->
+      <path data-width="12" id="collision-wall-incline-left" d="M 328 640 L 328 700"/>
+      <path data-width="12" id="collision-wall-incline-right" d="M 382 640 L 382 700"/>
+      <!-- plunger saddle: the ball rests here, above the animated spring -->
+      <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
+    </g>
+    <!-- THE POINTS (M12 diverter): exactly one blade solid at a time.
+         main  = closes the branch mouth flush with the orbit arc (the ball
+                 sweeps past and keeps the Main Line);
+         branch = seals the channel diagonally and sheds the ball inward
+                 through the mouth onto the exchange lane. -->
+    <g id="diverter-paths" fill="none">
+      <path data-width="12" id="collision-diverter-points-main" d="M 151 98 L 132 113 L 115 129 L 100 148"/>
+      <path data-width="12" id="collision-diverter-points-branch" d="M 70 90 L 108 158"/>
+    </g>
+  </defs>
+  <!-- field walls: layered SLATE rails (smoke-500/300 per STYLE-GUIDE §2),
+       kept dark so the lit ball and lamps pop -->
+  <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#07080d" stroke-width="16"><use href="#collision-paths"/></g>
+    <g stroke="#2c4434" stroke-width="12"><use href="#collision-paths"/></g>
+    <g stroke="#6e937f" stroke-width="6.5"><use href="#collision-paths"/></g>
+    <g stroke="#d7dce8" stroke-width="2.2" opacity="0.55"><use href="#collision-paths"/></g>
+  </g>
+  <!-- The diverter blades draw LIVE from the entity snapshot (only the solid
+       blade exists); the art here is just the points bed: sleepers under
+       both possible roads so either blade reads as part of the junction -->
+  <g id="art-points-bed" fill="none" stroke="#0e130f" stroke-width="3" opacity="0.6">
+    <line x1="146" y1="94" x2="156" y2="104"/><line x1="128" y1="108" x2="138" y2="119"/>
+    <line x1="111" y1="124" x2="121" y2="136"/><line x1="97" y1="143" x2="107" y2="155"/>
+    <line x1="72" y1="98" x2="84" y2="90"/><line x1="86" y1="122" x2="98" y2="114"/>
+    <line x1="98" y1="144" x2="110" y2="136"/>
+  </g>
+  <!-- the incline track: OPEN WIREFORM art along the lift profile (the ball
+       is carried by script — no collision — but the compositing split needs
+       this in art-rails-elevated so the carried ball reads as riding it) -->
+  <g id="art-rails-elevated" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- glass bed wash: dayglo default per STYLE-GUIDE §2 -->
+    <g stroke="#39ff14" stroke-width="34" opacity="0.10">
+      <path d="M 355 700 L 352 600 L 360 480 L 380 380 L 400 300 L 410 220 L 390 140 L 340 80 L 300 42 L 260 36"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="34" opacity="0.04">
+      <path d="M 355 700 L 352 600 L 360 480 L 380 380 L 400 300 L 410 220 L 390 140 L 340 80 L 300 42 L 260 36"/>
+    </g>
+    <!-- rack rails: two chrome wires + cross-ties -->
+    <g stroke="#07080d" stroke-width="8">
+      <path d="M 345 700 L 342 600 L 350 480 L 370 382 L 390 302 L 400 222 L 381 144 L 332 85 L 294 49 L 258 44"/>
+      <path d="M 365 700 L 362 600 L 370 478 L 390 378 L 410 298 L 420 218 L 399 136 L 348 75 L 306 35 L 262 28"/>
+    </g>
+    <g stroke="#aeb6c8" stroke-width="5">
+      <path d="M 345 700 L 342 600 L 350 480 L 370 382 L 390 302 L 400 222 L 381 144 L 332 85 L 294 49 L 258 44"/>
+      <path d="M 365 700 L 362 600 L 370 478 L 390 378 L 410 298 L 420 218 L 399 136 L 348 75 L 306 35 L 262 28"/>
+    </g>
+    <g stroke="#d7dce8" stroke-width="1.8">
+      <path d="M 345 700 L 342 600 L 350 480 L 370 382 L 390 302 L 400 222 L 381 144 L 332 85 L 294 49 L 258 44"/>
+      <path d="M 365 700 L 362 600 L 370 478 L 390 378 L 410 298 L 420 218 L 399 136 L 348 75 L 306 35 L 262 28"/>
+    </g>
+    <g stroke="#565d6e" stroke-width="2.5">
+      <line x1="343" y1="650" x2="364" y2="650"/><line x1="346" y1="540" x2="366" y2="540"/>
+      <line x1="360" y1="430" x2="380" y2="430"/><line x1="380" y1="340" x2="400" y2="340"/>
+      <line x1="395" y1="260" x2="415" y2="260"/><line x1="391" y1="180" x2="410" y2="178"/>
+      <line x1="356" y1="103" x2="371" y2="90"/><line x1="310" y1="60" x2="320" y2="44"/>
+    </g>
+  </g>
+
+  <!-- ═══════════════ height profiles (lift carry + subway guide) ═══════════════ -->
+  <g fill="none" stroke="none">
+    <path id="height-profile-incline" data-layer="1" data-height-from="0" data-height-to="30"
+          d="M 355 700 L 352 600 L 360 480 L 380 380 L 400 300 L 410 220 L 390 140 L 340 80 L 300 42 L 260 36"/>
+    <path id="height-profile-loop" data-layer="-1" data-height-from="-8" data-height-to="-8"
+          d="M 496 920 L 490 950 L 478 980 L 460 1000 L 430 1013 L 390 1021 L 340 1026 L 290 1028 L 240 1026 L 205 1010 L 190 960 L 182 860 L 179 760 L 180 660 L 180 640"/>
+  </g>
+
+  <!-- ═══════════════ sensors (invisible; zones only) ═══════════════ -->
+  <g fill="none" stroke="none">
+    <rect id="sensor-drain" x="0" y="1005" width="520" height="30"/>
+    <rect id="sensor-rollover-1" x="147" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-2" x="210" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-3" x="280" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-4" x="343" y="105" width="30" height="20"/>
+    <!-- express pair: a loop is entry+exit inside the pairing window -->
+    <rect id="sensor-ramp-entry" x="2.5" y="492" width="60" height="16"/>
+    <rect id="sensor-ramp-exit" x="442" y="117" width="36" height="36"/>
+    <!-- the signal wire: spinner spanning the top-right channel (launch +
+         orbit both cross it; the channel is ~100 mm wide here) -->
+    <rect id="sensor-spinner" x="436" y="168" width="102" height="18"/>
+    <!-- branch arrival: anything entering the exchange lane's throat -->
+    <rect id="sensor-lane-branch" x="78" y="195" width="52" height="20"/>
+    <rect id="sensor-kicker-sorting" x="252" y="430" width="40" height="40"/>
+    <rect id="sensor-kicker-banker" x="8" y="940" width="36" height="35"/>
+    <!-- coupling siding: captures only while LOCK is lit (kickerLit) -->
+    <rect id="sensor-kicker-siding" x="76" y="348" width="40" height="26"/>
+    <rect id="sensor-lift-incline" x="336" y="648" width="38" height="20"/>
+    <rect id="sensor-subway-loop" x="478" y="900" width="36" height="35"/>
+  </g>
+
+  <!-- ═══════════════ anchors (invisible placement points) ═══════════════ -->
+  <g fill="none" stroke="none">
+    <circle id="anchor-flipper-left" cx="171" cy="950" r="5"/>
+    <circle id="anchor-flipper-right" cx="349" cy="950" r="5"/>
+    <circle id="anchor-spawn" cx="547.5" cy="980" r="5"/>
+    <circle id="anchor-bumper-1" cx="210" cy="245" r="5"/>
+    <circle id="anchor-bumper-2" cx="320" cy="232" r="5"/>
+    <circle id="anchor-bumper-3" cx="245" cy="345" r="5"/>
+    <circle id="anchor-kicker-sorting" cx="272" cy="450" r="5"/>
+    <circle id="anchor-kicker-banker" cx="44" cy="680" r="5"/>
+    <circle id="anchor-kicker-siding" cx="95" cy="368" r="5"/>
+    <circle id="anchor-magnet-hook" cx="94" cy="290" r="5"/>
+    <circle id="anchor-disc-turntable" cx="180" cy="640" r="5"/>
+  </g>
+</svg>

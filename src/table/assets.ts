@@ -9,7 +9,7 @@
  */
 import type { TableId } from "./specs";
 import type { Song } from "../audio/songs";
-import { MIDWAY_SONG, MOONDIAL_SONG, TIDEBREAKER_SONG } from "../audio/songs";
+import { MIDWAY_SONG, MOONDIAL_SONG, NIGHTMAIL_SONG, TIDEBREAKER_SONG } from "../audio/songs";
 
 import moondialPlayfield from "../../design/tables/moondial/playfield.svg?raw";
 import moondialBackglass from "../../design/tables/moondial/backglass.svg?raw";
@@ -17,6 +17,8 @@ import tidebreakerPlayfield from "../../design/tables/tidebreaker/playfield.svg?
 import tidebreakerBackglass from "../../design/tables/tidebreaker/backglass.svg?raw";
 import midwayPlayfield from "../../design/tables/midway/playfield.svg?raw";
 import midwayBackglass from "../../design/tables/midway/backglass.svg?raw";
+import nightmailPlayfield from "../../design/tables/nightmail/playfield.svg?raw";
+import nightmailBackglass from "../../design/tables/nightmail/backglass.svg?raw";
 
 import orbitScene from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierScene from "../../design/dmd-scenes/multiplier.svg?raw";
@@ -42,6 +44,12 @@ import towerScene from "../../design/dmd-scenes/tower.svg?raw";
 import stampScene from "../../design/dmd-scenes/stamp.svg?raw";
 import chickenScene from "../../design/dmd-scenes/chicken.svg?raw";
 import fireworksScene from "../../design/dmd-scenes/fireworks.svg?raw";
+import boardScene from "../../design/dmd-scenes/board.svg?raw";
+import exchangeScene from "../../design/dmd-scenes/exchange.svg?raw";
+import couplingScene from "../../design/dmd-scenes/coupling.svg?raw";
+import tunnelScene from "../../design/dmd-scenes/tunnel.svg?raw";
+import connectionScene from "../../design/dmd-scenes/connection.svg?raw";
+import sortingScene from "../../design/dmd-scenes/sorting.svg?raw";
 
 export interface TableAssets {
   playfieldSvg: string;
@@ -96,5 +104,19 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       fireworks: { svg: fireworksScene, frames: 8 },
     },
     song: MIDWAY_SONG,
+  },
+  nightmail: {
+    playfieldSvg: nightmailPlayfield,
+    backglassSvg: nightmailBackglass,
+    // gantry/incline/loop keys fall back to text scenes until authored
+    dmdScenes: {
+      board: { svg: boardScene, frames: 8 },
+      exchange: { svg: exchangeScene, frames: 8 },
+      coupling: { svg: couplingScene, frames: 8 },
+      tunnel: { svg: tunnelScene, frames: 8 },
+      connection: { svg: connectionScene, frames: 8 },
+      sorting: { svg: sortingScene, frames: 8 },
+    },
+    song: NIGHTMAIL_SONG,
   },
 };

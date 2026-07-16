@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <!-- THE NIGHT MAIL backglass: shown in the landscape side panel above the
+       DMD and as the table-select card (§4.5/§8). Chrome-horizon wordmark,
+       the mail train at speed across the moonlit moor, one green aspect on
+       the gantry, the same moon. Smoke field ramp + signal-green feature
+       color + white-gold gas/carriage bulbs per STYLE-GUIDE §2
+       (2026-07-15 amendments). -->
+  <defs>
+    <linearGradient id="nmSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101613"/>
+      <stop offset="0.6" stop-color="#1a241e"/>
+      <stop offset="1" stop-color="#263629"/>
+    </linearGradient>
+    <linearGradient id="nmChrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <radialGradient id="nmSignalGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#39ff14" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#39ff14" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nmLampGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff4d6" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#ffdf9e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="nmGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="300" height="360" fill="url(#nmSky)"/>
+
+  <!-- the moon and a scatter of stars -->
+  <g opacity="0.85">
+    <circle cx="58" cy="46" r="16" fill="#aeb6c8" stroke="#07080d" stroke-width="1.5"/>
+    <path d="M 58 30 a 16 16 0 0 0 0 32 a 12 16 0 0 1 0 -32 Z" fill="#d7dce8" opacity="0.8"/>
+  </g>
+  <g fill="#7f8fc9">
+    <circle cx="110" cy="30" r="1.1" opacity="0.4"/><circle cx="162" cy="22" r="1" opacity="0.35"/>
+    <circle cx="206" cy="42" r="1.2" opacity="0.4"/><circle cx="252" cy="26" r="1" opacity="0.35"/>
+    <circle cx="24" cy="92" r="1" opacity="0.3"/><circle cx="140" cy="72" r="1" opacity="0.3"/>
+  </g>
+
+  <!-- low moonlit moor horizon -->
+  <path d="M 0 158 Q 40 146 90 156 Q 130 164 170 154 Q 220 144 262 156 Q 282 161 300 156 L 300 178 L 0 178 Z"
+        fill="#263629" stroke="#07080d" stroke-width="2"/>
+  <path d="M 0 158 Q 40 146 90 156 Q 130 164 170 154 Q 220 144 262 156 Q 282 161 300 156"
+        fill="none" stroke="#6e937f" stroke-width="1.2" opacity="0.45"/>
+  <path d="M 0 176 Q 80 168 160 178 Q 240 188 300 178 L 300 250 L 0 250 Z"
+        fill="#1a241e" stroke="#07080d" stroke-width="2"/>
+  <!-- foreground moor -->
+  <path d="M 0 238 Q 60 226 140 238 Q 220 250 300 236 L 300 360 L 0 360 Z"
+        fill="#101613" stroke="#07080d" stroke-width="2"/>
+
+  <!-- the permanent way: embankment, sleepers, wet rails glinting -->
+  <g>
+    <path d="M 250 158 L 266 172 L 0 268 L -10 268 L -10 232 Z" fill="#1a241e" stroke="#07080d" stroke-width="2"/>
+    <g stroke="#07080d" stroke-width="3" opacity="0.8">
+      <line x1="230" y1="171" x2="226" y2="177"/><line x1="200" y1="180" x2="195" y2="187"/>
+      <line x1="170" y1="189" x2="164" y2="197"/><line x1="140" y1="198" x2="133" y2="207"/>
+      <line x1="110" y1="207" x2="102" y2="217"/><line x1="80" y1="215" x2="71" y2="227"/>
+      <line x1="50" y1="224" x2="40" y2="237"/>
+    </g>
+    <path d="M 254 163 L -10 240" fill="none" stroke="#07080d" stroke-width="3"/>
+    <path d="M 254 163 L -10 240" fill="none" stroke="#aeb6c8" stroke-width="1.4"/>
+    <path d="M 256 167 L 0 252" fill="none" stroke="#07080d" stroke-width="3"/>
+    <path d="M 256 167 L 0 252" fill="none" stroke="#aeb6c8" stroke-width="1.4"/>
+  </g>
+
+  <!-- the lit rake of mail carriages, receding to the horizon -->
+  <g>
+    <g transform="translate(247 172) rotate(-19) scale(0.48)">
+      <rect x="-32" y="-30" width="64" height="30" rx="2" fill="#263629" stroke="#07080d" stroke-width="2.5"/>
+      <line x1="-32" y1="-30" x2="32" y2="-30" stroke="#6e937f" stroke-width="2" opacity="0.8"/>
+      <rect x="-26" y="0" width="12" height="5" fill="#23262f" stroke="#07080d" stroke-width="1.5"/>
+      <rect x="14" y="0" width="12" height="5" fill="#23262f" stroke="#07080d" stroke-width="1.5"/>
+      <g fill="#ffdf9e">
+        <circle cx="-24" cy="-16" r="2.8"/><circle cx="-12" cy="-16" r="2.8"/><circle cx="0" cy="-16" r="2.8"/>
+        <circle cx="12" cy="-16" r="2.8"/><circle cx="24" cy="-16" r="2.8"/>
+      </g>
+    </g>
+    <g transform="translate(213 183) rotate(-19) scale(0.62)">
+      <rect x="-32" y="-30" width="64" height="30" rx="2" fill="#263629" stroke="#07080d" stroke-width="2.5"/>
+      <line x1="-32" y1="-30" x2="32" y2="-30" stroke="#6e937f" stroke-width="2" opacity="0.8"/>
+      <rect x="-26" y="0" width="12" height="5" fill="#23262f" stroke="#07080d" stroke-width="1.5"/>
+      <rect x="14" y="0" width="12" height="5" fill="#23262f" stroke="#07080d" stroke-width="1.5"/>
+      <g fill="#ffdf9e">
+        <circle cx="-24" cy="-16" r="2.8"/><circle cx="-12" cy="-16" r="2.8"/><circle cx="0" cy="-16" r="2.8"/>
+        <circle cx="12" cy="-16" r="2.8"/><circle cx="24" cy="-16" r="2.8"/>
+      </g>
+    </g>
+    <g transform="translate(168 197) rotate(-19) scale(0.8)">
+      <rect x="-32" y="-30" width="64" height="30" rx="2" fill="#263629" stroke="#07080d" stroke-width="2.5"/>
+      <line x1="-32" y1="-30" x2="32" y2="-30" stroke="#6e937f" stroke-width="2" opacity="0.8"/>
+      <rect x="-26" y="0" width="12" height="5" fill="#23262f" stroke="#07080d" stroke-width="1.5"/>
+      <rect x="14" y="0" width="12" height="5" fill="#23262f" stroke="#07080d" stroke-width="1.5"/>
+      <g fill="#ffdf9e">
+        <circle cx="-24" cy="-16" r="2.8"/><circle cx="0" cy="-16" r="2.8"/>
+        <circle cx="12" cy="-16" r="2.8"/><circle cx="24" cy="-16" r="2.8"/>
+      </g>
+      <circle cx="-12" cy="-16" r="2.8" fill="#fff4d6"/>
+    </g>
+  </g>
+
+  <!-- steam plume trailing back over the rake -->
+  <g>
+    <circle cx="48" cy="168" r="7" fill="#565d6e" stroke="#07080d" stroke-width="2"/>
+    <circle cx="62" cy="156" r="9" fill="#565d6e" stroke="#07080d" stroke-width="2" opacity="0.95"/>
+    <circle cx="82" cy="146" r="11" fill="#565d6e" stroke="#07080d" stroke-width="2" opacity="0.9"/>
+    <circle cx="106" cy="138" r="13" fill="#565d6e" stroke="#07080d" stroke-width="2" opacity="0.8"/>
+    <circle cx="134" cy="132" r="15" fill="#565d6e" stroke="#07080d" stroke-width="2" opacity="0.7"/>
+    <circle cx="164" cy="128" r="16" fill="#565d6e" stroke="#07080d" stroke-width="2" opacity="0.55"/>
+    <g fill="none" stroke="#d7dce8" stroke-width="1.8" stroke-linecap="round" opacity="0.7">
+      <path d="M 74 139 a 11 11 0 0 1 10 -4"/>
+      <path d="M 97 130 a 13 13 0 0 1 11 -5"/>
+      <path d="M 124 123 a 15 15 0 0 1 12 -5"/>
+    </g>
+  </g>
+
+  <!-- the locomotive, cutting down the diagonal, headlamp burning -->
+  <g transform="translate(86 216) rotate(-19)">
+    <!-- headlamp beam -->
+    <polygon points="-44,-36 -98,-14 -98,-46" fill="#ffdf9e" opacity="0.12"/>
+    <!-- wheels -->
+    <g fill="#23262f" stroke="#07080d" stroke-width="2">
+      <circle cx="-34" cy="4" r="6"/>
+      <circle cx="-12" cy="0" r="11"/>
+      <circle cx="14" cy="0" r="11"/>
+      <circle cx="40" cy="3" r="7"/>
+      <circle cx="56" cy="3" r="7"/>
+    </g>
+    <circle cx="-12" cy="0" r="6.5" fill="none" stroke="#565d6e" stroke-width="1.2"/>
+    <circle cx="14" cy="0" r="6.5" fill="none" stroke="#565d6e" stroke-width="1.2"/>
+    <line x1="-12" y1="4" x2="14" y2="4" stroke="#07080d" stroke-width="4"/>
+    <line x1="-12" y1="4" x2="14" y2="4" stroke="#f4d27a" stroke-width="2"/>
+    <circle cx="-12" cy="4" r="2.5" fill="#e0b64e" stroke="#07080d" stroke-width="1"/>
+    <circle cx="14" cy="4" r="2.5" fill="#e0b64e" stroke="#07080d" stroke-width="1"/>
+    <!-- boiler + running board -->
+    <line x1="-46" y1="-2" x2="32" y2="-2" stroke="#07080d" stroke-width="2.5"/>
+    <rect x="-40" y="-30" width="70" height="26" rx="5" fill="#2c4434" stroke="#07080d" stroke-width="2.5"/>
+    <g stroke="#07080d" stroke-width="1.2" opacity="0.6">
+      <line x1="-20" y1="-30" x2="-20" y2="-4"/><line x1="0" y1="-30" x2="0" y2="-4"/>
+      <line x1="20" y1="-30" x2="20" y2="-4"/>
+    </g>
+    <line x1="-36" y1="-26" x2="26" y2="-26" stroke="#6e937f" stroke-width="2.5" opacity="0.9"/>
+    <line x1="-36" y1="-27" x2="-10" y2="-27" stroke="#d7dce8" stroke-width="1" opacity="0.7"/>
+    <!-- brass dome + chimney -->
+    <path d="M -14 -30 a 9 9 0 0 1 18 0 Z" fill="#e0b64e" stroke="#07080d" stroke-width="1.5"/>
+    <rect x="-38" y="-48" width="9" height="18" fill="#23262f" stroke="#07080d" stroke-width="2"/>
+    <rect x="-41" y="-51" width="15" height="5" rx="1.5" fill="#9c7c2c" stroke="#07080d" stroke-width="1.5"/>
+    <!-- smokebox, buffer beam, headlamp -->
+    <circle cx="-40" cy="-17" r="13" fill="#23262f" stroke="#07080d" stroke-width="2.5"/>
+    <circle cx="-40" cy="-17" r="8" fill="#263629" stroke="#07080d" stroke-width="1.5"/>
+    <circle cx="-40" cy="-17" r="2" fill="#e0b64e"/>
+    <rect x="-57" y="-9" width="5" height="12" fill="#9c7c2c" stroke="#07080d" stroke-width="1.5"/>
+    <circle cx="-40" cy="-36" r="9" fill="url(#nmLampGlow)"/>
+    <circle cx="-40" cy="-36" r="3.5" fill="#fff4d6" stroke="#07080d" stroke-width="1.2" filter="url(#nmGlow)"/>
+    <!-- cab, crew light on -->
+    <rect x="30" y="-42" width="34" height="42" fill="#263629" stroke="#07080d" stroke-width="2.5"/>
+    <rect x="27" y="-47" width="40" height="6" rx="2" fill="#23262f" stroke="#07080d" stroke-width="2"/>
+    <rect x="38" y="-36" width="13" height="12" fill="#ffdf9e" stroke="#07080d" stroke-width="1.5"/>
+  </g>
+
+  <!-- speed lines off the motion -->
+  <g stroke="#7f8fc9" stroke-width="1.2" opacity="0.5">
+    <line x1="150" y1="208" x2="172" y2="200"/>
+    <line x1="140" y1="222" x2="166" y2="213"/>
+    <line x1="92" y1="242" x2="120" y2="232"/>
+  </g>
+
+  <!-- signal gantry: one green aspect for the racing mail -->
+  <g>
+    <line x1="272" y1="242" x2="272" y2="94" stroke="#07080d" stroke-width="5"/>
+    <line x1="272" y1="242" x2="272" y2="94" stroke="#2c4434" stroke-width="2.5"/>
+    <line x1="272" y1="100" x2="234" y2="100" stroke="#07080d" stroke-width="5"/>
+    <line x1="272" y1="100" x2="234" y2="100" stroke="#2c4434" stroke-width="2.5"/>
+    <g stroke="#07080d" stroke-width="1.5">
+      <line x1="268" y1="130" x2="276" y2="130"/><line x1="268" y1="150" x2="276" y2="150"/>
+      <line x1="268" y1="170" x2="276" y2="170"/><line x1="268" y1="190" x2="276" y2="190"/>
+      <line x1="268" y1="210" x2="276" y2="210"/>
+    </g>
+    <rect x="266" y="240" width="12" height="4" fill="#23262f" stroke="#07080d" stroke-width="1.5"/>
+    <rect x="231" y="102" width="14" height="28" rx="3" fill="#23262f" stroke="#07080d" stroke-width="2"/>
+    <circle cx="238" cy="110" r="4" fill="#12141f" stroke="#07080d" stroke-width="1.2"/>
+    <circle cx="238" cy="121" r="13" fill="url(#nmSignalGlow)"/>
+    <circle cx="238" cy="121" r="4" fill="#39ff14" stroke="#07080d" stroke-width="1.2" filter="url(#nmGlow)"/>
+    <!-- wet-ground reflection of the aspect -->
+    <line x1="238" y1="232" x2="238" y2="248" stroke="#39ff14" stroke-width="1.5" opacity="0.2"/>
+    <line x1="238" y1="232" x2="238" y2="248" stroke="#1cae0d" stroke-width="3" opacity="0.1"/>
+  </g>
+
+  <!-- thin drizzle on the wind -->
+  <g stroke="#7f8fc9" stroke-width="0.8" opacity="0.3">
+    <line x1="30" y1="80" x2="26" y2="94"/><line x1="74" y1="104" x2="70" y2="118"/>
+    <line x1="120" y1="56" x2="116" y2="70"/><line x1="150" y1="96" x2="146" y2="110"/>
+    <line x1="188" y1="66" x2="184" y2="80"/><line x1="222" y1="118" x2="218" y2="132"/>
+    <line x1="256" y1="60" x2="252" y2="74"/><line x1="286" y1="120" x2="282" y2="134"/>
+    <line x1="52" y1="140" x2="48" y2="154"/><line x1="98" y1="126" x2="94" y2="140"/>
+    <line x1="200" y1="148" x2="196" y2="162"/><line x1="284" y1="196" x2="280" y2="210"/>
+  </g>
+
+  <!-- wordmark: chrome horizon, signal-green rim, violet reverie glow -->
+  <g>
+    <text x="146" y="288" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="13" font-weight="800" letter-spacing="8"
+          fill="#4e37a8" opacity="0.55" filter="url(#nmGlow)">THE</text>
+    <text x="146" y="286" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="13" font-weight="800" letter-spacing="8"
+          fill="url(#nmChrome)" stroke="#07080d" stroke-width="1.5" paint-order="stroke">THE</text>
+    <text x="146" y="286" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="13" font-weight="800" letter-spacing="8"
+          fill="none" stroke="#39ff14" stroke-width="0.6" opacity="0.9">THE</text>
+    <text x="150" y="322" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="31" font-weight="800" letter-spacing="2"
+          fill="#4e37a8" opacity="0.55" filter="url(#nmGlow)">NIGHT MAIL</text>
+    <text x="150" y="319" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="31" font-weight="800" letter-spacing="2"
+          fill="url(#nmChrome)" stroke="#07080d" stroke-width="2" paint-order="stroke">NIGHT MAIL</text>
+    <text x="150" y="319" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="31" font-weight="800" letter-spacing="2"
+          fill="none" stroke="#39ff14" stroke-width="0.8" opacity="0.9">NIGHT MAIL</text>
+    <text x="150" y="342" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="9" letter-spacing="4" fill="#7f8fc9">RACING · THE · DAWN</text>
+  </g>
+
+  <!-- deco frame -->
+  <rect x="5" y="5" width="290" height="350" fill="none" stroke="#2c3352" stroke-width="3"/>
+  <rect x="9" y="9" width="282" height="342" fill="none" stroke="#9c7c2c" stroke-width="1.5"/>
+</svg>

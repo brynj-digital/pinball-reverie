@@ -114,6 +114,8 @@ export class Renderer3D implements Renderer {
 
   private ballMesh?: THREE.Mesh;
   private ballMat?: THREE.MeshStandardMaterial;
+  /** M12 multiball: pooled extra-ball meshes (hidden when unused). */
+  private extraBallMeshes: THREE.Mesh[] = [];
   private prevBallPos = new THREE.Vector3();
   private flipperMeshes: THREE.Mesh[] = [];
   private bumperGlowMats: THREE.MeshStandardMaterial[] = [];
@@ -883,6 +885,24 @@ export class Renderer3D implements Renderer {
     this.ballGlowMat!.opacity =
       (snap.ball.layer === -1 ? 0.07 : 0.16 / pool) * snap.ball.alpha;
     this.ballGlow!.visible = ball.visible;
+
+    // M12 multiball extras: pooled clones sharing the ball geometry/material
+    while (this.extraBallMeshes.length < snap.extraBalls.length) {
+      const m = new THREE.Mesh(ball.geometry, this.ballMat!);
+      m.castShadow = true;
+      this.scene.add(m);
+      this.extraBallMeshes.push(m);
+    }
+    for (let i = 0; i < this.extraBallMeshes.length; i++) {
+      const mesh = this.extraBallMeshes[i];
+      const eb = snap.extraBalls[i];
+      if (!eb) {
+        mesh.visible = false;
+        continue;
+      }
+      mesh.visible = true;
+      mesh.position.set(eb.x, BALL_RADIUS + eb.h, eb.y);
+    }
 
     snap.flippers.forEach((f, i) => {
       this.flipperMeshes[i].rotation.y = -f.angle;

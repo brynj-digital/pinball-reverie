@@ -3,20 +3,22 @@
  * DMD all communicate through here (plan §3) — no direct cross-module calls.
  */
 export interface GameEvents {
-  /** The ball touched a sensor fixture; kind/id come from the fixture tag.
+  /** A ball touched a sensor fixture; kind/id come from the fixture tag.
    * zMin/zMax (M11): the sensor's height admission band — consumers skip
-   * the event when the ball's z falls outside it. */
+   * the event when that ball's z falls outside it. ballId (M12 multiball)
+   * says which live ball touched it; absent = the primary. */
   sensor: {
     kind: string;
     id?: string;
     zMin?: number;
     zMax?: number;
+    ballId?: number;
   };
   /** The ball's height support changed (M11): surface names, "field",
    * "air" or "subway". Table logic keys ramp rides off these. */
   surface: { from: string; to: string; x: number; y: number; z: number };
-  /** The ball struck a solid scoring element (bumper, sling, drop target). */
-  hit: { kind: string; id: string };
+  /** A ball struck a solid scoring element (bumper, sling, drop target). */
+  hit: { kind: string; id: string; ballId?: number };
   /** One spinner rotation tick while it's spinning down. */
   spinnerTick: Record<string, never>;
   /** All targets in a bank dropped. */

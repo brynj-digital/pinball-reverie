@@ -44,6 +44,9 @@ export const FIXED_DT = 1 / 120;
 export interface FixtureTag {
   kind: string;
   id?: string;
+  /** Which ball this fixture is (M12 multiball): index into the live set.
+   * Contacts and sensor events resolve height/routing per ball. */
+  ballId?: number;
   /** Full-height wall: the shell / lane wall (cabinet glass). */
   zAll?: boolean;
   /** Elevated-surface rail: band follows the local surface height. */
@@ -66,9 +69,15 @@ export class PhysicsWorld {
    * (a rail above/below the ball). Installed by Game/the sims with the
    * table's surfaces + the ball's HeightState. Pre-solve runs every step a
    * contact persists and Box2D re-enables contacts each step, so the gate
-   * tracks a climbing ball with no refiltering.
+   * tracks a climbing ball with no refiltering. M12 multiball: the BALL
+   * fixture's tag rides along so the gate can use that ball's own height.
    */
-  private zGate?: (tag: FixtureTag, ballX: number, ballY: number) => boolean;
+  private zGate?: (
+    tag: FixtureTag,
+    ballX: number,
+    ballY: number,
+    ballTag?: FixtureTag,
+  ) => boolean;
 
   constructor(
     private bus: EventBus,
@@ -85,12 +94,15 @@ export class PhysicsWorld {
       const ballFix = ta?.kind === "ball" ? a : tb?.kind === "ball" ? b : null;
       if (!ballFix) return;
       const other = (ballFix === a ? tb : ta) ?? { kind: "wall" };
+      const ballTag = (ballFix.getUserData() as FixtureTag | null) ?? undefined;
       const p = ballFix.getBody().getPosition();
-      if (!this.zGate(other, p.x, p.y)) c.setEnabled(false);
+      if (!this.zGate(other, p.x, p.y, ballTag)) c.setEnabled(false);
     });
   }
 
-  setZGate(fn: (tag: FixtureTag, ballX: number, ballY: number) => boolean): void {
+  setZGate(
+    fn: (tag: FixtureTag, ballX: number, ballY: number, ballTag?: FixtureTag) => boolean,
+  ): void {
     this.zGate = fn;
   }
 
@@ -147,6 +159,7 @@ export class PhysicsWorld {
     if (!a || !b) return;
     const other = a.kind === "ball" ? b : b.kind === "ball" ? a : null;
     if (!other) return;
+    const ballTag = a.kind === "ball" ? a : b;
     const sensorHit =
       contact.getFixtureA().isSensor() || contact.getFixtureB().isSensor();
     if (sensorHit) {
@@ -155,6 +168,7 @@ export class PhysicsWorld {
         id: other.id,
         zMin: other.zMin,
         zMax: other.zMax,
+        ballId: ballTag.ballId,
       });
     } else if (HIT_KINDS.has(other.kind)) {
       // begin-contact fires even when the pre-solve height gate disables
@@ -163,9 +177,9 @@ export class PhysicsWorld {
       if (this.zGate) {
         const ballFix = (a?.kind === "ball" ? contact.getFixtureA() : contact.getFixtureB());
         const p = ballFix.getBody().getPosition();
-        if (!this.zGate(other, p.x, p.y)) return;
+        if (!this.zGate(other, p.x, p.y, ballTag)) return;
       }
-      this.bus.emit("hit", { kind: other.kind, id: other.id ?? "" });
+      this.bus.emit("hit", { kind: other.kind, id: other.id ?? "", ballId: ballTag.ballId });
     }
   }
 
