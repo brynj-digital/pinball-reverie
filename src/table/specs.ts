@@ -3,6 +3,7 @@ import type { TableLogic, TableLogicCtx } from "../game/TableLogic";
 import { MOONDIAL_SPEC } from "./defs/moondial";
 import { TIDEBREAKER_SPEC } from "./defs/tidebreaker";
 import { MIDWAY_SPEC } from "./defs/midway";
+import { NIGHTMAIL_SPEC } from "./defs/nightmail";
 
 /** Scoring values every table's rules JSON must carry (Scoring.ts reads these). */
 export interface ScoringRules {
@@ -45,15 +46,16 @@ export interface TableSpec {
   theme: { rail3d: number; rail3dElevated: number; rampGlass3d: number };
 }
 
-export type TableId = "moondial" | "tidebreaker" | "midway";
+export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail";
 
 export const TABLE_SPECS: Record<TableId, TableSpec> = {
   moondial: MOONDIAL_SPEC,
   tidebreaker: TIDEBREAKER_SPEC,
   midway: MIDWAY_SPEC,
+  nightmail: NIGHTMAIL_SPEC,
 };
 
-export const TABLE_ORDER: TableId[] = ["moondial", "tidebreaker", "midway"];
+export const TABLE_ORDER: TableId[] = ["moondial", "tidebreaker", "midway", "nightmail"];
 
 const TABLE_KEY = "pinball-table-v1";
 

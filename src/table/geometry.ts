@@ -101,6 +101,80 @@ export interface SubwayDef {
   exitSpeed: number;
 }
 
+/**
+ * Logic-controlled gate (M12, the Night Mail's Points). The SVG carries one
+ * collision chain per blade (`collision-diverter-<id>-<blade>`, blade names
+ * single-segment); exactly one blade is solid at a time, chosen by
+ * TableLogic.diverterBlade(id) (default: `initial`). Blades swap by fixture
+ * create/destroy post-step — the DropTargetBank pattern.
+ */
+export interface DiverterDef {
+  id: string;
+  /** Blade names; each needs a collision-diverter-<id>-<blade> path. */
+  blades: readonly string[];
+  /** Blade solid at load and whenever logic offers no override. */
+  initial: string;
+}
+
+/**
+ * Scripted lift (M12, the Night Mail's incline): sensor-lift-<id> captures
+ * at the foot (lit-gated via TableLogic.kickerLit like kickers/subways); the
+ * ball is carried along height-profile-<id> with z following the profile
+ * height, then released AIRBORNE at the far end — it flies off the summit
+ * and lands on the best surface below (M11 ballistics), unlike a Subway
+ * which ends its transit at ground level.
+ */
+export interface LiftDef {
+  id: string;
+  /** Pause at the foot before the carry starts (the engine coupling on). */
+  dwellS: number;
+  /** Travel speed along the path (m/s). */
+  speed: number;
+  /** Exit speed (m/s) along the path's final segment direction. */
+  exitSpeed: number;
+}
+
+/**
+ * Magnet (M12, the Night Mail's mail-hook): while lit
+ * (TableLogic.magnetLit, default unlit) it pulls a ground ball within
+ * `radius` toward (x, y), captures inside `captureRadius`, holds `holdS`,
+ * then flings along `fling` at `flingSpeed`. Elevated/transiting balls are
+ * ignored — a rider crossing above the magnet is out of its reach.
+ */
+export interface MagnetDef {
+  id: string;
+  x: number;
+  y: number;
+  /** Pull field radius (m). */
+  radius: number;
+  /** Pull acceleration (m/s²) at the core, falling linearly to 0 at the rim. */
+  pull: number;
+  /** Capture distance (m). */
+  captureRadius: number;
+  holdS: number;
+  fling: Pt; // direction (normalised at use)
+  flingSpeed: number;
+  /** Post-fling window during which the magnet won't re-capture. */
+  cooldownS: number;
+}
+
+/**
+ * Rotating floor disc (M12, the Night Mail's turntable): a flush patch that
+ * couples a ground ball's velocity toward the disc's surface velocity
+ * (ω × r) with a friction-like force. Spin rate comes from
+ * TableLogic.discSpin (rad/s, signed; default 0 = parked, no force).
+ */
+export interface DiscDef {
+  id: string;
+  x: number;
+  y: number;
+  r: number;
+  /** Velocity-coupling rate toward the surface velocity (1/s). */
+  grip: number;
+  /** Cap on the coupling acceleration (m/s²). */
+  maxAccel: number;
+}
+
 export interface TableGeometry {
   table: {
     width: number;
@@ -137,6 +211,11 @@ export interface TableGeometry {
   spinner: { x: number; y: number; halfW: number };
   kickers: readonly KickerDef[];
   subways: readonly SubwayDef[];
+  /** M12 entities (optional: pre-Night-Mail tables simply have none). */
+  diverters?: readonly DiverterDef[];
+  lifts?: readonly LiftDef[];
+  magnets?: readonly MagnetDef[];
+  discs?: readonly DiscDef[];
 }
 
 /**

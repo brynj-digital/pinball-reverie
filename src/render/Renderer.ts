@@ -62,10 +62,18 @@ export interface ElementsSnapshot {
   /** Extra insert lamps (e.g. depth gauge); rgb feeds the additive glow. */
   lamps: { x: number; y: number; rgb: string; lit: number }[];
   spinner: { x: number; y: number; halfW: number; angle: number; spin: number };
+  /** M12: the solid blade of each diverter, as a table-space polyline. */
+  diverters: { id: string; blade: string; pts: { x: number; y: number }[] }[];
+  /** M12: magnet cores (r = capture radius; lit while armed). */
+  magnets: { x: number; y: number; r: number; lit: boolean; holding: boolean }[];
+  /** M12: rotating discs (angle in rad; spinning while driven). */
+  discs: { x: number; y: number; r: number; angle: number; spinning: boolean }[];
 }
 
 export interface WorldSnapshot {
   ball: BallSnapshot;
+  /** M12 multiball extras; empty outside multiball. */
+  extraBalls: BallSnapshot[];
   flippers: FlipperSnapshot[];
   elements: ElementsSnapshot;
   score: number;

@@ -5,10 +5,13 @@
  *
  *   collision-wall-<name>     <path d="M x y L x y ...">      open chain
  *   collision-loop-<name>     <path d="... Z">                closed chain
+ *   collision-diverter-<id>-<blade>  <path>                   diverter blade
+ *                                     (M12: swappable — one blade solid at a
+ *                                      time, owned by the Diverter entity)
  *   sensor-<kind>-<name>      <rect x y width height>         sensor fixture
  *   anchor-<entity>           <circle cx cy>                  placement point
  *   height-profile-<name>     <path>                          render-height /
- *                                                             subway guide
+ *                                                             subway/lift guide
  *
  * Height (M11, plan §7a): height profiles carry data-height-from/-to (mm
  * relative to the playfield surface). Profiles with data-surface (plus
@@ -42,6 +45,23 @@ export interface HeightProfile {
   surface?: string;
   /** Footprint half-width (m) when part of a surface. */
   surfaceHalfWidth?: number;
+}
+
+/**
+ * One blade of a logic-controlled diverter (M12):
+ * `collision-diverter-<diverter>-<blade>` — same path/width contract as a
+ * wall, but built as a swappable fixture by the Diverter entity instead of
+ * static table shape. Blade names are single-segment (the last hyphen splits
+ * diverter from blade).
+ */
+export interface DiverterBlade {
+  diverter: string;
+  blade: string;
+  pts: { x: number; y: number }[];
+  radius: number;
+  zAll?: boolean;
+  zMin?: number;
+  zMax?: number;
 }
 
 export interface ParsedTable {
@@ -79,6 +99,7 @@ export interface ParsedTable {
   }[];
   anchors: Map<string, { x: number; y: number }>;
   profiles: HeightProfile[];
+  diverters: DiverterBlade[];
 }
 
 /** Sensor kinds may themselves contain hyphens; match longest-first. */
@@ -92,6 +113,7 @@ const SENSOR_KINDS = [
   "lane",
   "kicker",
   "target",
+  "lift",
 ];
 
 const MM = 1 / 1000;
@@ -119,12 +141,38 @@ function parsePathPoints(d: string): { pts: { x: number; y: number }[]; loop: bo
 }
 
 export function parseTableSvg(svgText: string): ParsedTable {
-  const result: ParsedTable = { walls: [], sensors: [], anchors: new Map(), profiles: [] };
+  const result: ParsedTable = {
+    walls: [],
+    sensors: [],
+    anchors: new Map(),
+    profiles: [],
+    diverters: [],
+  };
 
   for (const tag of svgText.match(/<path\b[^>]*>/g) ?? []) {
     const a = attrs(tag);
     if (!a.id || !a.d) continue;
-    if (a.id.startsWith("collision-")) {
+    if (a.id.startsWith("collision-diverter-")) {
+      // M12: a diverter blade — swappable, so NOT part of the static walls
+      const { pts } = parsePathPoints(a.d);
+      if (pts.length < 2) throw new Error(`diverter blade ${a.id} has <2 points`);
+      const width = a["data-width"] ?? a["stroke-width"];
+      if (!width)
+        throw new Error(`diverter blade ${a.id} needs an explicit data-width (or stroke-width)`);
+      const rest = a.id.slice("collision-diverter-".length);
+      const split = rest.lastIndexOf("-");
+      if (split <= 0 || split === rest.length - 1)
+        throw new Error(`diverter blade id "${a.id}" must be collision-diverter-<id>-<blade>`);
+      result.diverters.push({
+        diverter: rest.slice(0, split),
+        blade: rest.slice(split + 1),
+        pts,
+        radius: (Number(width) / 2) * MM,
+        zAll: a["data-z"] === "all" || undefined,
+        zMin: a["data-z-min"] !== undefined ? Number(a["data-z-min"]) * MM : undefined,
+        zMax: a["data-z-max"] !== undefined ? Number(a["data-z-max"]) * MM : undefined,
+      });
+    } else if (a.id.startsWith("collision-")) {
       const { pts, loop } = parsePathPoints(a.d);
       if (pts.length < 2) throw new Error(`collision path ${a.id} has <2 points`);
       // data-width is preferred: it isn't a presentation attribute, so art

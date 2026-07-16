@@ -127,6 +127,68 @@ export class SequenceScene implements DmdScene {
   }
 }
 
+/**
+ * End-of-game match sequence (M12): the classic free-game lottery. The
+ * board flap-cycles two-digit multiples of ten, slowing, then settles on
+ * `final`; matching the player's last two score digits wins. Purely
+ * ceremonial in a coinless machine — the payoff is the knocker moment
+ * (Game plays it via onSettle) and the FREE GAME flash.
+ */
+export class MatchScene implements DmdScene {
+  /** Spin phase length (s); total duration = SPIN + hold. */
+  private static readonly SPIN = 2.2;
+
+  static duration(win: boolean): number {
+    return MatchScene.SPIN + (win ? 2.4 : 1.2);
+  }
+
+  private t = 0;
+  private settled = false;
+  private drawnKey = "";
+
+  constructor(
+    private playerDigits: number,
+    private final: number,
+    private win: boolean,
+    private onSettle?: () => void,
+  ) {}
+
+  update(dt: number, dmd: DotMatrix): boolean {
+    this.t += dt;
+    if (this.t >= MatchScene.duration(this.win)) return true;
+    const spinning = this.t < MatchScene.SPIN;
+    let shown: number;
+    if (spinning) {
+      // flap cadence eases from fast to slow across the spin
+      const u = this.t / MatchScene.SPIN;
+      const flaps = Math.floor((2 * u - u * u) * 22);
+      shown = ((flaps * 3 + 7) % 10) * 10; // decorative shuffle of the tens
+    } else {
+      shown = this.final;
+      if (!this.settled) {
+        this.settled = true;
+        this.onSettle?.();
+      }
+    }
+    const blinkOn = spinning || !this.win || Math.floor(this.t / 0.25) % 2 === 0;
+    const key = `${shown}|${blinkOn}|${spinning}`;
+    if (key !== this.drawnKey) {
+      this.drawnKey = key;
+      dmd.clear();
+      dmd.centerText("MATCH", 1, 2);
+      if (blinkOn) dmd.centerText(String(shown).padStart(2, "0"), 12, 3);
+      dmd.centerText(
+        !spinning && this.win
+          ? "FREE GAME"
+          : `YOURS ${String(this.playerDigits).padStart(2, "0")}`,
+        24,
+        1,
+      );
+    }
+    return false;
+  }
+}
+
 /** Attract-mode loop: title, prompt, high score. Never finishes. */
 export class AttractScene implements DmdScene {
   private t = 0;

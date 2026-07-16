@@ -1,0 +1,74 @@
+{
+  "comment": "The Night Mail rules metadata (plan §5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/nightmail.ts. Design truth: design/tables/nightmail/BRIEF.md.",
+  "points": {
+    "bumper": 100,
+    "sling": 50,
+    "rollover": 500,
+    "spinnerTick": 100,
+    "target": 500,
+    "bankComplete": 5000,
+    "orbit": 3000
+  },
+  "bonusUnits": {
+    "rollover": 500,
+    "target": 250,
+    "spinnerTick": 10
+  },
+  "expressCombo": {
+    "comment": "The Express Run (full Main Line orbit): repeat loops inside the window escalate ×2 per step.",
+    "windowS": 10,
+    "maxStep": 3
+  },
+  "exchange": {
+    "comment": "The mail hook: spinner spins arm the magnet; a snag pays snagPoints × the Express step and spots a Sorting Office rung.",
+    "spinsToLight": 8,
+    "snagPoints": 4000,
+    "bonusUnit": 500
+  },
+  "branch": {
+    "comment": "A ball tipped through the Points onto the exchange lane.",
+    "points": 1500,
+    "bonusUnit": 250
+  },
+  "incline": {
+    "comment": "The banking engine couples on and shoves the ball to the summit.",
+    "points": 2000,
+    "bonusUnit": 250
+  },
+  "sorting": {
+    "comment": "Sorting Office scoop: each capture awards the next item in the mailbag (wrapping); the STRONGBOX spots a timetable station and lights SIGNAL BOX; every capture lights the Loop Line.",
+    "holdS": 2.0,
+    "bonusUnit": 500,
+    "items": [
+      { "name": "POSTCARD", "points": 5000 },
+      { "name": "LETTER BUNDLE", "points": 10000 },
+      { "name": "PARCEL", "points": 15000 },
+      { "name": "STRONGBOX", "points": 25000 }
+    ]
+  },
+  "timetable": {
+    "comment": "Completing M-A-I-L advances one station; the bonus multiplier tracks the station (capped) and each completion lights the BANKER kickback. Letters lane-change on the flippers and persist across balls.",
+    "stations": ["KETTLEBECK", "MARROWMOOR", "COLDFELL", "GLASSWATER", "TERMINUS"],
+    "maxMultiplier": 6
+  },
+  "signalBox": {
+    "comment": "DMD video mode (M12): lit by the STRONGBOX; the scoop holds the ball while the flippers pull junction levers ahead of the little train. All junctions cleared couples a wagon.",
+    "junctions": 5,
+    "junctionValue": 3000,
+    "clearAllWagon": true,
+    "durationS": 11
+  },
+  "departure": {
+    "comment": "Coupling + DEPARTURE: a signal-gantry bank completion lights LOCK; a lit siding arrival couples a wagon. wagonsRequired coupled starts DEPARTURE — durationS of ×scoreFactor scoring with jackpots on the Express and the branch, the Points auto-toggling on every jackpot, the turntable spinning. (Single-ball frenzy until engine multiball lands — the brief's documented cut line.)",
+    "wagonsRequired": 3,
+    "durationS": 25,
+    "jackpot": 20000,
+    "scoreFactor": 2
+  },
+  "connection": {
+    "comment": "Wizard mode: reach TERMINUS, start one DEPARTURE and make one Exchange snag; the Sorting Office then lights for THE CONNECTION.",
+    "durationS": 30,
+    "jackpot": 25000,
+    "scoreFactor": 2
+  }
+}

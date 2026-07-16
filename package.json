@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "entcheck": "tsx scripts/entity-check.ts",
     "simcheck": "tsx scripts/simcheck.ts",
     "soak": "tsx scripts/soak.ts",
     "verify:touch": "tsx scripts/verify-touch.ts"

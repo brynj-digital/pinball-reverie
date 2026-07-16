@@ -1,37 +1,42 @@
 import { Vec2 } from "planck";
 import type { Ball } from "./Ball";
-import type { SubwayDef } from "../table/geometry";
+import type { LiftDef } from "../table/geometry";
 import type { HeightProfile } from "../table/SvgCollision";
 
 /**
- * Under-playfield transit (M10, Tidebreaker's trench + gutter): a scripted
- * carry along the table's height-profile-<id> polyline. Physics stays planar
- * (plan §7) — while transiting, the ball is gravity-free on layer -1 (it
- * collides with nothing but the drain) and is eased along the path; at the
- * far end gravity returns and the ball is ejected along the final segment.
- * Renderers read Ball.layer + the profile height to draw the sunken run.
+ * Scripted lift (M12, the Night Mail's incline): the above-field sibling of
+ * Subway. sensor-lift-<id> trips the capture (lit-gated by
+ * TableLogic.kickerLit, like kickers and subways); after an optional dwell
+ * (the banking engine coupling on) the ball is carried along
+ * height-profile-<id> at constant speed with its z FOLLOWING the profile
+ * height — renderers see a real slow climb, and height-banded collision
+ * keeps ignoring field furniture passing below. At the far end the ball is
+ * released AIRBORNE at the profile's hTo with exitSpeed along the final
+ * segment: a genuine M11 ballistic hand-off that lands on the best surface
+ * below (or rolls on at a summit surface's own height).
  *
  * capture() only sets state; body mutations happen in update(), post-step,
- * for the same world-locked reason as Kicker.
+ * for the same world-locked reason as Kicker/Subway.
  */
-export class Subway {
+export class Lift {
   active = false;
-  /** Runs at the moment of eject (Game adds flash + sfx; the sims don't). */
+  /** Runs at the moment of release (Game adds flash + sfx; the sims don't). */
   onEject?: () => void;
   private ball: Ball | null = null;
   private s = 0; // arc-length position along the path (m)
+  private dwellT = 0;
   private started = false;
   private cooldown = 0;
   private readonly total: number;
 
   constructor(
-    readonly def: SubwayDef,
+    readonly def: LiftDef,
     private path: HeightProfile,
   ) {
     this.total = path.cumLen[path.cumLen.length - 1];
   }
 
-  /** Is this transit carrying this specific ball (M12 captive guards)? */
+  /** Is this carry holding this specific ball (M12 captive guards)? */
   carries(ball: Ball): boolean {
     return this.active && this.ball === ball;
   }
@@ -41,11 +46,12 @@ export class Subway {
     this.active = true;
     this.ball = ball;
     this.started = false;
+    this.dwellT = this.def.dwellS;
     this.s = 0;
     return true;
   }
 
-  /** Abandon a transit (the ball was respawned elsewhere). */
+  /** Abandon a carry (the ball was respawned elsewhere). */
   cancel(): void {
     if (!this.active) return;
     this.active = false;
@@ -72,6 +78,11 @@ export class Subway {
     return pts[pts.length - 1];
   }
 
+  private heightAt(s: number): number {
+    const u = this.total > 0 ? Math.max(0, Math.min(1, s / this.total)) : 1;
+    return this.path.hFrom + (this.path.hTo - this.path.hFrom) * u;
+  }
+
   update(dt: number): void {
     this.cooldown = Math.max(0, this.cooldown - dt);
     if (!this.active || !this.ball) return;
@@ -80,11 +91,15 @@ export class Subway {
     if (!this.started) {
       this.started = true;
       b.setGravityScale(0);
-      ball.height.beginTransit(this.path.hFrom);
+      ball.height.beginTransit(this.heightAt(0));
     }
-    this.s += this.def.speed * dt;
+    if (this.dwellT > 0) {
+      this.dwellT -= dt;
+    } else {
+      this.s += this.def.speed * dt;
+    }
     if (this.s >= this.total) {
-      // eject along the final segment direction
+      // release airborne along the final segment direction, at hTo
       this.active = false;
       this.cooldown = 0.5;
       const pts = this.path.pts;
@@ -92,7 +107,8 @@ export class Subway {
       const e = pts[pts.length - 1];
       const d = Math.hypot(e.x - a.x, e.y - a.y) || 1;
       b.setGravityScale(1);
-      ball.height.endTransit();
+      ball.height.transitTo(this.heightAt(this.total));
+      ball.height.endTransitAirborne();
       b.setTransform(new Vec2(e.x, e.y), b.getAngle());
       b.setLinearVelocity(
         new Vec2(((e.x - a.x) / d) * this.def.exitSpeed, ((e.y - a.y) / d) * this.def.exitSpeed),
@@ -102,9 +118,10 @@ export class Subway {
       this.onEject?.();
       return;
     }
+    ball.height.transitTo(this.heightAt(this.s));
     const p = this.pointAt(this.s);
     const cur = b.getPosition();
-    const k = Math.min(1, dt * 14); // ease onto the rail, then track it
+    const k = Math.min(1, dt * 14); // ease into the cradle, then track it
     b.setTransform(new Vec2(cur.x + (p.x - cur.x) * k, cur.y + (p.y - cur.y) * k), b.getAngle());
     b.setLinearVelocity(new Vec2(0, 0));
     b.setAngularVelocity(0);

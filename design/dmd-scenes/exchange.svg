@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- THE NIGHT MAIL DMD scene: EXCHANGE — the mail exchange snag. A lineside
+       hook post waits at right; the TPO rushes through left-to-right and
+       whips the hanging pouch off the post, swinging it away with the
+       train. 8 frames of 128x32 (style guide §6): #fff=3, #888=2,
+       #666=1, black=0. Art rows 0..22; caption renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <g transform="translate(0,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="106" y1="5" x2="106" y2="8" stroke="#666" stroke-width="0.8"/>
+    <rect x="104" y="8" width="4" height="5" fill="#fff"/>
+  </g>
+  <g transform="translate(128,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="106" y1="5" x2="106" y2="8" stroke="#666" stroke-width="0.8"/>
+    <rect x="104" y="8" width="4" height="5" fill="#fff"/>
+  </g>
+  <g transform="translate(256,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="106" y1="5" x2="106" y2="8" stroke="#666" stroke-width="0.8"/>
+    <rect x="104" y="8" width="4" height="5" fill="#fff"/>
+    <rect x="0" y="13" width="14" height="8" fill="#666"/>
+    <line x1="0" y1="13" x2="14" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="7" y="15" width="3" height="3" fill="#fff"/>
+  </g>
+  <g transform="translate(384,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="106" y1="5" x2="106" y2="8" stroke="#666" stroke-width="0.8"/>
+    <rect x="104" y="8" width="4" height="5" fill="#fff"/>
+    <rect x="0" y="13" width="11" height="8" fill="#666"/>
+    <line x1="0" y1="13" x2="11" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="4" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="13" y="13" width="25" height="8" fill="#666"/>
+    <line x1="13" y1="13" x2="38" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="17" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="24" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="31" y="15" width="3" height="3" fill="#fff"/>
+  </g>
+  <g transform="translate(512,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <line x1="106" y1="5" x2="106" y2="8" stroke="#666" stroke-width="0.8"/>
+    <rect x="104" y="8" width="4" height="5" fill="#fff"/>
+    <rect x="0" y="13" width="8" height="8" fill="#666"/>
+    <line x1="0" y1="13" x2="8" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="1" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="10" y="13" width="25" height="8" fill="#666"/>
+    <line x1="10" y1="13" x2="35" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="14" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="21" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="28" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="37" y="13" width="25" height="8" fill="#666"/>
+    <line x1="37" y1="13" x2="62" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="41" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="48" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="55" y="15" width="3" height="3" fill="#fff"/>
+  </g>
+  <g transform="translate(640,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <rect x="7" y="13" width="25" height="8" fill="#666"/>
+    <line x1="7" y1="13" x2="32" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="11" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="18" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="25" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="34" y="13" width="25" height="8" fill="#666"/>
+    <line x1="34" y1="13" x2="59" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="38" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="45" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="52" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="61" y="13" width="25" height="8" fill="#666"/>
+    <line x1="61" y1="13" x2="86" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="65" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="72" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="79" y="15" width="3" height="3" fill="#fff"/>
+    <line x1="0" y1="15" x2="4" y2="15" stroke="#666" stroke-width="0.8"/>
+    <line x1="0" y1="19" x2="5" y2="19" stroke="#666" stroke-width="0.8"/>
+    <rect x="100" y="7" width="4" height="5" fill="#fff"/>
+    <line x1="88" y1="8" x2="98" y2="8" stroke="#888" stroke-width="1"/>
+    <line x1="86" y1="11" x2="96" y2="11" stroke="#666" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(768,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <rect x="31" y="13" width="25" height="8" fill="#666"/>
+    <line x1="31" y1="13" x2="56" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="35" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="42" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="49" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="58" y="13" width="25" height="8" fill="#666"/>
+    <line x1="58" y1="13" x2="83" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="62" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="69" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="76" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="85" y="13" width="25" height="8" fill="#666"/>
+    <line x1="85" y1="13" x2="110" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="89" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="96" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="103" y="15" width="3" height="3" fill="#fff"/>
+    <line x1="19" y1="15" x2="28" y2="15" stroke="#666" stroke-width="0.8"/>
+    <line x1="22" y1="19" x2="29" y2="19" stroke="#666" stroke-width="0.8"/>
+    <rect x="114" y="9" width="4" height="5" fill="#fff"/>
+    <line x1="102" y1="10" x2="112" y2="10" stroke="#888" stroke-width="0.8"/>
+    <line x1="100" y1="13" x2="110" y2="13" stroke="#666" stroke-width="0.8"/>
+  </g>
+  <g transform="translate(896,0)">
+    <line x1="0" y1="22" x2="128" y2="22" stroke="#666" stroke-width="1"/>
+    <line x1="110" y1="4" x2="110" y2="22" stroke="#888" stroke-width="1.2"/>
+    <line x1="103" y1="5" x2="110" y2="5" stroke="#888" stroke-width="1"/>
+    <rect x="55" y="13" width="25" height="8" fill="#666"/>
+    <line x1="55" y1="13" x2="80" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="59" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="66" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="73" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="82" y="13" width="25" height="8" fill="#666"/>
+    <line x1="82" y1="13" x2="107" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="86" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="93" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="100" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="109" y="13" width="19" height="8" fill="#666"/>
+    <line x1="109" y1="13" x2="128" y2="13" stroke="#888" stroke-width="1"/>
+    <rect x="113" y="15" width="3" height="3" fill="#fff"/>
+    <rect x="120" y="15" width="3" height="3" fill="#fff"/>
+    <line x1="43" y1="15" x2="52" y2="15" stroke="#666" stroke-width="0.8"/>
+    <line x1="46" y1="19" x2="53" y2="19" stroke="#666" stroke-width="0.8"/>
+    <rect x="121" y="11" width="4" height="5" fill="#888"/>
+    <line x1="110" y1="12" x2="119" y2="12" stroke="#666" stroke-width="0.8"/>
+  </g>
+</svg>

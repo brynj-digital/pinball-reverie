@@ -299,3 +299,72 @@ export const MIDWAY_SONG: Song = {
   bpm: 158,
   arrangement: [W_VERSE, W_CHORUS, W_VERSE, W_CHORUS, W_CALLIOPE, W_EDGE, W_CHORUS],
 };
+
+// ────────────────────────── THE NIGHT MAIL — E minor, 132 bpm ──────────────────────────
+// "Racing the Dawn": the rhythm IS the train — a wheel-clack ostinato on
+// the rolling bass that never stops, with a lonely two-note whistle riding
+// over it. Verses are the rails (tight pulse figure rocking E–B–E), the
+// chorus is the whistle answered across the valley; the moor breather is
+// triangle and wind; the gradient (middle eight) climbs — the banking
+// engine shoving — and tips over into the chorus like a summit crested.
+
+/** The rails: rocking ostinato, eighth after eighth — wheels over joints. */
+// prettier-ignore
+const N_RAILS: Section = {
+  chords: ["Em", "Em", "C", "G", "Em", "Em", "Am", "G"],
+  lead: [
+    64, -1, 71, -1, 76, -1, 71, -1,   64, -1, 71, -1, 76, -1, 79, -1,
+    60, -1, 67, -1, 72, -1, 67, -1,   67, -1, 74, -1, 79, -1, 74, -1,
+    64, -1, 71, -1, 76, -1, 71, -1,   64, -1, 71, -1, 76, -1, 79, -1,
+    69, -1, 72, -1, 76, -1, 72, -1,   74, -1, 71, -1, 67, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "roll",
+  arp: true, leadVol: 0.22, crash: false, swing: 0,
+};
+
+/** The whistle: two long notes across the valley, the rails answering. */
+// prettier-ignore
+const N_WHISTLE: Section = {
+  chords: ["C", "G", "Em", "Am", "C", "G", "Em", "Em"],
+  lead: [
+    79, -1, -1, -1, 76, -1, 74, -1,   74, -1, -1, -1, 71, -1, 74, -1,
+    76, -1, -1, -1, 71, -1, 67, -1,   69, -1, 72, -1, 76, -1, 79, -1,
+    79, -1, -1, -1, 76, -1, 74, -1,   74, -1, 79, -1, 74, -1, 71, -1,
+    76, -1, -1, -1, 74, -1, 71, -1,   64, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/** The moor: the train far off — the whistle on the wind, wheels gone. */
+// prettier-ignore
+const N_MOOR: Section = {
+  chords: ["Em", "C", "Am", "G"],
+  lead: [
+    79, -1, -1, -1,  0,  0, 74, -1,   76, -1, -1, -1,  0,  0, 72, -1,
+    72, -1, 76, -1, 72, -1, 69, -1,   67, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.32, crash: false, swing: 0,
+};
+
+/** The gradient: the climb — a figure that steps up each bar, pump bass
+ * shoving underneath, tipping over the top into the chorus. */
+// prettier-ignore
+const N_GRADIENT: Section = {
+  chords: ["Am", "C", "G", "Em", "Am", "C", "G", "G"],
+  lead: [
+    69, -1, 72, -1, 76, -1, 72, -1,   72, -1, 76, -1, 79, -1, 76, -1,
+    74, -1, 79, -1, 83, -1, 79, -1,   76, -1, -1, -1, 71, -1,  0,  0,
+    69, -1, 72, -1, 76, -1, 79, -1,   72, -1, 76, -1, 79, -1, 84, -1,
+    83, -1, 79, -1, 74, -1, 79, -1,   83, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "pump",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/** Form: rails, whistle, rails, whistle, the moor, the gradient, whistle. */
+export const NIGHTMAIL_SONG: Song = {
+  bpm: 132,
+  arrangement: [N_RAILS, N_WHISTLE, N_RAILS, N_WHISTLE, N_MOOR, N_GRADIENT, N_WHISTLE],
+};

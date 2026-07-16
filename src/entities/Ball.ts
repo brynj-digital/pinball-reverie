@@ -20,6 +20,9 @@ export class Ball {
     tuning: Tuning,
     private spawn: Pt,
     surfaces: readonly Surface[] = [],
+    /** M12 multiball: identity carried on the fixture tag so contacts and
+     * sensor events resolve per ball. 0 = the primary ball. */
+    readonly id: number = 0,
   ) {
     this.height = new HeightState(surfaces);
     this.body = world.createBody({
@@ -35,17 +38,24 @@ export class Ball {
       density: tuning.ballDensity,
       friction: tuning.ballFriction,
       restitution: tuning.ballRestitution,
-      userData: { kind: "ball" } satisfies FixtureTag,
+      userData: { kind: "ball", ballId: id } satisfies FixtureTag,
     });
     this.lastDensity = tuning.ballDensity;
   }
 
+  /** Remove this ball from the world (a drained multiball extra). */
+  destroy(world: World): void {
+    world.destroyBody(this.body);
+  }
+
   /**
    * Render/back-compat view of the height state: 1 riding (or flying over)
-   * an elevated surface, -1 in a subway transit, 0 on the field.
+   * an elevated surface, -1 in a subway transit, 0 on the field. A scripted
+   * transit reads its sign from z: subways carry below the field, lifts
+   * (M12) above it.
    */
   get layer(): number {
-    if (this.height.transiting) return -1;
+    if (this.height.transiting) return this.height.z >= 0 ? 1 : -1;
     return this.height.elevated ? 1 : 0;
   }
 
