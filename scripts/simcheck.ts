@@ -1624,7 +1624,7 @@ function smallhoursSuite(): void {
     ["left outlane (generator unlit)", 0.026, 0.75],
     ["right outlane (side door unlit)", 0.494, 0.75],
     ["deflector wedge", 0.02, 0.6],
-    ["phone mouth dead drop", 0.24, 0.5],
+    ["phone mouth dead drop", 0.268, 0.53],
     ["fader recess drop", 0.475, 0.47],
     ["aerial throat dead drop", 0.168, 0.66],
     ["switchboard zone rest (unlit)", 0.132, 0.37],
@@ -1721,7 +1721,7 @@ function smallhoursSuite(): void {
   logic.resetGame();
   state.labels.length = 0;
   state.drained = false;
-  placeBall(0.272, 0.56, 0, -1.1);
+  placeBall(0.3, 0.59, 0, -1.1);
   let phoneCaught = false;
   run(1, () => {
     if (phone.holding) phoneCaught = true;
@@ -1820,7 +1820,7 @@ function smallhoursSuite(): void {
   );
   check("chorus lights after dawn + on air + boost", state.modeEvents.includes("chorusReady"));
   state.drained = false;
-  placeBall(0.272, 0.56, 0, -1.1);
+  placeBall(0.3, 0.59, 0, -1.1);
   run(2);
   check("the phone starts THE DAWN CHORUS", state.modeEvents.includes("chorusStart"));
   check("the chorus doubles scoring", rig.scoring.eclipseFactor === 2);
@@ -1835,14 +1835,14 @@ function smallhoursSuite(): void {
   logic.resetGame();
   rig.scoring.reset();
   for (let i = 0; i < 3; i++) {
-    placeBall(0.272, 0.56, 0, -1.1);
+    placeBall(0.3, 0.59, 0, -1.1);
     run(4); // capture + award + eject (request, shout-out, dedication)
   }
   state.labels.length = 0;
-  placeBall(0.272, 0.56, 0, -1.1);
+  placeBall(0.3, 0.59, 0, -1.1);
   run(4);
   check("fourth capture awards the MYSTERY B-SIDE", state.labels.includes("MYSTERY B-SIDE"));
-  placeBall(0.272, 0.56, 0, -1.1);
+  placeBall(0.3, 0.59, 0, -1.1);
   run(4); // capture; the request show holds past the 2s holdS
   check("REQUEST SHOW holds the ball past holdS", phone.holding);
   run(9);
@@ -1862,6 +1862,29 @@ function smallhoursSuite(): void {
     rig.scoring.bonusUnits < 400,
     `units=${rig.scoring.bonusUnits}`,
   );
+  // differentiation pass: TUNED slings + NIGHT OWLS skill shot
+  {
+    const rigT = buildRig("smallhours");
+    const logicT = rigT.logic as SmallHoursLogic;
+    check("slings run stock while untuned", logicT.slingBoost() === 1);
+    for (let i = 0; i < 12; i++) rigT.bus.emit("spinnerTick", {});
+    check(
+      "TUNED raises the sling boost",
+      logicT.slingBoost() === 1.15,
+      `boost=${logicT.slingBoost()}`,
+    );
+    const rigS = buildRig("smallhours");
+    rigS.flippers[0].update(false, rigS.t);
+    rigS.flippers[1].update(false, rigS.t);
+    rigS.run(2);
+    let sawOwls = false;
+    rigS.bus.on("score", ({ label }) => {
+      if (label === "NIGHT OWLS") sawOwls = true;
+    });
+    rigS.ball.body.setLinearVelocity(new Vec2(0, -1.2));
+    rigS.run(3);
+    check("soft plunge pays NIGHT OWLS", sawOwls, `total=${rigS.scoring.total}`);
+  }
 }
 
 const which = process.argv[2] as TableId | undefined;

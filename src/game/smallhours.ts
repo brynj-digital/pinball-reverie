@@ -110,6 +110,7 @@ export class SmallHoursLogic implements TableLogic {
   private spins = 0;
   private tuned = false;
   private boosts = 0;
+  private skillUsed = false;
   // aerial run
   private boarded = false;
   // phone ladder
@@ -214,6 +215,7 @@ export class SmallHoursLogic implements TableLogic {
   }
 
   endBall(): void {
+    this.skillUsed = false;
     this.sweepStep = 0;
     this.lastSweepAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -327,6 +329,23 @@ export class SmallHoursLogic implements TableLogic {
       this.sidedoorLit = false;
       this.ctx.push(new MessageScene([["THE SIDE DOOR", "DOWN THE BACK STAIRS"]], 1.2), 2);
     }
+  }
+
+  /** While TUNED the studio monitors are up: sling kicks run hotter. */
+  slingBoost(): number {
+    return this.tuned ? rules.dial.slingBoost : 1;
+  }
+
+  /** NIGHT OWLS: soft plunge peaking in the lane band. Once per ball. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "nightowls" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "NIGHT OWLS");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["NIGHT OWLS", fmtScore(points)]], 1.4, true), 2);
   }
 
   /** A completed Aerial Run ride: SIGNAL, or the tuned SIGNAL BOOST. */

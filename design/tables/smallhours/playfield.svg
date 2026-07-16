@@ -171,25 +171,25 @@
     <!-- THE PHONE: studio scoop drawn as a rotary dial, mouth down-left.
          The kicker holds the ball here while the caller talks. -->
     <g id="art-phone">
-      <circle cx="272" cy="446" r="40" fill="#07080d"/>
-      <circle cx="272" cy="446" r="34" fill="#262015"/>
-      <circle cx="272" cy="446" r="34" fill="none" stroke="#46381f" stroke-width="3"/>
-      <circle cx="272" cy="446" r="38" fill="none" stroke="#9c7c2c" stroke-width="4"/>
-      <circle cx="272" cy="446" r="38" fill="none" stroke="#e0b64e" stroke-width="1.5" stroke-dasharray="5 6"/>
+      <circle cx="300" cy="476" r="40" fill="#07080d"/>
+      <circle cx="300" cy="476" r="34" fill="#262015"/>
+      <circle cx="300" cy="476" r="34" fill="none" stroke="#46381f" stroke-width="3"/>
+      <circle cx="300" cy="476" r="38" fill="none" stroke="#9c7c2c" stroke-width="4"/>
+      <circle cx="300" cy="476" r="38" fill="none" stroke="#e0b64e" stroke-width="1.5" stroke-dasharray="5 6"/>
       <!-- rotary finger holes -->
       <g fill="#171310" stroke="#565d6e" stroke-width="1">
-        <circle cx="272" cy="422" r="4"/><circle cx="289" cy="428" r="4"/>
-        <circle cx="296" cy="444" r="4"/><circle cx="291" cy="461" r="4"/>
-        <circle cx="255" cy="428" r="4"/><circle cx="248" cy="444" r="4"/>
+        <circle cx="300" cy="452" r="4"/><circle cx="317" cy="458" r="4"/>
+        <circle cx="324" cy="474" r="4"/><circle cx="319" cy="491" r="4"/>
+        <circle cx="283" cy="458" r="4"/><circle cx="276" cy="474" r="4"/>
       </g>
-      <circle cx="272" cy="446" r="7" fill="#ffa028" opacity="0.5"/>
-      <path d="M 254 430 a 24 24 0 0 1 11 -7" stroke="#a68d5c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="300" cy="476" r="7" fill="#ffa028" opacity="0.5"/>
+      <path d="M 282 460 a 24 24 0 0 1 11 -7" stroke="#a68d5c" stroke-width="2.5" fill="none" stroke-linecap="round"/>
       <g stroke="#ffa028" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.75">
-        <path d="M 252 499.5 L 259 490.5 L 266 499.5" transform="rotate(11 259 495)"/>
-        <path d="M 245 536.5 L 252 527.5 L 259 536.5" transform="rotate(11 252 532)"/>
+        <path d="M 280 529.5 L 287 520.5 L 294 529.5" transform="rotate(11 287 525)"/>
+        <path d="M 273 566.5 L 280 557.5 L 287 566.5" transform="rotate(11 280 562)"/>
       </g>
-      <text x="318" y="512" text-anchor="middle" font-family="ui-monospace, monospace"
-            font-size="11" letter-spacing="2" fill="#9c7c2c" transform="rotate(-70 318 512)">THE PHONE</text>
+      <text x="346" y="542" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="11" letter-spacing="2" fill="#9c7c2c" transform="rotate(-70 346 542)">THE PHONE</text>
     </g>
 
     <!-- THE FADER BANK recess in the lane wall (targets render live) -->
@@ -376,8 +376,10 @@
            tangent to its flipper base circle past the apex -->
       <path data-width="12" id="collision-wall-guide-left" d="M 52 690 L 52 905 L 174.2 938.4"/>
       <path data-width="12" id="collision-wall-guide-right" d="M 470 690 L 470 905 L 345.9 938.4"/>
-      <!-- phone hood: mouth opens down-left, never traps -->
-      <path data-width="12" id="collision-wall-phone-hood" d="M 316 460 L 314.3 453.7 L 311.8 444.9 L 308 437 L 302.6 431.3 L 296 426.6 L 289 423 L 281.9 420.5 L 274.4 419.1 L 267 419 L 259.3 420.5 L 251.7 423.3 L 245 427 L 239.5 432.3 L 235 438.6 L 232 443"/>
+      <!-- phone hood: mouth opens down-left, never traps. Differentiation
+           pass 2026-07-17: moved +28/+30 off the lineup-shared (272,450)
+           scoop spot, toward the record deck. -->
+      <path data-width="12" id="collision-wall-phone-hood" d="M 344 490 L 342.3 483.7 L 339.8 474.9 L 336 467 L 330.6 461.3 L 324 456.6 L 317 453 L 309.9 450.5 L 302.4 449.1 L 295 449 L 287.3 450.5 L 279.7 453.3 L 273 457 L 267.5 462.3 L 263 468.6 L 260 473"/>
       <!-- fader bank housing: recess brackets off the lane wall (mirror of
            table 2's airlock — the left-flipper cross shot) -->
       <path data-width="12" id="collision-wall-bank-housing" d="M 520 415 L 503 423 L 503 547 L 520 555"/>
@@ -457,6 +459,7 @@
 
   <!-- ═══════════════ sensors (invisible; zones only) ═══════════════ -->
   <g fill="none" stroke="none">
+    <rect id="sensor-skill-nightowls" x="526" y="440" width="43" height="60"/>
     <rect id="sensor-drain" x="0" y="1005" width="520" height="30"/>
     <rect id="sensor-rollover-1" x="147" y="105" width="30" height="20"/>
     <rect id="sensor-rollover-2" x="210" y="105" width="30" height="20"/>
@@ -467,7 +470,7 @@
     <rect id="sensor-ramp-exit" x="442" y="117" width="36" height="36"/>
     <!-- THE DIAL: spinner spanning the top-right launch channel -->
     <rect id="sensor-spinner" x="436" y="168" width="102" height="18"/>
-    <rect id="sensor-kicker-phone" x="252" y="430" width="40" height="40"/>
+    <rect id="sensor-kicker-phone" x="280" y="460" width="40" height="40"/>
     <rect id="sensor-kicker-generator" x="8" y="940" width="36" height="35"/>
     <!-- switchboard: sensor-only capture (lit-gated), z-banded so aerial
          riders crossing overhead at h34 never trip it -->
@@ -483,7 +486,7 @@
     <circle id="anchor-bumper-1" cx="285" cy="240" r="5"/>
     <circle id="anchor-bumper-2" cx="390" cy="275" r="5"/>
     <circle id="anchor-bumper-3" cx="315" cy="345" r="5"/>
-    <circle id="anchor-kicker-phone" cx="272" cy="450" r="5"/>
+    <circle id="anchor-kicker-phone" cx="300" cy="480" r="5"/>
     <circle id="anchor-kicker-generator" cx="44" cy="680" r="5"/>
     <circle id="anchor-kicker-switchboard" cx="132" cy="369" r="5"/>
     <circle id="anchor-disc-deck" cx="320" cy="640" r="5"/>
