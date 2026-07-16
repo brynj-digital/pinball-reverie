@@ -1,6 +1,6 @@
 # Table differentiation plan
 
-**Status: in execution (Phase 0 shipped 2026-07-17).** Companion briefs:
+**Status: in execution — Phase 0 + Phase 1 (retrofit pass) SHIPPED 2026-07-17** (PRs #10–#15; per-table deltas recorded in each BRIEF, lineup-wide summary in CLAUDE.md). Companion briefs:
 `design/tables/{sump,glasshouse,summit,thunderhead}/BRIEF.md`. This plan
 covers (A) a **retrofit pass** giving each built table a structural
 differentiator, and (B) **tables 6–9**, each of which breaks one piece
@@ -77,7 +77,20 @@ left/right/upper.
 | 0.4 | **DONE (2026-07-17, STYLE-GUIDE §4 "Differentiation-pass conventions"):** ~~Skill-shot pattern note~~: a `sensor-skill-<id>` band partway up the shooter lane, awarded by TableLogic on a soft plunge that peaks inside it. Pure SVG + rules — no engine change; the guide entry is so five tables author it consistently. | S | docs |
 | 0.5 | **DONE (2026-07-17, same §4 block):** ~~"No copy-paste kit" authoring rule~~: new tables must diverge sling verts, scoop positions and eject hands from the existing set unless a brief argues otherwise. Codifies the lesson so table 10 doesn't regress. | S | docs |
 
-## 4. Phase 1 — the retrofit pass (one PR per table)
+## 4. Phase 1 — the retrofit pass (one PR per table) — DONE 2026-07-17
+
+All five shipped (order 1.1 → 1.2 → 1.4 → 1.5 → 1.3 as planned). Outcome
+notes against the specs below: the gnomon shipped as specced (the
+dead-centre both-flipper pinch is a known sim artifact, watch in play);
+Tidebreaker's slings grew DOWN-AND-OUT only (a taller top clipped the
+winch habitrail landing); **1.4's relocation was abandoned with cause**
+(the target sat under the incline carry corridor; the eject-hand flip
+alone re-maps the flow — brief has the full geometry argument); Small
+Hours' phone-move rates were checked across three seeds (noise, not
+starvation); Midway's budgeted trap arrived on soak seed 2 and is fixed
+by a sloped coaster-back. Midway also gained the skill shot the spec
+below omitted (lineup consistency). Full-lineup simcheck + entcheck +
+soak green at close-out; no DEFAULT_TUNING value changed.
 
 Each item: SVG/defs/rules edit → simcheck → soak (standard seeds) →
 instrumented feature-rates before/after → brief amended with the delta
