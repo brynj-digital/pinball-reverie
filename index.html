@@ -2,8 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0c0d14" />
     <title>Pinball Reverie</title>
+    <link rel="icon" href="/icons/pwa-192.png" type="image/png" />
+    <!-- iOS has no install prompt and ignores display:fullscreen — these get
+         Add-to-Home-Screen launches into standalone with a dark status bar -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Pinball Reverie" />
   </head>
   <body>
     <div id="app"></div>

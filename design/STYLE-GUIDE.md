@@ -334,3 +334,8 @@ Before any asset ships into the game:
    verified against the in-game debug overlay.
 5. DMD scenes: 128×32, 5 levels, bitmap type only (§6).
 6. Original IP — evokes the era, copies nothing.
+7. App icon: the master is `design/app-icon.svg` (512, full-bleed void
+   field, subject inside the central 80% maskable-safe circle — one master
+   serves the manifest's "any" and "maskable" purposes plus iOS). Edit the
+   SVG, then `npm run icons` regenerates the checked-in PNGs in
+   `public/icons/`; never edit the PNGs directly.

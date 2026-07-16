@@ -17,6 +17,13 @@ body {
   /* mobile: size to the dynamic viewport so the DMD strip stays pinned to the
      visible top and the flippers aren't cut off behind the browser toolbar */
   height: 100dvh;
+  /* installed PWA with viewport-fit=cover: inset the canvas out from under
+     notches and home-indicator bars (the renderer sizes from the canvas's CSS
+     box, so this is all it takes); no-op where the insets are 0. Browsers
+     without env()/dvh drop these and keep the fallbacks above. */
+  width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  margin: env(safe-area-inset-top, 0px) auto env(safe-area-inset-bottom, 0px);
 }
 
 .tuning-panel {
