@@ -36,6 +36,15 @@
   --smoke-500: #2c4434; /* slate wall/rail body (steel-500 analog) */
   --smoke-300: #6e937f; /* slate wall/rail highlight (steel-300 analog) */
 
+  /* field, rooftop variant — Night Waves' sodium-washed asphalt ramp:
+     tar-paper and warm streetlight umber over the sleeping city (added
+     2026-07-16 per the table 5 brief; STYLE-GUIDE §2) */
+  --rooftop-900: #171310; /* tar-paper dark / deep shadow */
+  --rooftop-800: #262015; /* rooftop field base */
+  --rooftop-700: #3a2f1e; /* lit panels, studio aprons */
+  --rooftop-500: #46381f; /* asphalt wall/rail body (steel-500 analog) */
+  --rooftop-300: #a68d5c; /* warm-khaki wall/rail highlight (steel-300 analog) */
+
   /* marquee bulb — incandescent white-gold for bulb strings, chase lamps,
      platform gas lamps and lit carriage windows
      (added 2026-07-05, scope widened 2026-07-15; NOT brass — brass stays
@@ -71,6 +80,11 @@
   --green-600: #1cae0d;
   --violet-400: #8c6bff; /* the Reverie signature hue */
   --violet-600: #4e37a8;
+  --amber-400: #ffa028; /* transmitter amber — Night Waves' feature hue (added
+                           2026-07-16, table 5): lit electric signage — ON AIR,
+                           the dial, insert arrows. NOT brass (ball-touch metal)
+                           and NOT bulb (incandescent points). */
+  --amber-600: #b35f0e;
   --alert-400: #ff5555; /* tilt, danger lamps */
 
   /* DMD — amber plasma, 4 brightness levels + off */

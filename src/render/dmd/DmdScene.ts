@@ -182,7 +182,7 @@ export class MatchScene implements DmdScene {
           ? "FREE GAME"
           : `YOURS ${String(this.playerDigits).padStart(2, "0")}`,
         24,
-        1,
+        2, // dot LEVEL, not a size — 1 is near-invisible on the glass
       );
     }
     return false;
