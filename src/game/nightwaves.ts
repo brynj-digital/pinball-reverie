@@ -30,24 +30,30 @@ class RequestShowScene implements DmdScene {
     const s = this.read();
     if (!s.active) return true;
     dmd.clear();
-    dmd.centerText("REQUEST SHOW", 0, 2);
+    // NB: text/set take dot LEVELS 0-4 (dim -> hi), not font sizes — level 1
+    // is near-black on the smoked glass; keep everything readable at 2+
+    // (the SIGNAL BOX shipped that way once and read as a dead panel)
+    dmd.centerText("REQUEST SHOW", 0, 3);
     // the groove: a dotted line with 5 requests; the needle is a 3-dot block
     const y = 16;
-    for (let x = 6; x < 122; x += 2) dmd.set(x, y, 1);
+    for (let x = 6; x < 122; x += 2) dmd.set(x, y, 2);
     const n = s.required.length;
     for (let i = 0; i < n; i++) {
       const jx = 14 + Math.round((i * 100) / (n - 1));
       const res = s.results[i];
       // request glyph: side A cued up (left) or side B cued down (right);
       // brightness shows the outcome once the needle has passed
-      const lv = res === null ? 2 : res ? 4 : 1;
+      const lv = res === null ? 3 : res ? 4 : 1;
       const dir = s.required[i] === "left" ? -1 : 1;
       for (let k = 0; k <= 3; k++) dmd.set(jx + k, y + k * dir, lv);
     }
     const nx = 6 + Math.round(s.progress * 112);
     for (let k = -2; k <= 2; k++) dmd.set(nx + k, y - 5, 4);
     dmd.set(nx + 3, y - 5, 2); // the stylus tip
-    dmd.centerText(`CUE SIDE ${s.lever === "left" ? "A" : "B"}  ${s.cleared} RIGHT`, 25, 1);
+    // the cued side as a bright letter at the left edge — flipper presses
+    // must visibly DO something or the whole hold reads as a hang
+    dmd.text(s.lever === "left" ? "A" : "B", 1, s.lever === "left" ? 7 : 19, 4);
+    dmd.centerText(`CUE SIDE ${s.lever === "left" ? "A" : "B"}  ${s.cleared} RIGHT`, 25, 3);
     return false;
   }
 }
@@ -587,9 +593,11 @@ export class NightWavesLogic implements TableLogic {
   }
 
   // ─────────────────── REQUEST SHOW (video mode) ───────────────────
-  // Timer-driven: request i resolves at rsStart + 1.5 + i×1.8; the whole
-  // mode ends at rules.requestShow.durationS regardless of the DMD, so the
-  // headless sims (no DotMatrix) release the held ball on schedule.
+  // Timer-driven: request i resolves at rsStart + 2.2 + i×1.6 (the first
+  // AFTER the 1.4 s intro card — the player must see the groove before it
+  // starts judging); the whole mode ends at rules.requestShow.durationS
+  // regardless of the DMD, so the headless sims (no DotMatrix) release
+  // the held ball on schedule.
 
   private startRequestShow(): void {
     this.requestShowLit = false;
@@ -604,12 +612,13 @@ export class NightWavesLogic implements TableLogic {
     this.ctx.sfx("multiplier");
     this.ctx.push(
       new SequenceScene([
-        new MessageScene([["REQUEST SHOW", "FLIPPERS CUE THE SIDES"]], 1.4, true),
+        // 21 glyphs max on the second row: 128 dots / 6-per-glyph
+        new MessageScene([["REQUEST SHOW", "FLIPPERS CUE A AND B"]], 1.4, true),
         new RequestShowScene(() => ({
           active: this.rsActive,
           progress: Math.min(
             1,
-            Math.max(0, (this.now - this.rsStart - 1.5) / (1.8 * (rules.requestShow.requests - 1) + 0.9)),
+            Math.max(0, (this.now - this.rsStart - 2.2) / (1.6 * (rules.requestShow.requests - 1) + 0.8)),
           ),
           lever: this.rsLever,
           required: this.rsRequired,
@@ -624,7 +633,7 @@ export class NightWavesLogic implements TableLogic {
   private updateRequestShow(): void {
     const t = this.now - this.rsStart;
     for (let i = 0; i < this.rsRequired.length; i++) {
-      if (this.rsResults[i] === null && t >= 1.5 + i * 1.8) {
+      if (this.rsResults[i] === null && t >= 2.2 + i * 1.6) {
         const ok = this.rsLever === this.rsRequired[i];
         this.rsResults[i] = ok;
         if (ok) {
