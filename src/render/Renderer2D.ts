@@ -694,17 +694,21 @@ export class Renderer2D implements Renderer {
 
     ctx.font = "12px ui-monospace, monospace";
     ctx.fillStyle = "#8790b3";
-    const speed = Math.hypot(snap.ball.vx, snap.ball.vy);
-    ctx.fillText(
-      `${snap.fps.toFixed(0)} fps · worst ${worst.toFixed(0)}ms · ${slow} slow/2s · js ${snap.jsMs.toFixed(1)}ms   ball ${speed.toFixed(2)} m/s`,
-      10,
-      18,
-    );
-    ctx.fillText(
-      "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · Esc — settings",
-      10,
-      ch - 12,
-    );
+    if (snap.hudStats) {
+      const speed = Math.hypot(snap.ball.vx, snap.ball.vy);
+      ctx.fillText(
+        `${snap.fps.toFixed(0)} fps · worst ${worst.toFixed(0)}ms · ${slow} slow/2s · js ${snap.jsMs.toFixed(1)}ms   ball ${speed.toFixed(2)} m/s`,
+        10,
+        18,
+      );
+    }
+    if (snap.hudKeys) {
+      ctx.fillText(
+        "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · Esc — settings",
+        10,
+        ch - 12,
+      );
+    }
 
     if (snap.dmd) {
       this.drawDmdPanel(snap.dmd);

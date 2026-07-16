@@ -79,6 +79,12 @@ export interface WorldSnapshot {
   /** Canvas resolution fraction of native DPI — the active renderer's value
    * of the per-mode performance option (Game persists one per RenderMode). */
   renderScale: number;
+  /** Show the frame-stats HUD line (settings toggle; defaults off on
+   * small/touch devices, where it's clutter). */
+  hudStats: boolean;
+  /** Show the keyboard-hints HUD line (settings toggle; defaults off on
+   * small/touch devices, where the key names don't even apply). */
+  hudKeys: boolean;
   /**
    * The DMD's offscreen canvas (plan §5b): the DMD subsystem owns and paints
    * it; renderers only composite it (2D blits it, 3D would texture-map it).

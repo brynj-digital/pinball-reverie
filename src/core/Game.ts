@@ -32,6 +32,7 @@ import {
   loadTouchPref,
   resolveTouchEnabled,
   saveTouchPref,
+  touchAvailable,
   type TouchPref,
 } from "../ui/TouchControls";
 import { Haptics, saveHapticsPref } from "../ui/Haptics";
@@ -104,6 +105,47 @@ function loadRenderScale(mode: RenderMode): number {
   return RENDER_SCALE_DEFAULTS[mode];
 }
 
+/**
+ * The two HUD info lines (frame stats, keyboard hints) are display prefs like
+ * render mode — persisted outside Tuning so tuning resets can't flip them.
+ * Unset, they default off on small/touch devices: the stats line is clutter
+ * there and the key names don't apply to touch play.
+ */
+const HUD_PREF_KEYS = {
+  stats: "pinball-hud-stats-v1",
+  keys: "pinball-hud-keys-v1",
+} as const;
+
+function smallOrTouchDevice(): boolean {
+  try {
+    return (
+      touchAvailable() ||
+      (typeof screen !== "undefined" && Math.min(screen.width, screen.height) < 700)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function loadHudPref(kind: keyof typeof HUD_PREF_KEYS): boolean {
+  try {
+    const raw = localStorage.getItem(HUD_PREF_KEYS[kind]);
+    if (raw === "on") return true;
+    if (raw === "off") return false;
+  } catch {
+    // storage unavailable — fall through to the device default
+  }
+  return !smallOrTouchDevice();
+}
+
+function saveHudPref(kind: keyof typeof HUD_PREF_KEYS, on: boolean): void {
+  try {
+    localStorage.setItem(HUD_PREF_KEYS[kind], on ? "on" : "off");
+  } catch {
+    // best-effort
+  }
+}
+
 /** 3D camera style (tilted chase vs top-down classic), persisted like it. */
 const VIEW3D_KEY = "pinball-3d-view-v1";
 
@@ -152,6 +194,8 @@ export class Game {
   private touch: TouchControls;
   private touchPref: TouchPref = loadTouchPref();
   private haptics = new Haptics();
+  private hudStats = loadHudPref("stats");
+  private hudKeys = loadHudPref("keys");
 
   private panel: TuningPanel;
   private appliedTuningVersion = -1; // force one application on the first frame
@@ -369,6 +413,22 @@ export class Game {
         set: (on) => {
           this.haptics.enabled = on;
           saveHapticsPref(on);
+        },
+      },
+      {
+        stats: {
+          get: () => this.hudStats,
+          set: (on) => {
+            this.hudStats = on;
+            saveHudPref("stats", on);
+          },
+        },
+        keys: {
+          get: () => this.hudKeys,
+          set: (on) => {
+            this.hudKeys = on;
+            saveHudPref("keys", on);
+          },
         },
       },
     );
@@ -1062,6 +1122,8 @@ export class Game {
       fps: this.fps,
       jsMs: this.jsMs,
       renderScale: this.renderScale[this.renderMode],
+      hudStats: this.hudStats,
+      hudKeys: this.hudKeys,
       dmd: this.dmd.canvas,
       debugShapes: this.tuning.debugOverlay ? this.physics.collectDebugShapes() : undefined,
     };

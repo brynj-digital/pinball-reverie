@@ -47,6 +47,10 @@ export class SettingsPanel {
     private tableId: TableId,
     private touch: { get: () => TouchPref; set: (pref: TouchPref) => void },
     private haptics: { get: () => boolean; set: (on: boolean) => void },
+    private hud: {
+      stats: { get: () => boolean; set: (on: boolean) => void };
+      keys: { get: () => boolean; set: (on: boolean) => void };
+    },
   ) {
     this.root = document.createElement("div");
     this.root.className = "settings-overlay";
@@ -82,6 +86,9 @@ export class SettingsPanel {
     card.appendChild(this.touchRow());
     // no Vibration API (iOS/desktop) → the row would be a dead switch; omit it
     if (hapticsAvailable()) card.appendChild(this.hapticsRow());
+    // HUD info lines — off by default on small/touch devices (Game decides)
+    card.appendChild(this.toggleRow("Frame stats", this.hud.stats));
+    card.appendChild(this.toggleRow("Key hints", this.hud.keys));
     card.appendChild(this.tuningVisibleRow());
 
     const keysTitle = document.createElement("h3");
@@ -242,15 +249,23 @@ export class SettingsPanel {
 
   /** Vibration ticks on touch flips/plunges/nudges (only shown where supported). */
   private hapticsRow(): HTMLElement {
+    return this.toggleRow("Haptics", this.haptics);
+  }
+
+  /** Generic ON/OFF row over a boolean get/set pair. */
+  private toggleRow(
+    name: string,
+    pref: { get: () => boolean; set: (on: boolean) => void },
+  ): HTMLElement {
     const row = document.createElement("div");
     row.className = "key-row";
     const span = document.createElement("span");
-    span.textContent = "Haptics";
+    span.textContent = name;
     const btn = document.createElement("button");
-    const label = () => (btn.textContent = this.haptics.get() ? "ON" : "OFF");
+    const label = () => (btn.textContent = pref.get() ? "ON" : "OFF");
     label();
     btn.onclick = () => {
-      this.haptics.set(!this.haptics.get());
+      pref.set(!pref.get());
       label();
     };
     this.valueRefreshers.push(label);

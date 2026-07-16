@@ -620,8 +620,8 @@ export class Renderer3D implements Renderer {
     }
     this.hudEl = document.createElement("div");
     this.hudEl.className = "hud3d";
-    this.hudEl.textContent =
-      "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · Esc — settings";
+    // hidden until the first snapshot says which HUD lines are enabled
+    this.hudEl.style.display = "none";
     document.body.appendChild(this.hudEl);
   }
 
@@ -992,9 +992,14 @@ export class Renderer3D implements Renderer {
     this.hudAccum += dt;
     if (this.hudEl && this.hudAccum > 0.25) {
       this.hudAccum = 0;
-      this.hudEl.textContent =
-        `${Math.round(snap.fps)} fps · js ${snap.jsMs.toFixed(1)}ms · 3D — ` +
-        "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · Esc — settings";
+      const parts: string[] = [];
+      if (snap.hudStats) parts.push(`${Math.round(snap.fps)} fps · js ${snap.jsMs.toFixed(1)}ms · 3D`);
+      if (snap.hudKeys)
+        parts.push(
+          "Enter — start · Z / Shift — flippers · hold Space — plunger · arrows — nudge · Esc — settings",
+        );
+      this.hudEl.textContent = parts.join(" — ");
+      this.hudEl.style.display = parts.length ? "" : "none";
     }
   }
 
