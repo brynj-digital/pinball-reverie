@@ -9,7 +9,13 @@
  */
 import type { TableId } from "./specs";
 import type { Song } from "../audio/songs";
-import { MIDWAY_SONG, MOONDIAL_SONG, NIGHTMAIL_SONG, TIDEBREAKER_SONG } from "../audio/songs";
+import {
+  MIDWAY_SONG,
+  MOONDIAL_SONG,
+  NIGHTMAIL_SONG,
+  NIGHTWAVES_SONG,
+  TIDEBREAKER_SONG,
+} from "../audio/songs";
 
 import moondialPlayfield from "../../design/tables/moondial/playfield.svg?raw";
 import moondialBackglass from "../../design/tables/moondial/backglass.svg?raw";
@@ -19,6 +25,8 @@ import midwayPlayfield from "../../design/tables/midway/playfield.svg?raw";
 import midwayBackglass from "../../design/tables/midway/backglass.svg?raw";
 import nightmailPlayfield from "../../design/tables/nightmail/playfield.svg?raw";
 import nightmailBackglass from "../../design/tables/nightmail/backglass.svg?raw";
+import nightwavesPlayfield from "../../design/tables/nightwaves/playfield.svg?raw";
+import nightwavesBackglass from "../../design/tables/nightwaves/backglass.svg?raw";
 
 import orbitScene from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierScene from "../../design/dmd-scenes/multiplier.svg?raw";
@@ -50,6 +58,12 @@ import couplingScene from "../../design/dmd-scenes/coupling.svg?raw";
 import tunnelScene from "../../design/dmd-scenes/tunnel.svg?raw";
 import connectionScene from "../../design/dmd-scenes/connection.svg?raw";
 import sortingScene from "../../design/dmd-scenes/sorting.svg?raw";
+import dialScene from "../../design/dmd-scenes/dial.svg?raw";
+import mastScene from "../../design/dmd-scenes/mast.svg?raw";
+import callerScene from "../../design/dmd-scenes/caller.svg?raw";
+import onairScene from "../../design/dmd-scenes/onair.svg?raw";
+import staticScene from "../../design/dmd-scenes/static.svg?raw";
+import dawnScene from "../../design/dmd-scenes/dawn.svg?raw";
 
 export interface TableAssets {
   playfieldSvg: string;
@@ -118,5 +132,18 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       sorting: { svg: sortingScene, frames: 8 },
     },
     song: NIGHTMAIL_SONG,
+  },
+  nightwaves: {
+    playfieldSvg: nightwavesPlayfield,
+    backglassSvg: nightwavesBackglass,
+    dmdScenes: {
+      dial: { svg: dialScene, frames: 8 },
+      mast: { svg: mastScene, frames: 8 },
+      caller: { svg: callerScene, frames: 8 },
+      onair: { svg: onairScene, frames: 8 },
+      static: { svg: staticScene, frames: 6 },
+      dawn: { svg: dawnScene, frames: 9 },
+    },
+    song: NIGHTWAVES_SONG,
   },
 };

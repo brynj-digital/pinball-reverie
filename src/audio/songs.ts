@@ -368,3 +368,73 @@ export const NIGHTMAIL_SONG: Song = {
   bpm: 132,
   arrangement: [N_RAILS, N_WHISTLE, N_RAILS, N_WHISTLE, N_MOOR, N_GRADIENT, N_WHISTLE],
 };
+
+// ────────────────────────── NIGHT WAVES — A minor, 100 bpm ──────────────────────────
+// "The Small Hours": the lineup's first SHUFFLE — every section swings
+// (Hubbard shuffle on the odd sixteenths), where the Night Mail ran dead
+// straight. A walking bounce bass under a smoky thin-pulse lead that enters
+// late and leaves early (the DJ talking over the record); the chorus is the
+// show in full flight; the breather is a caller's voice, triangle and
+// nearly alone; the middle eight is the transmitter warming up — a figure
+// that climbs a third per bar and tips back into the chorus on the G.
+
+/** The groove: late entries, short phrases, air between them. */
+// prettier-ignore
+const V_VERSE: Section = {
+  chords: ["Am", "Dm", "G", "C", "Am", "Dm", "E", "E"],
+  lead: [
+     0,  0, 64, -1, 67, -1, 69, -1,   65, -1, -1, -1, 62, -1, 65, -1,
+    67, -1, 71, -1, 74, -1, 71, -1,   72, -1, -1, -1,  0,  0, 67, -1,
+     0,  0, 69, -1, 72, -1, 76, -1,   74, -1, -1, -1, 72, -1, 69, -1,
+    68, -1, 71, -1, 68, -1, 64, -1,   64, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "bounce",
+  arp: true, leadVol: 0.22, crash: false, swing: 0.3,
+};
+
+/** On air: the hook leans on the F–G lift and lands home on the sixth. */
+// prettier-ignore
+const V_CHORUS: Section = {
+  chords: ["F", "G", "C", "Am", "F", "G", "Am", "Am"],
+  lead: [
+    77, -1, 76, -1, 72, -1, 69, -1,   74, -1, -1, -1, 71, -1, 74, -1,
+    76, -1, 74, -1, 72, -1, 67, -1,   69, -1, -1, -1, 72, -1, 74, -1,
+    77, -1, 76, -1, 72, -1, 76, -1,   79, -1, -1, -1, 74, -1, 71, -1,
+    72, -1, 69, -1, 71, -1, 72, -1,   69, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.24, crash: true, swing: 0.3,
+};
+
+/** A caller's voice: triangle, nearly alone, the kit down to brushes. */
+// prettier-ignore
+const V_CALLER: Section = {
+  chords: ["Dm", "G", "C", "Am"],
+  lead: [
+    74, -1, -1, -1,  0,  0, 72, -1,   71, -1, -1, -1,  0,  0, 67, -1,
+    72, -1, 76, -1, 74, -1, 72, -1,   69, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.32, crash: false, swing: 0.3,
+};
+
+/** The transmitter warming up: a figure climbing a third per bar, pump
+ * bass underneath, tipping over on the G back into the chorus. */
+// prettier-ignore
+const V_TRANSMITTER: Section = {
+  chords: ["Dm", "Em", "F", "G", "Am", "F", "G", "G"],
+  lead: [
+    65, -1, 69, -1, 72, -1, 69, -1,   67, -1, 71, -1, 74, -1, 71, -1,
+    69, -1, 72, -1, 77, -1, 72, -1,   74, -1, -1, -1, 71, -1,  0,  0,
+    76, -1, 72, -1, 69, -1, 72, -1,   77, -1, -1, -1, 76, -1, 72, -1,
+    74, -1, 76, -1, 79, -1, 81, -1,   79, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "pump",
+  arp: true, leadVol: 0.24, crash: true, swing: 0.3,
+};
+
+/** Form: groove, on air, groove, on air, the caller, the transmitter, on air. */
+export const NIGHTWAVES_SONG: Song = {
+  bpm: 100,
+  arrangement: [V_VERSE, V_CHORUS, V_VERSE, V_CHORUS, V_CALLER, V_TRANSMITTER, V_CHORUS],
+};

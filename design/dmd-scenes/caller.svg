@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- NIGHT WAVES DMD scene: CALLER — a patch cord swings across the board and
+       seats in the jack; the hold-line lamp lights. Callers + the phone
+       ladder. 8 frames of 128x32 (style guide §6). Art rows 0..22; caption
+       renders from row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <g transform="translate(0,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 4.5 29 7.5 20" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="10" cy="20" r="1.8" fill="#888"/>
+    <line x1="6.5" y1="20" x2="9" y2="20" stroke="#888" stroke-width="1.4"/>
+    <circle cx="106" cy="1.8" r="1.4" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(128,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 12.15 20.54657697249032 24.5 11.546576972490323" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="27" cy="11.546576972490323" r="1.8" fill="#888"/>
+    <line x1="23.5" y1="11.546576972490323" x2="26" y2="11.546576972490323" stroke="#888" stroke-width="1.4"/>
+    <circle cx="106" cy="1.8" r="1.4" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(256,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 19.8 14.787321804458157 41.5 5.787321804458157" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="44" cy="5.787321804458157" r="1.8" fill="#888"/>
+    <line x1="40.5" y1="5.787321804458157" x2="43" y2="5.787321804458157" stroke="#888" stroke-width="1.4"/>
+    <circle cx="106" cy="1.8" r="1.4" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(384,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 27.45 13.387321804458157 58.5 4.387321804458156" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="61" cy="4.387321804458156" r="1.8" fill="#888"/>
+    <line x1="57.5" y1="4.387321804458156" x2="60" y2="4.387321804458156" stroke="#888" stroke-width="1.4"/>
+    <circle cx="106" cy="1.8" r="1.4" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(512,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 35.1 16.346576972490322 75.5 7.346576972490321" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="78" cy="7.346576972490321" r="1.8" fill="#888"/>
+    <line x1="74.5" y1="7.346576972490321" x2="77" y2="7.346576972490321" stroke="#888" stroke-width="1.4"/>
+    <circle cx="106" cy="1.8" r="1.4" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(640,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 42.75 22 92.5 13" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="95" cy="13" r="1.8" fill="#fff"/>
+    <line x1="91.5" y1="13" x2="94" y2="13" stroke="#888" stroke-width="1.4"/>
+    <circle cx="95" cy="13" r="3.2" fill="none" stroke="#fff" stroke-width="1.2"/>
+    <circle cx="106" cy="1.8" r="1.4" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(768,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 42.75 22 92.5 13" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="95" cy="13" r="1.8" fill="#fff"/>
+    <line x1="91.5" y1="13" x2="94" y2="13" stroke="#888" stroke-width="1.4"/>
+    <circle cx="95" cy="13" r="3.2" fill="none" stroke="#fff" stroke-width="1.2"/>
+    <circle cx="106" cy="1.8" r="1.6" fill="#fff"/>
+  </g>
+  <g transform="translate(896,0)">
+    <circle cx="84" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="6" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="13" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="84" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="95" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="106" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <circle cx="117" cy="20" r="2" fill="none" stroke="#666" stroke-width="1.2"/>
+    <path d="M 2 22 Q 42.75 22 92.5 13" fill="none" stroke="#666" stroke-width="1.1"/>
+    <circle cx="95" cy="13" r="1.8" fill="#fff"/>
+    <line x1="91.5" y1="13" x2="94" y2="13" stroke="#888" stroke-width="1.4"/>
+    <circle cx="95" cy="13" r="3.2" fill="none" stroke="#fff" stroke-width="1.2"/>
+    <circle cx="106" cy="1.8" r="1.6" fill="#fff"/>
+    <circle cx="106" cy="1.8" r="4" fill="none" stroke="#888" stroke-width="1.2"/>
+  </g>
+</svg>

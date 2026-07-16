@@ -28,6 +28,7 @@ import { MoondialLogic } from "../src/game/moondial";
 import { TidebreakerLogic } from "../src/game/tidebreaker";
 import { MidwayLogic } from "../src/game/midway";
 import { NightMailLogic } from "../src/game/nightmail";
+import { NightWavesLogic } from "../src/game/nightwaves";
 import { FLIPPER } from "../src/table/geometry";
 import { TABLE_SPECS, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
@@ -1404,11 +1405,327 @@ function nightmailSuite(): void {
   check("SIGNAL BOX releases on its timer", !sorting.holding);
 }
 
+// ═══════════════════════════ NIGHT WAVES ═══════════════════════════
+function nightwavesSuite(): void {
+  console.log("\n── nightwaves ──");
+  const rig = buildRig("nightwaves");
+  const { g, t, bus, ball, state, run, placeBall, wallR } = rig;
+  const logic = rig.logic as NightWavesLogic;
+  const phone = rig.kickers.find((k) => k.def.id === "phone")!;
+  const generator = rig.kickers.find((k) => k.def.id === "generator")!;
+  const switchboard = rig.kickers.find((k) => k.def.id === "switchboard")!;
+  rig.flippers[0].update(false, t);
+  rig.flippers[1].update(false, t);
+
+  // 1 — settles on the plunger saddle (shared envelope)
+  run(2);
+  {
+    const p = ball.body.getPosition();
+    const restY = g.plunger.saddleY - wallR - 0.0135;
+    check(
+      "ball settles ON the plunger saddle",
+      Math.abs(p.y - restY) < 0.004 && p.x > g.table.laneWallX,
+      `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 2 — full-power launch completes the City Sweep into the left lane,
+  // ripping the Dial spinner on the way
+  ball.body.setLinearVelocity(new Vec2(0, -t.plungerMaxSpeed));
+  let minY = g.table.height;
+  let minX = g.table.width;
+  run(3, () => {
+    const p = ball.body.getPosition();
+    minY = Math.min(minY, p.y);
+    minX = Math.min(minX, p.x);
+  });
+  check("launch reaches top of table", minY < 0.3, `minY=${minY.toFixed(3)}`);
+  check("launch completes the Sweep into the left lane", minX < 0.07, `minX=${minX.toFixed(3)}`);
+  check("the Dial spins on the launch", state.spins > 0, `ticks=${state.spins}`);
+
+  // 3 — drain fires through the centre gap
+  placeBall(0.26, 1.0);
+  run(0.5);
+  check("drain sensor fires", state.drained);
+
+  // 4 — fader bank: three cross-shots from the left drop the bank; CALLER lights
+  state.bankDone = false;
+  for (const tgt of g.dropTargets.targets) {
+    placeBall(0.42, tgt.y, 1.5, 0);
+    run(0.5);
+  }
+  check("fader bank drops + bonus", state.bankDone && rig.bank.targets.every((x) => !x.up));
+  check("faders up light CALLER at the switchboard", logic.kickerLit("switchboard"));
+  run(1.5);
+  check("faders reset after delay", rig.bank.targets.every((x) => x.up));
+
+  // 5 — a lit switchboard arrival puts a caller on hold (sensor-only zone)
+  state.labels.length = 0;
+  placeBall(0.132, 0.3, 0, 0.3);
+  let held = false;
+  run(3, () => {
+    if (switchboard.holding) held = true;
+  });
+  check("lit switchboard holds a caller", held, `held=${held}`);
+  check("the capture consumes CALLER", !logic.kickerLit("switchboard"));
+
+  // 6 — traps: seams, tip gap, guide creeps, unlit outlanes, and every
+  // pocket this table introduces
+  for (const [label, x, y] of [
+    ["left seam drop", 0.178, 0.915],
+    ["right seam drop", 0.342, 0.915],
+    ["tip gap drop", 0.26, 0.915],
+    ["left guide creep", 0.113, 0.912],
+    ["right guide creep", 0.407, 0.912],
+    ["left outlane (generator unlit)", 0.026, 0.75],
+    ["right outlane (side door unlit)", 0.494, 0.75],
+    ["deflector wedge", 0.02, 0.6],
+    ["phone mouth dead drop", 0.24, 0.5],
+    ["fader recess drop", 0.475, 0.47],
+    ["aerial throat dead drop", 0.168, 0.66],
+    ["switchboard zone rest (unlit)", 0.132, 0.37],
+    ["deck rest", 0.32, 0.64],
+    ["mast landing zone dead drop", 0.117, 0.1],
+  ] as const) {
+    state.drained = false;
+    placeBall(x, y);
+    run(10);
+    const p = ball.body.getPosition();
+    check(`${label} does not trap the ball`, state.drained, `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)}) layer=${ball.layer}`);
+  }
+
+  // 7 — rooftop aerial bumper kicks
+  placeBall(0.28, 0.18, 0, 0.8);
+  let maxSpeed = 0;
+  run(0.4, () => {
+    const v = ball.body.getLinearVelocity();
+    maxSpeed = Math.max(maxSpeed, Math.hypot(v.x, v.y));
+  });
+  check(
+    "aerial bumper fires and kicks",
+    state.hits.some((h) => h === "bumper:1") && maxSpeed > 1.0,
+    `maxSpeed=${maxSpeed.toFixed(2)}`,
+  );
+
+  // 8 — W-A-V-E lane rollover fires + the clock advances
+  placeBall(0.225, 0.07);
+  run(1);
+  check("A lane rollover fires", state.sensors.includes("rollover:2"));
+  for (const id of ["1", "2", "3", "4"]) bus.emit("sensor", { kind: "rollover", id });
+  check(
+    "W-A-V-E advances the clock + lights the generator",
+    logic.kickerLit("generator") && rig.scoring.multiplier === 2,
+  );
+
+  // 9 — the generator kickback saves a left-outlane ball
+  state.drained = false;
+  placeBall(0.026, 0.8);
+  let genFired = false;
+  let kickMinY = 1.1;
+  run(4, () => {
+    if (generator.holding) genFired = true;
+    if (genFired && !generator.holding) kickMinY = Math.min(kickMinY, ball.body.getPosition().y);
+  });
+  check("lit generator kickback saves the ball", genFired && kickMinY < 0.6, `minY=${kickMinY.toFixed(3)}`);
+  check("generator consumes its light", !logic.kickerLit("generator"));
+
+  // 10 — the aerial run: a straight-up left-flipper shot boards the
+  // surface, climbs, releases airborne at the mast and pays AERIAL RUN
+  state.labels.length = 0;
+  state.drained = false;
+  placeBall(0.168, 0.75, 0, -2.2);
+  let onRun = false;
+  let maxZ = 0;
+  run(8, () => {
+    if (ball.layer === 1) onRun = true;
+    maxZ = Math.max(maxZ, ball.height.z);
+  });
+  check("aerial shot boards the run", onRun);
+  check("the climb really climbs", maxZ > 0.028, `maxZ=${(maxZ * 1000).toFixed(0)}mm`);
+  check("mast drop-off pays AERIAL RUN", state.labels.includes("AERIAL RUN"));
+  check("release returns to ground", ball.layer === 0, `layer=${ball.layer} z=${ball.height.z.toFixed(3)}`);
+
+  // 10b — a weak shot stalls on the climb and rolls back out of the mouth
+  state.labels.length = 0;
+  placeBall(0.168, 0.75, 0, -1.0);
+  run(4);
+  check(
+    "failed climb rolls back to the field",
+    ball.layer === 0 && !state.labels.includes("AERIAL RUN"),
+    `layer=${ball.layer}`,
+  );
+
+  // 10c — a ball dropping in behind the run deflects off its solid back
+  placeBall(0.15, 0.42, 0, 0.9);
+  let throatBreach = false;
+  run(10, () => {
+    const p = ball.body.getPosition();
+    if (ball.layer === 0 && p.x > 0.14 && p.x < 0.19 && p.y > 0.52 && p.y < 0.62)
+      throatBreach = true;
+  });
+  check("run back deflects a ball falling in behind it", !throatBreach);
+
+  // 11 — the City Sweep scores (left-lane shot up around the arch)
+  state.labels.length = 0;
+  placeBall(0.0325, 0.53, 0, -2.3);
+  run(3);
+  check("Sweep entry+exit both fire", state.sensors.includes("ramp-entry") && state.sensors.includes("ramp-exit"));
+  check("City Sweep scores", state.labels.includes("CITY SWEEP"), `score=${rig.scoring.total}`);
+
+  // 12 — the phone: capture, request award, side door lights, eject left
+  rig.scoring.reset();
+  logic.resetGame();
+  state.labels.length = 0;
+  state.drained = false;
+  placeBall(0.272, 0.56, 0, -1.1);
+  let phoneCaught = false;
+  run(1, () => {
+    if (phone.holding) phoneCaught = true;
+  });
+  check("the phone captures the shot", phoneCaught && state.sensors.includes("kicker:phone"));
+  let ejectX = NaN;
+  run(4, () => {
+    const p = ball.body.getPosition();
+    if (Number.isNaN(ejectX) && !phone.holding && p.y >= 0.95) ejectX = p.x;
+  });
+  check(
+    "phone kickout feeds the left flipper",
+    !phone.holding && ejectX > 0.05 && ejectX < 0.27,
+    `crossed y=0.95 at x=${Number.isNaN(ejectX) ? "never" : ejectX.toFixed(3)}`,
+  );
+  check("first request awarded (REQUEST)", state.labels.includes("REQUEST"));
+  check("phone capture lights the side door", logic.kickerLit("sidedoor"));
+
+  // 13 — the side door (lit): the right outlane dives down the back
+  // stairs and resurfaces in the LEFT INLANE — and is not a drain
+  state.drained = false;
+  placeBall(0.494, 0.75);
+  let rode = false;
+  let outX = NaN;
+  let outY = NaN;
+  run(6, () => {
+    if (ball.layer === -1) rode = true;
+    if (rode && ball.layer === 0 && Number.isNaN(outX)) {
+      outX = ball.body.getPosition().x;
+      outY = ball.body.getPosition().y;
+    }
+  });
+  check(
+    "lit side door returns the ball to the left inlane",
+    rode && state.sensors.includes("subway:sidedoor") && outX < 0.12 && outY > 0.65 && outY < 0.78,
+    `resurfaced at (${outX.toFixed(3)}, ${outY.toFixed(3)})`,
+  );
+  check("the ride back is not a drain", !state.drained || ball.body.getPosition().y > 0.9);
+  check("side door consumes its light", !logic.kickerLit("sidedoor"));
+
+  // 14 — the dial: spins tune the transmitter; a tuned ride pays the boost
+  logic.resetGame();
+  rig.scoring.reset();
+  state.labels.length = 0;
+  placeBall(0.5475, 0.95); // park on the saddle away from all sensors
+  run(1.5);
+  for (let i = 0; i < 10; i++) bus.emit("spinnerTick", {});
+  run(0.1);
+  check("ten spins tune the transmitter (deck drifts)", logic.discSpin() === 2.5);
+  const syntheticRide = () => {
+    bus.emit("surface", { from: "field", to: "aerial", x: 0.168, y: 0.7, z: 0 });
+    run(0.1);
+    bus.emit("surface", { from: "aerial", to: "air", x: 0.11, y: 0.12, z: 0.034 });
+    run(0.1);
+  };
+  syntheticRide();
+  check("the tuned ride pays SIGNAL BOOST", state.labels.includes("SIGNAL BOOST"));
+  check("the boost consumes the light (deck parks)", logic.discSpin() === 0);
+
+  // 15 — the ruleset, synthetically: clock to DAWN, ON AIR, jackpots +
+  // the perfect segue, then THE DAWN CHORUS
+  state.modeEvents.length = 0;
+  // five sets from the fresh game: 1 AM → 5 AM (dawn)
+  for (let round = 0; round < 5; round++)
+    for (const id of ["1", "2", "3", "4"]) bus.emit("sensor", { kind: "rollover", id });
+  check("clock reaches 5 AM (multiplier capped ×6)", rig.scoring.multiplier === 6);
+  check("hour lamps track the clock", logic.lamp("h5") === 1 && logic.lamp("h1") === 1);
+  // three callers: bank + a captured switchboard ball each time
+  for (let c = 0; c < 3; c++) {
+    bus.emit("bankComplete", {});
+    placeBall(0.132, 0.3, 0, 0.3);
+    run(4); // capture + hold + eject + fall away
+  }
+  check("three callers start ON AIR", state.modeEvents.includes("onairStart"));
+  check("ON AIR doubles scoring", rig.scoring.eclipseFactor === 2);
+  run(0.1);
+  check("the deck spins during ON AIR", rig.discs[0].spin > 0);
+  state.labels.length = 0;
+  const syntheticSweep = () => {
+    bus.emit("sensor", { kind: "ramp-entry" });
+    run(0.1);
+    bus.emit("sensor", { kind: "ramp-exit" });
+    run(0.1);
+  };
+  syntheticSweep();
+  check("the Sweep pays jackpot during ON AIR", state.labels.includes("SWEEP JACKPOT"));
+  syntheticRide(); // the other shot inside the segue window
+  check(
+    "the other shot inside the window pays the PERFECT SEGUE",
+    state.labels.includes("AERIAL JACKPOT") && state.labels.includes("PERFECT SEGUE"),
+  );
+  run(26);
+  check(
+    "ON AIR ends after its duration",
+    state.modeEvents.includes("onairEnd") && rig.scoring.eclipseFactor === 1,
+  );
+  check("chorus lights after dawn + on air + boost", state.modeEvents.includes("chorusReady"));
+  state.drained = false;
+  placeBall(0.272, 0.56, 0, -1.1);
+  run(2);
+  check("the phone starts THE DAWN CHORUS", state.modeEvents.includes("chorusStart"));
+  check("the chorus doubles scoring", rig.scoring.eclipseFactor === 2);
+  run(31);
+  check(
+    "the chorus ends after its duration",
+    state.modeEvents.includes("chorusEnd") && rig.scoring.eclipseFactor === 1,
+  );
+
+  // 16 — REQUEST SHOW: the B-SIDE lights it; the next phone capture holds
+  // the ball for the mode's whole duration (extended hold), then releases
+  logic.resetGame();
+  rig.scoring.reset();
+  for (let i = 0; i < 3; i++) {
+    placeBall(0.272, 0.56, 0, -1.1);
+    run(4); // capture + award + eject (request, shout-out, dedication)
+  }
+  state.labels.length = 0;
+  placeBall(0.272, 0.56, 0, -1.1);
+  run(4);
+  check("fourth capture awards the MYSTERY B-SIDE", state.labels.includes("MYSTERY B-SIDE"));
+  placeBall(0.272, 0.56, 0, -1.1);
+  run(4); // capture; the request show holds past the 2s holdS
+  check("REQUEST SHOW holds the ball past holdS", phone.holding);
+  run(9);
+  check("REQUEST SHOW releases on its timer", !phone.holding);
+
+  // 17 — DEAD AIR: armed by scoring, the idle clock drains listeners
+  logic.resetGame();
+  rig.scoring.reset();
+  placeBall(0.5475, 0.95); // park on the saddle, out of harm's way
+  run(1.5);
+  bus.emit("sensor", { kind: "kicker", id: "phone" }); // no capture (ball in lane): no score
+  rig.scoring.award(1000, "TEST"); // arm the clock
+  rig.scoring.bonusUnits = 400;
+  run(21); // warnS 14 + drainS 6, plus slack
+  check(
+    "dead air drains listeners after the idle window",
+    rig.scoring.bonusUnits < 400,
+    `units=${rig.scoring.bonusUnits}`,
+  );
+}
+
 const which = process.argv[2] as TableId | undefined;
 if (!which || which === "moondial") moondialSuite();
 if (!which || which === "tidebreaker") tidebreakerSuite();
 if (!which || which === "midway") midwaySuite();
 if (!which || which === "nightmail") nightmailSuite();
+if (!which || which === "nightwaves") nightwavesSuite();
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

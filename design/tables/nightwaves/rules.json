@@ -1,0 +1,77 @@
+{
+  "comment": "Night Waves rules metadata (plan §5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/nightwaves.ts. Design truth: design/tables/nightwaves/BRIEF.md.",
+  "points": {
+    "bumper": 100,
+    "sling": 50,
+    "rollover": 500,
+    "spinnerTick": 100,
+    "target": 500,
+    "bankComplete": 5000,
+    "orbit": 3000
+  },
+  "bonusUnits": {
+    "rollover": 500,
+    "target": 250,
+    "spinnerTick": 10
+  },
+  "sweepCombo": {
+    "comment": "The City Sweep (full orbit): repeat sweeps inside the window escalate ×2 per step.",
+    "windowS": 10,
+    "maxStep": 3
+  },
+  "dial": {
+    "comment": "The Dial: spinner spins tune the transmitter; TUNED arms one Signal Boost on the Aerial Run (and the deck starts its slow drift).",
+    "spinsToTune": 10,
+    "boostPoints": 4000,
+    "bonusUnit": 500
+  },
+  "aerial": {
+    "comment": "A completed Aerial Run ride (mouth to mast). Tuned rides pay the boost instead.",
+    "points": 2000,
+    "bonusUnit": 250
+  },
+  "phone": {
+    "comment": "The Phone scoop: each capture awards the next request (wrapping); the MYSTERY B-SIDE advances the Clock an hour and lights REQUEST SHOW; every capture lights the Side Door.",
+    "holdS": 2.0,
+    "bonusUnit": 500,
+    "items": [
+      { "name": "REQUEST", "points": 5000 },
+      { "name": "SHOUT-OUT", "points": 10000 },
+      { "name": "DEDICATION", "points": 15000 },
+      { "name": "MYSTERY B-SIDE", "points": 25000 }
+    ]
+  },
+  "clock": {
+    "comment": "Completing W-A-V-E advances one hour; the bonus multiplier tracks the hour (capped) and each completion lights the GENERATOR kickback. Letters lane-change on the flippers and persist across balls.",
+    "hours": ["1 AM", "2 AM", "3 AM", "4 AM", "5 AM"],
+    "maxMultiplier": 6
+  },
+  "requestShow": {
+    "comment": "DMD video mode (M12 pattern): lit by the MYSTERY B-SIDE; the scoop holds the ball while the flippers cue SIDE A / SIDE B ahead of the needle. All five cues right puts a caller on the line.",
+    "requests": 5,
+    "requestValue": 3000,
+    "clearAllCaller": true,
+    "durationS": 11
+  },
+  "onAir": {
+    "comment": "Fader bank completion lights CALLER; a lit switchboard capture puts a caller on hold (physical lock). callersRequired on the line starts ON AIR — durationS of ×scoreFactor with jackpots on the Aerial Run and the City Sweep; the other shot within segueS of a jackpot pays the PERFECT SEGUE bonus. Lit switchboard arrivals mid-mode pay CALLER JACKPOT.",
+    "callersRequired": 3,
+    "durationS": 25,
+    "jackpot": 20000,
+    "scoreFactor": 2,
+    "segueS": 5,
+    "segueBonus": 20000
+  },
+  "dawnChorus": {
+    "comment": "Wizard mode: reach 5 AM, start one ON AIR and make one Signal Boost; the Phone then lights for THE DAWN CHORUS.",
+    "durationS": 30,
+    "jackpot": 25000,
+    "scoreFactor": 2
+  },
+  "deadAir": {
+    "comment": "Score nothing for warnS and the DMD dissolves to static; every drainS after that a slice of the listeners tunes out (bonus units shrink). Armed by the first score of each ball.",
+    "warnS": 14,
+    "drainS": 6,
+    "lossFraction": 0.25
+  }
+}
