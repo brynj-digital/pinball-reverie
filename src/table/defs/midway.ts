@@ -35,10 +35,22 @@ const GEOMETRY: TableGeometry = {
     upper: { x: 0.49, y: 0.3, side: "right" },
   },
   /** Dodgem bumpers, an asymmetric cluster mid-arena. */
+  /**
+   * THE DODGEMS (differentiation pass 2026-07-17): FIVE small bumper cars
+   * (r 22 mm vs the lineup-standard 3 x 28 mm) scattered across the arena
+   * the striker wire crosses — the one table where breaking the 3-bumper
+   * rule is the fiction. Placement solved against the gap bands: pairwise
+   * centre distance >= 82 mm (edge gaps > 38), clear of the striker
+   * rails' ball-height mouth run (x > ~310), the striker-back, the top
+   * dividers, the ghost pocket and the booth hood; bumper 5 sits 6.5 mm
+   * off the striker-back's end cap (< 13.5 mm = sealed, legal).
+   */
   bumpers: [
-    { id: "1", x: 0.24, y: 0.225, r: 0.028 },
-    { id: "2", x: 0.335, y: 0.255, r: 0.028 },
-    { id: "3", x: 0.272, y: 0.335, r: 0.028 },
+    { id: "1", x: 0.2, y: 0.235, r: 0.022 },
+    { id: "2", x: 0.255, y: 0.31, r: 0.022 },
+    { id: "3", x: 0.345, y: 0.315, r: 0.022 },
+    { id: "4", x: 0.222, y: 0.39, r: 0.022 },
+    { id: "5", x: 0.285, y: 0.22, r: 0.022 },
   ],
   /** Bunting rigs above the inlanes; hypotenuse is the kicking face. */
   slings: [

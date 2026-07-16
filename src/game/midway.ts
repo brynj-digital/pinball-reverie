@@ -45,6 +45,7 @@ export class MidwayLogic implements TableLogic {
   private litLanes = new Set<string>();
   private gondolas = 0;
   private wheelTurns = 0;
+  private skillUsed = false;
   private prizeIdx = 0;
   private boothLit = false;
   private chickenLit = false;
@@ -122,6 +123,7 @@ export class MidwayLogic implements TableLogic {
   }
 
   endBall(): void {
+    this.skillUsed = false;
     this.comboStep = 0;
     this.lastLoopAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -344,6 +346,20 @@ export class MidwayLogic implements TableLogic {
   }
 
   // ── the ferris wheel ──
+
+  /** TEST YOUR STRENGTH: soft plunge peaking in the lane band. Once per
+   * ball; pays and loads a gondola. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "strength" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "TEST YOUR STRENGTH");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["TEST YOUR STRENGTH", fmtScore(points)]], 1.4, true), 2);
+    this.loadGondola("SKILL SHOT");
+  }
 
   private loadGondola(source: string): void {
     this.gondolas++;

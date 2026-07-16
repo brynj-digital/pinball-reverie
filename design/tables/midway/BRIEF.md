@@ -1,9 +1,35 @@
 # Midnight Midway — Table 3 design brief
 
-**Status: v1 built (2026-07-05).** `playfield.svg` + `rules.json` +
-`src/table/defs/midway.ts` + `src/game/midway.ts` are now the specifics;
-this brief remains the design intent. Table id: `midway`. Deltas from the
-concept, found during clearance-solving and simcheck/soak:
+**Status: v1 built (2026-07-05); differentiation pass 2026-07-17.**
+`playfield.svg` + `rules.json` + `src/table/defs/midway.ts` +
+`src/game/midway.ts` are now the specifics; this brief remains the design
+intent. Table id: `midway`.
+
+Differentiation pass (2026-07-17, plan item 1.3):
+
+- **THE DODGEMS** — the lineup's "always 3 bumpers" rule broken where the
+  fiction begs for it: FIVE small bumper cars (r 22 mm) scattered across
+  the arena, replacing the standard 3 × 28 mm nest. Placement solved
+  against the gap bands (pairwise centre distance ≥ 82 mm; clear of the
+  striker rails' ball-height mouth run x > ~310, the striker-back, the
+  dividers, the ghost pocket and the booth hood; car 5 sits 6.5 mm off
+  the striker-back's end cap — < 13.5 mm, sealed). Feature-rates:
+  bumper hits 65–68/600 s vs 13–27 baseline; striker boards (47–55),
+  Sky Ride entries/exits, coaster boards and ghost/stamp/chicken rates
+  all hold their baseline class across seeds 1–3.
+- **Soak-found trap (budgeted for):** seed 2 rested a ball at (153, 569),
+  the dead-end strip between the coaster underbrace and the flat
+  coaster-back, entered SIDEWAYS through the height-gated rails (the
+  P-column rework sealed the top of this strip; the side door was
+  latent). Fix: the coaster-back is now SLOPED (`M 137 570 L 189 592`,
+  z-max 10 unchanged) — the underbrace's own shed-left trick — so a
+  resting ball rolls off through the rail where it is gated off and
+  rejoins the orbit-arm corridor. Simcheck carries the regression spot.
+- **TEST YOUR STRENGTH** — the skill shot (STYLE-GUIDE §4):
+  `sensor-skill-strength`, ≤ 0.75 m/s pays 15,000 + loads a gondola,
+  once per ball.
+
+Deltas from the concept, found during clearance-solving and simcheck/soak:
 
 - **Every Sky Ride loop feeds the mallet** (reworked after play found the
   original speed-sorted return starved the feature). An **arch catcher**

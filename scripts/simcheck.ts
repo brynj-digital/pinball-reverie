@@ -902,6 +902,10 @@ function midwaySuite(): void {
     ["right outlane (chicken unlit)", 0.494, 0.75],
     ["deflector wedge", 0.02, 0.6],
     ["ghost pocket dead drop", 0.24, 0.51],
+    // dodgem-soak-found (seed 2): the strip between the coaster underbrace
+    // and the (now sloped) coaster-back — a side-entered ball must shed
+    // left through the gated rail into the orbit-arm corridor
+    ["coaster back-strip dead rest", 0.153, 0.569],
     ["booth mouth dead drop", 0.35, 0.47],
     ["tower recess drop", 0.482, 0.47],
     ["coaster mouth drop (layer 0)", 0.163, 0.69],
