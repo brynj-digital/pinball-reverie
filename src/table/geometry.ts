@@ -208,7 +208,13 @@ export interface TableGeometry {
   /** Multiplier-lane lamp indicator positions (sensors live in the SVG). */
   rollovers: readonly RolloverDef[];
   lamps: readonly LampDef[];
-  spinner: { x: number; y: number; halfW: number };
+  /**
+   * Spinner placement. `tilt` (rad, default 0) rotates the bar in the table
+   * plane so its axle lies ACROSS the lane it spans — 0 suits a vertical
+   * lane (bar horizontal); a diagonal channel needs the lane's direction
+   * minus 90° (the Night Mail's signal wire crosses the top-right channel).
+   */
+  spinner: { x: number; y: number; halfW: number; tilt?: number };
   kickers: readonly KickerDef[];
   subways: readonly SubwayDef[];
   /** M12 entities (optional: pre-Night-Mail tables simply have none). */
