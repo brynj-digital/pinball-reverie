@@ -91,8 +91,10 @@ const GEOMETRY: TableGeometry = {
     { id: "banker", x: 0.026, y: 0.868, rgb: "57, 255, 20" },
     { id: "loop", x: 0.494, y: 0.838, rgb: "57, 255, 20" },
   ],
-  /** The signal wire: spinner in the top-right channel (launch + orbit). */
-  spinner: { x: 0.487, y: 0.177, halfW: 0.03 },
+  /** The signal wire: spinner in the top-right channel (launch + orbit).
+   * The channel runs along the orbit diagonal (409,134)→(520,300), so the
+   * bar tilts to lie across the ball's path: atan2(166,111) − 90° ≈ −0.59. */
+  spinner: { x: 0.487, y: 0.177, halfW: 0.03, tilt: -0.59 },
   kickers: [
     {
       /** Sorting Office scoop, mid-field; ejects to the left flipper. */

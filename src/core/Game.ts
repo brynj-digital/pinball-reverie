@@ -288,12 +288,15 @@ export class Game {
     this.table.renderData.backglassSvgText = assets.backglassSvg;
     this.ball = new Ball(this.physics.world, this.tuning, g.table.spawn, this.table.surfaces);
     // M11 height gate: rails only touch a ball at their height. M12: the
-    // contact's own ball resolves by its fixture tag (multiball); parked
-    // lock balls gate at their own (ground) height.
+    // contact's own ball resolves by its fixture tag (multiball). Parked
+    // lock balls are contact GHOSTS: out of play means out of physics —
+    // a solid parked wagon forms a stable cradle against any nearby wall
+    // and traps live balls (playtest-found); ghosting removes the whole
+    // failure class. They resolidify the moment releaseLocks fires.
     this.physics.setZGate((tag, x, y, ballTag) => {
-      const locked = this.lockedBerths.find((L) => L.ball.id === ballTag?.ballId);
-      const z = locked ? locked.ball.height.z : this.ballById(ballTag?.ballId).height.z;
-      return contactApplies(tag, this.table.surfaces, x, y, z);
+      if (this.isLocked(ballTag?.ballId)) return false;
+      if (tag.kind === "ball" && this.isLocked(tag.ballId)) return false;
+      return contactApplies(tag, this.table.surfaces, x, y, this.ballById(ballTag?.ballId).height.z);
     });
     // support changes drive table logic (ramp rides) + sensor resense
     this.wireBallEvents(this.ball);
@@ -1429,7 +1432,9 @@ export class Game {
             angle: L.ball.body.getAngle(),
             vx: 0,
             vy: 0,
-            alpha: 1,
+            // parked wagons are contact ghosts — a touch of transparency
+            // so a live ball passing through reads as intended, not a bug
+            alpha: 0.8,
             h: 0,
             layer: 0,
           };

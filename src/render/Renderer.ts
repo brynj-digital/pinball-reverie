@@ -69,7 +69,8 @@ export interface ElementsSnapshot {
   rollovers: { x: number; y: number; lit: number }[];
   /** Extra insert lamps (e.g. depth gauge); rgb feeds the additive glow. */
   lamps: { x: number; y: number; rgb: string; lit: number }[];
-  spinner: { x: number; y: number; halfW: number; angle: number; spin: number };
+  /** tilt: table-plane rotation of the bar (rad) so it lies across its lane. */
+  spinner: { x: number; y: number; halfW: number; angle: number; spin: number; tilt?: number };
   /** M12: the solid blade of each diverter, as a table-space polyline. */
   diverters: { id: string; blade: string; pts: { x: number; y: number }[] }[];
   /** M12: magnet cores (r = capture radius; lit while armed). */

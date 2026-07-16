@@ -565,17 +565,22 @@ export class Renderer2D implements Renderer {
       this.drawGlow(l.x, l.y, 0.022, l.rgb, l.lit);
     }
 
-    // spinner — bar whose projected thickness fakes rotation about the lane axis
+    // spinner — bar whose projected thickness fakes rotation about the lane
+    // axis; tilt lays the bar across a diagonal lane (Night Mail's channel)
     const sp = el.spinner;
     this.drawGlow(sp.x, sp.y, 0.03, "244, 210, 122", sp.spin * 0.9);
     const thick = Math.max(0.003, 0.013 * Math.abs(Math.cos(sp.angle)));
+    ctx.save();
+    ctx.translate(sp.x, sp.y);
+    ctx.rotate(sp.tilt ?? 0);
     ctx.fillStyle = "#e0b64e";
     ctx.strokeStyle = "#07080d";
     ctx.lineWidth = 0.0015;
     ctx.beginPath();
-    ctx.rect(sp.x - sp.halfW + 0.004, sp.y - thick / 2, sp.halfW * 2 - 0.008, thick);
+    ctx.rect(-sp.halfW + 0.004, -thick / 2, sp.halfW * 2 - 0.008, thick);
     ctx.fill();
     ctx.stroke();
+    ctx.restore();
 
     // slingshots — rubber over a table-accent lamp (STYLE-GUIDE §7): the
     // chrome-800 body rounds the physics triangle's corners (render-side

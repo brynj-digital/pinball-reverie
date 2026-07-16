@@ -49,6 +49,17 @@ simcheck/soak/feature-rates:
   be created inside a second ball at the summit — `Diverter.setBlade` now
   skips the swap while any live ball overlaps the incoming blade and
   retries next frame (the STYLE-GUIDE §4 authoring caution, enforced).
+- **Parked wagons are contact ghosts (playtest-found, 2026-07-16):** a
+  SOLID parked lock ball formed a stable two-contact cradle against the
+  exchange wall and trapped a live ball on top of it — a failure class
+  the ball-gap rules can't see (one contact is a ball, and berth tuning
+  can't remove it anywhere near furniture). Locked balls now collide with
+  nothing (rendered at 0.8 alpha so a pass-through reads as intended) and
+  resolidify the instant DEPARTURE releases them. The incline track also
+  now builds in the 3D renderer (layer-1 profiles without data-surface —
+  a lift is a carry, not a rideable surface), and the signal-wire spinner
+  carries `tilt` so its bar lies across the diagonal channel in both
+  renderers.
 
 **Premise:** an overnight mail train runs a single dark line from the city
 terminus up over the moors to make the dawn connection. The tall scrolling

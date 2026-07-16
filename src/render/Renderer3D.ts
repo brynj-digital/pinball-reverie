@@ -417,7 +417,15 @@ export class Renderer3D implements Renderer {
     );
     const tube = (a: THREE.Vector3, b: THREE.Vector3, r: number, mat: THREE.Material) =>
       this.scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(a, b), 1, r, 8, false), mat));
-    for (const surf of buildSurfaces(parsed.profiles)) {
+    // Lift tracks (M12): layer-1 profiles WITHOUT data-surface are scripted
+    // carries — no physics surface exists (the ball can't free-ride them),
+    // but the track itself must: build the same wireform/bed/posts over
+    // them (the Night Mail's incline). Narrow gauge: the carry is a cradle,
+    // not a channel.
+    const liftTracks = parsed.profiles
+      .filter((p) => p.layer === 1 && !p.surface)
+      .map((p) => ({ name: p.name, profiles: [p], halfWidth: 0.013 }));
+    for (const surf of [...buildSurfaces(parsed.profiles), ...liftTracks]) {
       // merge the chained profiles into one run with per-point height
       const run: { x: number; y: number; h: number }[] = [];
       for (const prof of surf.profiles) {
@@ -832,8 +840,13 @@ export class Renderer3D implements Renderer {
         }),
       ),
     );
-    this.spinnerMesh.position.set(sp.x, BALL_RADIUS, sp.y);
-    this.scene.add(this.spinnerMesh);
+    // tilt lays the axle across a diagonal lane (the table-plane rotation
+    // is about the scene Y axis, negated: table y maps to scene z)
+    const spinnerRig = new THREE.Group();
+    spinnerRig.position.set(sp.x, BALL_RADIUS, sp.y);
+    spinnerRig.rotation.y = -(sp.tilt ?? 0);
+    spinnerRig.add(this.spinnerMesh);
+    this.scene.add(spinnerRig);
   }
 
   spawnEffect(kind: EffectKind, x: number, y: number): void {
