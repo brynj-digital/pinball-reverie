@@ -97,10 +97,16 @@ const GEOMETRY: TableGeometry = {
   spinner: { x: 0.487, y: 0.177, halfW: 0.03, tilt: -0.59 },
   kickers: [
     {
-      /** Sorting Office scoop, mid-field; ejects to the left flipper. */
+      /**
+       * Sorting Office scoop, mid-field; ejects to the RIGHT flipper
+       * (differentiation pass — the lineup's only right-hand scoop return:
+       * left-flipper feed in, right-flipper ball out, an alternating-hands
+       * loop). Eject clears the incline-left wall by ~10 mm (x 312.5 vs
+       * edge 322 at y 690, simcheck-verified landing on the right bat).
+       */
       id: "sorting",
       hold: { x: 0.272, y: 0.45 },
-      eject: { x: -0.12, y: 0.99 },
+      eject: { x: 0.12, y: 0.99 },
       holdS: rules.sorting.holdS,
       cooldownS: 0.4,
     },

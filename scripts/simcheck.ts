@@ -1335,8 +1335,8 @@ function nightmailSuite(): void {
     if (Number.isNaN(ejectX) && !sorting.holding && p.y >= 0.95) ejectX = p.x;
   });
   check(
-    "sorting kickout feeds the left flipper",
-    !sorting.holding && ejectX > 0.05 && ejectX < 0.27,
+    "sorting kickout feeds the RIGHT flipper",
+    !sorting.holding && ejectX > 0.27 && ejectX < 0.49,
     `crossed y=0.95 at x=${Number.isNaN(ejectX) ? "never" : ejectX.toFixed(3)}`,
   );
   check("first item awarded (POSTCARD)", state.labels.includes("POSTCARD"));
@@ -1517,6 +1517,36 @@ function nightmailSuite(): void {
   check("SIGNAL BOX holds the ball past holdS", sorting.holding);
   run(9);
   check("SIGNAL BOX releases on its timer", !sorting.holding);
+  // THE SIGNAL skill shot (differentiation pass): soft plunge holds at the
+  // signal — pays and spots a timetable letter; a full plunge does not
+  {
+    const rigS = buildRig("nightmail");
+    rigS.flippers[0].update(false, rigS.t);
+    rigS.flippers[1].update(false, rigS.t);
+    rigS.run(2);
+    let sawSignal = false;
+    rigS.bus.on("score", ({ label }) => {
+      if (label === "THE SIGNAL") sawSignal = true;
+    });
+    rigS.ball.body.setLinearVelocity(new Vec2(0, -1.2));
+    rigS.run(3);
+    check(
+      "soft plunge pays THE SIGNAL and spots a letter",
+      sawSignal && (rigS.logic as NightMailLogic).laneLit("1") > 0,
+      `total=${rigS.scoring.total}`,
+    );
+    const rigF = buildRig("nightmail");
+    rigF.flippers[0].update(false, rigF.t);
+    rigF.flippers[1].update(false, rigF.t);
+    rigF.run(2);
+    let sawFull = false;
+    rigF.bus.on("score", ({ label }) => {
+      if (label === "THE SIGNAL") sawFull = true;
+    });
+    rigF.ball.body.setLinearVelocity(new Vec2(0, -rigF.t.plungerMaxSpeed));
+    rigF.run(3);
+    check("full plunge does not qualify (nightmail)", !sawFull);
+  }
 }
 
 // ═══════════════════════════ SMALL HOURS ═══════════════════════════

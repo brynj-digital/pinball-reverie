@@ -1,8 +1,30 @@
 # The Night Mail — Table 4 design brief
 
-**Status: v1 built (2026-07-16).** `playfield.svg` + `rules.json` +
-`src/table/defs/nightmail.ts` + `src/game/nightmail.ts` are now the
-specifics; this brief remains the design intent. Table id: `nightmail`.
+**Status: v1 built (2026-07-16); differentiation pass 2026-07-17.**
+`playfield.svg` + `rules.json` + `src/table/defs/nightmail.ts` +
+`src/game/nightmail.ts` are now the specifics; this brief remains the
+design intent. Table id: `nightmail`.
+
+Differentiation pass (2026-07-17, plan item 1.4):
+
+- **The sorting office ejects RIGHT** — the lineup's only right-hand
+  scoop return: left-flipper feed in, right-flipper ball out, an
+  alternating-hands loop (`eject (0.12, 0.99)`, threading the incline-left
+  wall by ~10 mm; simcheck lands it on the right bat at x 0.300).
+- **The planned relocation was tried and ABANDONED** (plan said move to
+  ~(330,470)): that spot sits under the incline's carry corridor, and the
+  wall-hung alternative (Moondial's telescope housing) has no clean feed
+  here — the incline corridor blocks the left-flipper diagonal, and the
+  right-inlane throat (x 436–450 between sling edge and guide) is too
+  narrow for any single-impulse eject to thread (the ballistic spread
+  ratio ≥ 1.3 over the throat's height vs the 1.365 the corridor allows —
+  and Slingshot kicks on ANY face contact, so grazing the sling's
+  vertical edge misfires the kick). The eject hand alone re-maps the
+  flow; position stays.
+- **THE SIGNAL** — the skill shot (STYLE-GUIDE §4): `sensor-skill-signal`
+  y 440–500, ≤ 0.75 m/s pays 15,000 + one spotted timetable letter, once
+  per ball ("held at the signal" — the fiction writes itself).
+
 Deltas from the concept, found during clearance-solving and
 simcheck/soak/feature-rates:
 

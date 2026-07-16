@@ -372,7 +372,11 @@
            tangent to its flipper base circle past the apex -->
       <path data-width="12" id="collision-wall-guide-left" d="M 52 690 L 52 905 L 174.2 938.4"/>
       <path data-width="12" id="collision-wall-guide-right" d="M 470 690 L 470 905 L 345.9 938.4"/>
-      <!-- sorting-office hood: mouth opens down-left, never traps -->
+      <!-- sorting-office hood: mouth opens down-left, never traps. The
+           eject hand flipped RIGHT in the differentiation pass (see defs) —
+           relocation was tried and abandoned: the mid-field sits under the
+           incline's carry corridor and a wall-hung scoop has no clean feed
+           here (the incline blocks the left-flipper diagonal). -->
       <path data-width="12" id="collision-wall-sorting-hood" d="M 316 460 L 314.3 453.7 L 311.8 444.9 L 308 437 L 302.6 431.3 L 296 426.6 L 289 423 L 281.9 420.5 L 274.4 419.1 L 267 419 L 259.3 420.5 L 251.7 423.3 L 245 427 L 239.5 432.3 L 235 438.6 L 232 443"/>
       <!-- signal gantry housing: recess brackets off the orbit wall -->
       <path data-width="12" id="collision-wall-bank-housing" d="M 65 415 L 82 423 L 82 547 L 65 555"/>
@@ -452,6 +456,7 @@
 
   <!-- ═══════════════ sensors (invisible; zones only) ═══════════════ -->
   <g fill="none" stroke="none">
+    <rect id="sensor-skill-signal" x="526" y="440" width="43" height="60"/>
     <rect id="sensor-drain" x="0" y="1005" width="520" height="30"/>
     <rect id="sensor-rollover-1" x="147" y="105" width="30" height="20"/>
     <rect id="sensor-rollover-2" x="210" y="105" width="30" height="20"/>

@@ -101,6 +101,7 @@ export class NightMailLogic implements TableLogic {
   private lastExpressAt = -Infinity;
   // timetable
   private litLanes = new Set<string>();
+  private skillUsed = false;
   private station = 0;
   private terminus = false;
   // points
@@ -192,6 +193,7 @@ export class NightMailLogic implements TableLogic {
   }
 
   endBall(): void {
+    this.skillUsed = false;
     this.expressStep = 0;
     this.lastExpressAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -231,6 +233,10 @@ export class NightMailLogic implements TableLogic {
 
   /** M-A-I-L lanes: all four advance the timetable + light the banker. */
   onRollover(id: string): void {
+    this.spotLetter(id);
+  }
+
+  private spotLetter(id: string): void {
     this.litLanes.add(id);
     if (this.litLanes.size === 4) {
       this.litLanes.clear();
@@ -248,6 +254,21 @@ export class NightMailLogic implements TableLogic {
       );
       this.checkConnectionReady();
     }
+  }
+
+  /** THE SIGNAL: soft plunge peaking in the lane band. Once per ball. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "signal" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "THE SIGNAL");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["THE SIGNAL", fmtScore(points)]], 1.4, true), 2);
+    // spot one uncollected timetable letter (shared completion logic)
+    const unlit = ["1", "2", "3", "4"].find((m) => !this.litLanes.has(m));
+    if (unlit) this.spotLetter(unlit);
   }
 
   /** Classic lane change: flippers rotate the collected letters. */
