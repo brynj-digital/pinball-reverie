@@ -15,7 +15,7 @@ const LANE_IDS = ["1", "2", "3", "4"] as const;
  * resolve without this scene ever updating). The scene draws the junction
  * ladder, the little train, and the lever state from the logic's state.
  */
-class SignalBoxScene implements DmdScene {
+export class SignalBoxScene implements DmdScene {
   constructor(
     private read: () => {
       active: boolean;
@@ -31,24 +31,34 @@ class SignalBoxScene implements DmdScene {
     const s = this.read();
     if (!s.active) return true;
     dmd.clear();
-    dmd.centerText("SIGNAL BOX", 0, 2);
+    // NB: text/set take dot LEVELS 0–4 (dim→hi), not font sizes — level 1
+    // is near-black on the smoked glass; keep everything readable at 2+
+    // (an early draft at 1/2 made the whole mode look like a dead panel)
+    dmd.centerText("SIGNAL BOX", 0, 3);
     // the line: a dotted track with 5 junctions; the train is a 3-dot block
     const y = 16;
-    for (let x = 6; x < 122; x += 2) dmd.set(x, y, 1);
+    for (let x = 6; x < 122; x += 2) dmd.set(x, y, 2);
     const n = s.required.length;
     for (let i = 0; i < n; i++) {
       const jx = 14 + Math.round((i * 100) / (n - 1));
       const res = s.results[i];
       // junction glyph: switch blade up (left) or down (right); brightness
-      // shows outcome once passed
-      const lv = res === null ? 2 : res ? 4 : 1;
+      // shows the outcome once passed (missed goes dim, cleared goes hot)
+      const lv = res === null ? 3 : res ? 4 : 1;
       const dir = s.required[i] === "left" ? -1 : 1;
       for (let k = 0; k <= 3; k++) dmd.set(jx + k, y + k * dir, lv);
     }
     const tx = 6 + Math.round(s.progress * 112);
     for (let k = -2; k <= 2; k++) dmd.set(tx + k, y - 5, 4);
     dmd.set(tx + 3, y - 5, 2); // lamp at the front
-    dmd.centerText(`LEVER ${s.lever === "left" ? "UP" : "DOWN"}  ${s.cleared} CLEAR`, 25, 1);
+    // the lever, as a fat arrow at the left edge — flipper presses must
+    // visibly DO something or the whole hold reads as a hang
+    const ly = s.lever === "left" ? 9 : 23;
+    for (let k = 0; k < 3; k++) {
+      dmd.set(1 + k, ly - k, 4);
+      dmd.set(1 + k, ly + k, 4);
+    }
+    dmd.centerText(`LEVER ${s.lever === "left" ? "UP" : "DOWN"}  ${s.cleared} CLEAR`, 25, 3);
     return false;
   }
 }
@@ -538,9 +548,11 @@ export class NightMailLogic implements TableLogic {
   }
 
   // ─────────────────── SIGNAL BOX (M12 video mode) ───────────────────
-  // Timer-driven: junction i resolves at sbStart + 1.5 + i×1.8; the whole
-  // mode ends at rules.signalBox.durationS regardless of the DMD, so the
-  // headless sims (no DotMatrix) release the held ball on schedule.
+  // Timer-driven: junction i resolves at sbStart + 2.2 + i×1.6 (the first
+  // AFTER the 1.4 s intro card — the player must see the ladder before it
+  // starts judging); the whole mode ends at rules.signalBox.durationS
+  // regardless of the DMD, so the headless sims (no DotMatrix) release the
+  // held ball on schedule.
 
   private startSignalBox(): void {
     this.signalBoxLit = false;
@@ -555,10 +567,11 @@ export class NightMailLogic implements TableLogic {
     this.ctx.sfx("multiplier");
     this.ctx.push(
       new SequenceScene([
-        new MessageScene([["SIGNAL BOX", "FLIPPERS PULL THE LEVERS"]], 1.4, true),
+        // 21 glyphs max on the second row: 128 dots / 6-per-glyph
+        new MessageScene([["SIGNAL BOX", "FLIPPERS SET THE ROAD"]], 1.4, true),
         new SignalBoxScene(() => ({
           active: this.sbActive,
-          progress: Math.min(1, Math.max(0, (this.now - this.sbStart - 1.5) / (1.8 * (rules.signalBox.junctions - 1) + 0.9))),
+          progress: Math.min(1, Math.max(0, (this.now - this.sbStart - 2.2) / (1.6 * (rules.signalBox.junctions - 1) + 0.8))),
           lever: this.sbLever,
           required: this.sbRequired,
           results: this.sbResults,
@@ -572,7 +585,7 @@ export class NightMailLogic implements TableLogic {
   private updateSignalBox(): void {
     const t = this.now - this.sbStart;
     for (let i = 0; i < this.sbRequired.length; i++) {
-      if (this.sbResults[i] === null && t >= 1.5 + i * 1.8) {
+      if (this.sbResults[i] === null && t >= 2.2 + i * 1.6) {
         const ok = this.sbLever === this.sbRequired[i];
         this.sbResults[i] = ok;
         if (ok) {
