@@ -39,14 +39,15 @@ export function saveHapticsPref(on: boolean): void {
 export class Haptics {
   enabled = loadHapticsPref();
 
-  /** Crisp tick for a flipper press or plunger launch. */
+  /** Crisp tick for a flipper press or plunger launch. Not shorter: ERM
+   * motors need ~20ms+ to spin up — 12ms proved imperceptible on hardware. */
   tick(): void {
-    this.pulse(12);
+    this.pulse(25);
   }
 
   /** Heavier thump for a nudge — the whole cabinet moved. */
   nudge(): void {
-    this.pulse(30);
+    this.pulse(50);
   }
 
   private pulse(ms: number): void {
