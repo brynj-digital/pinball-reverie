@@ -327,6 +327,111 @@
     <rect x="0" y="0" width="575" height="1050" fill="url(#vignette)"/>
   </g>
 
+  <!-- ═══════════════ art polish (2026-07-17): the abyss dressed ═══════════════
+       Kelp on the port side, bubble streams, depth ticks down the dive lane,
+       sonar rings around the buoys, a fish school, one anglerfish in the
+       dark, the wreck on the trench floor, portholes and hull rivets. -->
+  <defs>
+    <radialGradient id="tpPort" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffdf9e" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#ffdf9e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g id="art-polish">
+      <circle cx="46" cy="852" r="1.2" fill="none" stroke="#37707e" stroke-width="1" opacity="0.55"/>
+      <circle cx="53" cy="821" r="1.6" fill="none" stroke="#37707e" stroke-width="1" opacity="0.49"/>
+      <circle cx="50" cy="788" r="2.1" fill="none" stroke="#37707e" stroke-width="1" opacity="0.43"/>
+      <circle cx="41" cy="756" r="2.5" fill="none" stroke="#37707e" stroke-width="1" opacity="0.37"/>
+      <circle cx="40" cy="720" r="3.0" fill="none" stroke="#37707e" stroke-width="1" opacity="0.31"/>
+      <circle cx="48" cy="681" r="3.5" fill="none" stroke="#37707e" stroke-width="1" opacity="0.25"/>
+      <circle cx="53" cy="646" r="3.9" fill="none" stroke="#37707e" stroke-width="1" opacity="0.19"/>
+      <circle cx="348" cy="694" r="1.2" fill="none" stroke="#37707e" stroke-width="1" opacity="0.55"/>
+      <circle cx="355" cy="657" r="1.6" fill="none" stroke="#37707e" stroke-width="1" opacity="0.49"/>
+      <circle cx="352" cy="622" r="2.1" fill="none" stroke="#37707e" stroke-width="1" opacity="0.43"/>
+      <circle cx="343" cy="596" r="2.5" fill="none" stroke="#37707e" stroke-width="1" opacity="0.37"/>
+      <circle cx="342" cy="564" r="3.0" fill="none" stroke="#37707e" stroke-width="1" opacity="0.31"/>
+      <circle cx="350" cy="526" r="3.5" fill="none" stroke="#37707e" stroke-width="1" opacity="0.25"/>
+      <circle cx="355" cy="495" r="3.9" fill="none" stroke="#37707e" stroke-width="1" opacity="0.19"/>
+      <circle cx="498" cy="635" r="1.2" fill="none" stroke="#37707e" stroke-width="1" opacity="0.55"/>
+      <circle cx="505" cy="594" r="1.6" fill="none" stroke="#37707e" stroke-width="1" opacity="0.49"/>
+      <circle cx="502" cy="565" r="2.1" fill="none" stroke="#37707e" stroke-width="1" opacity="0.43"/>
+      <circle cx="493" cy="537" r="2.5" fill="none" stroke="#37707e" stroke-width="1" opacity="0.37"/>
+      <circle cx="492" cy="494" r="3.0" fill="none" stroke="#37707e" stroke-width="1" opacity="0.31"/>
+      <circle cx="500" cy="468" r="3.5" fill="none" stroke="#37707e" stroke-width="1" opacity="0.25"/>
+      <circle cx="505" cy="426" r="3.9" fill="none" stroke="#37707e" stroke-width="1" opacity="0.19"/>
+      <path d="M 20 902 C 11 839.0 31 776.0 16 690" fill="none" stroke="#1c5c50" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <path d="M 20 850 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 20 808 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 20 766 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 20 724 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 34 902 C 25 854.0 45 806.0 30 740" fill="none" stroke="#1c5c50" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <path d="M 34 862 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 34 830 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 34 798 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 34 766 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 48 902 C 39 846.5 59 791.0 44 715" fill="none" stroke="#1c5c50" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+      <path d="M 48 856 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 48 819 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 48 782 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <path d="M 48 745 q 12 -5 17 -14" fill="none" stroke="#1c5c50" stroke-width="2.4" stroke-linecap="round" opacity="0.6"/>
+      <line x1="70" y1="300" x2="82" y2="300" stroke="#2fc9d6" stroke-width="1.6" opacity="0.55"/>
+      <text x="87" y="303" font-family="ui-monospace, monospace" font-size="8" fill="#2fc9d6" opacity="0.6">100M</text>
+      <line x1="70" y1="382" x2="82" y2="382" stroke="#2fc9d6" stroke-width="1.6" opacity="0.55"/>
+      <text x="87" y="385" font-family="ui-monospace, monospace" font-size="8" fill="#2fc9d6" opacity="0.6">200M</text>
+      <line x1="70" y1="464" x2="82" y2="464" stroke="#2fc9d6" stroke-width="1.6" opacity="0.55"/>
+      <text x="87" y="467" font-family="ui-monospace, monospace" font-size="8" fill="#2fc9d6" opacity="0.6">300M</text>
+      <line x1="70" y1="546" x2="82" y2="546" stroke="#2fc9d6" stroke-width="1.6" opacity="0.55"/>
+      <text x="87" y="549" font-family="ui-monospace, monospace" font-size="8" fill="#2fc9d6" opacity="0.6">400M</text>
+      <circle cx="207" cy="272" r="52" fill="none" stroke="#2fc9d6" stroke-width="1.2" stroke-dasharray="4 9" opacity="0.26"/>
+      <circle cx="207" cy="272" r="78" fill="none" stroke="#2fc9d6" stroke-width="1.2" stroke-dasharray="4 9" opacity="0.22"/>
+      <circle cx="207" cy="272" r="104" fill="none" stroke="#2fc9d6" stroke-width="1.2" stroke-dasharray="4 9" opacity="0.17"/>
+      <path d="M 322 836 q 5 -3 9 0 q -4 3 -9 0 M 331 836 l 4 -3 l 0 6 Z" fill="#37707e" opacity="0.7"/>
+      <path d="M 339 762 q 5 -3 9 0 q -4 3 -9 0 M 348 762 l 4 -3 l 0 6 Z" fill="#37707e" opacity="0.7"/>
+      <path d="M 404 784 q 5 -3 9 0 q -4 3 -9 0 M 413 784 l 4 -3 l 0 6 Z" fill="#37707e" opacity="0.7"/>
+      <path d="M 343 785 q 5 -3 9 0 q -4 3 -9 0 M 352 785 l 4 -3 l 0 6 Z" fill="#37707e" opacity="0.7"/>
+      <path d="M 419 768 q 5 -3 9 0 q -4 3 -9 0 M 428 768 l 4 -3 l 0 6 Z" fill="#37707e" opacity="0.7"/>
+      <path d="M 397 771 q 5 -3 9 0 q -4 3 -9 0 M 406 771 l 4 -3 l 0 6 Z" fill="#37707e" opacity="0.7"/>
+      <path d="M 358 840 q 5 -3 9 0 q -4 3 -9 0 M 367 840 l 4 -3 l 0 6 Z" fill="#37707e" opacity="0.7"/>
+      <g opacity="0.9" transform="translate(108,838)">
+        <path d="M 0 0 q 16 -12 34 -3 q 8 4 6 10 q -14 10 -32 4 q -8 -4 -8 -11" fill="#0b1e27" stroke="#143641" stroke-width="1.6"/>
+        <path d="M 6 -4 q 6 -14 16 -16" fill="none" stroke="#143641" stroke-width="1.6"/>
+        <circle cx="22" cy="-20" r="3" fill="#e8ff6a" opacity="0.9"/>
+        <circle cx="22" cy="-20" r="7" fill="#e8ff6a" opacity="0.2"/>
+        <circle cx="10" cy="1" r="1.6" fill="#e8ff6a" opacity="0.8"/>
+        <path d="M 34 2 l 9 -5 l 0 11 Z" fill="#0b1e27" stroke="#143641" stroke-width="1.2"/>
+      </g>
+      <g opacity="0.9">
+        <path d="M 140 1050 L 168 992 L 196 1050" fill="none" stroke="#0b1e27" stroke-width="7"/>
+        <path d="M 208 1050 L 232 984 L 258 1050" fill="none" stroke="#0b1e27" stroke-width="7"/>
+        <path d="M 272 1050 L 292 996 L 314 1050" fill="none" stroke="#0b1e27" stroke-width="7"/>
+        <path d="M 120 1034 Q 240 962 372 1030" fill="none" stroke="#143641" stroke-width="4"/>
+        <rect x="330" y="1006" width="34" height="20" rx="3" fill="#0b1e27" stroke="#143641" stroke-width="1.6" transform="rotate(-12 347 1016)"/>
+        <circle cx="344" cy="1012" r="3.4" fill="none" stroke="#37707e" stroke-width="1.2"/>
+      </g>
+      <circle cx="58" cy="668" r="9" fill="#241a08" stroke="#9c7c2c" stroke-width="2.4"/>
+      <circle cx="58" cy="668" r="5" fill="#ffdf9e" opacity="0.55"/>
+      <circle cx="58" cy="668" r="16" fill="url(#tpPort)"/>
+      <circle cx="462" cy="668" r="9" fill="#241a08" stroke="#9c7c2c" stroke-width="2.4"/>
+      <circle cx="462" cy="668" r="5" fill="#ffdf9e" opacity="0.55"/>
+      <circle cx="462" cy="668" r="16" fill="url(#tpPort)"/>
+      <circle cx="18" cy="214" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="30" cy="172" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="49" cy="133" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="74" cy="98" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="106" cy="68" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="141" cy="44" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="181" cy="27" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="223" cy="17" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="266" cy="14" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="309" cy="19" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="351" cy="31" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="389" cy="51" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="424" cy="76" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="453" cy="108" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="477" cy="144" r="1.6" fill="#37707e" opacity="0.6"/>
+      <circle cx="494" cy="184" r="1.6" fill="#37707e" opacity="0.6"/>
+  </g>
+
   <!-- ═══════════════ collision (rendered as layered steel rails) ═══════════════
        One set of paths = both physics and art. data-width feeds the physics
        radius (width/2); data-layer="1" walls are the elevated winch ramp +

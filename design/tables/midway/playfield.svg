@@ -544,6 +544,73 @@
     <rect x="0" y="0" width="575" height="1050" fill="url(#vignette)"/>
   </g>
 
+  <!-- ═══════════════ art polish (2026-07-17): the park, louder ═══════════════
+       Midway runs the accent budget hot (STYLE-GUIDE §2 amendment): balloon
+       bundle, bulb strings down both walks, the duck-shoot row over the
+       ghost mouth, dropped tickets + popcorn, a helter-skelter, the
+       fortune-teller's tent, paver ellipses up the midway. -->
+  <g id="art-polish">
+      <ellipse cx="78" cy="392" rx="9" ry="11" fill="#ff3e9a" stroke="#07080d" stroke-width="1.4" opacity="0.92"/>
+      <path d="M 78 403 q 3 12 -2 24" fill="none" stroke="#aeb6c8" stroke-width="1" opacity="0.7"/>
+      <ellipse cx="94" cy="376" rx="9" ry="11" fill="#2fc9d6" stroke="#07080d" stroke-width="1.4" opacity="0.92"/>
+      <path d="M 94 387 q 3 12 -2 24" fill="none" stroke="#aeb6c8" stroke-width="1" opacity="0.7"/>
+      <ellipse cx="108" cy="394" rx="9" ry="11" fill="#f4d27a" stroke="#07080d" stroke-width="1.4" opacity="0.92"/>
+      <path d="M 108 405 q 3 12 -2 24" fill="none" stroke="#aeb6c8" stroke-width="1" opacity="0.7"/>
+      <ellipse cx="88" cy="410" rx="9" ry="11" fill="#8c6bff" stroke="#07080d" stroke-width="1.4" opacity="0.92"/>
+      <path d="M 88 421 q 3 12 -2 24" fill="none" stroke="#aeb6c8" stroke-width="1" opacity="0.7"/>
+      <path d="M 86 434 q 8 6 16 0" fill="none" stroke="#aeb6c8" stroke-width="1.2" opacity="0.7"/>
+      <circle cx="60" cy="700" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="74" cy="732" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="88" cy="760" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="101" cy="783" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="115" cy="801" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="129" cy="819" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="142" cy="840" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="156" cy="866" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="170" cy="897" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="460" cy="700" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="446" cy="732" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="432" cy="760" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="419" cy="783" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="405" cy="801" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="391" cy="819" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="378" cy="840" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <circle cx="364" cy="866" r="2.4" fill="#ffdf9e" opacity="0.6"/>
+      <circle cx="350" cy="897" r="2.4" fill="#ffdf9e" opacity="0.85"/>
+      <g transform="translate(214,520)" opacity="0.9"><path d="M 0 0 q 6 -8 12 -2 q 6 -1 6 4 q -2 5 -10 5 l -8 0 q -3 -3 0 -7" fill="#f4d27a" stroke="#07080d" stroke-width="1.2"/><circle cx="10" cy="-1" r="1" fill="#07080d"/></g>
+      <g transform="translate(240,520)" opacity="0.9"><path d="M 0 0 q 6 -8 12 -2 q 6 -1 6 4 q -2 5 -10 5 l -8 0 q -3 -3 0 -7" fill="#f4d27a" stroke="#07080d" stroke-width="1.2"/><circle cx="10" cy="-1" r="1" fill="#07080d"/></g>
+      <g transform="translate(266,520)" opacity="0.9"><path d="M 0 0 q 6 -8 12 -2 q 6 -1 6 4 q -2 5 -10 5 l -8 0 q -3 -3 0 -7" fill="#f4d27a" stroke="#07080d" stroke-width="1.2"/><circle cx="10" cy="-1" r="1" fill="#07080d"/></g>
+      <g transform="translate(292,520)" opacity="0.9"><path d="M 0 0 q 6 -8 12 -2 q 6 -1 6 4 q -2 5 -10 5 l -8 0 q -3 -3 0 -7" fill="#f4d27a" stroke="#07080d" stroke-width="1.2"/><circle cx="10" cy="-1" r="1" fill="#07080d"/></g>
+      <line x1="208" y1="528" x2="322" y2="528" stroke="#8a4d9e" stroke-width="2.4" opacity="0.8"/>
+      <rect x="320" y="480" width="12" height="7" rx="1.4" fill="#ff3e9a" stroke="#07080d" stroke-width="1" opacity="0.85" transform="rotate(20 326 483)"/>
+      <rect x="342" y="500" width="12" height="7" rx="1.4" fill="#ff3e9a" stroke="#07080d" stroke-width="1" opacity="0.85" transform="rotate(-15 348 503)"/>
+      <rect x="300" y="505" width="12" height="7" rx="1.4" fill="#ff3e9a" stroke="#07080d" stroke-width="1" opacity="0.85" transform="rotate(40 306 508)"/>
+      <circle cx="346" cy="590" r="2" fill="#fff4d6" stroke="#07080d" stroke-width="0.8" opacity="0.8"/>
+      <circle cx="383" cy="613" r="2" fill="#fff4d6" stroke="#07080d" stroke-width="0.8" opacity="0.8"/>
+      <circle cx="380" cy="602" r="2" fill="#fff4d6" stroke="#07080d" stroke-width="0.8" opacity="0.8"/>
+      <circle cx="377" cy="591" r="2" fill="#fff4d6" stroke="#07080d" stroke-width="0.8" opacity="0.8"/>
+      <circle cx="374" cy="614" r="2" fill="#fff4d6" stroke="#07080d" stroke-width="0.8" opacity="0.8"/>
+      <circle cx="371" cy="603" r="2" fill="#fff4d6" stroke="#07080d" stroke-width="0.8" opacity="0.8"/>
+      <g transform="translate(96,586)" opacity="0.95">
+        <polygon points="0,0 26,0 20,54 6,54" fill="#2b1638" stroke="#07080d" stroke-width="1.6"/>
+        <path d="M 1 8 L 25 16 M 2 20 L 24 28 M 4 34 L 22 40" stroke="#ff3e9a" stroke-width="4" opacity="0.85"/>
+        <polygon points="-4,0 30,0 13,-16" fill="#8a4d9e" stroke="#07080d" stroke-width="1.6"/>
+        <circle cx="13" cy="-18" r="2.4" fill="#ffdf9e"/>
+      </g>
+      <g transform="translate(392,300)" opacity="0.95">
+        <path d="M 0 26 Q 2 4 16 -6 Q 30 4 32 26 Z" fill="#3d1f4d" stroke="#07080d" stroke-width="1.6"/>
+        <path d="M 8 26 Q 12 12 16 8 Q 20 12 24 26 Z" fill="#1c0f26" stroke="#07080d" stroke-width="1.2"/>
+        <path d="M 16 -6 l 0 -7 l 7 3 l -7 3" fill="#ff3e9a" stroke="#07080d" stroke-width="1"/>
+        <circle cx="16" cy="18" r="3" fill="#8c6bff" opacity="0.85"/>
+      </g>
+      <ellipse cx="260" cy="640" rx="60" ry="7" fill="none" stroke="#45215a" stroke-width="1.6" opacity="0.34"/>
+      <ellipse cx="260" cy="682" rx="55" ry="7" fill="none" stroke="#45215a" stroke-width="1.6" opacity="0.31"/>
+      <ellipse cx="260" cy="724" rx="50" ry="7" fill="none" stroke="#45215a" stroke-width="1.6" opacity="0.28"/>
+      <ellipse cx="260" cy="766" rx="45" ry="7" fill="none" stroke="#45215a" stroke-width="1.6" opacity="0.25"/>
+      <ellipse cx="260" cy="808" rx="40" ry="7" fill="none" stroke="#45215a" stroke-width="1.6" opacity="0.22"/>
+      <ellipse cx="260" cy="850" rx="35" ry="7" fill="none" stroke="#45215a" stroke-width="1.6" opacity="0.19"/>
+  </g>
+
   <!-- ═══════════════ collision (rendered as layered plum rails) ═══════════════
        One set of paths = both physics and art. data-width feeds the physics
        radius (width/2); data-layer="1" walls are the elevated coaster circuit

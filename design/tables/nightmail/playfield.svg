@@ -331,6 +331,79 @@
     <rect x="0" y="0" width="575" height="1050" fill="url(#vignette)"/>
   </g>
 
+  <!-- ═══════════════ art polish (2026-07-17): the permanent way dressed ═══════════════
+       Sleepers + twin rails down the main line, telegraph poles with sagging
+       wires, a semaphore at the points, the station clock over the sorting
+       office, mail bags and a parcel trolley at the siding, steam wisps, the
+       platform edge stripe and a mile post. -->
+  <g id="art-polish">
+      <line x1="20" y1="330" x2="48" y2="330" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="354" x2="48" y2="354" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="378" x2="48" y2="378" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="402" x2="48" y2="402" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="426" x2="48" y2="426" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="450" x2="48" y2="450" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="474" x2="48" y2="474" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="498" x2="48" y2="498" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="522" x2="48" y2="522" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="546" x2="48" y2="546" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="570" x2="48" y2="570" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="20" y1="594" x2="48" y2="594" stroke="#1a241e" stroke-width="4" opacity="0.8"/>
+      <line x1="26" y1="322" x2="26" y2="608" stroke="#6e937f" stroke-width="1.8" opacity="0.5"/>
+      <line x1="42" y1="322" x2="42" y2="608" stroke="#6e937f" stroke-width="1.8" opacity="0.5"/>
+      <line x1="468" y1="348" x2="468" y2="306" stroke="#2c4434" stroke-width="3" opacity="0.9"/>
+      <line x1="460" y1="310" x2="476" y2="310" stroke="#2c4434" stroke-width="2.4" opacity="0.9"/>
+      <circle cx="462" cy="308" r="1.2" fill="#aeb6c8" opacity="0.8"/>
+      <circle cx="474" cy="308" r="1.2" fill="#aeb6c8" opacity="0.8"/>
+      <line x1="452" y1="452" x2="452" y2="410" stroke="#2c4434" stroke-width="3" opacity="0.9"/>
+      <line x1="444" y1="414" x2="460" y2="414" stroke="#2c4434" stroke-width="2.4" opacity="0.9"/>
+      <circle cx="446" cy="412" r="1.2" fill="#aeb6c8" opacity="0.8"/>
+      <circle cx="458" cy="412" r="1.2" fill="#aeb6c8" opacity="0.8"/>
+      <line x1="438" y1="556" x2="438" y2="514" stroke="#2c4434" stroke-width="3" opacity="0.9"/>
+      <line x1="430" y1="518" x2="446" y2="518" stroke="#2c4434" stroke-width="2.4" opacity="0.9"/>
+      <circle cx="432" cy="516" r="1.2" fill="#aeb6c8" opacity="0.8"/>
+      <circle cx="444" cy="516" r="1.2" fill="#aeb6c8" opacity="0.8"/>
+      <path d="M 462 308 Q 450 374 446 412" fill="none" stroke="#6e937f" stroke-width="1" opacity="0.55"/>
+      <path d="M 446 412 Q 435 478 432 516" fill="none" stroke="#6e937f" stroke-width="1" opacity="0.55"/>
+      <g transform="translate(128,196)" opacity="0.95">
+        <line x1="0" y1="0" x2="0" y2="-40" stroke="#2c4434" stroke-width="3.4"/>
+        <rect x="0" y="-38" width="20" height="6" rx="1" fill="#b0121f" stroke="#07080d" stroke-width="1.2"/>
+        <rect x="14" y="-37" width="4" height="4" fill="#ffffff" opacity="0.9"/>
+        <circle cx="3" cy="-26" r="2.6" fill="#39ff14" opacity="0.95"/>
+        <circle cx="3" cy="-18" r="2.6" fill="#b0121f" opacity="0.6"/>
+      </g>
+      <g transform="translate(388,404)" opacity="0.95">
+        <circle r="13" fill="#101613" stroke="#9c7c2c" stroke-width="2.4"/>
+        <circle r="10" fill="none" stroke="#2c4434" stroke-width="1"/>
+        <line x1="0" y1="0" x2="0" y2="-7" stroke="#e0b64e" stroke-width="1.6"/>
+        <line x1="0" y1="0" x2="4.5" y2="2.5" stroke="#e0b64e" stroke-width="1.2"/>
+        <circle r="1.2" fill="#e0b64e"/>
+        <line x1="0" y1="13" x2="0" y2="22" stroke="#2c4434" stroke-width="2.4"/>
+      </g>
+      <g transform="translate(58,320)" opacity="0.92">
+        <path d="M 0 14 q -2 -12 7 -14 q 9 2 7 14 q -1 5 -7 5 q -6 0 -7 -5" fill="#3a2f1e" stroke="#07080d" stroke-width="1.3"/>
+        <path d="M 4 2 l 6 0" stroke="#9c7c2c" stroke-width="1.6"/>
+        <path d="M 18 16 q -2 -10 6 -12 q 8 2 6 12 q -1 4 -6 4 q -5 0 -6 -4" fill="#46381f" stroke="#07080d" stroke-width="1.3"/>
+      </g>
+      <g transform="translate(40,600)" opacity="0.92">
+        <rect x="0" y="0" width="26" height="4" fill="#2c4434" stroke="#07080d" stroke-width="1"/>
+        <circle cx="5" cy="7" r="3" fill="none" stroke="#6e937f" stroke-width="1.4"/>
+        <circle cx="21" cy="7" r="3" fill="none" stroke="#6e937f" stroke-width="1.4"/>
+        <line x1="26" y1="0" x2="32" y2="-8" stroke="#2c4434" stroke-width="1.6"/>
+        <rect x="4" y="-6" width="8" height="6" fill="#46381f" stroke="#07080d" stroke-width="1"/>
+        <rect x="13" y="-6" width="7" height="6" fill="#3a2f1e" stroke="#07080d" stroke-width="1"/>
+      </g>
+      <g transform="translate(90,240) scale(1.0)" opacity="0.35"><path d="M 0 0 q 8 -10 2 -20 q -6 -8 2 -18" fill="none" stroke="#aeb6c8" stroke-width="4" stroke-linecap="round"/><path d="M 12 4 q 7 -9 2 -17" fill="none" stroke="#aeb6c8" stroke-width="3" stroke-linecap="round"/></g>
+      <g transform="translate(140,480) scale(0.8)" opacity="0.35"><path d="M 0 0 q 8 -10 2 -20 q -6 -8 2 -18" fill="none" stroke="#aeb6c8" stroke-width="4" stroke-linecap="round"/><path d="M 12 4 q 7 -9 2 -17" fill="none" stroke="#aeb6c8" stroke-width="3" stroke-linecap="round"/></g>
+      <g transform="translate(72,700) scale(0.7)" opacity="0.35"><path d="M 0 0 q 8 -10 2 -20 q -6 -8 2 -18" fill="none" stroke="#aeb6c8" stroke-width="4" stroke-linecap="round"/><path d="M 12 4 q 7 -9 2 -17" fill="none" stroke="#aeb6c8" stroke-width="3" stroke-linecap="round"/></g>
+      <path d="M 60 356 L 60 420" stroke="#ffdf9e" stroke-width="2.4" stroke-dasharray="8 6" opacity="0.5"/>
+      <g transform="translate(492,620)" opacity="0.9">
+        <rect x="-3" y="-22" width="6" height="22" fill="#2c4434" stroke="#07080d" stroke-width="1"/>
+        <circle cy="-26" r="6" fill="#101613" stroke="#6e937f" stroke-width="1.6"/>
+        <text y="-23" text-anchor="middle" font-family="ui-monospace, monospace" font-size="7" fill="#6e937f">86</text>
+      </g>
+  </g>
+
   <!-- ═══════════════ collision (rendered as layered slate rails) ═══════════════
        One set of paths = both physics and art. data-width feeds the physics
        radius (width/2). The orbit inner wall is SPLIT at the summit: the gap
