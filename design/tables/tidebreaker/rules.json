@@ -76,5 +76,12 @@
     "maxSpeed": 0.75,
     "points": 15000,
     "bonusUnit": 500
+  },
+  "sonar": {
+    "comment": "SONAR SWEEP (DMD video mode): completing the haul list lights it; the next dive-bell capture holds the ball while a sweep line crosses - flip as it passes each contact. Timer-driven (sim-safe).",
+    "durationS": 10,
+    "pings": 3,
+    "pingValue": 15000,
+    "windowS": 0.4
   }
 }

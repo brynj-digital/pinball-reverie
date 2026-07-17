@@ -1,6 +1,57 @@
 import type { TableLogic, TableLogicCtx } from "./TableLogic";
+import type { DmdScene } from "../render/dmd/DmdScene";
+import type { DotMatrix } from "../render/dmd/DotMatrix";
 import { BakedDmdScene, MessageScene, SequenceScene, fmtScore } from "../render/dmd/DmdScene";
 import rules from "../../design/tables/moondial/rules.json";
+
+/**
+ * ALIGN THE SCOPE — the DMD video mode (SIGNAL BOX pattern: pure display,
+ * MoondialLogic owns every timer and outcome; the headless sims resolve
+ * the mode without this scene ever updating).
+ */
+export class AlignScopeScene implements DmdScene {
+  constructor(
+    private read: () => {
+      active: boolean;
+      offset: number; // reticle offset from the star, dots
+      results: (boolean | null)[];
+      locking: boolean; // inside the judge flash window
+    },
+  ) {}
+
+  update(_dt: number, dmd: DotMatrix): boolean {
+    const s = this.read();
+    if (!s.active) return true;
+    dmd.clear();
+    dmd.centerText("ALIGN THE SCOPE", 0, 3);
+    // the star, fixed at centre; the reticle drifts around it
+    const cx = 64;
+    const cy = 16;
+    dmd.set(cx, cy, 4);
+    dmd.set(cx - 1, cy, 2);
+    dmd.set(cx + 1, cy, 2);
+    dmd.set(cx, cy - 1, 2);
+    dmd.set(cx, cy + 1, 2);
+    const rx = cx + Math.round(s.offset);
+    const lv = s.locking ? 4 : 3;
+    for (let k = -1; k <= 1; k++) {
+      dmd.set(rx - 5, cy + k, lv);
+      dmd.set(rx + 5, cy + k, lv);
+      dmd.set(rx + k, cy - 4, lv);
+      dmd.set(rx + k, cy + 4, lv);
+    }
+    // result stars along the bottom
+    s.results.forEach((r, i) => {
+      const x = 52 + i * 12;
+      const level = r === null ? 1 : r ? 4 : 2;
+      dmd.set(x, 27, level);
+      dmd.set(x - 1, 28, level);
+      dmd.set(x + 1, 28, level);
+      dmd.set(x, 29, level);
+    });
+    return false;
+  }
+}
 
 /** Entry→exit (either direction) within this window counts as an orbit. */
 const ORBIT_PAIR_WINDOW = 3.5;
@@ -40,6 +91,13 @@ export class MoondialLogic implements TableLogic {
   private eclipseWasActive = false;
   private litMoons = new Set<string>();
   private skillUsed = false;
+  private scopeLit = false;
+  private asActive = false;
+  private asStart = 0;
+  private asOffset = 0;
+  private asDrift = 1;
+  private asResults: (boolean | null)[] = [];
+  private eclipseStartTotal = 0;
 
   constructor(private ctx: TableLogicCtx) {
     ctx.bus.on("sensor", ({ kind }) => {
@@ -79,16 +137,44 @@ export class MoondialLogic implements TableLogic {
 
   update(dt: number): void {
     this.now += dt;
+    if (this.asActive) this.updateAlignScope(dt);
     if (this.eclipseWasActive && !this.eclipseActive) {
       this.eclipseWasActive = false;
       this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "eclipseEnd" });
-      this.ctx.push(new MessageScene([["ECLIPSE OVER"]], 1.2), 2);
+      this.ctx.push(
+        new MessageScene(
+          [["ECLIPSE OVER"], ["ECLIPSE TOTAL", fmtScore(this.ctx.scoring.total - this.eclipseStartTotal)]],
+          1.3,
+        ),
+        2,
+      );
     }
+  }
+
+  /** Live ticker for the score readout (DMD pass). */
+  dmdStatus(): string | undefined {
+    if (this.eclipseActive) return `ECLIPSE ${Math.ceil(this.eclipseRemaining)}`;
+    if (this.eclipseReady) return "SHOOT THE ORBIT";
+    return `MOONS ${this.litMoons.size}/3  X${this.ctx.scoring.multiplier}`;
+  }
+
+  /** Both-flipper progress readout (DMD pass). */
+  statusReport(): string[][] {
+    const T = rules.telescope;
+    return [
+      [`MOONS ${this.litMoons.size}/3`, `MULTIPLIER X${this.ctx.scoring.multiplier}`],
+      [
+        `BANKS ${Math.min(this.banks, rules.eclipse.banksRequired)}/${rules.eclipse.banksRequired} ORBITS ${Math.min(this.orbits, rules.eclipse.orbitsRequired)}/${rules.eclipse.orbitsRequired}`,
+        this.eclipseReady ? "ECLIPSE IS LIT" : "LIGHT THE ECLIPSE",
+      ],
+      ["NEXT SIGHTING", T.sightings[this.sightingIdx].name],
+    ];
   }
 
   /** Ball drained: combos and any running eclipse die with it. */
   endBall(): void {
+    if (this.asActive) this.endAlignScope(true);
     this.skillUsed = false;
     this.orbitStep = 0;
     this.lastOrbitAt = -Infinity;
@@ -146,6 +232,12 @@ export class MoondialLogic implements TableLogic {
     return true; // the telescope scoop is always live
   }
 
+  /** Confirmed captures start the lit video mode (the hold is real now). */
+  onCapture(id: string): void {
+    if (id !== "telescope") return;
+    if (this.scopeLit && !this.asActive && !this.ctx.scoring.muted) this.startAlignScope();
+  }
+
   /** THE GNOMON rises while the saver is live and during the eclipse. */
   diverterBlade(id: string): string {
     if (id !== "gnomon") return "down";
@@ -170,10 +262,15 @@ export class MoondialLogic implements TableLogic {
   /** Telescope scoop capture: award the next sighting in the logbook. */
   private onTelescope(): void {
     if (this.ctx.scoring.muted) return; // tilted: no sighting, no progression
+    // a lit scope consumes this capture for the video mode — which starts
+    // from onCapture (AFTER the kicker actually holds; starting from the
+    // raw sensor made beginExtendedHold a no-op on an idle kicker)
+    if (this.scopeLit || this.asActive) return;
     const T = rules.telescope;
     const s = T.sightings[this.sightingIdx];
     const spotted = T.lastSpotsOrbit && this.sightingIdx === T.sightings.length - 1;
     this.sightingIdx = (this.sightingIdx + 1) % T.sightings.length;
+    if (this.sightingIdx === 0) this.scopeLit = true; // the log is full: align
     const points = this.ctx.scoring.award(s.points, s.name);
     this.ctx.scoring.bonusUnits += T.bonusUnit;
     if (spotted && !this.eclipseReady && !this.eclipseActive) {
@@ -239,7 +336,81 @@ export class MoondialLogic implements TableLogic {
     }
   }
 
+  // ─────────────── ALIGN THE SCOPE (DMD video mode) ───────────────
+  // Timer-driven: star i judges at asStart + 2.4 + i×2.4; the mode ends at
+  // alignScope.durationS regardless of the DMD (the headless sims have no
+  // DotMatrix, and an unclosed hold is a stuck ball).
+
+  onFlipper(side: "left" | "right"): void {
+    if (this.asActive) this.asOffset += side === "left" ? -3 : 3;
+  }
+
+  private startAlignScope(): void {
+    this.scopeLit = false;
+    this.asActive = true;
+    this.asStart = this.now;
+    this.asOffset = Math.random() < 0.5 ? -7 : 7;
+    this.asDrift = (Math.random() < 0.5 ? -1 : 1) * (2.4 + Math.random() * 1.4);
+    this.asResults = Array.from({ length: rules.alignScope.stars }, () => null);
+    this.ctx.holdScoop?.("telescope", true);
+    this.ctx.sfx("multiplier");
+    this.ctx.push(
+      new SequenceScene([
+        new MessageScene([["ALIGN THE SCOPE", "FLIPPERS NUDGE THE TUBE"]], 1.4, true),
+        new AlignScopeScene(() => ({
+          active: this.asActive,
+          offset: this.asOffset,
+          results: this.asResults,
+          locking: ((this.now - this.asStart - 2.4) % 2.4) > 1.9,
+        })),
+      ]),
+      3,
+    );
+  }
+
+  private updateAlignScope(dt: number): void {
+    const t = this.now - this.asStart;
+    // the tube drifts; it reverses now and then so holding one flipper
+    // can't trivially pin it
+    this.asOffset += this.asDrift * dt;
+    if (Math.abs(this.asOffset) > 10) {
+      this.asOffset = Math.sign(this.asOffset) * 10;
+      this.asDrift = -this.asDrift;
+    }
+    for (let i = 0; i < this.asResults.length; i++) {
+      if (this.asResults[i] === null && t >= 2.4 + i * 2.4) {
+        const ok = Math.abs(this.asOffset) <= 2.5;
+        this.asResults[i] = ok;
+        if (ok) {
+          this.ctx.scoring.award(rules.alignScope.starValue, "STAR FIXED");
+          this.ctx.sfx("rollover");
+        } else {
+          this.ctx.sfx("target");
+        }
+        this.asDrift = (Math.random() < 0.5 ? -1 : 1) * (2.6 + Math.random() * 1.6);
+      }
+    }
+    if (t >= rules.alignScope.durationS) this.endAlignScope(false);
+  }
+
+  private endAlignScope(abandoned: boolean): void {
+    this.asActive = false;
+    this.ctx.holdScoop?.("telescope", false);
+    if (abandoned) return;
+    const fixed = this.asResults.filter(Boolean).length;
+    if (fixed === this.asResults.length && rules.alignScope.allSpotsOrbit) {
+      this.ctx.push(new MessageScene([["EVERY STAR FIXED", "ORBIT SPOTTED"]], 1.5, true), 3);
+      if (!this.eclipseReady && !this.eclipseActive) {
+        this.orbits++;
+        this.checkReady();
+      }
+    } else {
+      this.ctx.push(new MessageScene([[`${fixed} STARS FIXED`]], 1.3), 3);
+    }
+  }
+
   private startEclipse(): void {
+    this.eclipseStartTotal = this.ctx.scoring.total;
     this.eclipseReady = false;
     this.banks = 0;
     this.orbits = 0;

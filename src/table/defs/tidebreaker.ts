@@ -141,6 +141,10 @@ export const TIDEBREAKER_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new TidebreakerLogic(ctx),
+  attractTips: [
+    ["D-I-V-E DEEPENS", "THE GAUGE"],
+    ["HAUL THE BELL", "WAKE LEVIATHAN"],
+  ],
   highScoreKey: "pinball-highscores-tidebreaker-v1",
   // dark verdigris field walls (abyss-300/500 blend); habitrail stays chrome;
   // ramp glass is cyan-400 abyssal blue, not the dayglo default (STYLE-GUIDE §2)

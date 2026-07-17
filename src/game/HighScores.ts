@@ -37,6 +37,11 @@ export class HighScores {
     return this.scores[0];
   }
 
+  /** Copy of the table (DMD pass: the attract reel's scores page). */
+  get list(): ScoreEntry[] {
+    return this.scores.slice();
+  }
+
   qualifies(score: number): boolean {
     if (score <= 0) return false;
     return this.scores.length < MAX || score > this.scores[this.scores.length - 1].score;

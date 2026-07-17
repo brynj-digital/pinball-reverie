@@ -106,6 +106,10 @@ export const MOONDIAL_SPEC: TableSpec = {
   scoring: rules,
   createLogic: (ctx) => new MoondialLogic(ctx),
   // pre-M10 key, kept so existing players' scores survive the multi-table move
+  attractTips: [
+    ["SPOT SIGHTINGS", "AT THE TELESCOPE"],
+    ["BANKS + ORBITS", "LIGHT THE ECLIPSE"],
+  ],
   highScoreKey: "pinball-highscores-v2",
   // steel + chrome, dayglo glass; violet element lamps (the Reverie signature)
   theme: {

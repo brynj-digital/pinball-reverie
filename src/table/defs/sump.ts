@@ -127,6 +127,10 @@ export const SUMP_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new SumpLogic(ctx),
+  attractTips: [
+    ["DROP THE SLUICE", "OPEN THE FLOODGATE"],
+    ["THE DRAIN IS", "THE WAY IN"],
+  ],
   highScoreKey: "pinball-highscores-sump-v1",
   // iron-green masonry rails; flood-red element lamps (STYLE-GUIDE §2/§7)
   theme: {

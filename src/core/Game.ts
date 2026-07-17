@@ -22,6 +22,7 @@ import { DotMatrix } from "../render/dmd/DotMatrix";
 import { DmdQueue } from "../render/dmd/DmdQueue";
 import {
   AttractScene,
+  type DmdScene,
   BakedDmdScene,
   InitialsScene,
   MatchScene,
@@ -29,6 +30,8 @@ import {
   ScoreScene,
   SequenceScene,
   fmtScore,
+  BonusScene,
+  FireworksScene,
 } from "../render/dmd/DmdScene";
 import { SettingsPanel } from "../ui/SettingsPanel";
 import { PauseOverlay } from "../ui/PauseOverlay";
@@ -195,6 +198,8 @@ export class Game {
   private flippers: Flipper[];
   private upperFlipper?: Flipper;
   private miniFlippers: Flipper[] = [];
+  private statusHeldS = 0;
+  private statusShown = false;
   private bumpers: Bumper[];
   private slings: Slingshot[];
   private targetBank: DropTargetBank;
@@ -622,12 +627,21 @@ export class Game {
     };
     document.body.appendChild(this.gearBtn);
 
-    this.scoreScene = new ScoreScene(() => ({
-      score: this.scoring.total,
-      ball: this.ballNum,
-      mult: this.scoring.multiplier,
-    }));
-    this.attractScene = new AttractScene(() => this.highScores.top, spec.name, TABLE_ORDER.length);
+    this.scoreScene = new ScoreScene(
+      () => ({
+        score: this.scoring.total,
+        ball: this.ballNum,
+        mult: this.scoring.multiplier,
+      }),
+      () => this.logic.dmdStatus?.(),
+    );
+    this.attractScene = new AttractScene(
+      () => this.highScores.list,
+      spec.name,
+      TABLE_ORDER.length,
+      spec.attractTips ?? [],
+      () => [...this.baked.values()],
+    );
     this.initialsScene = new InitialsScene(() => ({
       letters: this.initialsLetters,
       slot: this.initialsSlot,
@@ -872,6 +886,19 @@ export class Game {
     this.prevFlip.left = flipL;
     this.prevFlip.right = flipR;
     this.prevFlip.upper = flipU;
+    // status report (DMD pass): hold both flippers ~1.8 s in play for the
+    // classic paged progress readout
+    if (this.phase === "play" && flipL && flipR && !this.tilted) {
+      this.statusHeldS += dt;
+      if (this.statusHeldS >= 1.8 && !this.statusShown) {
+        this.statusShown = true;
+        const pages = this.logic.statusReport?.();
+        if (pages?.length) this.dmdQueue.push(new MessageScene(pages, 1.8), 1);
+      }
+    } else {
+      this.statusHeldS = 0;
+      this.statusShown = false;
+    }
     this.flippers[0].update(flipL, t);
     this.flippers[1].update(flipR, t);
     this.upperFlipper?.update(flipU, t);
@@ -1276,11 +1303,16 @@ export class Game {
     this.saverUntil = -Infinity;
     // TILT forfeits the end-of-ball bonus (real-machine rule)
     let bonus = 0;
+    const bonusUnits = this.scoring.bonusUnits;
+    const bonusMult = this.scoring.multiplier;
     if (wasTilted) this.scoring.forfeitBonus();
     else bonus = this.scoring.collectBonus();
     this.logic.endBall();
     this.scoring.multiplier = 1;
-    const bonusPage: string[][] = bonus > 0 ? [["BONUS", fmtScore(bonus)]] : [];
+    // the classic tally ceremony (DMD pass): units tick up with pips
+    const bonusScene = () =>
+      new BonusScene(bonusUnits, bonusMult, bonus, () => this.audio.sfx("rollover"));
+    const bonusDur = bonus > 0 ? BonusScene.duration(bonusUnits, bonusMult) : 0;
     if (this.ballNum >= BALLS_PER_GAME) {
       this.music.stop();
       this.clearLocks(); // no wagons parked through attract mode
@@ -1296,14 +1328,16 @@ export class Game {
         this.input.setTextCapture(true);
         this.dmdQueue.clear();
         this.dmdQueue.setIdle(this.initialsScene);
-        if (bonusPage.length) this.dmdQueue.push(new MessageScene(bonusPage, 1.8), 2);
+        const celebration: DmdScene[] = bonus > 0 ? [bonusScene()] : [];
+        celebration.push(new FireworksScene("NEW HIGH SCORE"));
+        this.dmdQueue.push(new SequenceScene(celebration), 2);
       } else {
         this.phase = "gameOver";
-        const parts = [];
+        const parts: DmdScene[] = [];
         let dur = 0.3;
-        if (bonusPage.length) {
-          parts.push(new MessageScene(bonusPage, 1.8));
-          dur += 1.8;
+        if (bonus > 0) {
+          parts.push(bonusScene());
+          dur += bonusDur;
         }
         const match = this.makeMatchScene();
         parts.push(match.scene);
@@ -1325,7 +1359,12 @@ export class Game {
     } else {
       this.ballNum++;
       this.respawn();
-      this.dmdQueue.push(new MessageScene([...bonusPage, [`BALL ${this.ballNum}`]], 1.6), 2);
+      this.dmdQueue.push(
+        bonus > 0
+          ? new SequenceScene([bonusScene(), new MessageScene([[`BALL ${this.ballNum}`]], 1.4)])
+          : new MessageScene([[`BALL ${this.ballNum}`]], 1.6),
+        2,
+      );
     }
   }
 

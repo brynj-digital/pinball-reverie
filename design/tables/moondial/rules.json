@@ -1,5 +1,5 @@
 {
-  "comment": "Moondial rules metadata (plan §5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/Modes.ts.",
+  "comment": "Moondial rules metadata (plan \u00a75e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/Modes.ts.",
   "points": {
     "bumper": 100,
     "sling": 50,
@@ -24,10 +24,22 @@
     "bonusUnit": 500,
     "lastSpotsOrbit": true,
     "sightings": [
-      { "name": "COMET", "points": 5000 },
-      { "name": "METEOR SHOWER", "points": 10000 },
-      { "name": "NEBULA", "points": 15000 },
-      { "name": "SUPERNOVA", "points": 25000 }
+      {
+        "name": "COMET",
+        "points": 5000
+      },
+      {
+        "name": "METEOR SHOWER",
+        "points": 10000
+      },
+      {
+        "name": "NEBULA",
+        "points": 15000
+      },
+      {
+        "name": "SUPERNOVA",
+        "points": 25000
+      }
     ]
   },
   "skill": {
@@ -42,5 +54,12 @@
     "durationS": 25,
     "orbitValue": 25000,
     "scoreFactor": 2
+  },
+  "alignScope": {
+    "comment": "ALIGN THE SCOPE (DMD video mode): completing the sightings cycle lights it; the next telescope capture holds the ball while the flippers nudge a drifting reticle onto each star. Timer-driven (sim-safe).",
+    "durationS": 10,
+    "stars": 3,
+    "starValue": 15000,
+    "allSpotsOrbit": true
   }
 }

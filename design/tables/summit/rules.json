@@ -9,8 +9,15 @@
     "bankComplete": 5000,
     "orbit": 2500
   },
-  "bonusUnits": { "rollover": 500, "target": 250, "spinnerTick": 10 },
-  "ridgeCombo": { "windowS": 10, "maxStep": 3 },
+  "bonusUnits": {
+    "rollover": 500,
+    "target": 250,
+    "spinnerTick": 10
+  },
+  "ridgeCombo": {
+    "windowS": 10,
+    "maxStep": 3
+  },
   "peakLanes": {
     "comment": "P-E-A-K: completion lights a free cable-car ride and the WINDBREAK. Letters persist, lane change on the flippers.",
     "points": 5000
@@ -41,10 +48,22 @@
     "holdS": 2.0,
     "bonusUnit": 500,
     "rungs": [
-      { "name": "SHELTER", "points": 5000 },
-      { "name": "BREW", "points": 10000 },
-      { "name": "RESUPPLY", "points": 15000 },
-      { "name": "THE LOG", "points": 25000 }
+      {
+        "name": "SHELTER",
+        "points": 5000
+      },
+      {
+        "name": "BREW",
+        "points": 10000
+      },
+      {
+        "name": "RESUPPLY",
+        "points": 15000
+      },
+      {
+        "name": "THE LOG",
+        "points": 25000
+      }
     ]
   },
   "lastCar": {
@@ -67,5 +86,12 @@
     "maxSpeed": 0.75,
     "points": 15000,
     "bonusUnit": 500
+  },
+  "cable": {
+    "comment": "HOLD THE CABLE (DMD video mode): topping the bothy ladder lights it; the next bothy capture holds the ball while gusts hit the car - flip the flipper OPPOSITE each gust inside windowS. Timer-driven (sim-safe).",
+    "durationS": 10,
+    "gusts": 3,
+    "gustValue": 15000,
+    "windowS": 1.4
   }
 }

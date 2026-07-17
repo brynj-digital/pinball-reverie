@@ -167,6 +167,10 @@ export const NIGHTMAIL_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new NightMailLogic(ctx),
+  attractTips: [
+    ["THROW THE POINTS", "CATCH THE MAILS"],
+    ["COUPLE WAGONS", "MAKE THE CONNECTION"],
+  ],
   highScoreKey: "pinball-highscores-nightmail-v1",
   // wet-slate field walls (smoke-500/300 blend); the incline wireform stays
   // chrome; ramp glass is the dayglo default (STYLE-GUIDE §2)

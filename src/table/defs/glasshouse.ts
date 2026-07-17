@@ -121,6 +121,10 @@ export const GLASSHOUSE_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new GlasshouseLogic(ctx),
+  attractTips: [
+    ["FOLLOW THE", "LIT LAMP"],
+    ["FOUR RETURN LANES", "COUNT THE POLLEN"],
+  ],
   highScoreKey: "pinball-highscores-glasshouse-v1",
   // leaf ironwork rails; rose lamps; the vine's glass is rose too (§2)
   theme: {

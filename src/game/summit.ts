@@ -1,6 +1,55 @@
 import type { TableLogic, TableLogicCtx } from "./TableLogic";
-import { BakedDmdScene, MessageScene, fmtScore } from "../render/dmd/DmdScene";
+import type { DmdScene } from "../render/dmd/DmdScene";
+import type { DotMatrix } from "../render/dmd/DotMatrix";
+import { BakedDmdScene, MessageScene, SequenceScene, fmtScore } from "../render/dmd/DmdScene";
 import rules from "../../design/tables/summit/rules.json";
+
+/**
+ * HOLD THE CABLE — the DMD video mode (SIGNAL BOX pattern: pure display;
+ * the logic owns every timer and outcome, sim-safe).
+ */
+export class CableScene implements DmdScene {
+  constructor(
+    private read: () => {
+      active: boolean;
+      gust: "left" | "right" | null;
+      results: (boolean | null)[];
+    },
+  ) {}
+
+  update(_dt: number, dmd: DotMatrix): boolean {
+    const s = this.read();
+    if (!s.active) return true;
+    dmd.clear();
+    dmd.centerText("HOLD THE CABLE", 0, 3);
+    // the cable and the car
+    for (let x = 4; x <= 124; x += 2) dmd.set(x, 10, 1);
+    for (let yy = 11; yy <= 17; yy++)
+      for (let xx = 60; xx <= 68; xx++) dmd.set(xx, yy, yy === 11 || s.gust === null ? 3 : 2);
+    if (s.gust) {
+      // gust chevrons blowing in from the gust side + the counter-press cue
+      const fromLeft = s.gust === "left";
+      for (let k = 0; k < 3; k++) {
+        const cx = fromLeft ? 14 + k * 12 : 114 - k * 12;
+        const dir = fromLeft ? 1 : -1;
+        for (let a = 0; a < 4; a++) {
+          dmd.set(cx - dir * a, 14 - a, 4);
+          dmd.set(cx - dir * a, 14 + a, 4);
+        }
+      }
+      dmd.centerText(fromLeft ? "FLIP RIGHT" : "FLIP LEFT", 25, 3);
+    }
+    s.results.forEach((r, i) => {
+      const bx = 4 + i * 6;
+      const lv = r === null ? 1 : r ? 4 : 2;
+      dmd.set(bx, 28, lv);
+      dmd.set(bx + 1, 28, lv);
+      dmd.set(bx, 29, lv);
+      dmd.set(bx + 1, 29, lv);
+    });
+    return false;
+  }
+}
 
 /** Entry→exit (either direction) within this window counts as a Ridge Run. */
 const RIDGE_PAIR_WINDOW = 3.5;
@@ -56,6 +105,14 @@ export class SummitLogic implements TableLogic {
   auroraReady = false;
   private auroraUntil = -Infinity;
   private auroraWasActive = false;
+  private cableLit = false;
+  private ctActive = false;
+  private ctStart = 0;
+  private ctGust = 0;
+  private ctDirs: ("left" | "right")[] = [];
+  private ctResults: (boolean | null)[] = [];
+  private lastCarStartTotal = 0;
+  private auroraStartTotal = 0;
 
   constructor(private ctx: TableLogicCtx) {
     ctx.bus.on("sensor", ({ kind, id }) => {
@@ -86,6 +143,7 @@ export class SummitLogic implements TableLogic {
 
   update(dt: number): void {
     this.now += dt;
+    if (this.ctActive) this.updateCable();
     // one combined score factor: any doubled mode doubles, never stacks
     this.ctx.scoring.eclipseFactor =
       this.avalancheActive || this.lastCarActive || this.auroraActive
@@ -94,16 +152,35 @@ export class SummitLogic implements TableLogic {
     if (this.lastCarWasActive && !this.lastCarActive) {
       this.lastCarWasActive = false;
       this.ctx.bus.emit("mode", { kind: "lastCarEnd" });
-      this.ctx.push(new MessageScene([["THE CAR REACHES THE DOCK"]], 1.2), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["THE CAR REACHES THE DOCK"],
+            ["LAST CAR TOTAL", fmtScore(this.ctx.scoring.total - this.lastCarStartTotal)],
+          ],
+          1.3,
+        ),
+        2,
+      );
     }
     if (this.auroraWasActive && !this.auroraActive) {
       this.auroraWasActive = false;
       this.ctx.bus.emit("mode", { kind: "auroraEnd" });
-      this.ctx.push(new MessageScene([["THE LOG CLOSES", "DAWN ON THE RIDGE"]], 1.5), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["THE LOG CLOSES", "DAWN ON THE RIDGE"],
+            ["AURORA TOTAL", fmtScore(this.ctx.scoring.total - this.auroraStartTotal)],
+          ],
+          1.5,
+        ),
+        2,
+      );
     }
   }
 
   endBall(): void {
+    if (this.ctActive) this.endCable(true);
     this.skillUsed = false;
     this.ridgeStep = 0;
     this.lastRidgeAt = -Infinity;
@@ -159,6 +236,10 @@ export class SummitLogic implements TableLogic {
   }
 
   onFlipper(side: "left" | "right"): void {
+    if (this.ctActive) {
+      this.ctPress(side);
+      return;
+    }
     if (this.litLanes.size === 0 || this.litLanes.size === 4) return;
     const shift = side === "left" ? -1 : 1;
     const next = new Set<string>();
@@ -206,8 +287,11 @@ export class SummitLogic implements TableLogic {
 
   onCapture(id: string): void {
     if (this.ctx.scoring.muted) return;
-    if (id === "bothy") this.onBothy();
-    else if (id === "windbreak") {
+    if (id === "bothy") {
+      if (this.ctActive) return;
+      if (this.cableLit && !this.auroraReady) this.startCable();
+      else this.onBothy();
+    } else if (id === "windbreak") {
       this.windbreakLit = false;
       this.ctx.push(new MessageScene([["WINDBREAK", "BALL SAVED"]], 1.1), 2);
     } else if (id === "gallery") {
@@ -329,6 +413,8 @@ export class SummitLogic implements TableLogic {
     this.ctx.scoring.bonusUnits += rules.bothy.bonusUnit;
     if (topped) {
       this.galleryLit = true;
+      this.cableLit = true; // THE LOG is full: the wind test is on
+
       const unread = INSTRUMENTS.find((i) => !this.reads.has(i));
       if (unread) this.onInstrument(unread);
     }
@@ -338,6 +424,7 @@ export class SummitLogic implements TableLogic {
   private startLastCar(): void {
     this.litRides = 0;
     this.multiballed = true;
+    this.lastCarStartTotal = this.ctx.scoring.total;
     this.lastCarUntil = this.now + rules.lastCar.durationS;
     this.lastCarWasActive = true;
     this.ctx.addBalls?.(rules.lastCar.balls);
@@ -374,6 +461,7 @@ export class SummitLogic implements TableLogic {
     this.forecasts = 0;
     this.multiballed = false;
     this.snowJackpoted = false;
+    this.auroraStartTotal = this.ctx.scoring.total;
     this.auroraUntil = this.now + rules.aurora.durationS;
     this.auroraWasActive = true;
     this.ctx.bus.emit("mode", { kind: "auroraStart" });
@@ -410,5 +498,110 @@ export class SummitLogic implements TableLogic {
       rules.points.orbit * factor,
       factor > 1 ? `RIDGE RUN ×${factor}` : "RIDGE RUN",
     );
+  }
+
+  /** Live ticker for the score readout (DMD pass). */
+  dmdStatus(): string | undefined {
+    if (this.auroraActive) return `AURORA ${Math.ceil(this.auroraUntil - this.now)}`;
+    if (this.auroraReady) return "SHOOT THE BOTHY";
+    if (this.lastCarActive) return `LAST CAR ${Math.ceil(this.lastCarUntil - this.now)}`;
+    if (this.galeActive) return "GALE  CAR CLOSED";
+    const letters = ["P", "E", "A", "K"].map((c, i) => (this.litLanes.has(String(i + 1)) ? c : ".")).join("");
+    return `${letters}  FORECAST ${this.forecasts}`;
+  }
+
+  /** Both-flipper progress readout (DMD pass). */
+  statusReport(): string[][] {
+    return [
+      [`FORECASTS ${this.forecasts}`, `MULTIPLIER X${this.ctx.scoring.multiplier}`],
+      [`CARS BANKED ${this.litRides} OF ${rules.lastCar.ridesRequired}`, this.carLit ? "THE CAR RIDES FREE" : "COMPLETE P-E-A-K"],
+      [
+        this.auroraReady ? "THE SKY IS MOVING" : "FOR THE AURORA",
+        this.auroraReady
+          ? "SHOOT THE BOTHY"
+          : `${this.multiballed ? "" : "MULTIBALL "}${this.snowJackpoted ? "" : "SNOW JACKPOT"}` || "FORECASTS",
+      ],
+    ];
+  }
+
+  // ─────────────── HOLD THE CABLE (DMD video mode) ───────────────
+  // Gusts hit the car from alternating sides; the counter-press is the
+  // OPPOSITE flipper inside cable.windowS. An unanswered gust judges as a
+  // miss. Ends at cable.durationS (sim-safe).
+
+  private ctGustAt(i: number): number {
+    return 1.6 + i * 2.6;
+  }
+
+  private ctCurrentGust(): "left" | "right" | null {
+    const t = this.now - this.ctStart;
+    if (this.ctGust >= this.ctDirs.length) return null;
+    const at = this.ctGustAt(this.ctGust);
+    return t >= at && t <= at + rules.cable.windowS ? this.ctDirs[this.ctGust] : null;
+  }
+
+  private ctPress(side: "left" | "right"): void {
+    const gust = this.ctCurrentGust();
+    if (gust === null) return;
+    const ok = side !== gust;
+    this.ctResults[this.ctGust] = ok;
+    if (ok) {
+      this.ctx.scoring.award(rules.cable.gustValue, "HELD ON");
+      this.ctx.sfx("rollover");
+    } else {
+      this.ctx.sfx("target");
+    }
+    this.ctGust++;
+  }
+
+  private startCable(): void {
+    this.cableLit = false;
+    this.ctActive = true;
+    this.ctStart = this.now;
+    this.ctGust = 0;
+    this.ctDirs = Array.from({ length: rules.cable.gusts }, (_, i) =>
+      i % 2 === 0 ? "left" : "right",
+    );
+    this.ctResults = Array.from({ length: rules.cable.gusts }, () => null);
+    this.ctx.holdScoop?.("bothy", true);
+    this.ctx.sfx("multiplier");
+    this.ctx.push(
+      new SequenceScene([
+        new MessageScene([["HOLD THE CABLE", "FLIP AGAINST THE GUST"]], 1.4, true),
+        new CableScene(() => ({
+          active: this.ctActive,
+          gust: this.ctCurrentGust(),
+          results: this.ctResults,
+        })),
+      ]),
+      3,
+    );
+  }
+
+  private updateCable(): void {
+    const t = this.now - this.ctStart;
+    if (
+      this.ctGust < this.ctResults.length &&
+      t > this.ctGustAt(this.ctGust) + rules.cable.windowS
+    ) {
+      this.ctResults[this.ctGust] = false;
+      this.ctx.sfx("target");
+      this.ctGust++;
+    }
+    if (t >= rules.cable.durationS) this.endCable(false);
+  }
+
+  private endCable(abandoned: boolean): void {
+    this.ctActive = false;
+    this.ctx.holdScoop?.("bothy", false);
+    if (abandoned) return;
+    const held = this.ctResults.filter(Boolean).length;
+    if (held === this.ctResults.length) {
+      this.ctx.push(new MessageScene([["NEVER LET GO", "AN INSTRUMENT IS READ"]], 1.5, true), 3);
+      const unread = INSTRUMENTS.find((i) => !this.reads.has(i));
+      if (unread) this.onInstrument(unread);
+    } else {
+      this.ctx.push(new MessageScene([[`HELD ${held} OF ${this.ctResults.length}`]], 1.3), 3);
+    }
   }
 }

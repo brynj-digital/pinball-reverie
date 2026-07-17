@@ -1,6 +1,48 @@
 import type { TableLogic, TableLogicCtx } from "./TableLogic";
-import { BakedDmdScene, MessageScene, fmtScore } from "../render/dmd/DmdScene";
+import type { DmdScene } from "../render/dmd/DmdScene";
+import type { DotMatrix } from "../render/dmd/DotMatrix";
+import { BakedDmdScene, MessageScene, SequenceScene, fmtScore } from "../render/dmd/DmdScene";
 import rules from "../../design/tables/sump/rules.json";
+
+/**
+ * PRESSURE TEST — the DMD video mode (SIGNAL BOX pattern: pure display;
+ * the logic owns every timer and outcome, sim-safe).
+ */
+export class PressureScene implements DmdScene {
+  constructor(
+    private read: () => {
+      active: boolean;
+      needle: number; // 0..1
+      greenLo: number;
+      greenHi: number;
+      results: (boolean | null)[];
+    },
+  ) {}
+
+  update(_dt: number, dmd: DotMatrix): boolean {
+    const s = this.read();
+    if (!s.active) return true;
+    dmd.clear();
+    dmd.centerText("PRESSURE TEST", 0, 3);
+    // the gauge arc: a horizontal band with the green zone brighter
+    const y = 18;
+    for (let x = 10; x <= 118; x++) {
+      const u = (x - 10) / 108;
+      dmd.set(x, y, u >= s.greenLo && u <= s.greenHi ? 3 : 1);
+    }
+    const nx = 10 + Math.round(s.needle * 108);
+    for (let k = 0; k < 6; k++) dmd.set(nx, y - 1 - k, 4);
+    s.results.forEach((r, i) => {
+      const bx = 54 + i * 10;
+      const lv = r === null ? 1 : r ? 4 : 2;
+      dmd.set(bx, 27, lv);
+      dmd.set(bx + 1, 27, lv);
+      dmd.set(bx, 28, lv);
+      dmd.set(bx + 1, 28, lv);
+    });
+    return false;
+  }
+}
 
 /** Entry→exit (either direction) within this window counts as an Outflow. */
 const OUTFLOW_PAIR_WINDOW = 3.5;
@@ -43,6 +85,12 @@ export class SumpLogic implements TableLogic {
   private gateLit = false;
   private grateLit = false;
   private skillUsed = false;
+  private pressureLit = false;
+  private ptActive = false;
+  private ptStart = 0;
+  private ptGauge = 0;
+  private ptResults: (boolean | null)[] = [];
+  private highWaterStartTotal = 0;
   // sump play
   private inChamber = false;
   private chamberT = 0;
@@ -86,11 +134,18 @@ export class SumpLogic implements TableLogic {
 
   update(dt: number): void {
     this.now += dt;
+    if (this.ptActive) this.updatePressureTest();
     if (this.highWaterWasActive && !this.highWaterActive) {
       this.highWaterWasActive = false;
       this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "highWaterEnd" });
-      this.ctx.push(new MessageScene([["THE PUMPS WIN", "LEVEL FALLS"]], 1.4), 2);
+      this.ctx.push(
+        new MessageScene(
+          [["THE PUMPS WIN", "LEVEL FALLS"], ["HIGH WATER TOTAL", fmtScore(this.ctx.scoring.total - this.highWaterStartTotal)]],
+          1.4,
+        ),
+        2,
+      );
       // the water table wins in the end: the mode drains the level back
       this.stage = 1;
       this.ctx.scoring.multiplier = 2;
@@ -118,6 +173,7 @@ export class SumpLogic implements TableLogic {
   }
 
   endBall(): void {
+    if (this.ptActive) this.endPressureTest(true);
     this.skillUsed = false;
     this.outflowStep = 0;
     this.lastOutflowAt = -Infinity;
@@ -171,6 +227,10 @@ export class SumpLogic implements TableLogic {
 
   /** Classic lane change: flippers rotate the collected letters. */
   onFlipper(side: "left" | "right"): void {
+    if (this.ptActive) {
+      this.ptLockNow();
+      return;
+    }
     if (this.litLanes.size === 0 || this.litLanes.size === 4) return;
     const shift = side === "left" ? -1 : 1;
     const next = new Set<string>();
@@ -226,6 +286,11 @@ export class SumpLogic implements TableLogic {
   /** Kicker/subway captures: the pump ladder, the grate, the return ride. */
   onCapture(id: string): void {
     if (this.ctx.scoring.muted) return;
+    if (id === "pump" && this.pressureLit && !this.ptActive && !this.highWaterReady) {
+      this.startPressureTest();
+      return;
+    }
+    if (id === "pump" && this.ptActive) return;
     if (id === "pump") this.onPump();
     else if (id === "grate") {
       this.grateLit = false;
@@ -246,6 +311,7 @@ export class SumpLogic implements TableLogic {
     if (topped) {
       this.ladderTopped = true;
       this.spotValveNext = true;
+      this.pressureLit = true; // the master valve wants a PRESSURE TEST
       this.checkReady();
     }
     const frames = this.ctx.baked("gauge");
@@ -384,6 +450,7 @@ export class SumpLogic implements TableLogic {
     this.highWaterReady = false;
     this.outflowRides = 0;
     this.ladderTopped = false;
+    this.highWaterStartTotal = this.ctx.scoring.total;
     this.highWaterUntil = this.now + rules.highWater.durationS;
     this.highWaterWasActive = true;
     this.ctx.scoring.eclipseFactor = rules.highWater.scoreFactor;
@@ -397,5 +464,95 @@ export class SumpLogic implements TableLogic {
         : new MessageScene([["HIGH WATER", "GATE LOCKED OPEN  X2"]], 1.6, true),
       3,
     );
+  }
+
+  /** Live ticker for the score readout (DMD pass). */
+  dmdStatus(): string | undefined {
+    if (this.highWaterActive) return `HIGH WATER ${Math.ceil(this.highWaterUntil - this.now)}`;
+    if (this.inChamber) return `SUMP PLAY  VALVES ${this.valveCount}/${rules.sumpPlay.valveHits}`;
+    const letters = ["S", "U", "M", "P"].map((c, i) => (this.litLanes.has(String(i + 1)) ? c : ".")).join("");
+    return `${letters}  LVL ${this.stage}/5${this.gateLit ? "  GATE" : ""}`;
+  }
+
+  /** Both-flipper progress readout (DMD pass). */
+  statusReport(): string[][] {
+    return [
+      [`WATER LEVEL ${this.stage} OF 5`, `MULTIPLIER X${this.ctx.scoring.multiplier}`],
+      [this.gateLit ? "FLOODGATE OPEN" : "DROP THE SLUICE", `OUTFLOWS ${this.outflowRides}`],
+      ["NEXT PUMP RUNG", rules.pump.rungs[this.rungIdx].name],
+    ];
+  }
+
+  // ─────────────── PRESSURE TEST (DMD video mode) ───────────────
+  // The needle sweeps 0..1 and back; a flipper press locks the gauge —
+  // inside the green arc scores. An unswung window judges as a miss. Ends
+  // at pressureTest.durationS (sim-safe).
+
+  private ptNeedle(): number {
+    const t = this.now - this.ptStart - 1.6;
+    if (t < 0) return 0;
+    const u = (t * 0.7) % 2;
+    return u < 1 ? u : 2 - u;
+  }
+
+  private ptLockNow(): void {
+    if (this.ptGauge >= this.ptResults.length || this.ptResults[this.ptGauge] !== null) return;
+    const n = this.ptNeedle();
+    const ok = n >= rules.pressureTest.greenLo && n <= rules.pressureTest.greenHi;
+    this.ptResults[this.ptGauge] = ok;
+    if (ok) {
+      this.ctx.scoring.award(rules.pressureTest.gaugeValue, "IN THE GREEN");
+      this.ctx.sfx("rollover");
+    } else {
+      this.ctx.sfx("target");
+    }
+    this.ptGauge++;
+  }
+
+  private startPressureTest(): void {
+    this.pressureLit = false;
+    this.ptActive = true;
+    this.ptStart = this.now;
+    this.ptGauge = 0;
+    this.ptResults = Array.from({ length: rules.pressureTest.gauges }, () => null);
+    this.ctx.holdScoop?.("pump", true);
+    this.ctx.sfx("multiplier");
+    this.ctx.push(
+      new SequenceScene([
+        new MessageScene([["PRESSURE TEST", "FLIP IN THE GREEN"]], 1.4, true),
+        new PressureScene(() => ({
+          active: this.ptActive,
+          needle: this.ptNeedle(),
+          greenLo: rules.pressureTest.greenLo,
+          greenHi: rules.pressureTest.greenHi,
+          results: this.ptResults,
+        })),
+      ]),
+      3,
+    );
+  }
+
+  private updatePressureTest(): void {
+    const t = this.now - this.ptStart;
+    const windowEnd = 1.6 + (this.ptGauge + 1) * 2.6;
+    if (this.ptGauge < this.ptResults.length && t >= windowEnd) {
+      this.ptResults[this.ptGauge] = false;
+      this.ctx.sfx("target");
+      this.ptGauge++;
+    }
+    if (t >= rules.pressureTest.durationS) this.endPressureTest(false);
+  }
+
+  private endPressureTest(abandoned: boolean): void {
+    this.ptActive = false;
+    this.ctx.holdScoop?.("pump", false);
+    if (abandoned) return;
+    const greens = this.ptResults.filter(Boolean).length;
+    if (greens === this.ptResults.length) {
+      this.ctx.push(new MessageScene([["ALL IN THE GREEN", "A VALVE IS SPOTTED"]], 1.5, true), 3);
+      this.spotValveNext = true;
+    } else {
+      this.ctx.push(new MessageScene([[`${greens} IN THE GREEN`]], 1.3), 3);
+    }
   }
 }

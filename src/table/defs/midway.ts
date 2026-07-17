@@ -144,6 +144,10 @@ export const MIDWAY_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new MidwayLogic(ctx),
+  attractTips: [
+    ["RIDE EVERYTHING", "PUNCH THE PASS"],
+    ["DING THE STRIKER", "FILL THE WHEEL"],
+  ],
   highScoreKey: "pinball-highscores-midway-v1",
   // dusk plum field walls (carnival-500/300 blend); wireforms stay chrome
   theme: {

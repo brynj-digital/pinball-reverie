@@ -126,6 +126,10 @@ export const SUMMIT_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new SummitLogic(ctx),
+  attractTips: [
+    ["RIDE THE CAR UP", "READ THE SKY"],
+    ["LAUNCH OFF", "THE TERRACE"],
+  ],
   highScoreKey: "pinball-highscores-summit-v1",
   // granite rails, chrome terrace; ice lamps; the terrace glass is ice
   theme: {

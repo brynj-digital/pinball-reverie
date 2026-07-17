@@ -147,6 +147,10 @@ export const SMALLHOURS_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new SmallHoursLogic(ctx),
+  attractTips: [
+    ["TUNE IN THEN", "RIDE THE AERIAL"],
+    ["THREE CALLERS", "PUT YOU ON AIR"],
+  ],
   highScoreKey: "pinball-highscores-smallhours-v1",
   // warm asphalt field walls (rooftop-500/300 blend); the aerial run stays
   // chrome; ramp glass is transmitter amber (STYLE-GUIDE §2, table 5)

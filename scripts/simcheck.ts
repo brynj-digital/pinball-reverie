@@ -463,17 +463,29 @@ function moondialSuite(): void {
   check("eclipse not lit before the last sighting", !logic.eclipseReady);
   visit(); // SUPERNOVA 25,000 — spots the 3rd orbit
   check("last sighting spots an orbit and lights the eclipse", orbitSpotted && logic.eclipseReady);
-  visit(); // wraps back to COMET
   check(
-    "sighting list wraps and totals are exact",
-    sightingsSeen[4] === "COMET" && rig.scoring.total === 77500,
-    `total=${rig.scoring.total}`,
-  );
-  check(
-    "telescope visits accrue bonus units",
-    rig.scoring.bonusUnits === 5 * moondialRules.telescope.bonusUnit,
+    "four sightings accrue bonus units",
+    rig.scoring.bonusUnits === 4 * moondialRules.telescope.bonusUnit,
     `units=${rig.scoring.bonusUnits}`,
   );
+  // the full log lights ALIGN THE SCOPE (DMD pass): the 5th capture holds
+  // the ball for the video mode, releases on its timer, and the log wraps
+  // on the capture after that
+  {
+    const tk = rig.kickers[0];
+    placeBall(0.42, 0.55, 0.55, -1.1);
+    run(3); // capture; the mode holds past the 2 s holdS
+    check("ALIGN THE SCOPE holds the ball past holdS", tk.holding);
+    run(9);
+    check("ALIGN THE SCOPE releases on its timer", !tk.holding);
+    placeBall(0.42, 0.55, 0.55, -1.1);
+    run(4);
+    check(
+      "the sighting log wraps after the mode",
+      sightingsSeen[sightingsSeen.length - 1] === "COMET",
+      sightingsSeen.join(","),
+    );
+  }
 
   // 9 — THE GNOMON (differentiation pass): the centre post rises with the
   // saver and seals the tip gap; retracted, the same drop drains
@@ -840,6 +852,22 @@ function tidebreakerSuite(): void {
     rigF.ball.body.setLinearVelocity(new Vec2(0, -rigF.t.plungerMaxSpeed));
     rigF.run(3);
     check("full plunge does not qualify (tidebreaker)", !sawFull);
+  }
+
+  // 14 — SONAR SWEEP (DMD pass): a full manifest lights it; the next bell
+  // capture holds the ball for the video mode and releases on its timer
+  {
+    const rigV = buildRig("tidebreaker");
+    rigV.flippers[0].update(false, rigV.t);
+    rigV.flippers[1].update(false, rigV.t);
+    const logicV = rigV.logic as TidebreakerLogic;
+    for (let i = 0; i < 4; i++) logicV.onCapture("divebell"); // fill the manifest
+    const bellV = rigV.kickers.find((k) => k.def.id === "divebell")!;
+    rigV.placeBall(0.272, 0.56, 0, -1.1);
+    rigV.run(3.5); // capture; the mode holds past diveBell.holdS
+    check("SONAR SWEEP holds the ball past holdS", bellV.holding);
+    rigV.run(9);
+    check("SONAR SWEEP releases on its timer", !bellV.holding);
   }
 }
 
@@ -1216,6 +1244,23 @@ function midwaySuite(): void {
     "finale ends after its duration",
     state.modeEvents.includes("fireworksEnd") && !logic.fireworksActive && rig.scoring.eclipseFactor === 1,
   );
+
+  // RING THE BELL (DMD pass): every prize won lights it; the next lit
+  // booth capture holds the ball for the video mode, releases on its timer
+  {
+    const rigV = buildRig("midway");
+    rigV.flippers[0].update(false, rigV.t);
+    rigV.flippers[1].update(false, rigV.t);
+    const logicV = rigV.logic as MidwayLogic;
+    for (let i = 0; i < 4; i++) logicV.onCapture("booth"); // win every prize
+    rigV.bus.emit("bankComplete", {}); // light the booth for the real shot
+    const boothV = rigV.kickers.find((k) => k.def.id === "booth")!;
+    rigV.placeBall(0.35, 0.56, 0, -1.4);
+    rigV.run(3.5);
+    check("RING THE BELL holds the ball past holdS", boothV.holding);
+    rigV.run(9);
+    check("RING THE BELL releases on its timer", !boothV.holding);
+  }
 }
 
 // ═══════════════════════════ THE NIGHT MAIL ═══════════════════════════
@@ -2065,6 +2110,26 @@ function sumpSuite(): void {
     rigS.run(3);
     check("soft plunge pays THE READING", sawReading);
   }
+
+  // PRESSURE TEST (DMD pass): topping the pump ladder lights it; the next
+  // pump capture holds the ball for the video mode and releases on its
+  // timer. The capture is driven the way the rig's sensor path drives it
+  // (this suite has no proven physical scoop shot to reuse).
+  {
+    const rigV = buildRig("sump");
+    rigV.flippers[0].update(false, rigV.t);
+    rigV.flippers[1].update(false, rigV.t);
+    const logicV = rigV.logic as SumpLogic;
+    for (let i = 0; i < 4; i++) logicV.onCapture("pump"); // top the ladder
+    const pumpV = rigV.kickers.find((k) => k.def.id === "pump")!;
+    rigV.placeBall(0.33, 0.5);
+    rigV.run(0.3);
+    if (pumpV.capture(rigV.ball)) logicV.onCapture("pump");
+    rigV.run(3);
+    check("PRESSURE TEST holds the ball past holdS", pumpV.holding);
+    rigV.run(9);
+    check("PRESSURE TEST releases on its timer", !pumpV.holding);
+  }
 }
 
 
@@ -2408,6 +2473,24 @@ function summitSuite(): void {
     const logicG = rigG.logic as SummitLogic;
     for (let i = 0; i < 45; i++) rigG.bus.emit("spinnerTick", {});
     check("a gale closes the cable car", !logicG.kickerLit("car"));
+  }
+
+  // 13 — HOLD THE CABLE (DMD pass): topping THE LOG lights it; the next
+  // bothy capture holds the ball for the video mode and releases on its
+  // timer. Capture driven the way the rig's sensor path drives it.
+  {
+    const rigV = buildRig("summit");
+    rigV.flippers.forEach((f) => f.update(false, rigV.t));
+    const logicV = rigV.logic as SummitLogic;
+    for (let i = 0; i < 4; i++) logicV.onCapture("bothy"); // top THE LOG
+    const bothyV = rigV.kickers.find((k) => k.def.id === "bothy")!;
+    rigV.placeBall(0.18, 0.44);
+    rigV.run(0.3);
+    if (bothyV.capture(rigV.ball)) logicV.onCapture("bothy");
+    rigV.run(3);
+    check("HOLD THE CABLE holds the ball past holdS", bothyV.holding);
+    rigV.run(9);
+    check("HOLD THE CABLE releases on its timer", !bothyV.holding);
   }
 }
 

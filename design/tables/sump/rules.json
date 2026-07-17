@@ -20,7 +20,13 @@
   },
   "waterLevel": {
     "comment": "S-U-M-P completions raise the level 1..5; the bonus multiplier tracks it. Level 5 arms HIGH WATER. Letters persist across balls, lane change on the flippers.",
-    "stages": ["LEVEL 1", "LEVEL 2", "LEVEL 3", "LEVEL 4", "HIGH WATER MARK"],
+    "stages": [
+      "LEVEL 1",
+      "LEVEL 2",
+      "LEVEL 3",
+      "LEVEL 4",
+      "HIGH WATER MARK"
+    ],
     "maxMultiplier": 6,
     "litsGrate": true
   },
@@ -34,17 +40,34 @@
     "valvePoints": 2500,
     "pumpS": 25,
     "floodS": 40,
-    "outflowLadder": [25000, 50000, 75000, 100000]
+    "outflowLadder": [
+      25000,
+      50000,
+      75000,
+      100000
+    ]
   },
   "pump": {
     "comment": "Pump House scoop ladder (wrapping); the top rung spots a valve in the next sump play.",
     "holdS": 2.0,
     "bonusUnit": 500,
     "rungs": [
-      { "name": "GAUGE", "points": 5000 },
-      { "name": "GREASE", "points": 10000 },
-      { "name": "OVERHAUL", "points": 15000 },
-      { "name": "MASTER VALVE", "points": 25000 }
+      {
+        "name": "GAUGE",
+        "points": 5000
+      },
+      {
+        "name": "GREASE",
+        "points": 10000
+      },
+      {
+        "name": "OVERHAUL",
+        "points": 15000
+      },
+      {
+        "name": "MASTER VALVE",
+        "points": 25000
+      }
     ]
   },
   "highWater": {
@@ -58,5 +81,13 @@
     "maxSpeed": 0.75,
     "points": 15000,
     "bonusUnit": 500
+  },
+  "pressureTest": {
+    "comment": "PRESSURE TEST (DMD video mode): topping the pump ladder lights it; the next pump capture holds the ball while a needle sweeps - flip inside the green arc. Timer-driven (sim-safe).",
+    "durationS": 10,
+    "gauges": 3,
+    "gaugeValue": 15000,
+    "greenLo": 0.66,
+    "greenHi": 0.9
   }
 }

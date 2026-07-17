@@ -94,5 +94,12 @@
     "maxSpeed": 0.75,
     "points": 15000,
     "bonusUnit": 500
+  },
+  "bellGame": {
+    "comment": "RING THE BELL (DMD video mode): the full prize list lights it; the next booth capture holds the ball while a power meter oscillates - flip at the top of each swing. Timer-driven (sim-safe).",
+    "durationS": 10,
+    "swings": 3,
+    "dingValue": 20000,
+    "dingLoadsGondola": true
   }
 }

@@ -39,6 +39,8 @@ export interface TableSpec {
   createLogic(ctx: TableLogicCtx): TableLogic;
   /** localStorage key — each table keeps its own high-score list. */
   highScoreKey: string;
+  /** Attract-reel rules-teaser cards (DMD pass): [line1, line2] pages. */
+  attractTips?: string[][];
   /**
    * Renderer theming that can't live in the SVG (3D materials). Wall art
    * colors themselves are per-table IN the SVG (STYLE-GUIDE §2); these keep

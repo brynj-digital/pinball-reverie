@@ -61,6 +61,8 @@ export class GlasshouseLogic implements TableLogic {
   centuryReady = false;
   private centuryUntil = -Infinity;
   private centuryWasActive = false;
+  private swarmStartTotal = 0;
+  private centuryStartTotal = 0;
   // LIGHTS OUT video mode (timer-driven; the scene is pure display)
   private loActive = false;
   private loCue = 0;
@@ -108,13 +110,31 @@ export class GlasshouseLogic implements TableLogic {
       this.swarmWasActive = false;
       if (!this.centuryActive) this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "swarmEnd" });
-      this.ctx.push(new MessageScene([["THE SWARM SETTLES"]], 1.2), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["THE SWARM SETTLES"],
+            ["SWARM TOTAL", fmtScore(this.ctx.scoring.total - this.swarmStartTotal)],
+          ],
+          1.3,
+        ),
+        2,
+      );
     }
     if (this.centuryWasActive && !this.centuryActive) {
       this.centuryWasActive = false;
       this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "centuryEnd" });
-      this.ctx.push(new MessageScene([["THE FLOWER CLOSES", "A HUNDRED YEARS"]], 1.5), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["THE FLOWER CLOSES", "A HUNDRED YEARS"],
+            ["CENTURY TOTAL", fmtScore(this.ctx.scoring.total - this.centuryStartTotal)],
+          ],
+          1.5,
+        ),
+        2,
+      );
     }
     // LIGHTS OUT cues run on a timer the logic owns (sims have no DMD)
     if (this.loActive && this.now - this.loCueAt > rules.lightsOut.cueS) this.loAdvance();
@@ -393,6 +413,7 @@ export class GlasshouseLogic implements TableLogic {
     this.swarmReady = false;
     this.swarmed = true;
     this.moths = 0;
+    this.swarmStartTotal = this.ctx.scoring.total;
     this.swarmUntil = this.now + rules.swarm.durationS;
     this.swarmWasActive = true;
     this.ctx.scoring.eclipseFactor = rules.swarm.scoreFactor;
@@ -430,6 +451,7 @@ export class GlasshouseLogic implements TableLogic {
     this.blooms = 0;
     this.swarmed = false;
     this.crossPollinated = false;
+    this.centuryStartTotal = this.ctx.scoring.total;
     this.centuryUntil = this.now + rules.century.durationS;
     this.centuryWasActive = true;
     this.ctx.scoring.eclipseFactor = rules.century.scoreFactor;
@@ -469,5 +491,30 @@ export class GlasshouseLogic implements TableLogic {
       rules.points.orbit * factor,
       factor > 1 ? `GALLERY ×${factor}` : "THE GALLERY",
     );
+  }
+
+  /** Live ticker for the score readout (DMD pass). */
+  dmdStatus(): string | undefined {
+    if (this.centuryActive) return `CENTURY ${Math.ceil(this.centuryUntil - this.now)}`;
+    if (this.centuryReady) return "SHOOT THE ORCHID";
+    if (this.swarmActive) return `THE SWARM ${Math.ceil(this.swarmUntil - this.now)}`;
+    const letters = ["M", "O", "T", "H"].map((c, i) => (this.litLanes.has(String(i + 1)) ? c : ".")).join("");
+    return `${letters}  BLOOMS ${this.blooms}/${rules.bloom.blooms}`;
+  }
+
+  /** Both-flipper progress readout (DMD pass). */
+  statusReport(): string[][] {
+    const missing =
+      `${this.blooms >= rules.bloom.blooms ? "" : "FULL BED "}${this.swarmed ? "" : "SWARM "}${this.crossPollinated ? "" : "POLLEN"}`.trim();
+    return [
+      [`BLOOMS ${this.blooms} OF ${rules.bloom.blooms}`, `MULTIPLIER X${this.ctx.scoring.multiplier}`],
+      [
+        this.swarmed ? "THE SWARM HAS FLOWN" : "RAISE THE SWARM",
+        this.crossPollinated ? "POLLEN CARRIED" : "RIDE VINE TO CANOPY",
+      ],
+      this.centuryReady
+        ? ["THE CENTURY BLOOM", "SHOOT THE ORCHID"]
+        : ["FOR THE CENTURY", missing || "READY SOON"],
+    ];
   }
 }

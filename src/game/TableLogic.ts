@@ -101,6 +101,16 @@ export interface TableLogic {
   /** Whether a magnet is armed right now (M12; default unlit = inert). */
   magnetLit?(id: string): boolean;
   /**
+   * One-line live status for the score readout's bottom ticker (DMD pass):
+   * collected letters, mode timers — max ~21 glyphs. Undefined = no line.
+   */
+  dmdStatus?(): string | undefined;
+  /**
+   * Paged progress readout (DMD pass): shown when the player holds both
+   * flippers ~2 s in play. Each page is [line1, line2?].
+   */
+  statusReport?(): string[][];
+  /**
    * Multiplier on the sling kick impulse right now (differentiation pass;
    * e.g. Small Hours' TUNED monitors). Absent hook or 1 = stock kick. Keep
    * it modest (~0.8–1.3): the sling geometry was trap-proofed at stock
