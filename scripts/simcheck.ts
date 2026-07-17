@@ -29,6 +29,7 @@ import { TidebreakerLogic } from "../src/game/tidebreaker";
 import { MidwayLogic } from "../src/game/midway";
 import { NightMailLogic } from "../src/game/nightmail";
 import { SmallHoursLogic } from "../src/game/smallhours";
+import { SumpLogic } from "../src/game/sump";
 import { FLIPPER } from "../src/table/geometry";
 import { TABLE_SPECS, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
@@ -60,6 +61,11 @@ function buildRig(id: TableId) {
   ];
   if (g.flippers.upper)
     flippers.push(new Flipper(pw.world, table.body, g.flippers.upper.side, t, g.flippers.upper));
+  if (g.flippers.mini)
+    flippers.push(
+      new Flipper(pw.world, table.body, "left", t, g.flippers.mini.left),
+      new Flipper(pw.world, table.body, "right", t, g.flippers.mini.right),
+    );
   const bumpers = g.bumpers.map((d) => new Bumper(pw.world, d));
   const slings = g.slings.map((d) => new Slingshot(pw.world, d));
   const bank = new DropTargetBank(pw.world, pw, bus, g.dropTargets);
@@ -1892,11 +1898,179 @@ function smallhoursSuite(): void {
 }
 
 const which = process.argv[2] as TableId | undefined;
+
+// ═══════════════════════════ THE SUMP ═══════════════════════════
+function sumpSuite(): void {
+  console.log("\n── sump ──");
+  const rig = buildRig("sump");
+  const { g, t, bus, ball, state, run, placeBall, wallR } = rig;
+  rig.flippers.forEach((f) => f.update(false, t));
+
+  // 1 — settles on the plunger saddle (deep envelope, same lane geometry)
+  run(2);
+  {
+    const p = ball.body.getPosition();
+    const restY = g.plunger.saddleY - wallR - 0.0135;
+    check(
+      "ball settles ON the plunger saddle",
+      Math.abs(p.y - restY) < 0.004 && p.x > g.table.laneWallX,
+      `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 2 — full-power launch rides the orbit into the left lane
+  ball.body.setLinearVelocity(new Vec2(0, -t.plungerMaxSpeed));
+  let minY = g.table.height;
+  let minX = g.table.width;
+  run(3, () => {
+    const p = ball.body.getPosition();
+    minY = Math.min(minY, p.y);
+    minX = Math.min(minX, p.x);
+  });
+  check("launch reaches top of table", minY < 0.3, `minY=${minY.toFixed(3)}`);
+  check("launch completes the orbit into the left lane", minX < 0.07, `minX=${minX.toFixed(3)}`);
+
+  // 3 — gate SHUT (default): a centre drain sheds right and reaches the
+  // true drain at the bottom of the deep envelope
+  state.drained = false;
+  placeBall(0.26, 1.0);
+  run(4);
+  check("gate shut: centre drain reaches the true drain", state.drained);
+
+  // 4 — gate OPEN: the same drop descends into the chamber and starts
+  // SUMP PLAY instead
+  state.drained = false;
+  state.modeEvents.length = 0;
+  rig.bus.emit("bankComplete", {}); // SLUICE lights the gate
+  run(0.3); // let the blade swap
+  placeBall(0.26, 1.0);
+  run(4);
+  const inChamberP = ball.body.getPosition();
+  check(
+    "gate open: the descent starts SUMP PLAY",
+    state.modeEvents.includes("sumpPlayStart"),
+    `rest=(${inChamberP.x.toFixed(3)}, ${inChamberP.y.toFixed(3)})`,
+  );
+
+  // 5 — the mini pair flips a chamber ball up to the valve manifold
+  {
+    let sawValve = false;
+    bus.on("score", ({ label }) => {
+      if (label.startsWith("VALVE")) sawValve = true;
+    });
+    // rest the ball on the mini-right flipper, then flip
+    placeBall(0.32, 1.13);
+    run(1.5);
+    rig.flippers.forEach((f) => f.update(false, t));
+    run(0.8, () => {
+      const mr = rig.flippers[3]; // mini pair appended after the mains
+      mr.update(false, t);
+      rig.flippers[3 + 1]?.update(true, t);
+    });
+    run(2);
+    check("mini flipper reaches the valve manifold", sawValve);
+  }
+
+  // 6 — three valve hits light the return; the subway rides home to the
+  // left inlane and pays the outflow
+  {
+    const rig2 = buildRig("sump");
+    rig2.flippers.forEach((f) => f.update(false, rig2.t));
+    const logic2 = rig2.logic as SumpLogic;
+    rig2.bus.emit("bankComplete", {});
+    rig2.run(0.3);
+    rig2.placeBall(0.26, 1.0);
+    rig2.run(3.5); // descend into sump play
+    for (let i = 0; i < 3; i++)
+      rig2.bus.emit("sensor", { kind: "target", id: "valves" });
+    check("three valves light the return pipe", logic2.kickerLit("return"));
+    let sawOutflow = false;
+    let sumpPlays = 0;
+    rig2.bus.on("score", ({ label }) => {
+      if (label === "OUTFLOW") sawOutflow = true;
+      if (label === "SUMP PLAY") sumpPlays++;
+    });
+    rig2.placeBall(0.19, 1.128, -0.5, -0.05); // roll INTO the return mouth
+    let rideMinY = 2;
+    rig2.run(6, () => {
+      rideMinY = Math.min(rideMinY, rig2.ball.body.getPosition().y);
+    });
+    check(
+      "the return pipe rides home and pays OUTFLOW",
+      sawOutflow && rideMinY < 0.9,
+      `carried up to y=${rideMinY.toFixed(3)}`,
+    );
+    // the relit gate is proved by the SECOND descent the loose ball takes
+    check("the ride re-lights the floodgate", sumpPlays >= 1);
+  }
+
+  // 7 — traps: the new bottom geometry
+  for (const [label, x, y] of [
+    ["throat left seam", 0.19, 1.0],
+    ["throat right seam", 0.33, 1.0],
+    ["shed-left ridge", 0.16, 1.035],
+    ["shed-right ridge", 0.36, 1.04],
+    ["left void drop", 0.06, 0.98],
+    ["right void drop", 0.45, 0.98],
+    ["chamber mouth drop", 0.19, 1.083],
+    ["gate-shut landing shelf", 0.3, 1.06],
+  ] as const) {
+    const rigT = buildRig("sump");
+    rigT.flippers.forEach((f) => f.update(false, rigT.t));
+    // mouth points are only reachable while the gate is open (the shut
+    // blade overhangs the deflector) — open it for every drop
+    rigT.bus.emit("bankComplete", {});
+    rigT.run(0.3);
+    rigT.placeBall(x, y);
+    rigT.run(5);
+    const p = rigT.ball.body.getPosition();
+    check(
+      `${label} does not trap the ball`,
+      rigT.state.drained,
+      `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 8 — chamber drops drain clean through the mini tip gap (gate shut
+  // afterwards: chamber gap is a REAL drain)
+  {
+    const rigC = buildRig("sump");
+    rigC.flippers.forEach((f) => f.update(false, rigC.t));
+    rigC.placeBall(0.26, 1.12);
+    rigC.run(4);
+    check("chamber tip-gap drop drains", rigC.state.drained);
+  }
+
+  // 9 — water level: four lanes raise the level and the multiplier
+  {
+    const rigW = buildRig("sump");
+    const logicW = rigW.logic as SumpLogic;
+    for (const id of ["1", "2", "3", "4"]) logicW.onRollover(id);
+    check("S-U-M-P raises the water level", rigW.scoring.multiplier === 2, `x${rigW.scoring.multiplier}`);
+    check("level lights THE GRATE", logicW.kickerLit("grate"));
+  }
+
+  // 10 — skill shot: soft plunge pays THE READING
+  {
+    const rigS = buildRig("sump");
+    rigS.flippers.forEach((f) => f.update(false, rigS.t));
+    rigS.run(2);
+    let sawReading = false;
+    rigS.bus.on("score", ({ label }) => {
+      if (label === "THE READING") sawReading = true;
+    });
+    rigS.ball.body.setLinearVelocity(new Vec2(0, -1.2));
+    rigS.run(3);
+    check("soft plunge pays THE READING", sawReading);
+  }
+}
+
 if (!which || which === "moondial") moondialSuite();
 if (!which || which === "tidebreaker") tidebreakerSuite();
 if (!which || which === "midway") midwaySuite();
 if (!which || which === "nightmail") nightmailSuite();
 if (!which || which === "smallhours") smallhoursSuite();
+if (!which || which === "sump") sumpSuite();
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

@@ -192,6 +192,8 @@ export class Game {
   private nextBallId = 1;
   private spawnQueue: { at: { x: number; y: number }; v: { x: number; y: number }; delay: number }[] = [];
   private flippers: Flipper[];
+  private upperFlipper?: Flipper;
+  private miniFlippers: Flipper[] = [];
   private bumpers: Bumper[];
   private slings: Slingshot[];
   private targetBank: DropTargetBank;
@@ -305,11 +307,22 @@ export class Game {
       new Flipper(this.physics.world, this.table.body, "left", this.tuning, g.flippers.left),
       new Flipper(this.physics.world, this.table.body, "right", this.tuning, g.flippers.right),
     ];
-    // optional upper (third) flipper — Midway's mallet; index 2 by convention
-    if (g.flippers.upper)
-      this.flippers.push(
-        new Flipper(this.physics.world, this.table.body, g.flippers.upper.side, this.tuning, g.flippers.upper),
+    // optional upper (third) flipper — Midway's mallet
+    if (g.flippers.upper) {
+      this.upperFlipper = new Flipper(
+        this.physics.world, this.table.body, g.flippers.upper.side, this.tuning, g.flippers.upper,
       );
+      this.flippers.push(this.upperFlipper);
+    }
+    // M13: optional mini pair (the Sump's chamber) — same hardware, driven
+    // by the main left/right actions (one button works both storeys)
+    if (g.flippers.mini) {
+      this.miniFlippers = [
+        new Flipper(this.physics.world, this.table.body, "left", this.tuning, g.flippers.mini.left),
+        new Flipper(this.physics.world, this.table.body, "right", this.tuning, g.flippers.mini.right),
+      ];
+      this.flippers.push(...this.miniFlippers);
+    }
     this.prevFlipAngles = this.flippers.map((f) => f.body.getAngle());
     this.bumpers = g.bumpers.map((def) => new Bumper(this.physics.world, def));
     this.slings = g.slings.map((def) => new Slingshot(this.physics.world, def));
@@ -846,7 +859,7 @@ export class Game {
     const flipU = flippersLive && (s.upper || tapU);
     if (flipL && !this.prevFlip.left) this.audio.sfx("flipper");
     if (flipR && !this.prevFlip.right) this.audio.sfx("flipper");
-    if (this.flippers[2] && flipU && !this.prevFlip.upper) this.audio.sfx("flipper");
+    if (this.upperFlipper && flipU && !this.prevFlip.upper) this.audio.sfx("flipper");
     // lane change (flippersLive already excludes tilt): main flippers only —
     // the upper defaults to sharing the right keys, so it must not re-fire
     if (this.phase === "play") {
@@ -858,7 +871,9 @@ export class Game {
     this.prevFlip.upper = flipU;
     this.flippers[0].update(flipL, t);
     this.flippers[1].update(flipR, t);
-    this.flippers[2]?.update(flipU, t);
+    this.upperFlipper?.update(flipU, t);
+    // M13 mini pair: keyed by side off the MAIN actions
+    for (const f of this.miniFlippers) f.update(f.side === "left" ? flipL : flipR, t);
     if (this.phase === "play") this.updatePlunger(dt, s.plunger, t);
     else if (this.phase === "attract" && s.plunger) {
       if (!browsing) this.startGame();

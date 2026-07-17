@@ -92,7 +92,9 @@ Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 (`--abyss-500/300`), Midnight Midway layers dusk plum
 (`--carnival-500/300`), The Night Mail layers wet slate
 (`--smoke-500/300`), Small Hours layers warm asphalt
-(`--rooftop-500/300`) — always over a 16 mm ink base with a `chrome-200`
+(`--rooftop-500/300`), The Sump layers iron-green masonry
+(`--culvert-500/300`, added 2026-07-17 per the table 6 brief) — always
+over a 16 mm ink base with a `chrome-200`
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
 are OPAQUE bright chrome, and only the ramp BED between them — a wide
@@ -112,10 +114,14 @@ translucent bed ribbon riding each layer-1 height profile.
 
 ## 3. Master units & scale
 
-- **Playfield master SVG: 1 user unit = 1 mm.** The table master is
-  `575 × 1050` (`viewBox="0 0 575 1050"`), matching the physics table of
+- **Playfield master SVG: 1 user unit = 1 mm.** The lineup-standard master
+  is `575 × 1050` (`viewBox="0 0 575 1050"`), matching a physics table of
   0.575 × 1.05 m. The SVG→fixture parser divides by 1000 — no other scale
-  factor anywhere.
+  factor anywhere. *(Amended 2026-07-17 for table 6: the envelope is
+  per-table data — The Sump runs `575 × 1250`, its sump chamber occupying
+  the extra 200 mm below the lineup's usual floor. The invariants are the
+  1 unit = 1 mm scale and the 0..520 / 520..575 playfield/lane split, not
+  the height.)*
 - **The launch lane lives outside the playfield** (Pinball Fantasies
   convention): the playfield proper is `0..520`; the plunger lane occupies
   `520..575` and meets the playfield only through the orbit at the top.
@@ -326,7 +332,10 @@ See [previews/materials.html](previews/materials.html).
 - **Table accent (2026-07-16):** each table names one neon pair as its
   element-lamp accent, carried by `TableSpec.theme` so both renderers stay in
   step — Moondial `violet-400/600`, Tidebreaker `cyan-400/600`, Midnight
-  Midway `magenta-400/600`, The Night Mail `green-400/600`, Small Hours
+  Midway `magenta-400/600`, The Night Mail `green-400/600`, The Sump
+  `red-400/600` (flood-warning red, added 2026-07-17 — lit warning
+  signage only, colder/pinker than the `--alert-400` UI lamp, never
+  blood, never substituting for brass or bulb warmth), Small Hours
   `amber-400/600`. Slings and drop
   targets draw their coloured light from it; new per-table element lamps
   should too before inventing a new colour.

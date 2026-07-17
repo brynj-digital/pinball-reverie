@@ -5,6 +5,7 @@ import { TIDEBREAKER_SPEC } from "./defs/tidebreaker";
 import { MIDWAY_SPEC } from "./defs/midway";
 import { NIGHTMAIL_SPEC } from "./defs/nightmail";
 import { SMALLHOURS_SPEC } from "./defs/smallhours";
+import { SUMP_SPEC } from "./defs/sump";
 
 /** Scoring values every table's rules JSON must carry (Scoring.ts reads these). */
 export interface ScoringRules {
@@ -55,7 +56,7 @@ export interface TableSpec {
   };
 }
 
-export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail" | "smallhours";
+export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail" | "smallhours" | "sump";
 
 export const TABLE_SPECS: Record<TableId, TableSpec> = {
   moondial: MOONDIAL_SPEC,
@@ -63,6 +64,7 @@ export const TABLE_SPECS: Record<TableId, TableSpec> = {
   midway: MIDWAY_SPEC,
   nightmail: NIGHTMAIL_SPEC,
   smallhours: SMALLHOURS_SPEC,
+  sump: SUMP_SPEC,
 };
 
 export const TABLE_ORDER: TableId[] = [
@@ -71,6 +73,7 @@ export const TABLE_ORDER: TableId[] = [
   "midway",
   "nightmail",
   "smallhours",
+  "sump",
 ];
 
 const TABLE_KEY = "pinball-table-v1";

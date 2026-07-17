@@ -119,6 +119,12 @@ function validateAnchors(
   const expect: [string, { x: number; y: number }][] = [
     ["flipper-left", g.flippers.left],
     ["flipper-right", g.flippers.right],
+    ...(g.flippers.mini
+      ? [
+          ["flipper-mini-left", g.flippers.mini.left] as [string, { x: number; y: number }],
+          ["flipper-mini-right", g.flippers.mini.right] as [string, { x: number; y: number }],
+        ]
+      : []),
     ...(g.flippers.upper
       ? [["flipper-upper", g.flippers.upper] as [string, { x: number; y: number }]]
       : []),

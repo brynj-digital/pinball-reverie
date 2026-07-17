@@ -68,6 +68,11 @@ for (const tableId of tables) {
   ];
   if (g.flippers.upper)
     flippers.push(new Flipper(pw.world, table.body, g.flippers.upper.side, t, g.flippers.upper));
+  if (g.flippers.mini)
+    flippers.push(
+      new Flipper(pw.world, table.body, "left", t, g.flippers.mini.left),
+      new Flipper(pw.world, table.body, "right", t, g.flippers.mini.right),
+    );
   const bumpers = g.bumpers.map((d) => new Bumper(pw.world, d));
   const slings = g.slings.map((d) => new Slingshot(pw.world, d));
   const bank = new DropTargetBank(pw.world, pw, bus, g.dropTargets);

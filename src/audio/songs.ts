@@ -438,3 +438,72 @@ export const SMALLHOURS_SONG: Song = {
   bpm: 100,
   arrangement: [V_VERSE, V_CHORUS, V_VERSE, V_CHORUS, V_CALLER, V_TRANSMITTER, V_CHORUS],
 };
+
+// ────────────────────────── THE SUMP — D minor, 92 bpm ──────────────────────────
+// "Under the City": the lineup's most reverberant song — dub space, long
+// echoing gaps, a pulse bass like distant pumps. The verse answers itself
+// (phrase, silence, the echo of the phrase); the chorus is the floodgate
+// open and the water moving; the breather is drips in a big dark room; the
+// middle eight is the pump hall hammering. Straight time throughout.
+
+/** Deep water: a sparse triangle line that leaves room for its own echo. */
+// prettier-ignore
+const S_VERSE: Section = {
+  chords: ["Dm", "Bb", "F", "C", "Dm", "Bb", "Gm", "C"],
+  lead: [
+    74, -1, -1, -1,  0,  0, 77, -1,    0,  0,  0,  0, 74, -1,  0,  0,
+     0,  0, 72, -1,  0,  0,  0,  0,   69, -1, -1, -1,  0,  0,  0,  0,
+    74, -1, -1, -1,  0,  0, 77, -1,    0,  0, 81, -1, 77, -1,  0,  0,
+     0,  0, 74, -1, 72, -1,  0,  0,   67, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.2, crash: false, swing: 0,
+};
+
+/** The gate is open: the water moving, the pulse doubled under it. */
+// prettier-ignore
+const S_CHORUS: Section = {
+  chords: ["Dm", "Gm", "Bb", "C", "Dm", "Gm", "C", "Dm"],
+  lead: [
+    74, -1, 77, -1, 74, -1, 72, -1,   70, -1, -1, -1, 74, -1, 70, -1,
+    77, -1, -1, -1, 74, -1, 77, -1,   79, -1, 77, -1, 74, -1, 72, -1,
+    74, -1, 77, -1, 81, -1, 77, -1,   82, -1, -1, -1, 79, -1, 77, -1,
+    79, -1, 77, -1, 74, -1, 72, -1,   74, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "roll",
+  arp: true, leadVol: 0.22, crash: false, swing: 0,
+};
+
+/** The breather: drips in the dark — near-silence, plinks off the beat. */
+// prettier-ignore
+const S_DRIPS: Section = {
+  chords: ["Dm", "Dm", "Bb", "Bb", "Dm", "Dm", "C", "C"],
+  lead: [
+     0,  0,  0,  0, 86, -1,  0,  0,    0,  0,  0,  0,  0,  0, 81, -1,
+     0,  0,  0,  0,  0,  0,  0,  0,   89, -1,  0,  0,  0,  0,  0,  0,
+     0,  0, 86, -1,  0,  0,  0,  0,    0,  0,  0,  0, 82, -1,  0,  0,
+     0,  0,  0,  0, 81, -1,  0,  0,    0,  0,  0,  0,  0,  0,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.16, crash: false, swing: 0,
+};
+
+/** The pump hall: pistons hammering — the middle eight drives. */
+// prettier-ignore
+const S_PUMPS: Section = {
+  chords: ["Dm", "C", "Bb", "C", "Dm", "C", "Gm", "Am"],
+  lead: [
+    74, 74, -1, 74,  0, 74, 72, -1,   72, 72, -1, 72,  0, 72, 70, -1,
+    70, 70, -1, 70,  0, 70, 72, -1,   72, -1, 74, -1, 76, -1, 77, -1,
+    74, 74, -1, 74,  0, 74, 72, -1,   72, 72, -1, 72,  0, 72, 70, -1,
+    79, -1, 77, -1, 76, -1, 72, -1,   74, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "pump",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/** Form: deep water, the gate, deep water, the gate, drips, pumps, the gate. */
+export const SUMP_SONG: Song = {
+  bpm: 92,
+  arrangement: [S_VERSE, S_CHORUS, S_VERSE, S_CHORUS, S_DRIPS, S_PUMPS, S_CHORUS],
+};

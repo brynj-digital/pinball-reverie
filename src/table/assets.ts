@@ -14,6 +14,7 @@ import {
   MOONDIAL_SONG,
   NIGHTMAIL_SONG,
   SMALLHOURS_SONG,
+  SUMP_SONG,
   TIDEBREAKER_SONG,
 } from "../audio/songs";
 
@@ -27,6 +28,8 @@ import nightmailPlayfield from "../../design/tables/nightmail/playfield.svg?raw"
 import nightmailBackglass from "../../design/tables/nightmail/backglass.svg?raw";
 import smallhoursPlayfield from "../../design/tables/smallhours/playfield.svg?raw";
 import smallhoursBackglass from "../../design/tables/smallhours/backglass.svg?raw";
+import sumpPlayfield from "../../design/tables/sump/playfield.svg?raw";
+import sumpBackglass from "../../design/tables/sump/backglass.svg?raw";
 
 import orbitScene from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierScene from "../../design/dmd-scenes/multiplier.svg?raw";
@@ -58,6 +61,12 @@ import couplingScene from "../../design/dmd-scenes/coupling.svg?raw";
 import tunnelScene from "../../design/dmd-scenes/tunnel.svg?raw";
 import connectionScene from "../../design/dmd-scenes/connection.svg?raw";
 import sortingScene from "../../design/dmd-scenes/sorting.svg?raw";
+import gaugeScene from "../../design/dmd-scenes/gauge.svg?raw";
+import gateScene from "../../design/dmd-scenes/gate.svg?raw";
+import valveScene from "../../design/dmd-scenes/valve.svg?raw";
+import outflowScene from "../../design/dmd-scenes/outflow.svg?raw";
+import pumpsScene from "../../design/dmd-scenes/pumps.svg?raw";
+import highwaterScene from "../../design/dmd-scenes/highwater.svg?raw";
 import dialScene from "../../design/dmd-scenes/dial.svg?raw";
 import mastScene from "../../design/dmd-scenes/mast.svg?raw";
 import callerScene from "../../design/dmd-scenes/caller.svg?raw";
@@ -145,5 +154,18 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       dawn: { svg: dawnScene, frames: 9 },
     },
     song: SMALLHOURS_SONG,
+  },
+  sump: {
+    playfieldSvg: sumpPlayfield,
+    backglassSvg: sumpBackglass,
+    dmdScenes: {
+      gauge: { svg: gaugeScene, frames: 8 },
+      gate: { svg: gateScene, frames: 8 },
+      valve: { svg: valveScene, frames: 8 },
+      outflow: { svg: outflowScene, frames: 8 },
+      pumps: { svg: pumpsScene, frames: 8 },
+      highwater: { svg: highwaterScene, frames: 8 },
+    },
+    song: SUMP_SONG,
   },
 };

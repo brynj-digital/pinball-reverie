@@ -1,0 +1,62 @@
+{
+  "comment": "The Sump rules metadata (plan 5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/sump.ts.",
+  "points": {
+    "bumper": 100,
+    "sling": 50,
+    "rollover": 500,
+    "spinnerTick": 100,
+    "target": 500,
+    "bankComplete": 5000,
+    "orbit": 2500
+  },
+  "bonusUnits": {
+    "rollover": 500,
+    "target": 250,
+    "spinnerTick": 10
+  },
+  "outflowCombo": {
+    "windowS": 10,
+    "maxStep": 3
+  },
+  "waterLevel": {
+    "comment": "S-U-M-P completions raise the level 1..5; the bonus multiplier tracks it. Level 5 arms HIGH WATER. Letters persist across balls, lane change on the flippers.",
+    "stages": ["LEVEL 1", "LEVEL 2", "LEVEL 3", "LEVEL 4", "HIGH WATER MARK"],
+    "maxMultiplier": 6,
+    "litsGrate": true
+  },
+  "floodgate": {
+    "comment": "Lit by a SLUICE completion; while lit a centre drain opens the gate and SUMP PLAY begins instead of a ball loss. Consumed on descent; relit at half price (bank walls stay down) after a completed outflow ride.",
+    "descentPoints": 10000
+  },
+  "sumpPlay": {
+    "comment": "Chamber scoring runs at x waterLevel (scoring factor). valveHits hits on the manifold light the RETURN PIPE; riding it pays the outflow ladder and returns the ball to the left inlane. After pumpS in the chamber the pumps spool (DMD warning); at floodS the return lights FREE regardless of valves (the escape is offered, never forced - the chamber gap stays a real drain).",
+    "valveHits": 3,
+    "valvePoints": 2500,
+    "pumpS": 25,
+    "floodS": 40,
+    "outflowLadder": [25000, 50000, 75000, 100000]
+  },
+  "pump": {
+    "comment": "Pump House scoop ladder (wrapping); the top rung spots a valve in the next sump play.",
+    "holdS": 2.0,
+    "bonusUnit": 500,
+    "rungs": [
+      { "name": "GAUGE", "points": 5000 },
+      { "name": "GREASE", "points": 10000 },
+      { "name": "OVERHAUL", "points": 15000 },
+      { "name": "MASTER VALVE", "points": 25000 }
+    ]
+  },
+  "highWater": {
+    "comment": "Wizard: WATER LEVEL 5 + two outflow rides + the pump ladder top light the Pump House; shooting it starts durationS of x scoreFactor with the floodgate locked open.",
+    "outflowsRequired": 2,
+    "durationS": 30,
+    "scoreFactor": 2
+  },
+  "skill": {
+    "comment": "THE READING (differentiation-pass pattern): a soft plunge peaking in the sensor-skill-reading band (fires at <= maxSpeed m/s) pays points and spots one S-U-M-P lane. Once per ball.",
+    "maxSpeed": 0.75,
+    "points": 15000,
+    "bonusUnit": 500
+  }
+}

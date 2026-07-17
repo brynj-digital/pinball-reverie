@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <!-- THE SUMP backglass: shown in the landscape side panel above the DMD
+       and as the table-select card (§4.5/§8). Chrome-horizon wordmark over
+       a brick junction cross-section: grate slots of moonlight at street
+       level, the arched culvert, the gauge past its red line, the chamber's
+       work-lamp pool at the bottom. Culvert field ramp + flood-red feature
+       color per STYLE-GUIDE §2 (2026-07-17 amendments). Same moon,
+       glimpsed through the grate. -->
+  <defs>
+    <linearGradient id="spSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#17201d"/>
+      <stop offset="0.55" stop-color="#101614"/>
+      <stop offset="1" stop-color="#0a0d0c"/>
+    </linearGradient>
+    <linearGradient id="spChrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <radialGradient id="spLamp" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffdf9e" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ffdf9e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="spFlood" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff2e44" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#ff2e44" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="spGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="300" height="360" fill="url(#spSky)"/>
+
+  <!-- street level: kerb line + grate slots, the moon caught in one slice -->
+  <rect x="0" y="34" width="300" height="4" fill="#2b3a35"/>
+  <g fill="#d7dce8" opacity="0.28">
+    <rect x="92" y="12" width="9" height="18" rx="3"/>
+    <rect x="112" y="10" width="9" height="20" rx="3"/>
+    <rect x="132" y="9" width="9" height="21" rx="3"/>
+    <rect x="152" y="9" width="9" height="21" rx="3"/>
+    <rect x="172" y="10" width="9" height="20" rx="3"/>
+    <rect x="192" y="12" width="9" height="18" rx="3"/>
+  </g>
+  <circle cx="146" cy="19" r="7" fill="#f5f2e8" opacity="0.85" filter="url(#spGlow)"/>
+  <rect x="0" y="9" width="300" height="1.4" fill="#465e55" opacity="0.6"/>
+
+  <!-- the brick arch of the junction -->
+  <path d="M 26 220 L 26 132 Q 150 52 274 132 L 274 220"
+        fill="none" stroke="#2b3a35" stroke-width="10"/>
+  <path d="M 26 216 L 26 134 Q 150 58 274 134 L 274 216"
+        fill="none" stroke="#465e55" stroke-width="2"/>
+  <!-- brick courses -->
+  <g stroke="#2b3a35" stroke-width="1.2" opacity="0.5" fill="none">
+    <path d="M 40 150 Q 150 84 260 150"/>
+    <path d="M 56 172 Q 150 116 244 172"/>
+  </g>
+
+  <!-- wordmark: chrome horizon type with a flood-red echo -->
+  <text x="150" y="112" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="44" font-weight="bold" letter-spacing="2"
+        fill="#b01226" opacity="0.5" filter="url(#spGlow)">THE SUMP</text>
+  <text x="150" y="108" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="44" font-weight="bold" letter-spacing="2"
+        fill="url(#spChrome)" stroke="#07080d" stroke-width="2" paint-order="stroke">THE SUMP</text>
+  <text x="150" y="108" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="44" font-weight="bold" letter-spacing="2"
+        fill="none" stroke="#ff2e44" stroke-width="0.8" opacity="0.85">THE SUMP</text>
+  <text x="150" y="132" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="11" letter-spacing="5" fill="#465e55">UNDER THE CITY</text>
+
+  <!-- the gauge, past the red line -->
+  <g transform="translate(66,196)">
+    <circle r="26" fill="#0a0d0c" stroke="#2b3a35" stroke-width="3"/>
+    <path d="M -18 -8 A 20 20 0 0 1 18 -8" fill="none" stroke="#465e55" stroke-width="2"/>
+    <path d="M 10 -17 A 20 20 0 0 1 18 -8" fill="none" stroke="#ff2e44" stroke-width="3"/>
+    <line x1="0" y1="0" x2="14" y2="-13" stroke="#ff2e44" stroke-width="2.4" filter="url(#spGlow)"/>
+    <circle r="3" fill="#465e55"/>
+  </g>
+
+  <!-- pipes descending to the chamber -->
+  <g stroke="#2b3a35" stroke-width="6" fill="none" opacity="0.8">
+    <path d="M 226 168 L 226 300"/>
+    <path d="M 246 186 L 246 300"/>
+  </g>
+  <g stroke="#465e55" stroke-width="1.2" fill="none" opacity="0.6">
+    <path d="M 226 168 L 226 300"/>
+    <path d="M 246 186 L 246 300"/>
+  </g>
+
+  <!-- the chamber: work-lamp pool, mini flippers as silhouettes, the ball -->
+  <rect x="24" y="252" width="252" height="4" fill="#2b3a35"/>
+  <circle cx="150" cy="308" r="64" fill="url(#spLamp)"/>
+  <circle cx="150" cy="266" r="24" fill="url(#spFlood)"/>
+  <g fill="#9c7c2c" stroke="#07080d" stroke-width="1.4">
+    <path d="M 106 318 L 140 328 L 140 334 L 106 326 Z"/>
+    <path d="M 194 318 L 160 328 L 160 334 L 194 326 Z"/>
+  </g>
+  <circle cx="150" cy="312" r="9" fill="#d7dce8" stroke="#07080d" stroke-width="1.4"/>
+  <circle cx="147" cy="309" r="3" fill="#ffffff"/>
+  <text x="150" y="352" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="9" letter-spacing="3" fill="#ff2e44" opacity="0.9">THE DRAIN IS THE WAY IN</text>
+</svg>

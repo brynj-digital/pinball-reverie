@@ -200,8 +200,18 @@ export interface TableGeometry {
    * (M10+, Midway's mallet): placed by anchor-flipper-upper in the SVG,
    * driven by the "upper" input action (defaults to the same keys as its
    * `side`'s lower flipper). Same hardware (FLIPPER constants) as the pair.
+   *
+   * `mini` (M13, the Sump's chamber pair): an optional SECOND full pair,
+   * placed by anchor-flipper-mini-left/right and driven by the SAME
+   * left/right actions as the main pair — one button works both storeys,
+   * the real-machine lower-playfield convention. Same hardware.
    */
-  flippers: { left: Pt; right: Pt; upper?: Pt & { side: FlipperSide } };
+  flippers: {
+    left: Pt;
+    right: Pt;
+    upper?: Pt & { side: FlipperSide };
+    mini?: { left: Pt; right: Pt };
+  };
   bumpers: readonly BumperDef[];
   slings: readonly SlingDef[];
   dropTargets: DropTargetsDef;

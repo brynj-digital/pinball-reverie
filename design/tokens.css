@@ -45,6 +45,15 @@
   --rooftop-500: #46381f; /* asphalt wall/rail body (steel-500 analog) */
   --rooftop-300: #a68d5c; /* warm-khaki wall/rail highlight (steel-300 analog) */
 
+  /* field, culvert variant — The Sump's wet-brick-and-iron ramp: enclosed
+     Victorian masonry, green-black slate cooler than the smoke and darker
+     than the abyss (added 2026-07-17 per the table 6 brief; STYLE-GUIDE §2) */
+  --culvert-900: #0a0d0c; /* tunnel dark / deep shadow */
+  --culvert-800: #101614; /* culvert field base */
+  --culvert-700: #17201d; /* torch-pool panels, brick arches */
+  --culvert-500: #2b3a35; /* iron-green wall/rail body (steel-500 analog) */
+  --culvert-300: #465e55; /* iron-green wall/rail highlight (steel-300 analog) */
+
   /* marquee bulb — incandescent white-gold for bulb strings, chase lamps,
      platform gas lamps and lit carriage windows
      (added 2026-07-05, scope widened 2026-07-15; NOT brass — brass stays
@@ -85,6 +94,12 @@
                            the dial, insert arrows. NOT brass (ball-touch metal)
                            and NOT bulb (incandescent points). */
   --amber-600: #b35f0e;
+  --red-400: #ff2e44; /* flood-warning red — The Sump's feature hue (added
+                          2026-07-17, table 6): gauge needles past the line,
+                          the FLOODGATE OPEN sign, valve inserts. Lit warning
+                          signage only — colder/pinker than --alert-400 (the
+                          UI tilt/danger lamp), never blood, never brass. */
+  --red-600: #b01226;
   --alert-400: #ff5555; /* tilt, danger lamps */
 
   /* DMD — amber plasma, 4 brightness levels + off */
