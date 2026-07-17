@@ -46,7 +46,11 @@ plum dusk) with magenta as its feature color; The Night Mail uses the
 as its feature color; Small Hours uses the **rooftop** ramp
 (`--rooftop-700/800/900`, sodium-washed asphalt umber — added 2026-07-16
 per the table 5 brief) with **transmitter amber** (`--amber-400/600`) as
-its feature color. Any new variant adds its
+its feature color; Thunderhead uses the **stratus** ramp
+(`--stratus-700/800/900`, moonlit grey-violet cloud-deck — added
+2026-07-17 per the table 9 brief, the only field variant that is a
+*surface of weather* rather than ground) with **storm yellow**
+(`--yellow-400/600`) as its feature color. Any new variant adds its
 tokens here first, keeps `--ink`/steel/chrome/brass unchanged, and stays
 within the §1 saturation discipline.
 
@@ -95,7 +99,9 @@ Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 (`--rooftop-500/300`), The Sump layers iron-green masonry
 (`--culvert-500/300`, added 2026-07-17 per the table 6 brief), Glasshouse
 layers deep leaf (`--conservatory-500/300`, 2026-07-17, table 7), Summit
-layers moonlit granite (`--alpine-500/300`, 2026-07-17, table 8) — always
+layers moonlit granite (`--alpine-500/300`, 2026-07-17, table 8),
+Thunderhead layers storm iron (`--stratus-500/300`, 2026-07-17,
+table 9) — always
 over a 16 mm ink base with a `chrome-200`
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
@@ -105,7 +111,8 @@ the height profiles — semi-transparent fluorescent ramp plastic. **The
 glass TINT is per-table, matching the field variant** (amended 2026-07-05
 by direction): DAYGLO green (`--green-400` #39ff14) is the default —
 Moondial and Midway use it — while Tidebreaker's glass is abyssal
-`--cyan-400` #2fc9d6 and Small Hours' is transmitter `--amber-400`
+`--cyan-400` #2fc9d6 Thunderhead's is storm `--yellow-400` #f4f491,
+and Small Hours' is transmitter `--amber-400`
 #ffa028 (2026-07-16, per the table 5 brief). The SVG wash and `TableSpec.theme.rampGlass3d` must
 carry the same hue. Renderers composite the
 `art-rails-elevated` group separately — over the ball on the main field
@@ -342,7 +349,10 @@ See [previews/materials.html](previews/materials.html).
   `red-400/600` (flood-warning red, added 2026-07-17 — lit warning
   signage only, colder/pinker than the `--alert-400` UI lamp, never
   blood, never substituting for brass or bulb warmth), Small Hours
-  `amber-400/600`. Slings and drop
+  `amber-400/600`, Thunderhead `yellow-400/600` (storm yellow,
+  2026-07-17 — lightning, charge arcs and the barograph line only;
+  electric-COLD toward white, never amber's sodium warmth, never bulb,
+  never brass). Slings and drop
   targets draw their coloured light from it; new per-table element lamps
   should too before inventing a new colour.
 - **Playfield:** `field-800` base; `field-900` occlusion pooling along walls;
