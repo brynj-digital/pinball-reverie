@@ -2158,6 +2158,10 @@ function glasshouseSuite(): void {
     ["outer-right return slot", 0.6, 0.72],
     ["bloom housing left cap", 0.29, 0.505],
     ["bloom housing right cap", 0.46, 0.505],
+    ["bloom roof rain (west)", 0.31, 0.36],
+    ["bloom roof rain (mid)", 0.375, 0.38],
+    ["bloom roof rain (east, onto the hood)", 0.44, 0.4],
+    ["bloom roof west wall", 0.27, 0.42],
     ["vine mouth seam", 0.175, 0.68],
     ["vine back drop", 0.225, 0.56],
 

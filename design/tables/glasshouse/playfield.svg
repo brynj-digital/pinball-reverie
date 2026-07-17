@@ -115,6 +115,16 @@
            sits 8 mm behind the target line (recess shallower than a ball
            radius) with curled end caps sealing the sides -->
       <path data-width="12" id="collision-wall-bloom-housing" d="M 290 516 L 298 492 L 452 492 L 460 516"/>
+      <!-- bank roof: the crest windows rain balls onto the housing's flat
+           back (soak seeds 2+7 rested a ball there). One 20-degree shed
+           slopes everything RIGHT onto the orchid hood's crest (which
+           itself sheds on down to the field); the vertical west wall
+           closes the triangle so nothing sneaks under the roof onto the
+           flat. A symmetric gable was tried and cradled a ball against
+           the hood's end cap. -->
+      <path data-width="12" id="collision-wall-bloom-roof" d="M 284 372 L 531 456"/>
+      <path data-width="12" id="collision-wall-bloom-roof-west" d="M 284 372 L 284 516"/>
+      <path data-width="12" id="collision-wall-bloom-roof-east" d="M 460 467 L 460 516"/>
       <!-- THE ORCHID hood: mouth down-left, never traps -->
       <path data-width="12" id="collision-wall-orchid-hood" d="M 544 484 L 542.3 477.7 L 539.8 468.9 L 536 461 L 530.6 455.3 L 524 450.6 L 517 447 L 509.9 444.5 L 502.4 443.1 L 495 443 L 487.3 444.5 L 479.7 447.3 L 473 451 L 467.5 456.3 L 463 462.6 L 460 467"/>
       <!-- lane-wall deflector sheltering the MISTER kickback -->

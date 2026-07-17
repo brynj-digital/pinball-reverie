@@ -41,7 +41,14 @@ clearance-solving and simcheck:
   lanes 2/3 framed by risen dividers (the Midway/Night Mail apex
   pattern, applied at build time) took the table to 3 lane-set
   completions and 63 bumper hits per 600 s.
-- Soak 1/2/3/7 = 0 stuck. WATCH ITEM: weak plunges roll back more than the lineup norm (pre-deflector soak peaked at ~250 launches/600 s; post-fix ~126, still watch): the
+- **The bloom roof took four shapes** (all soak/simcheck-found): the
+  crest windows rain balls onto the bank's flat back — a gable cradled
+  against the hood cap, a low shed made a valley, a crest-level shed
+  parked slow balls on the hood crest's own 5° flat. Shipped: one
+  continuous 20° shed from a west wall, running FLUSH over the hood
+  crest into its right shoulder, with east/west walls sealing the
+  under-roof cavity (a 37 mm south gap admitted balls onto the flat).
+- Soak seeds 1/2/3/5/7/11/13 = 0 stuck. WATCH ITEM: weak plunges roll back more than the lineup norm (pre-deflector soak peaked at ~250 launches/600 s; post-fix ~126, still watch): the
   lineup's ~130 — the widebody's taller/longer launch channel returns a
   bigger slice of the random plunger range to the saddle (weak plunges
   roll back). Real widebodies do demand a fuller pull; if play shows the
