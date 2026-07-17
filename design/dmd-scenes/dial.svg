@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
-  <!-- NIGHT WAVES DMD scene: DIAL — the tuning needle sweeps the frequency band
+  <!-- SMALL HOURS DMD scene: DIAL — the tuning needle sweeps the frequency band
        through static, finds the carrier and blooms. TUNED IN. 8 frames of
        128x32 (style guide §6). Art rows 0..22; caption renders from row 24. -->
   <rect width="1024" height="32" fill="#000"/>

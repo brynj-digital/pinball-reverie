@@ -1,5 +1,5 @@
 {
-  "comment": "Night Waves rules metadata (plan §5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/nightwaves.ts. Design truth: design/tables/nightwaves/BRIEF.md.",
+  "comment": "Small Hours rules metadata (plan §5e: the SVG carries shape, this file carries scoring/mode rules). Consumed by src/game/Scoring.ts and src/game/smallhours.ts. Design truth: design/tables/smallhours/BRIEF.md.",
   "points": {
     "bumper": 100,
     "sling": 50,

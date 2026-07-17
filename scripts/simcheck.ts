@@ -28,7 +28,7 @@ import { MoondialLogic } from "../src/game/moondial";
 import { TidebreakerLogic } from "../src/game/tidebreaker";
 import { MidwayLogic } from "../src/game/midway";
 import { NightMailLogic } from "../src/game/nightmail";
-import { NightWavesLogic } from "../src/game/nightwaves";
+import { SmallHoursLogic } from "../src/game/smallhours";
 import { FLIPPER } from "../src/table/geometry";
 import { TABLE_SPECS, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
@@ -1405,12 +1405,12 @@ function nightmailSuite(): void {
   check("SIGNAL BOX releases on its timer", !sorting.holding);
 }
 
-// ═══════════════════════════ NIGHT WAVES ═══════════════════════════
-function nightwavesSuite(): void {
-  console.log("\n── nightwaves ──");
-  const rig = buildRig("nightwaves");
+// ═══════════════════════════ SMALL HOURS ═══════════════════════════
+function smallhoursSuite(): void {
+  console.log("\n── smallhours ──");
+  const rig = buildRig("smallhours");
   const { g, t, bus, ball, state, run, placeBall, wallR } = rig;
-  const logic = rig.logic as NightWavesLogic;
+  const logic = rig.logic as SmallHoursLogic;
   const phone = rig.kickers.find((k) => k.def.id === "phone")!;
   const generator = rig.kickers.find((k) => k.def.id === "generator")!;
   const switchboard = rig.kickers.find((k) => k.def.id === "switchboard")!;
@@ -1725,7 +1725,7 @@ if (!which || which === "moondial") moondialSuite();
 if (!which || which === "tidebreaker") tidebreakerSuite();
 if (!which || which === "midway") midwaySuite();
 if (!which || which === "nightmail") nightmailSuite();
-if (!which || which === "nightwaves") nightwavesSuite();
+if (!which || which === "smallhours") smallhoursSuite();
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

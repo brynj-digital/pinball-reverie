@@ -369,7 +369,7 @@ export const NIGHTMAIL_SONG: Song = {
   arrangement: [N_RAILS, N_WHISTLE, N_RAILS, N_WHISTLE, N_MOOR, N_GRADIENT, N_WHISTLE],
 };
 
-// ────────────────────────── NIGHT WAVES — A minor, 100 bpm ──────────────────────────
+// ────────────────────────── SMALL HOURS — A minor, 100 bpm ──────────────────────────
 // "The Small Hours": the lineup's first SHUFFLE — every section swings
 // (Hubbard shuffle on the odd sixteenths), where the Night Mail ran dead
 // straight. A walking bounce bass under a smoky thin-pulse lead that enters
@@ -434,7 +434,7 @@ const V_TRANSMITTER: Section = {
 };
 
 /** Form: groove, on air, groove, on air, the caller, the transmitter, on air. */
-export const NIGHTWAVES_SONG: Song = {
+export const SMALLHOURS_SONG: Song = {
   bpm: 100,
   arrangement: [V_VERSE, V_CHORUS, V_VERSE, V_CHORUS, V_CALLER, V_TRANSMITTER, V_CHORUS],
 };

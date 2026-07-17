@@ -1,8 +1,10 @@
-# Night Waves — Table 5 design brief
+# Small Hours — Table 5 design brief
 
-**Status: v1 built (2026-07-16).** Table id: `nightwaves`. This brief is
+**Status: v1 built (2026-07-16); renamed from "Night Waves" 2026-07-17**
+(two "Night" tables in one lineup — the mail train keeps the word; this
+table takes its own song's name). Table id: `smallhours`. This brief is
 the design truth; `playfield.svg` + `rules.json` + `src/table/defs/
-nightwaves.ts` + `src/game/nightwaves.ts` are the specifics. Deltas from
+smallhours.ts` + `src/game/smallhours.ts` are the specifics. Deltas from
 the concept, found during clearance-solving and simcheck/soak/
 feature-rates:
 
@@ -39,9 +41,9 @@ callers on the line. The drain is dead air.
 Fifth panel of the same-night anthology, and the first to go **indoors with
 the humans**: Moondial watches the sky, Tidebreaker is under the sea, the
 Midway is lit like daytime, the Night Mail crosses the dark country — and
-Night Waves is the voice playing quietly in every one of those places.
+Small Hours is the voice playing quietly in every one of those places.
 Register: **warm, close, unhurried** — the lineup's first cozy table. Where
-the Night Mail never stops moving, Night Waves *settles in*: swung rhythm,
+the Night Mail never stops moving, Small Hours *settles in*: swung rhythm,
 sodium light, one voice and the city listening.
 
 ## 0. IP note (read first)
@@ -281,7 +283,7 @@ table change; v1 ships with the deck rumble sfx only.
 ## 7. Engine requirements & cut line
 
 **This table adds NO new engine entities** — deliberately. After the
-Night Mail's feature milestone, Night Waves is the *integration* table:
+Night Mail's feature milestone, Small Hours is the *integration* table:
 every mechanic re-points existing machinery at a new job.
 
 1. **Spinner as selector** — pure `TableLogic` (spins arm a shot). No
