@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- GLASSHOUSE DMD scene: BLOOM - petals unfurl one per completion; the full flower on FULL BED / POLLEN COUNT.
+       8 frames of 128x32: #fff=3, #888=2, #666=1, black=0. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="64.0" cy="7.0" rx="5" ry="9" fill="#fff" transform="rotate(0 64.0 7.0)"/>
+  </g>
+  <g transform="translate(128,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="64.0" cy="7.0" rx="5" ry="9" fill="#fff" transform="rotate(0 64.0 7.0)"/>
+  </g>
+  <g transform="translate(256,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="60.7" cy="7.3" rx="5" ry="9" fill="#888" transform="rotate(-16 60.7 7.3)"/>
+    <ellipse cx="67.3" cy="7.3" rx="5" ry="9" fill="#fff" transform="rotate(16 67.3 7.3)"/>
+  </g>
+  <g transform="translate(384,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="57.7" cy="8.3" rx="5" ry="9" fill="#888" transform="rotate(-32 57.7 8.3)"/>
+    <ellipse cx="64.0" cy="7.0" rx="5" ry="9" fill="#888" transform="rotate(0 64.0 7.0)"/>
+    <ellipse cx="70.3" cy="8.3" rx="5" ry="9" fill="#fff" transform="rotate(32 70.3 8.3)"/>
+  </g>
+  <g transform="translate(512,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="57.7" cy="8.3" rx="5" ry="9" fill="#888" transform="rotate(-32 57.7 8.3)"/>
+    <ellipse cx="64.0" cy="7.0" rx="5" ry="9" fill="#888" transform="rotate(0 64.0 7.0)"/>
+    <ellipse cx="70.3" cy="8.3" rx="5" ry="9" fill="#fff" transform="rotate(32 70.3 8.3)"/>
+  </g>
+  <g transform="translate(640,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="55.2" cy="9.9" rx="5" ry="9" fill="#888" transform="rotate(-47 55.2 9.9)"/>
+    <ellipse cx="60.7" cy="7.3" rx="5" ry="9" fill="#888" transform="rotate(-16 60.7 7.3)"/>
+    <ellipse cx="67.3" cy="7.3" rx="5" ry="9" fill="#888" transform="rotate(16 67.3 7.3)"/>
+    <ellipse cx="72.8" cy="9.9" rx="5" ry="9" fill="#fff" transform="rotate(47 72.8 9.9)"/>
+  </g>
+  <g transform="translate(768,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="53.3" cy="11.9" rx="5" ry="9" fill="#888" transform="rotate(-63 53.3 11.9)"/>
+    <ellipse cx="57.7" cy="8.3" rx="5" ry="9" fill="#888" transform="rotate(-32 57.7 8.3)"/>
+    <ellipse cx="64.0" cy="7.0" rx="5" ry="9" fill="#888" transform="rotate(0 64.0 7.0)"/>
+    <ellipse cx="70.3" cy="8.3" rx="5" ry="9" fill="#888" transform="rotate(32 70.3 8.3)"/>
+    <ellipse cx="74.7" cy="11.9" rx="5" ry="9" fill="#fff" transform="rotate(63 74.7 11.9)"/>
+  </g>
+  <g transform="translate(896,0)">
+    <line x1="64" y1="30" x2="64" y2="18" stroke="#666" stroke-width="1.4"/>
+    <ellipse cx="52.2" cy="14.2" rx="5" ry="9" fill="#888" transform="rotate(-79 52.2 14.2)"/>
+    <ellipse cx="55.2" cy="9.9" rx="5" ry="9" fill="#888" transform="rotate(-47 55.2 9.9)"/>
+    <ellipse cx="60.7" cy="7.3" rx="5" ry="9" fill="#888" transform="rotate(-16 60.7 7.3)"/>
+    <ellipse cx="67.3" cy="7.3" rx="5" ry="9" fill="#888" transform="rotate(16 67.3 7.3)"/>
+    <ellipse cx="72.8" cy="9.9" rx="5" ry="9" fill="#888" transform="rotate(47 72.8 9.9)"/>
+    <ellipse cx="75.8" cy="14.2" rx="5" ry="9" fill="#fff" transform="rotate(79 75.8 14.2)"/>
+  </g>
+</svg>

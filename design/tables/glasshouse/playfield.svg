@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 1050" width="660" height="1050">
+  <!--
+    GLASSHOUSE — table 7 of Pinball Reverie (M14). The city's botanic
+    glasshouse locked for the night: the lineup's WIDEBODY (660 wide) and
+    its first LEFT-hand plunger — the fire-escape conventions mirrored.
+    Master units: 1 SVG unit = 1 mm (style guide §3). Design truth:
+    design/tables/glasshouse/BRIEF.md.
+
+    Structure: lane x 0..55 (the potting corridor), playfield 55..660
+    centred on x 357.5. The arch is the standard shell mirrored (lane side
+    left) with each half stretched about its outer anchor so the apexes
+    meet in ONE continuous crown — a flat crown was tried first and
+    stalled dying launches (simcheck-found; anything under ~17 deg holds
+    a resting ball). DOUBLE inlanes each side (four return lanes, the
+    POLLEN COUNT); THE VINE RUN is the lineup's only LATERAL climbing
+    surface (west mouth, airborne release over the east return lanes);
+    the BLOOM bank is the first free-standing 5-bank.
+  -->
+  <defs>
+    <linearGradient id="consGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#162419"/>
+      <stop offset="0.45" stop-color="#0f1811"/>
+      <stop offset="1" stop-color="#0a100c"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.42" r="0.85">
+      <stop offset="0.6" stop-color="#07080d" stop-opacity="0"/>
+      <stop offset="1" stop-color="#07080d" stop-opacity="0.34"/>
+    </radialGradient>
+    <radialGradient id="lampGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff8fae" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ff8fae" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="moonPane" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#d7dce8" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#d7dce8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ═══════════════ art: the glasshouse at night ═══════════════ -->
+  <g id="art-field">
+    <rect x="0" y="0" width="660" height="1050" fill="url(#consGrad)"/>
+    <!-- the pane grid of the roof, moonlight through it -->
+    <g stroke="#24382b" stroke-width="2" opacity="0.5">
+      <path d="M 120 40 L 590 40" fill="none"/>
+      <path d="M 95 120 L 610 120" fill="none"/>
+      <line x1="200" y1="12" x2="200" y2="130"/><line x1="290" y1="4" x2="290" y2="130"/>
+      <line x1="380" y1="4" x2="380" y2="130"/><line x1="470" y1="12" x2="470" y2="130"/>
+    </g>
+    <circle cx="357" cy="60" r="80" fill="url(#moonPane)"/>
+    <circle cx="340" cy="52" r="12" fill="#f5f2e8" opacity="0.8"/>
+    <!-- bed rows -->
+    <g stroke="#162419" stroke-width="14" opacity="0.7" fill="none" stroke-linecap="round">
+      <path d="M 180 480 Q 360 440 540 480"/>
+      <path d="M 200 660 Q 360 630 520 660"/>
+    </g>
+    <g stroke="#4a6b52" stroke-width="1.4" opacity="0.4" fill="none">
+      <path d="M 180 473 Q 360 433 540 473"/>
+      <path d="M 200 653 Q 360 623 520 653"/>
+    </g>
+    <!-- the three maintenance lamps (roving lit-shot halos live here) -->
+    <circle cx="270" cy="440" r="52" fill="url(#lampGlow)"/>
+    <circle cx="445" cy="395" r="52" fill="url(#lampGlow)"/>
+    <circle cx="345" cy="625" r="52" fill="url(#lampGlow)"/>
+    <g fill="#ffdf9e" opacity="0.85">
+      <circle cx="270" cy="440" r="3.4"/><circle cx="445" cy="395" r="3.4"/><circle cx="345" cy="625" r="3.4"/>
+    </g>
+    <!-- BLOOM letters over the bank -->
+    <text x="375" y="482" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="10" letter-spacing="14" fill="#ff8fae" opacity="0.9">BLOOM</text>
+    <!-- THE ORCHID roundel -->
+    <g>
+      <circle cx="500" cy="466" r="40" fill="#07080d"/>
+      <circle cx="500" cy="466" r="34" fill="#0f1811"/>
+      <circle cx="500" cy="466" r="34" fill="none" stroke="#24382b" stroke-width="3"/>
+      <circle cx="500" cy="466" r="38" fill="none" stroke="#9c7c2c" stroke-width="4"/>
+      <circle cx="500" cy="466" r="38" fill="none" stroke="#ff8fae" stroke-width="1.5" stroke-dasharray="5 6"/>
+      <g fill="#ff8fae" opacity="0.8">
+        <path d="M 500 450 q 8 8 0 16 q -8 -8 0 -16" />
+        <path d="M 486 462 q 10 -4 16 4 q -10 4 -16 -4"/>
+        <path d="M 514 462 q -10 -4 -16 4 q 10 4 16 -4"/>
+      </g>
+      <text x="546" y="518" text-anchor="middle" font-family="ui-monospace, monospace"
+            font-size="11" letter-spacing="2" fill="#9c7c2c" transform="rotate(-64 546 518)">THE ORCHID</text>
+    </g>
+    <!-- wordmarks and lane labels -->
+    <text x="357" y="800" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="10" letter-spacing="4" fill="#4a6b52">POLLEN COUNT</text>
+    <text x="26" y="640" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="9" letter-spacing="3" fill="#4a6b52" transform="rotate(-90 26 640)">THE POTTING CORRIDOR</text>
+    <text x="75" y="905" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="8" letter-spacing="1" fill="#9c7c2c" transform="rotate(-90 75 905)">THE MISTER</text>
+    <text x="640" y="905" text-anchor="middle" font-family="ui-monospace, monospace"
+          font-size="8" letter-spacing="1" fill="#9c7c2c" transform="rotate(90 640 905)">COLD FRAME</text>
+  </g>
+
+  <!-- ═══════════════ collision (leaf-green ironwork rails) ═══════════════ -->
+  <defs>
+    <g id="collision-paths" fill="none">
+      <!-- widebody shell: mirrored arch with the 85 mm flat crown -->
+      <path data-width="12" data-z="all" id="collision-loop-shell" d="M 0 1050 L 0.0 315 L 1.5 284.1 L 6.1 253.5 L 13.8 223.6 L 24.7 194.5 L 38.8 166.5 L 56.3 140 L 77.1 115.2 L 101.1 92.3 L 128.1 71.5 L 157.7 53.1 L 189.6 37.2 L 223.1 24 L 257.4 13.6 L 291.8 6.1 L 325.5 1.5 L 357.5 0 L 357.5 0 L 384.1 1.3 L 412.4 5 L 441.7 11.2 L 470.9 19.8 L 499.5 30.7 L 526.7 43.8 L 552.0 59 L 575.0 76.2 L 595.4 95.1 L 613.0 115.6 L 627.7 137.4 L 639.5 160.5 L 648.6 184.5 L 655.0 209.3 L 658.7 234.5 L 660.0 260 L 660 1050 Z"/>
+      <!-- plunger lane inner wall — the LEFT side (M14) -->
+      <path data-width="12" data-z="all" id="collision-wall-lane" d="M 55 300 L 55 1050"/>
+      <!-- orbit inner wall (the Gallery): far lane on the RIGHT, crown flat -->
+      <path data-width="12" id="collision-wall-orbit" d="M 55.0 300.0 L 69.8 266.5 L 75.8 243.1 L 84.2 220.6 L 95.1 199.1 L 108.4 178.8 L 124.5 159.7 L 143.4 141.7 L 165.1 124.9 L 189.4 109.9 L 216.0 96.6 L 244.4 85.4 L 273.8 76.5 L 303.2 70.1 L 331.5 66.2 L 360.5 64.9 L 354.3 64.9 L 378.3 66.0 L 401.4 69.1 L 425.7 74.2 L 450.2 81.4 L 473.8 90.4 L 495.8 101.0 L 515.8 113.0 L 533.4 126.2 L 548.6 140.2 L 561.3 155.0 L 571.7 170.4 L 580.1 186.9 L 586.6 204.1 L 591.2 222.2 L 594.0 240.9 L 595.1 263.3 L 595.0 300.0 L 595.0 550.0"/>
+      <!-- M-O-T-H top-lane dividers under the wide crown -->
+      <path data-width="12" id="collision-wall-divider-1" d="M 262 84 L 262 150"/>
+      <path data-width="12" id="collision-wall-divider-2" d="M 357 69 L 357 150"/>
+      <path data-width="12" id="collision-wall-divider-3" d="M 453 86 L 453 150"/>
+      <!-- BLOOM 5-bank housing: free-standing in the beds; the back wall
+           sits 8 mm behind the target line (recess shallower than a ball
+           radius) with curled end caps sealing the sides -->
+      <path data-width="12" id="collision-wall-bloom-housing" d="M 290 516 L 298 492 L 452 492 L 460 516"/>
+      <!-- THE ORCHID hood: mouth down-left, never traps -->
+      <path data-width="12" id="collision-wall-orchid-hood" d="M 544 484 L 542.3 477.7 L 539.8 468.9 L 536 461 L 530.6 455.3 L 524 450.6 L 517 447 L 509.9 444.5 L 502.4 443.1 L 495 443 L 487.3 444.5 L 479.7 447.3 L 473 451 L 467.5 456.3 L 463 462.6 L 460 467"/>
+      <!-- lane-wall deflector sheltering the MISTER kickback -->
+      <path data-width="12" id="collision-wall-deflector" d="M 55 598 L 89 619 L 55 670"/>
+      <!-- DOUBLE inlanes (M14/Fathom convention): full outlane guides ending
+           tangent to the flipper bases, plus short splitters making two
+           entry slots per side that merge below y 800 -->
+      <path data-width="12" id="collision-wall-guide-left" d="M 95 690 L 95 905 L 271.7 938.4"/>
+      <path data-width="12" id="collision-wall-guide-right" d="M 620 690 L 620 905 L 443.3 938.4"/>
+      <path data-width="12" id="collision-wall-splitter-left" d="M 138 690 L 138 800"/>
+      <path data-width="12" id="collision-wall-splitter-right" d="M 577 690 L 577 800"/>
+      <!-- plunger saddle (left lane) -->
+      <path data-width="12" id="collision-wall-plunger-saddle" d="M 6 1000 L 49 1000"/>
+      <!-- THE VINE RUN: lateral surface rails (the only sideways climb in
+           the lineup); west mouth, airborne release at the east end -->
+      <path data-width="12" data-surface="vine" id="collision-wall-vine-rail-a" d="M 191.9 654.1 L 228.6 592.2 L 322.6 573.9 L 425.3 573.6 L 505.5 606.6 L 555.8 662.6"/>
+      <path data-width="12" data-surface="vine" id="collision-wall-vine-rail-b" d="M 148.1 625.9 L 201.4 547.8 L 317.4 522.1 L 434.7 522.4 L 534.5 563.4 L 594.2 627.4"/>
+      <!-- vine back: the bed sits below ball height near the mouth -->
+      <path data-width="12" data-z-max="10" id="collision-wall-vine-back" d="M 228.6 592.2 L 201.4 547.8"/>
+    </g>
+  </defs>
+  <g id="art-rails" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#07080d" stroke-width="16"><use href="#collision-paths"/></g>
+    <g stroke="#24382b" stroke-width="12"><use href="#collision-paths"/></g>
+    <g stroke="#4a6b52" stroke-width="6.5"><use href="#collision-paths"/></g>
+    <g stroke="#d7dce8" stroke-width="2.2" opacity="0.7"><use href="#collision-paths"/></g>
+  </g>
+  <!-- elevated wireform art: the vine run reads as chrome wires + rose glass -->
+  <g id="art-rails-elevated" fill="none" stroke-linecap="round">
+    <path d="M 170.0 640.0 L 215.0 570.0 L 320.0 548.0 L 430.0 548.0 L 520.0 585.0 L 575.0 645.0" stroke="#ff8fae" stroke-width="46" opacity="0.15"/>
+    <path d="M 191.9 654.1 L 228.6 592.2 L 322.6 573.9 L 425.3 573.6 L 505.5 606.6 L 555.8 662.6" stroke="#d7dce8" stroke-width="3"/>
+    <path d="M 148.1 625.9 L 201.4 547.8 L 317.4 522.1 L 434.7 522.4 L 534.5 563.4 L 594.2 627.4" stroke="#d7dce8" stroke-width="3"/>
+  </g>
+  <rect x="0" y="0" width="660" height="1050" fill="url(#vignette)"/>
+
+  <!-- ═══════════════ height profiles ═══════════════ -->
+  <g fill="none" stroke="none">
+    <path id="height-profile-vine-a" data-layer="1" data-surface="vine" data-surface-width="52"
+          data-height-from="0" data-height-to="32" d="M 170.0 640.0 L 215.0 570.0"/>
+    <path id="height-profile-vine-b" data-layer="1" data-surface="vine" data-surface-width="52"
+          data-height-from="32" data-height-to="38" d="M 215.0 570.0 L 320.0 548.0 L 430.0 548.0 L 520.0 585.0 L 575.0 645.0"/>
+    <path id="height-profile-coldframe" data-layer="-1" data-height-from="-8" data-height-to="-8"
+          d="M 640 935 L 630 1005 L 598 900 L 598 745"/>
+  </g>
+
+  <!-- ═══════════════ sensors ═══════════════ -->
+  <g fill="none" stroke="none">
+    <rect id="sensor-drain" x="55" y="1005" width="605" height="30"/>
+    <rect id="sensor-rollover-1" x="215" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-2" x="310" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-3" x="405" y="105" width="30" height="20"/>
+    <rect id="sensor-rollover-4" x="500" y="105" width="30" height="20"/>
+    <rect id="sensor-spinner" x="35" y="175" width="63" height="20"/>
+    <rect id="sensor-ramp-entry" x="597.5" y="500" width="60" height="16"/>
+    <rect id="sensor-ramp-exit" x="71" y="117" width="82" height="36"/>
+    <rect id="sensor-kicker-orchid" x="478" y="448" width="44" height="44"/>
+    <rect id="sensor-kicker-mister" x="59" y="940" width="34" height="35"/>
+    <rect id="sensor-subway-coldframe" x="624" y="920" width="34" height="34"/>
+    <rect id="sensor-lane-pol1" x="101" y="750" width="31" height="20"/>
+    <rect id="sensor-lane-pol2" x="144" y="750" width="30" height="20"/>
+    <rect id="sensor-lane-pol3" x="536" y="750" width="30" height="20"/>
+    <rect id="sensor-lane-pol4" x="583" y="750" width="31" height="20"/>
+    <rect id="sensor-lane-mothA" x="250" y="426" width="40" height="28"/>
+    <rect id="sensor-lane-mothB" x="425" y="381" width="40" height="28"/>
+    <rect id="sensor-lane-mothC" x="325" y="611" width="40" height="28"/>
+    <rect id="sensor-skill-nightshift" x="6" y="440" width="43" height="60"/>
+  </g>
+
+  <!-- ═══════════════ anchors ═══════════════ -->
+  <g fill="none" stroke="none">
+    <circle id="anchor-flipper-left" cx="268.5" cy="950" r="5"/>
+    <circle id="anchor-flipper-right" cx="446.5" cy="950" r="5"/>
+    <circle id="anchor-spawn" cx="27.5" cy="980" r="5"/>
+    <circle id="anchor-bumper-1" cx="300" cy="240" r="5"/>
+    <circle id="anchor-bumper-2" cx="415" cy="225" r="5"/>
+    <circle id="anchor-bumper-3" cx="360" cy="340" r="5"/>
+    <circle id="anchor-kicker-orchid" cx="500" cy="470" r="5"/>
+    <circle id="anchor-kicker-mister" cx="75" cy="680" r="5"/>
+  </g>
+</svg>

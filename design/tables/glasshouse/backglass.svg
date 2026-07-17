@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <!-- GLASSHOUSE backglass: shown in the landscape side panel above the DMD
+       and as the table-select card. Chrome wordmark over the great
+       glasshouse's pane vault at night — the moon in the glass, moths on
+       the lamps, one orchid open. Conservatory field ramp + orchid-rose
+       feature color per STYLE-GUIDE §2 (2026-07-17 amendments). Same moon,
+       cut into panes. -->
+  <defs>
+    <linearGradient id="ghSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#162419"/>
+      <stop offset="0.6" stop-color="#0f1811"/>
+      <stop offset="1" stop-color="#0a100c"/>
+    </linearGradient>
+    <linearGradient id="ghChrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <radialGradient id="ghLamp" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ff8fae" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#ff8fae" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="ghGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="300" height="360" fill="url(#ghSky)"/>
+
+  <!-- the pane vault -->
+  <path d="M 20 150 Q 150 10 280 150" fill="none" stroke="#24382b" stroke-width="8"/>
+  <path d="M 20 150 Q 150 16 280 150" fill="none" stroke="#4a6b52" stroke-width="1.6"/>
+  <g stroke="#24382b" stroke-width="1.6" opacity="0.7">
+    <path d="M 60 120 Q 150 46 240 120" fill="none"/>
+    <line x1="105" y1="52" x2="105" y2="132"/>
+    <line x1="150" y1="34" x2="150" y2="120"/>
+    <line x1="195" y1="52" x2="195" y2="132"/>
+  </g>
+  <!-- the moon caught in one pane -->
+  <circle cx="172" cy="66" r="12" fill="#f5f2e8" opacity="0.9" filter="url(#ghGlow)"/>
+
+  <!-- wordmark -->
+  <text x="150" y="188" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="38" font-weight="bold" letter-spacing="1"
+        fill="#c24868" opacity="0.5" filter="url(#ghGlow)">GLASSHOUSE</text>
+  <text x="150" y="184" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="38" font-weight="bold" letter-spacing="1"
+        fill="url(#ghChrome)" stroke="#07080d" stroke-width="2" paint-order="stroke">GLASSHOUSE</text>
+  <text x="150" y="184" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="38" font-weight="bold" letter-spacing="1"
+        fill="none" stroke="#ff8fae" stroke-width="0.8" opacity="0.85">GLASSHOUSE</text>
+  <text x="150" y="208" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="10" letter-spacing="4" fill="#4a6b52">THE NIGHT SHIFT BLOOMS</text>
+
+  <!-- foliage silhouettes + the lamps with moths -->
+  <g fill="#0a100c" stroke="#24382b" stroke-width="1.2">
+    <path d="M 18 320 q 26 -70 52 -6 q 18 -46 38 -2 L 108 330 L 18 330 Z"/>
+    <path d="M 292 320 q -30 -78 -58 -8 q -16 -40 -34 -2 L 200 330 L 292 330 Z"/>
+  </g>
+  <circle cx="98" cy="256" r="34" fill="url(#ghLamp)"/>
+  <circle cx="98" cy="256" r="3.4" fill="#ffdf9e"/>
+  <circle cx="206" cy="270" r="30" fill="url(#ghLamp)"/>
+  <circle cx="206" cy="270" r="3" fill="#ffdf9e"/>
+  <g fill="#d7dce8" opacity="0.8">
+    <path d="M 88 246 l 4 -3 l 4 3 l -4 2 Z"/>
+    <path d="M 108 262 l 4 -3 l 4 3 l -4 2 Z"/>
+    <path d="M 214 260 l 4 -3 l 4 3 l -4 2 Z"/>
+  </g>
+  <!-- the orchid, open -->
+  <g transform="translate(150,300)" filter="url(#ghGlow)">
+    <path d="M 0 -16 q 8 8 0 18 q -8 -10 0 -18" fill="#ff8fae"/>
+    <path d="M -14 -4 q 12 -6 16 6 q -12 6 -16 -6" fill="#ff8fae" opacity="0.85"/>
+    <path d="M 14 -4 q -12 -6 -16 6 q 12 6 16 -6" fill="#ff8fae" opacity="0.85"/>
+    <circle r="3" fill="#ffdf9e"/>
+  </g>
+  <line x1="150" y1="302" x2="150" y2="336" stroke="#24382b" stroke-width="2.4"/>
+  <text x="150" y="352" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="9" letter-spacing="3" fill="#ff8fae" opacity="0.9">ONCE A CENTURY, TONIGHT</text>
+</svg>

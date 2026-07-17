@@ -54,6 +54,15 @@
   --culvert-500: #2b3a35; /* iron-green wall/rail body (steel-500 analog) */
   --culvert-300: #465e55; /* iron-green wall/rail highlight (steel-300 analog) */
 
+  /* field, conservatory variant — Glasshouse's leaf-green-black ramp:
+     deep glasshouse foliage under a moonlit pane grid (added 2026-07-17
+     per the table 7 brief; STYLE-GUIDE §2) */
+  --conservatory-900: #0a100c; /* undergrowth dark / deep shadow */
+  --conservatory-800: #0f1811; /* conservatory field base */
+  --conservatory-700: #162419; /* moonlit-bed panels */
+  --conservatory-500: #24382b; /* leaf wall/rail body (steel-500 analog) */
+  --conservatory-300: #4a6b52; /* leaf wall/rail highlight (steel-300 analog) */
+
   /* marquee bulb — incandescent white-gold for bulb strings, chase lamps,
      platform gas lamps and lit carriage windows
      (added 2026-07-05, scope widened 2026-07-15; NOT brass — brass stays
@@ -94,6 +103,12 @@
                            the dial, insert arrows. NOT brass (ball-touch metal)
                            and NOT bulb (incandescent points). */
   --amber-600: #b35f0e;
+  --rose-400: #ff8fae; /* orchid rose — Glasshouse's feature hue (added
+                           2026-07-17, table 7): organic light only — bloom
+                           inserts, the lit lamp halo. Pale/warm vs the
+                           carnival's hot magenta; if a specimen reads as
+                           Midway, desaturate rose, never brighten it. */
+  --rose-600: #c24868;
   --red-400: #ff2e44; /* flood-warning red — The Sump's feature hue (added
                           2026-07-17, table 6): gauge needles past the line,
                           the FLOODGATE OPEN sign, valve inserts. Lit warning

@@ -30,7 +30,8 @@ import { MidwayLogic } from "../src/game/midway";
 import { NightMailLogic } from "../src/game/nightmail";
 import { SmallHoursLogic } from "../src/game/smallhours";
 import { SumpLogic } from "../src/game/sump";
-import { FLIPPER } from "../src/table/geometry";
+import { GlasshouseLogic } from "../src/game/glasshouse";
+import { FLIPPER, onPlayfieldSide } from "../src/table/geometry";
 import { TABLE_SPECS, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
 import moondialRules from "../design/tables/moondial/rules.json";
@@ -143,7 +144,7 @@ function buildRig(id: TableId) {
       // which catches at the outlane bottom but fires from the chute above).
       const k = kickers.find((k) => k.def.id === sid);
       const p = ball.body.getPosition();
-      if (k && p.x < g.table.laneWallX && logic.kickerLit(sid) && k.capture(ball))
+      if (k && onPlayfieldSide(g.table, p.x) && logic.kickerLit(sid) && k.capture(ball))
         logic.onCapture?.(sid);
     }
     if (kind === "subway" && sid) {
@@ -2065,12 +2066,165 @@ function sumpSuite(): void {
   }
 }
 
+
+// ═══════════════════════════ GLASSHOUSE ═══════════════════════════
+function glasshouseSuite(): void {
+  console.log("\n── glasshouse ──");
+  const rig = buildRig("glasshouse");
+  const { g, t, ball, state, run, placeBall, wallR } = rig;
+  rig.flippers.forEach((f) => f.update(false, t));
+
+  // 1 — settles on the LEFT saddle (M14: the lineup's first left plunger)
+  run(2);
+  {
+    const p = ball.body.getPosition();
+    const restY = g.plunger.saddleY - wallR - 0.0135;
+    check(
+      "ball settles ON the left-lane saddle",
+      Math.abs(p.y - restY) < 0.004 && p.x < g.table.laneWallX,
+      `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 2 — full-power launch rides the mirrored arch into the RIGHT lane
+  ball.body.setLinearVelocity(new Vec2(0, -t.plungerMaxSpeed));
+  let minY = g.table.height;
+  let maxX = 0;
+  run(3, () => {
+    const p = ball.body.getPosition();
+    minY = Math.min(minY, p.y);
+    maxX = Math.max(maxX, p.x);
+  });
+  check("launch reaches the crown", minY < 0.3, `minY=${minY.toFixed(3)}`);
+  check("launch completes the Gallery into the right lane", maxX > 0.59, `maxX=${maxX.toFixed(3)}`);
+
+  // 3 — centre gap drains
+  state.drained = false;
+  placeBall(0.3575, 0.99);
+  run(1.5);
+  check("drain sensor fires", state.drained);
+
+  // 4 — the Orchid captures a left-flipper shot and returns to the RIGHT bat
+  {
+    const orchid = rig.kickers.find((k) => k.def.id === "orchid")!;
+    placeBall(0.47, 0.65, 0.25, -1.2);
+    let caught = false;
+    run(1.2, () => {
+      if (orchid.holding) caught = true;
+    });
+    check("the orchid captures the shot", caught);
+    let ejectX = NaN;
+    run(4, () => {
+      const p = ball.body.getPosition();
+      if (Number.isNaN(ejectX) && !orchid.holding && p.y >= 0.95) ejectX = p.x;
+    });
+    check(
+      "orchid kickout feeds the right bat",
+      !orchid.holding && ejectX > 0.36 && ejectX < 0.51,
+      `crossed y=0.95 at x=${Number.isNaN(ejectX) ? "never" : ejectX.toFixed(3)}`,
+    );
+  }
+
+  // 5 — POLLEN COUNT: all four return lanes step the multiplier + mister
+  {
+    const rigP = buildRig("glasshouse");
+    const logicP = rigP.logic as GlasshouseLogic;
+    for (const id of ["pol1", "pol2", "pol3", "pol4"])
+      rigP.bus.emit("sensor", { kind: "lane", id });
+    check("POLLEN COUNT steps the multiplier", rigP.scoring.multiplier === 2, `x${rigP.scoring.multiplier}`);
+    check("pollen lights THE MISTER", logicP.kickerLit("mister"));
+  }
+
+  // 6 — the vine run: an aimed west-mouth entry rides east and pays
+  {
+    const rigV = buildRig("glasshouse");
+    rigV.flippers.forEach((f) => f.update(false, rigV.t));
+    let sawCanopy = false;
+    rigV.bus.on("score", ({ label }) => {
+      if (label === "CANOPY" || label === "CROSS-POLLINATION") sawCanopy = true;
+    });
+    // fire into the mouth from the lower right (the right-flipper diagonal)
+    rigV.placeBall(0.185, 0.75, -0.2, -1.9); // into the mouth END (attach needs local h ~ 0)
+    let maxZ = 0;
+    rigV.run(6, () => (maxZ = Math.max(maxZ, rigV.ball.height.z)));
+    check("the vine run rides west to east", sawCanopy, `maxZ=${(maxZ * 1000).toFixed(0)}mm`);
+  }
+
+  // 7 — traps: the widebody's new bottom + vine mouth
+  for (const [label, x, y] of [
+    ["left splitter top", 0.141, 0.68],
+    ["right splitter top", 0.58, 0.68],
+    ["outer-left return slot", 0.115, 0.72],
+    ["outer-right return slot", 0.6, 0.72],
+    ["bloom housing left cap", 0.29, 0.505],
+    ["bloom housing right cap", 0.46, 0.505],
+    ["vine mouth seam", 0.175, 0.68],
+    ["vine back drop", 0.225, 0.56],
+
+    ["left outlane", 0.075, 0.72],
+    ["right outlane", 0.64, 0.72],
+  ] as const) {
+    const rigT = buildRig("glasshouse");
+    rigT.flippers.forEach((f) => f.update(false, rigT.t));
+    rigT.placeBall(x, y);
+    rigT.run(5);
+    const p = rigT.ball.body.getPosition();
+    const onSaddle = p.x < rigT.g.table.laneWallX && p.y > 0.95;
+    check(
+      `${label} does not trap the ball`,
+      rigT.state.drained || onSaddle,
+      `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 7b — a dying launch must never stall on the crown: at every marginal
+  // launch speed the ball ends up OUT of the crown box within 6 s
+  for (const v of [1.5, 1.7, 1.9]) {
+    const rigC = buildRig("glasshouse");
+    rigC.flippers.forEach((f) => f.update(false, rigC.t));
+    rigC.run(2);
+    rigC.ball.body.setLinearVelocity(new Vec2(0, -v));
+    rigC.run(6);
+    const p = rigC.ball.body.getPosition();
+    check(
+      `marginal launch v=${v} does not stall on the crown`,
+      p.y > 0.12,
+      `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 8 — NIGHT SHIFT skill shot (left lane; the probe numbers mirror)
+  {
+    const rigS = buildRig("glasshouse");
+    rigS.flippers.forEach((f) => f.update(false, rigS.t));
+    rigS.run(2);
+    let sawShift = false;
+    rigS.bus.on("score", ({ label }) => {
+      if (label === "NIGHT SHIFT") sawShift = true;
+    });
+    rigS.ball.body.setLinearVelocity(new Vec2(0, -1.2));
+    rigS.run(3);
+    check("soft plunge pays NIGHT SHIFT", sawShift);
+  }
+
+  // 9 — the wandering lamp rotates on its clock
+  {
+    const rigL = buildRig("glasshouse");
+    const logicL = rigL.logic as GlasshouseLogic;
+    const before = ["lampA", "lampB", "lampC"].map((l) => logicL.lamp(l)).join(",");
+    rigL.run(10);
+    const after = ["lampA", "lampB", "lampC"].map((l) => logicL.lamp(l)).join(",");
+    check("the lit lamp wanders", before !== after, `${before} -> ${after}`);
+  }
+}
+
 if (!which || which === "moondial") moondialSuite();
 if (!which || which === "tidebreaker") tidebreakerSuite();
 if (!which || which === "midway") midwaySuite();
 if (!which || which === "nightmail") nightmailSuite();
 if (!which || which === "smallhours") smallhoursSuite();
 if (!which || which === "sump") sumpSuite();
+if (!which || which === "glasshouse") glasshouseSuite();
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

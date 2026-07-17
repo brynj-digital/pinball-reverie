@@ -25,6 +25,7 @@ import { Magnet } from "../src/entities/Magnet";
 import { Disc } from "../src/entities/Disc";
 import { Scoring } from "../src/game/Scoring";
 import { contactApplies, sensorApplies } from "../src/table/Surfaces";
+import { inShooterLane, onPlayfieldSide } from "../src/table/geometry";
 import { TABLE_SPECS, TABLE_ORDER, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
 
@@ -195,7 +196,7 @@ for (const tableId of tables) {
     const p = ball.body.getPosition();
     const v = ball.body.getLinearVelocity();
     const speed = Math.hypot(v.x, v.y);
-    const inLane = p.x > g.table.laneWallX && p.y > g.table.laneTopY;
+    const inLane = inShooterLane(g.table, p.x, p.y);
     if (inLane && speed < 0.05 && p.y > 0.95) {
       // sample the real plunger range so the soak covers what players can do
       const launch = t.plungerMinSpeed + rand() * (t.plungerMaxSpeed - t.plungerMinSpeed);
@@ -258,7 +259,7 @@ for (const tableId of tables) {
     }
 
     if (step % Math.round(0.5 / FIXED_DT) === 0) {
-      if (p.y < 0.8 && p.x < g.table.laneWallX) {
+      if (p.y < 0.8 && onPlayfieldSide(g.table, p.x)) {
         loopBuf.push({ x: p.x, y: p.y });
         if (loopBuf.length > LOOP_SAMPLES) loopBuf.shift();
         if (loopBuf.length === LOOP_SAMPLES) {

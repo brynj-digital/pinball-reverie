@@ -10,6 +10,7 @@
 import type { TableId } from "./specs";
 import type { Song } from "../audio/songs";
 import {
+  GLASSHOUSE_SONG,
   MIDWAY_SONG,
   MOONDIAL_SONG,
   NIGHTMAIL_SONG,
@@ -30,6 +31,8 @@ import smallhoursPlayfield from "../../design/tables/smallhours/playfield.svg?ra
 import smallhoursBackglass from "../../design/tables/smallhours/backglass.svg?raw";
 import sumpPlayfield from "../../design/tables/sump/playfield.svg?raw";
 import sumpBackglass from "../../design/tables/sump/backglass.svg?raw";
+import glasshousePlayfield from "../../design/tables/glasshouse/playfield.svg?raw";
+import glasshouseBackglass from "../../design/tables/glasshouse/backglass.svg?raw";
 
 import orbitScene from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierScene from "../../design/dmd-scenes/multiplier.svg?raw";
@@ -67,6 +70,12 @@ import valveScene from "../../design/dmd-scenes/valve.svg?raw";
 import outflowScene from "../../design/dmd-scenes/outflow.svg?raw";
 import pumpsScene from "../../design/dmd-scenes/pumps.svg?raw";
 import highwaterScene from "../../design/dmd-scenes/highwater.svg?raw";
+import mothScene from "../../design/dmd-scenes/mothscene.svg?raw";
+import bloomScene from "../../design/dmd-scenes/bloomscene.svg?raw";
+import crossingScene from "../../design/dmd-scenes/crossingscene.svg?raw";
+import swarmScene from "../../design/dmd-scenes/swarmscene.svg?raw";
+import lightsoutScene from "../../design/dmd-scenes/lightsoutscene.svg?raw";
+import centuryScene from "../../design/dmd-scenes/centuryscene.svg?raw";
 import dialScene from "../../design/dmd-scenes/dial.svg?raw";
 import mastScene from "../../design/dmd-scenes/mast.svg?raw";
 import callerScene from "../../design/dmd-scenes/caller.svg?raw";
@@ -167,5 +176,18 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       highwater: { svg: highwaterScene, frames: 8 },
     },
     song: SUMP_SONG,
+  },
+  glasshouse: {
+    playfieldSvg: glasshousePlayfield,
+    backglassSvg: glasshouseBackglass,
+    dmdScenes: {
+      moth: { svg: mothScene, frames: 8 },
+      bloom: { svg: bloomScene, frames: 8 },
+      crossing: { svg: crossingScene, frames: 8 },
+      swarm: { svg: swarmScene, frames: 8 },
+      lightsout: { svg: lightsoutScene, frames: 8 },
+      century: { svg: centuryScene, frames: 8 },
+    },
+    song: GLASSHOUSE_SONG,
   },
 };

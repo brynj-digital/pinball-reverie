@@ -1,9 +1,46 @@
 # Glasshouse — Table 7 design brief
 
-**Status: concept (2026-07-16), not yet scheduled.** Table id:
-`glasshouse`. Planned engine milestone: **M14 (envelope generalization —
-the widebody and the left-hand plunger)**. See
-`docs/plans/table-differentiation-plan.md` for sequencing.
+**Status: v1 built (2026-07-17).** Table id: `glasshouse`. Engine
+milestone **M14 shipped with it**: `table.plungerSide` with the
+`inShooterLane`/`onPlayfieldSide` helpers routing every lane test (Game,
+camera, all three sims, the touch plunger corner), the widebody envelope
+proven at 660 × 1050. Deltas from the concept, found during
+clearance-solving and simcheck:
+
+- **The arch has no flat crown.** The concept's "mirror the standard
+  shell and spend the extra 85 mm as a flat crown" stalled dying
+  launches (anything under ~17° holds a resting ball — the Sump's shelf
+  lesson, remeasured here); a gable ridge couldn't be both low enough
+  to launch over and steep enough to shed. The shipped arch warps each
+  mirrored half with an identity-slope-at-both-ends blend
+  (`f(s) = a·s + (1−a)(3s²−2s³)`) so the apex and the lane-side corner
+  keep standard curvature and the width bulges mid-arc; the orbit is a
+  constant 65 mm inward offset of that shell (guaranteed channel).
+  Three generator bugs found by the launch trace: doubled-back mirrored
+  point lists (twice) and offset normals flipping on near-vertical
+  segments — each read as "the launch dies mid-channel".
+- **The vine run climbs at the mouth, not across the field.** A single
+  0→38 profile put ball-height rails across the whole mid-field — a
+  lateral wall cutting the table in half. Shipped: two chained profiles
+  (0→32 over the first 83 mm, then 32→38 across), so the crossing rails
+  gate off for ground balls. The mouth also moved up-field to (170,640):
+  between the splitter and the sling there is no room for a 52 mm mouth
+  plus clearances (the aerial-run wedge lesson, again).
+- The lamp zones are plain `sensor-lane` zones paired with the roving
+  insert lamps; the moving jackpot needs no engine support.
+- Suite: 25 glasshouse checks green (left-saddle settle, mirrored orbit
+  both ways, orchid capture + right-bat return, pollen count, a full
+  west→east vine ride at 38 mm, marginal-launch crown sweeps at three
+  speeds, 10 trap drops, skill, lamp wander).
+
+- Soak 1/2/3/7 = 0 stuck. WATCH ITEM: launches run ~250/600 s vs the
+  lineup's ~130 — the widebody's taller/longer launch channel returns a
+  bigger slice of the random plunger range to the saddle (weak plunges
+  roll back). Real widebodies do demand a fuller pull; if play shows the
+  launch feeling doughy, lower the crown apex a few mm before touching
+  the global plunger tuning.
+
+See `docs/plans/table-differentiation-plan.md` for the plan context.
 
 **Premise:** the great glasshouse of the city's botanic garden, locked
 for the night. Moonlight through a thousand panes, night-blooming

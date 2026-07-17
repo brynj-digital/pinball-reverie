@@ -43,6 +43,7 @@ import {
 import { Haptics, saveHapticsPref } from "../ui/Haptics";
 import { TableSelect } from "../ui/TableSelect";
 import { TABLE_ORDER, saveTableId } from "../table/specs";
+import { inShooterLane, onPlayfieldSide } from "../table/geometry";
 import { bakeDmdFrames } from "../render/dmd/bake";
 import { AudioEngine } from "../audio/AudioEngine";
 import { ChipMusic } from "../audio/ChipMusic";
@@ -482,6 +483,7 @@ export class Game {
       canvas.parentElement ?? document.body,
       spec.geometry.flippers.upper != null,
       this.haptics,
+      spec.geometry.table.plungerSide ?? "right",
     );
     this.touch.setEnabled(resolveTouchEnabled(this.touchPref));
     this.input.onReset(() => {
@@ -1002,10 +1004,10 @@ export class Game {
     let followY = this.prevBall.y + (this.ball.body.getPosition().y - this.prevBall.y) * a;
     if (this.extraBalls.length > 0) {
       const cand: number[] = [];
-      if (this.ball.body.getPosition().x < g.table.laneWallX) cand.push(followY);
+      if (onPlayfieldSide(g.table, this.ball.body.getPosition().x)) cand.push(followY);
       for (let i = 0; i < this.extraBalls.length; i++) {
         const p = this.extraBalls[i].body.getPosition();
-        if (p.x < g.table.laneWallX)
+        if (onPlayfieldSide(g.table, p.x))
           cand.push(this.prevExtras[i].y + (p.y - this.prevExtras[i].y) * a);
       }
       if (cand.length > 0) followY = Math.max(...cand);
@@ -1020,7 +1022,7 @@ export class Game {
   private ballInLane(): boolean {
     const g = this.spec.geometry.table;
     const p = this.ball.body.getPosition();
-    return p.x > g.laneWallX && p.y > g.laneTopY;
+    return inShooterLane(g, p.x, p.y);
   }
 
   private updatePlunger(dt: number, held: boolean, t: Tuning): void {

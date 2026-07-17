@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- GLASSHOUSE DMD scene: CROSSING - the moth crosses the whole frame over the bed rows. Vine rides / CROSS-POLLINATION.
+       8 frames of 128x32: #fff=3, #888=2, #666=1, black=0. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 4.0 20.0 L 8.0 17.0 L 12.0 20.0 L 8.0 22.0 Z" fill="#fff"/>
+  </g>
+  <g transform="translate(128,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 20.0 13.9 L 24.0 10.9 L 28.0 13.9 L 24.0 15.9 Z" fill="#fff"/>
+  </g>
+  <g transform="translate(256,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 36.0 9.1 L 40.0 6.1 L 44.0 9.1 L 40.0 11.1 Z" fill="#fff"/>
+  </g>
+  <g transform="translate(384,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 52.0 6.4 L 56.0 3.4 L 60.0 6.4 L 56.0 8.4 Z" fill="#fff"/>
+  </g>
+  <g transform="translate(512,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 68.0 6.4 L 72.0 3.4 L 76.0 6.4 L 72.0 8.4 Z" fill="#fff"/>
+  </g>
+  <g transform="translate(640,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 84.0 9.1 L 88.0 6.1 L 92.0 9.1 L 88.0 11.1 Z" fill="#fff"/>
+  </g>
+  <g transform="translate(768,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 100.0 13.9 L 104.0 10.9 L 108.0 13.9 L 104.0 15.9 Z" fill="#fff"/>
+  </g>
+  <g transform="translate(896,0)">
+    <line x1="4" y1="26" x2="124" y2="26" stroke="#666" stroke-width="1"/>
+    <line x1="14" y1="24" x2="22" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="54" y1="24" x2="62" y2="24" stroke="#888" stroke-width="1.4"/>
+    <line x1="94" y1="24" x2="102" y2="24" stroke="#888" stroke-width="1.4"/>
+    <path d="M 116.0 20.0 L 120.0 17.0 L 124.0 20.0 L 120.0 22.0 Z" fill="#fff"/>
+  </g>
+</svg>

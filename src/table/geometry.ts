@@ -186,6 +186,12 @@ export interface TableGeometry {
     /** y where the plunger lane's inner wall ends. */
     laneTopY: number;
     spawn: Pt;
+    /**
+     * Which side of the playfield the shooter lane lives on (M14, the
+     * Glasshouse). Default "right" (the lineup convention). All
+     * lane-vs-playfield tests must go through the helpers below.
+     */
+    plungerSide?: "left" | "right";
   };
   /** Plunger visuals: rod + spring assembly under the saddle bar. */
   plunger: {
@@ -240,6 +246,24 @@ export interface TableGeometry {
  * circle's chord (x = 0, |y| = baseRadius) so bat + base form one convex
  * profile with no re-entrant corner for the ball to seat in.
  */
+/** Is (x, y) inside the shooter lane? (M14: side-aware — never hand-roll.) */
+export function inShooterLane(
+  t: { laneWallX: number; laneTopY: number; plungerSide?: "left" | "right" },
+  x: number,
+  y: number,
+): boolean {
+  if (y <= t.laneTopY) return false;
+  return t.plungerSide === "left" ? x < t.laneWallX : x > t.laneWallX;
+}
+
+/** Is x on the playfield side of the lane wall? (Camera follow, gates.) */
+export function onPlayfieldSide(
+  t: { laneWallX: number; plungerSide?: "left" | "right" },
+  x: number,
+): boolean {
+  return t.plungerSide === "left" ? x > t.laneWallX : x < t.laneWallX;
+}
+
 export function flipperVerts(side: FlipperSide): Pt[] {
   const L = FLIPPER.length;
   const r = FLIPPER.baseRadius;

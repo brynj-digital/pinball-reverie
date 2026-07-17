@@ -507,3 +507,73 @@ export const SUMP_SONG: Song = {
   bpm: 92,
   arrangement: [S_VERSE, S_CHORUS, S_VERSE, S_CHORUS, S_DRIPS, S_PUMPS, S_CHORUS],
 };
+
+// ────────────────────────── GLASSHOUSE — A minor, 116 bpm ──────────────────────────
+// "Nocturne for the Night Shift": a music-box lead (thin, high, short
+// phrases) over a soft pulse — the waltz the brief asked for, carried as a
+// 3-against-4 cross-rhythm (ChipMusic bars are 16 sixteenths; true 3/4
+// needs a sequencer seam noted as the brief's cut line). The chorus adds a
+// counter-voice like a second moth; the breather is condensation; the
+// middle eight is the swarm running in triplet-feel eighths.
+
+/** The house at night: music-box thirds drifting over a slow pulse. */
+// prettier-ignore
+const G_VERSE: Section = {
+  chords: ["Am", "F", "Dm", "E", "Am", "F", "C", "E"],
+  lead: [
+    81, -1, -1, 84, -1, -1, 81, -1,    0,  0, 76, -1, -1, -1,  0,  0,
+    77, -1, -1, 81, -1, -1, 77, -1,    0,  0, 74, -1, -1, -1,  0,  0,
+    81, -1, -1, 84, -1, -1, 88, -1,   -1, -1, 84, -1, 81, -1,  0,  0,
+    80, -1, -1, 76, -1, -1, 74, -1,   76, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.2, swing: 0, crash: false,
+};
+
+/** In flower: the counter-moth joins, the pulse warms. */
+// prettier-ignore
+const G_CHORUS: Section = {
+  chords: ["Am", "C", "F", "G", "Am", "C", "Dm", "E"],
+  lead: [
+    84, -1, 81, 84, -1, 88, 84, -1,   81, -1, 79, -1, 81, -1,  0,  0,
+    84, -1, 81, 84, -1, 88, 84, -1,   86, -1, 84, -1, 81, -1,  0,  0,
+    88, -1, 86, 88, -1, 91, 88, -1,   86, -1, 84, -1, 81, -1, 79, -1,
+    81, -1, 79, 76, -1, 74, 76, -1,   81, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "bounce",
+  arp: true, leadVol: 0.22, swing: 0, crash: false,
+};
+
+/** Condensation: near-silence, drips off the panes. */
+// prettier-ignore
+const G_DRIPS: Section = {
+  chords: ["Am", "Am", "F", "F", "Dm", "Dm", "E", "E"],
+  lead: [
+     0,  0,  0,  0, 88, -1,  0,  0,    0,  0, 84, -1,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0, 89, -1,    0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0, 86, -1,  0,  0,  0,  0,    0,  0,  0,  0, 81, -1,  0,  0,
+     0,  0,  0,  0,  0,  0, 80, -1,    0,  0,  0,  0,  0,  0,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.15, swing: 0, crash: false,
+};
+
+/** The swarm: running sixteenth triplet-feel on the thin pulse. */
+// prettier-ignore
+const G_SWARM: Section = {
+  chords: ["Am", "G", "F", "E", "Am", "G", "F", "E"],
+  lead: [
+    81, 84, 88, 81, 84, 88, 81, 84,   79, 83, 86, 79, 83, 86, 79, 83,
+    77, 81, 84, 77, 81, 84, 77, 81,   76, 80, 83, 76, 80, 83, 80, 83,
+    81, 84, 88, 81, 84, 88, 81, 84,   79, 83, 86, 79, 83, 86, 79, 83,
+    77, 81, 84, 77, 81, 84, 88, -1,   88, -1, 87, -1, 88, -1,  0,  0,
+  ],
+  leadStep: 1, wave: "pulse125", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.22, swing: 0, crash: true,
+};
+
+/** Form: the house, in flower, the house, in flower, drips, swarm, in flower. */
+export const GLASSHOUSE_SONG: Song = {
+  bpm: 116,
+  arrangement: [G_VERSE, G_CHORUS, G_VERSE, G_CHORUS, G_DRIPS, G_SWARM, G_CHORUS],
+};

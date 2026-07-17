@@ -93,7 +93,8 @@ Moondial layers steel (`steel-500/300`), Tidebreaker layers dark verdigris
 (`--carnival-500/300`), The Night Mail layers wet slate
 (`--smoke-500/300`), Small Hours layers warm asphalt
 (`--rooftop-500/300`), The Sump layers iron-green masonry
-(`--culvert-500/300`, added 2026-07-17 per the table 6 brief) — always
+(`--culvert-500/300`, added 2026-07-17 per the table 6 brief), Glasshouse
+layers deep leaf (`--conservatory-500/300`, 2026-07-17, table 7) — always
 over a 16 mm ink base with a `chrome-200`
 core, and kept DARK so the ball and lamps pop. **Elevated (layer 1)
 structure reads as glass between chrome** on every table: the edge wires
@@ -332,7 +333,10 @@ See [previews/materials.html](previews/materials.html).
 - **Table accent (2026-07-16):** each table names one neon pair as its
   element-lamp accent, carried by `TableSpec.theme` so both renderers stay in
   step — Moondial `violet-400/600`, Tidebreaker `cyan-400/600`, Midnight
-  Midway `magenta-400/600`, The Night Mail `green-400/600`, The Sump
+  Midway `magenta-400/600`, The Night Mail `green-400/600`, Glasshouse
+  `rose-400/600` (orchid rose, 2026-07-17 — ORGANIC light only: blooms and
+  lamp halos, never signage; pale/warm against the carnival's hot
+  magenta), The Sump
   `red-400/600` (flood-warning red, added 2026-07-17 — lit warning
   signage only, colder/pinker than the `--alert-400` UI lamp, never
   blood, never substituting for brass or bulb warmth), Small Hours
