@@ -259,6 +259,10 @@ untouched — and gives the ball one real scalar: `z`.
 | 9 | **3D renderer** | `Renderer3D` (three.js) swapped in behind the same interface |
 | 10 | Multi-table | Table-agnostic engine (specs/assets registries, collision layers, subways), table select, Tidebreaker + Midnight Midway |
 | 11 | **True height (2.5D surfaces)** | §7a: ball gains real `z`; surfaces + height-band collision replace the M10 layer trick; slope dynamics; all tables migrated + re-tuned |
+| 12 | **Feature engine (The Night Mail)** | Diverter/Lift/Magnet/Disc entities, engine-wide multiball, DMD video modes, match sequence, physical ball locks |
+| 13 | **Lower playfield (The Sump)** | Envelope depth is per-table (575×1250); a second full flipper pair on the main buttons (`flippers.mini`); the floodgate diverter makes a lit centre drain the way IN. Differentiation plan phase 2. |
+| 14 | **Widebody + left plunger (Glasshouse)** | `table.plungerSide` with side-aware lane helpers everywhere; 660-wide envelope; double inlanes; the lateral vine run. Differentiation plan phase 3. |
+| 15 | **Playable elevation (Summit)** | `flippers.upper.z` height-banded bat; a flat M11 platform the ball plays ON while ground traffic passes beneath. Differentiation plan phase 4. |
 
 Milestone 1 is the make-or-break: if the flippers don't *feel* good, nothing else matters. Spend disproportionate time tuning it.
 

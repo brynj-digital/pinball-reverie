@@ -1,6 +1,6 @@
 # Table differentiation plan
 
-**Status: in execution — Phase 0 + Phase 1 (retrofit pass) SHIPPED 2026-07-17** (PRs #10–#15; per-table deltas recorded in each BRIEF, lineup-wide summary in CLAUDE.md). Companion briefs:
+**Status: COMPLETE through Phase 4 (2026-07-17).** Phase 0 + retrofits: PRs #10–#16; M13 The Sump: #17; M14 Glasshouse: #18; M15 Summit: #19. Every phase's deltas live in its table's BRIEF; the lineup summary in CLAUDE.md. Remaining: Thunderhead stays gated in backlog (§8) pending the player feel sign-off its brief demands. Companion briefs:
 `design/tables/{sump,glasshouse,summit,thunderhead}/BRIEF.md`. This plan
 covers (A) a **retrofit pass** giving each built table a structural
 differentiator, and (B) **tables 6–9**, each of which breaks one piece
@@ -163,7 +163,7 @@ Amend all five briefs with deltas; update
 full suite (`simcheck` all tables, `soak` all seeds × tables,
 `entcheck`). Ship the STYLE-GUIDE amendments (0.4/0.5) with this pass.
 
-## 5. Phase 2 — M13: The Sump (table 6)
+## 5. Phase 2 — M13: The Sump (table 6) — DONE 2026-07-17 (PR #17)
 
 The lower-playfield table — the drain itself becomes the feature. Full
 design in `design/tables/sump/BRIEF.md`. Engine scope (details in the
@@ -178,7 +178,7 @@ entcheck case for the second pair; gate-descent/chamber-exit/dwell
 feature-rates per the brief; soak proves the chamber (a new enclosed
 space = the highest trap surface since the striker throat).
 
-## 6. Phase 3 — M14: Glasshouse (table 7)
+## 6. Phase 3 — M14: Glasshouse (table 7) — DONE 2026-07-17 (PR #18)
 
 The widebody with the left-hand launch and four return lanes. Full
 design in `design/tables/glasshouse/BRIEF.md`. Engine scope (brief
@@ -192,7 +192,7 @@ right-handed and land the mirror in a follow-up — width is the bigger
 felt change. Exit criteria: vine-run speed sweep, outer-inlane feed
 rates, lit-lamp hit rate.
 
-## 7. Phase 4 — M15: Summit (table 8)
+## 7. Phase 4 — M15: Summit (table 8) — DONE 2026-07-17 (PR #19)
 
 The playable elevated platform — a flipper and furniture at height.
 Full design in `design/tables/summit/BRIEF.md`. Engine scope (brief
