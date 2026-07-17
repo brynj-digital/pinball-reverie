@@ -101,6 +101,12 @@ export interface TableLogic {
   /** Whether a magnet is armed right now (M12; default unlit = inert). */
   magnetLit?(id: string): boolean;
   /**
+   * Directed fling (Thunderhead's charge cells): the release direction for
+   * a magnet's next fling, polled each frame while it holds. Undefined (or
+   * absent hook) = the def's static fling vector. Normalised at use.
+   */
+  magnetFling?(id: string): { x: number; y: number } | undefined;
+  /**
    * One-line live status for the score readout's bottom ticker (DMD pass):
    * collected letters, mode timers — max ~21 glyphs. Undefined = no line.
    */

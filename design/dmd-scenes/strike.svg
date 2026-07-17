@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- THUNDERHEAD DMD scene: STRIKE — the frame whites out from the starboard quarter — 8 frames of 128x32, baked to 4-level dot frames at load.
+       Levels by luminance: #fff=3, #888=2, #666=1. -->
+  <rect width="1024" height="32" fill="#000"/>
+  <g transform="translate(0,0)"><rect width="128" height="32" fill="#000"/></g>
+  <g transform="translate(128,0)"><rect width="128" height="32" fill="#000"/></g>
+  <g transform="translate(256,0)"><rect width="128" height="32" fill="#000"/><path d="M 96 0 L 88 12 L 94 12 L 84 26 L 98 10 L 91 10 L 100 0 Z" fill="#fff"/></g>
+  <g transform="translate(384,0)"><path d="M 96 0 L 88 12 L 94 12 L 84 26 L 98 10 L 91 10 L 100 0 Z" fill="#fff"/><circle cx="92" cy="8" r="53" fill="#888" opacity="0.9"/><circle cx="92" cy="8" r="31" fill="#fff"/></g>
+  <g transform="translate(512,0)"><path d="M 96 0 L 88 12 L 94 12 L 84 26 L 98 10 L 91 10 L 100 0 Z" fill="#fff"/><circle cx="92" cy="8" r="89" fill="#888" opacity="0.9"/><circle cx="92" cy="8" r="53" fill="#fff"/></g>
+  <g transform="translate(640,0)"><rect width="128" height="32" fill="#888"/></g>
+  <g transform="translate(768,0)"><rect width="128" height="32" fill="#666"/></g>
+  <g transform="translate(896,0)"><rect width="128" height="32" fill="#666"/></g>
+</svg>

@@ -24,6 +24,12 @@ export class Magnet {
   private ball: Ball | null = null;
   /** Runs when the magnet snags the ball (Game adds sfx + logic.onCapture). */
   onCapture?: () => void;
+  /**
+   * Directed-fling override (Thunderhead): set each frame from
+   * TableLogic.magnetFling; null falls back to def.fling. Normalised at use.
+   */
+  flingDir: { x: number; y: number } | null = null;
+
   /** Runs at the moment of fling (Game adds flash + sfx; the sims don't). */
   onRelease?: () => void;
   private holdT = 0;
@@ -106,9 +112,10 @@ export class Magnet {
       this.cooldown = def.cooldownS;
       b.setGravityScale(1);
       b.setTransform(new Vec2(def.x, def.y), b.getAngle());
-      const d = Math.hypot(def.fling.x, def.fling.y) || 1;
+      const fling = this.flingDir ?? def.fling;
+      const d = Math.hypot(fling.x, fling.y) || 1;
       b.setLinearVelocity(
-        new Vec2((def.fling.x / d) * def.flingSpeed, (def.fling.y / d) * def.flingSpeed),
+        new Vec2((fling.x / d) * def.flingSpeed, (fling.y / d) * def.flingSpeed),
       );
       b.setAngularVelocity(0);
       this.ball = null;

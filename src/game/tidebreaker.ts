@@ -429,7 +429,12 @@ export class TidebreakerLogic implements TableLogic {
     this.ctx.sfx("multiplier");
     this.ctx.push(
       new SequenceScene([
-        new MessageScene([["SONAR SWEEP", "FLIP ON EACH CONTACT"]], 1.4, true),
+        (() => {
+          const f = this.ctx.baked("sonarsweep");
+          return f
+            ? new BakedDmdScene(f, 9, "FLIP ON EACH CONTACT")
+            : new MessageScene([["SONAR SWEEP", "FLIP ON EACH CONTACT"]], 1.4, true);
+        })(),
         new SonarScene(() => ({
           active: this.snActive,
           sweepX: Math.min(1, Math.max(0, (this.now - this.snStart - 1.6) / (rules.sonar.durationS - 3))),

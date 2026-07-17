@@ -356,7 +356,12 @@ export class MoondialLogic implements TableLogic {
     this.ctx.sfx("multiplier");
     this.ctx.push(
       new SequenceScene([
-        new MessageScene([["ALIGN THE SCOPE", "FLIPPERS NUDGE THE TUBE"]], 1.4, true),
+        (() => {
+          const f = this.ctx.baked("alignscope");
+          return f
+            ? new BakedDmdScene(f, 9, "FLIPPERS NUDGE THE TUBE")
+            : new MessageScene([["ALIGN THE SCOPE", "FLIPPERS NUDGE THE TUBE"]], 1.4, true);
+        })(),
         new AlignScopeScene(() => ({
           active: this.asActive,
           offset: this.asOffset,

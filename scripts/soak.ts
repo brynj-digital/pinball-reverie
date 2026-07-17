@@ -224,6 +224,7 @@ for (const tableId of tables) {
     for (const l of lifts) l.update(FIXED_DT);
     for (const m of magnets) {
       m.lit = logic.magnetLit?.(m.def.id) ?? false;
+      m.flingDir = logic.magnetFling?.(m.def.id) ?? null;
       m.update(FIXED_DT, [ball]);
     }
     for (const d of discs) {

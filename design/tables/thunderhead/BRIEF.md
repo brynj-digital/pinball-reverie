@@ -1,6 +1,13 @@
 # Thunderhead — Table 9 design brief (backlog)
 
-**Status: backlog concept (2026-07-16), deliberately unscheduled.**
+**Status: GREY-BOX PROTOTYPE BUILT (2026-07-17) — awaiting the §7.1
+feel sign-off.** The gate build exists on every machine-checkable axis
+(see §9); master art, the style-guide amendment (storm yellow + stratus
+field) and the final audio mix stay gated until the player plays the
+stagger and signs it off. If the stagger fails the feel test, the
+documented fallback stands: level flippers, everything else kept.
+
+**Original gate note (2026-07-16):**
 Table id: `thunderhead`. This is the lineup's riskiest structural
 experiment — **staggered flippers** graze the player-approved flipper
 feel — so it sits behind a mandatory prototype gate (see §7 and
@@ -171,3 +178,45 @@ route completion rate**, and — above all — **drain-rate delta vs the
 lineup** (staggered flippers + no bumpers changes ball-time
 materially; soak must show game length in family with the other
 tables before art is committed).
+
+## 9. Grey-box build record (2026-07-17, v0 deltas)
+
+Built to the letter of §7–8 except where the sims forced changes — all
+simcheck/soak-found, standard trap classes:
+
+- **The stagger, exactly:** left bat (178, 920), right (342, 950) — x
+  pulled in 7 mm a side so the resting tip gap across the diagonal stays
+  ~39 mm (the lineup's proven drain-gap invariant, preserved by
+  construction). Cradle-on-raised-bat, honest-centre-drain and both-hand
+  funnel checks are suite-asserted.
+- **Directed fling is an engine seam:** `Magnet.flingDir`, set per frame
+  from `TableLogic.magnetFling` (Game + both sims), entcheck-proven. The
+  fling aims at the BAT that makes the next route shot — a straight line
+  at the shot itself crossed the spine rails (simcheck-found).
+- **Left-wall geometry took four passes** (the soak story, §8's predicted
+  risk): (1) the ballast housing pinched the outlane throat to 23 mm and
+  its face + guide-cap formed a wedge pocket; (2) a big channel deflector
+  wedged balls against the orbit wall's bottom cap; (3) the deflector +
+  housing merged into one continuous shed wall (face x 30, targets proud
+  at x 40 — they were buried INSIDE the wall at x 8.5 as first drawn);
+  (4) the spine's west rail ends early at y ≈ 628 — its mouth-end cap +
+  sling vertex was a seed-9 wedge (the smallhours mouth lesson).
+- **The kickback fed itself:** STATIC's first firing mouth (50, 645) sat
+  beside the ballast targets — every fire completed the bank, which
+  relit the kickback: a 295-capture perpetual-motion loop in the rates
+  harness. The mouth now sits at (44, 775), just above the guide top.
+- **STATIC starts lit each ball** (consumed on use, relit with the keel
+  by ballast) — the drain-family lever. Without it the left outlane ate
+  every circuit return.
+- **Crest windows over G-A-L-E lanes 2/3** (the glasshouse fix): lanes
+  fed from below only ran 0/600 s; with circuit riders dropping through
+  the two arc windows they run ~3 completions/600 s across seeds.
+- **Charge retuned for engagement:** cellCharge 14 → 8, laneCharge 4.
+  Cells engage ~4/600 s in random soak — scarce and earned per §2; the
+  storm route stays an aimed economy.
+
+**Feature-rates (seed 1, 600 s):** 141 launches / 46 drains (lineup
+family 109–146 / 43–60 — IN FAMILY; soak seeds 5/9: 44/53 drains, 0
+stuck). G-A-L-E 38 hits, 3 completions. Cells 4 engagements. Nacelle 5,
+keel 6, spine pays, skill fires. Zero bumpers throughout — nothing in
+the engine assumed a nest.

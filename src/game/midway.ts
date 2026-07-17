@@ -576,7 +576,12 @@ export class MidwayLogic implements TableLogic {
     this.ctx.sfx("multiplier");
     this.ctx.push(
       new SequenceScene([
-        new MessageScene([["RING THE BELL", "FLIP AT THE TOP"]], 1.4, true),
+        (() => {
+          const f = this.ctx.baked("bellgame");
+          return f
+            ? new BakedDmdScene(f, 9, "FLIP AT THE TOP")
+            : new MessageScene([["RING THE BELL", "FLIP AT THE TOP"]], 1.4, true);
+        })(),
         new BellGameScene(() => ({
           active: this.bgActive,
           power: this.bgPower(),

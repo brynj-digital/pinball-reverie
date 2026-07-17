@@ -519,7 +519,12 @@ export class SumpLogic implements TableLogic {
     this.ctx.sfx("multiplier");
     this.ctx.push(
       new SequenceScene([
-        new MessageScene([["PRESSURE TEST", "FLIP IN THE GREEN"]], 1.4, true),
+        (() => {
+          const f = this.ctx.baked("pressure");
+          return f
+            ? new BakedDmdScene(f, 9, "FLIP IN THE GREEN")
+            : new MessageScene([["PRESSURE TEST", "FLIP IN THE GREEN"]], 1.4, true);
+        })(),
         new PressureScene(() => ({
           active: this.ptActive,
           needle: this.ptNeedle(),

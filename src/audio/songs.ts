@@ -647,3 +647,53 @@ export const SUMMIT_SONG: Song = {
   bpm: 76,
   arrangement: [A_VERSE, A_CHORUS, A_VERSE, A_CHORUS, A_WIND, A_AURORA, A_CHORUS],
 };
+
+// ────────────────────────── THUNDERHEAD — E minor, 140 bpm ──────────────────────────
+// "Riding the Cell" — the lineup's fastest. Driving arpeggio bass under a
+// storm-siren lead (long swells sit against the pace); the breather is THE
+// EYE: near-silence, one held tone (grey-box prototype song — final mix
+// waits with the master art behind the feel gate).
+
+// prettier-ignore
+const TH_VERSE: Section = {
+  chords: ["Em", "C", "G", "Dm", "Em", "C", "Am", "E"],
+  lead: [
+    76, -1, 79, -1, 76, -1, 74, -1,   72, -1, 76, -1, 72, -1, 71, -1,
+    74, -1, 79, -1, 74, -1, 71, -1,   69, -1, 74, -1, 71, -1, 67, -1,
+    76, -1, 79, -1, 76, -1, 74, -1,   72, -1, 76, -1, 79, -1, 81, -1,
+    83, -1, -1, -1, 81, -1, 79, -1,   78, -1, -1, -1, 74, -1, 71, -1,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.2, crash: false, swing: 0,
+};
+
+// prettier-ignore
+const TH_SIREN: Section = {
+  chords: ["Em", "Em", "C", "Dm", "Em", "Em", "C", "E"],
+  lead: [
+    88, -1, -1, -1, -1, -1, -1, -1,   86, -1, -1, -1, -1, -1, -1, -1,
+    84, -1, -1, -1, 86, -1, -1, -1,   88, -1, -1, -1, -1, -1, -1, -1,
+    91, -1, -1, -1, -1, -1, -1, -1,   88, -1, -1, -1, -1, -1, -1, -1,
+    86, -1, 84, -1, 83, -1, 84, -1,   86, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+// prettier-ignore
+const TH_EYE: Section = {
+  chords: ["Em", "Em", "Em", "Em", "C", "C", "Em", "Em"],
+  lead: [
+    76, -1, -1, -1, -1, -1, -1, -1,   -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,   -1, -1, -1, -1, -1, -1, -1, -1,
+    79, -1, -1, -1, -1, -1, -1, -1,   -1, -1, -1, -1, -1, -1, -1, -1,
+    76, -1, -1, -1, -1, -1, -1, -1,   -1, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.3, crash: false, swing: 0,
+};
+
+export const THUNDERHEAD_SONG: Song = {
+  bpm: 140,
+  arrangement: [TH_VERSE, TH_VERSE, TH_SIREN, TH_VERSE, TH_EYE, TH_SIREN, TH_SIREN],
+};
