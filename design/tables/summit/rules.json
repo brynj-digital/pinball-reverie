@@ -1,0 +1,71 @@
+{
+  "comment": "Summit rules metadata (plan 5e). Consumed by src/game/Scoring.ts and src/game/summit.ts.",
+  "points": {
+    "bumper": 100,
+    "sling": 50,
+    "rollover": 500,
+    "spinnerTick": 100,
+    "target": 500,
+    "bankComplete": 5000,
+    "orbit": 2500
+  },
+  "bonusUnits": { "rollover": 500, "target": 250, "spinnerTick": 10 },
+  "ridgeCombo": { "windowS": 10, "maxStep": 3 },
+  "peakLanes": {
+    "comment": "P-E-A-K: completion lights a free cable-car ride and the WINDBREAK. Letters persist, lane change on the flippers.",
+    "points": 5000
+  },
+  "instruments": {
+    "comment": "Terrace reads (z-banded pads). All three read (across any number of rides) = a FORECAST: bonus multiplier step + aurora progress; reads reset per forecast.",
+    "readPoints": 2500,
+    "maxMultiplier": 6
+  },
+  "launch": {
+    "comment": "Leaving the terrace through the east opening ABOVE the gutter line (y < gutterY) is THE LAUNCH; below it is a dribble (safe, unpaid).",
+    "gutterY": 0.305,
+    "eastX": 0.44,
+    "points": 15000
+  },
+  "wind": {
+    "comment": "Anemometer spins accumulate WIND; at galeSpins the cable car closes for galeS (the hazard you farmed for points).",
+    "galeSpins": 40,
+    "galeS": 20
+  },
+  "cornice": {
+    "comment": "Bank completion drops the cornice: avalancheS of doubled scoring; a terrace leave during the slide pays the SNOW JACKPOT.",
+    "avalancheS": 15,
+    "snowJackpot": 25000
+  },
+  "bothy": {
+    "comment": "Refuge-hut scoop ladder (wrapping); the top rung spots an instrument and lights the GALLERY subway.",
+    "holdS": 2.0,
+    "bonusUnit": 500,
+    "rungs": [
+      { "name": "SHELTER", "points": 5000 },
+      { "name": "BREW", "points": 10000 },
+      { "name": "RESUPPLY", "points": 15000 },
+      { "name": "THE LOG", "points": 25000 }
+    ]
+  },
+  "lastCar": {
+    "comment": "LAST CAR UP: litRides free cable-car rides bank toward the multiball (virtual locks - the physical dock berths were the brief's cut line); jackpots on rides, SUMMIT JACKPOT on a LAUNCH mid-mode.",
+    "ridesRequired": 3,
+    "balls": 2,
+    "durationS": 25,
+    "scoreFactor": 2,
+    "jackpot": 25000,
+    "summitJackpot": 50000
+  },
+  "aurora": {
+    "comment": "Wizard: three FORECASTs + one LAST CAR UP + one SNOW JACKPOT light the Bothy; 30 s of doubled scores with the car running gale-proof.",
+    "forecastsRequired": 3,
+    "durationS": 30,
+    "scoreFactor": 2
+  },
+  "skill": {
+    "comment": "LAST CAR (skill shot): a soft plunge peaking in the sensor-skill-lastcar band (fires at <= maxSpeed m/s) pays points and spots an instrument read. Once per ball.",
+    "maxSpeed": 0.75,
+    "points": 15000,
+    "bonusUnit": 500
+  }
+}

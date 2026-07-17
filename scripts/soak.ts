@@ -68,7 +68,7 @@ for (const tableId of tables) {
     new Flipper(pw.world, table.body, "right", t, g.flippers.right),
   ];
   if (g.flippers.upper)
-    flippers.push(new Flipper(pw.world, table.body, g.flippers.upper.side, t, g.flippers.upper));
+    flippers.push(new Flipper(pw.world, table.body, g.flippers.upper.side, t, g.flippers.upper, g.flippers.upper.z));
   if (g.flippers.mini)
     flippers.push(
       new Flipper(pw.world, table.body, "left", t, g.flippers.mini.left),

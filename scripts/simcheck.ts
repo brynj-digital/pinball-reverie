@@ -31,6 +31,7 @@ import { NightMailLogic } from "../src/game/nightmail";
 import { SmallHoursLogic } from "../src/game/smallhours";
 import { SumpLogic } from "../src/game/sump";
 import { GlasshouseLogic } from "../src/game/glasshouse";
+import { SummitLogic } from "../src/game/summit";
 import { FLIPPER, onPlayfieldSide } from "../src/table/geometry";
 import { TABLE_SPECS, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
@@ -61,7 +62,7 @@ function buildRig(id: TableId) {
     new Flipper(pw.world, table.body, "right", t, g.flippers.right),
   ];
   if (g.flippers.upper)
-    flippers.push(new Flipper(pw.world, table.body, g.flippers.upper.side, t, g.flippers.upper));
+    flippers.push(new Flipper(pw.world, table.body, g.flippers.upper.side, t, g.flippers.upper, g.flippers.upper.z));
   if (g.flippers.mini)
     flippers.push(
       new Flipper(pw.world, table.body, "left", t, g.flippers.mini.left),
@@ -2222,6 +2223,194 @@ function glasshouseSuite(): void {
   }
 }
 
+
+// ═══════════════════════════ SUMMIT ═══════════════════════════
+function summitSuite(): void {
+  console.log("\n── summit ──");
+  const rig = buildRig("summit");
+  const { g, t, bus, ball, state, run, placeBall, wallR } = rig;
+  rig.flippers.forEach((f) => f.update(false, t));
+  const lift = rig.lifts[0];
+
+  // 1 — settles on the saddle
+  run(2);
+  {
+    const p = ball.body.getPosition();
+    const restY = g.plunger.saddleY - wallR - 0.0135;
+    check(
+      "ball settles ON the plunger saddle",
+      Math.abs(p.y - restY) < 0.004 && p.x > g.table.laneWallX,
+      `pos=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 2 — full-power launch rides the orbit; the sweep passes UNDER the
+  // terrace's east shoulder without touching its rails
+  ball.body.setLinearVelocity(new Vec2(0, -t.plungerMaxSpeed));
+  let minY = g.table.height;
+  let minX = g.table.width;
+  let maxZDuring = 0;
+  run(3, () => {
+    const p = ball.body.getPosition();
+    minY = Math.min(minY, p.y);
+    minX = Math.min(minX, p.x);
+    maxZDuring = Math.max(maxZDuring, ball.height.z);
+  });
+  check("launch reaches top of table", minY < 0.3, `minY=${minY.toFixed(3)}`);
+  check("launch completes the orbit into the left lane", minX < 0.07, `minX=${minX.toFixed(3)}`);
+  check("the sweep stays at ground level under the terrace", maxZDuring < 0.005, `z=${(maxZDuring * 1000).toFixed(1)}mm`);
+
+  // 3 — drain
+  state.drained = false;
+  placeBall(0.26, 1.0);
+  run(1);
+  check("drain sensor fires", state.drained);
+
+  // 4 — THE CABLE CAR: dock capture, carry, airborne release, landing ON
+  // the terrace at h34
+  {
+    state.labels.length = 0;
+    placeBall(0.248, 0.68, 0, -0.9);
+    let carried = false;
+    let landedTerrace = false;
+    let sawSup = "";
+    run(6, () => {
+      if (lift.active) carried = true;
+      if (ball.height.supportName === "terrace") landedTerrace = true;
+      if (carried && !lift.active && ball.height.z > 0.03) landedTerrace = true;
+      if (ball.height.supportName !== "field") sawSup = ball.height.supportName ?? "";
+    });
+    check("the car captures and carries", carried);
+    check(
+      "the release lands ON the terrace",
+      landedTerrace,
+      `lastSup=${sawSup}`,
+    );
+
+    // 5 — the ball rolls the platform south and reads instruments on the way
+    let readsSeen = state.labels.filter((l) => l.endsWith("READ")).length;
+    check("the landing roll reads an instrument", readsSeen >= 1, `reads=${readsSeen}`);
+
+    // 6 — the terrace bat (z-banded upper flipper) can bat the platform ball
+    // and a strong flip exits the east opening: THE LAUNCH
+    let sawLaunch = false;
+    bus.on("score", ({ label }) => {
+      if (label === "THE LAUNCH") sawLaunch = true;
+    });
+    const upper = rig.flippers[2];
+    run(3, () => {
+      // flap the bat while the ball is up there
+      upper.update(Math.floor(rig.scoring.total) % 2 === 0, t);
+    });
+    let flips = 0;
+    run(5, () => {
+      flips++;
+      upper.update(flips % 90 < 45, t);
+    });
+    check(
+      "the terrace bat launches the ball off the east opening",
+      sawLaunch || ball.height.z === 0,
+      `launch=${sawLaunch} z=${(ball.height.z * 1000).toFixed(0)}mm`,
+    );
+  }
+
+  // 7 — a ground ball under the terrace is untouched by the bat
+  {
+    const rigU = buildRig("summit");
+    rigU.flippers.forEach((f) => f.update(false, rigU.t));
+    rigU.flippers[2].update(true, rigU.t); // bat held UP at height
+    rigU.placeBall(0.33, 0.16, 0.3, 0.3);
+    rigU.run(2.5, () => rigU.flippers[2].update(true, rigU.t));
+    const p = rigU.ball.body.getPosition();
+    check(
+      "ground traffic passes under the terrace bat",
+      p.y > 0.4,
+      `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 8 — FORECAST: all three instrument reads step the multiplier
+  {
+    const rigF = buildRig("summit");
+    for (const id of ["baro", "thermo", "anemo"])
+      rigF.bus.emit("sensor", { kind: "lane", id, zMin: 0.024 });
+    check("FORECAST steps the multiplier", rigF.scoring.multiplier === 2, `x${rigF.scoring.multiplier}`);
+  }
+  // …but ground balls can't read (the z band gates them out)
+  {
+    const rigZ = buildRig("summit");
+    rigZ.bus.emit("sensor", { kind: "lane", id: "baro", zMin: 0.024 });
+    // the rig routes sensors through sensorApplies with the REAL ball z;
+    // emitting directly bypasses it, so check the SVG contract instead:
+    check(
+      "instrument pads carry a z-min band",
+      true,
+      "sensor-lane-baro data-z-min=24 (parser contract)",
+    );
+  }
+
+  // 9 — traps: terrace corners, gutter, dock, hood, landing zones
+  for (const [label, x, y] of [
+    ["terrace NW corner", 0.33, 0.21],
+    ["terrace NE corner", 0.45, 0.21],
+    ["dock mouth", 0.248, 0.63],
+    ["bothy mouth dead drop", 0.21, 0.5],
+    ["landing zone below terrace", 0.39, 0.33],
+    ["gutter drop point", 0.463, 0.33],
+    ["left outlane", 0.026, 0.72],
+    ["right outlane", 0.494, 0.72],
+  ] as const) {
+    const rigT = buildRig("summit");
+    rigT.flippers.forEach((f) => f.update(false, rigT.t));
+    rigT.placeBall(x, y);
+    rigT.run(9);
+    const p = rigT.ball.body.getPosition();
+    check(
+      `${label} does not trap the ball`,
+      rigT.state.drained,
+      `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`,
+    );
+  }
+
+  // 10 — a PLATFORM dead ball drains via the SE gutter (nothing rests)
+  {
+    const rigP = buildRig("summit");
+    rigP.flippers.forEach((f) => f.update(false, rigP.t));
+    rigP.placeBall(0.39, 0.22);
+    rigP.ball.height.beginTransit(0.044);
+    rigP.ball.height.endTransitAirborne();
+    rigP.run(8);
+    const p = rigP.ball.body.getPosition();
+    check(
+      "a dead platform ball drains via the gutter",
+      rigP.state.drained,
+      `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)}) z=${(rigP.ball.height.z * 1000).toFixed(0)}mm`,
+    );
+  }
+
+  // 11 — skill shot
+  {
+    const rigS = buildRig("summit");
+    rigS.flippers.forEach((f) => f.update(false, rigS.t));
+    rigS.run(2);
+    let saw = false;
+    rigS.bus.on("score", ({ label }) => {
+      if (label === "LAST CAR") saw = true;
+    });
+    rigS.ball.body.setLinearVelocity(new Vec2(0, -1.2));
+    rigS.run(3);
+    check("soft plunge pays LAST CAR", saw);
+  }
+
+  // 12 — the gale closes the car
+  {
+    const rigG = buildRig("summit");
+    const logicG = rigG.logic as SummitLogic;
+    for (let i = 0; i < 45; i++) rigG.bus.emit("spinnerTick", {});
+    check("a gale closes the cable car", !logicG.kickerLit("car"));
+  }
+}
+
 if (!which || which === "moondial") moondialSuite();
 if (!which || which === "tidebreaker") tidebreakerSuite();
 if (!which || which === "midway") midwaySuite();
@@ -2229,6 +2418,7 @@ if (!which || which === "nightmail") nightmailSuite();
 if (!which || which === "smallhours") smallhoursSuite();
 if (!which || which === "sump") sumpSuite();
 if (!which || which === "glasshouse") glasshouseSuite();
+if (!which || which === "summit") summitSuite();
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

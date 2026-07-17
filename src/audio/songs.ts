@@ -577,3 +577,73 @@ export const GLASSHOUSE_SONG: Song = {
   bpm: 116,
   arrangement: [G_VERSE, G_CHORUS, G_VERSE, G_CHORUS, G_DRIPS, G_SWARM, G_CHORUS],
 };
+
+// ────────────────────────── SUMMIT — A minor, 76 bpm ──────────────────────────
+// "Thin Air": the lineup's slowest, widest song. Long pedal bass, a lead
+// that moves in whole phrases with real silence between them, cold
+// intervals (fifths and fourths). The chorus is the cable car moving — a
+// steady climbing arpeggio under the lead; the breather is wind alone;
+// the middle eight doubles the SUBDIVISION, not the speed. The aurora
+// section is the one warm place in the song.
+
+/** The valley station: fifths in the cold, half the sky. */
+// prettier-ignore
+const A_VERSE: Section = {
+  chords: ["Am", "Em", "F", "C", "Am", "Em", "G", "Am"],
+  lead: [
+    69, -1, -1, -1, 76, -1, -1, -1,    0,  0,  0,  0, 74, -1, -1, -1,
+     0,  0, 72, -1, -1, -1,  0,  0,   69, -1, -1, -1, -1, -1,  0,  0,
+    69, -1, -1, -1, 76, -1, -1, -1,    0,  0, 81, -1, -1, -1, 79, -1,
+     0,  0, 76, -1, -1, -1, 72, -1,   74, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.2, crash: false, swing: 0,
+};
+
+/** The car climbing: a steady rising figure under the wide lead. */
+// prettier-ignore
+const A_CHORUS: Section = {
+  chords: ["Am", "F", "C", "G", "Am", "F", "Dm", "E"],
+  lead: [
+    76, -1, 79, -1, 81, -1, -1, -1,   77, -1, 81, -1, 84, -1, -1, -1,
+    79, -1, 84, -1, 88, -1, -1, -1,   86, -1, 83, -1, 79, -1,  0,  0,
+    76, -1, 79, -1, 81, -1, -1, -1,   77, -1, 81, -1, 84, -1, -1, -1,
+    86, -1, 84, -1, 81, -1, 77, -1,   76, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "roll",
+  arp: true, leadVol: 0.22, crash: false, swing: 0,
+};
+
+/** The breather: wind alone on the ridge — one held tone, then nothing. */
+// prettier-ignore
+const A_WIND: Section = {
+  chords: ["Am", "Am", "Em", "Em", "F", "F", "E", "E"],
+  lead: [
+    81, -1, -1, -1, -1, -1, -1, -1,   -1, -1, -1, -1,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,   76, -1, -1, -1, -1, -1,  0,  0,
+     0,  0,  0,  0, 79, -1, -1, -1,   -1, -1,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,   80, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.16, crash: false, swing: 0,
+};
+
+/** The aurora: the only warm chords in the song, still slow. */
+// prettier-ignore
+const A_AURORA: Section = {
+  chords: ["F", "C", "G", "Am", "F", "C", "E", "Am"],
+  lead: [
+    84, -1, 86, -1, 88, -1, 91, -1,   88, -1, 86, -1, 84, -1, 81, -1,
+    84, -1, -1, -1, 88, -1, -1, -1,   86, -1, 84, -1, 81, -1,  0,  0,
+    84, 86, 88, -1, 91, -1, 93, -1,   91, -1, 88, -1, 86, -1, 84, -1,
+    81, -1, 84, -1, 88, -1, 84, -1,   81, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/** Form: the valley, the climb, the valley, the climb, wind, aurora, the climb. */
+export const SUMMIT_SONG: Song = {
+  bpm: 76,
+  arrangement: [A_VERSE, A_CHORUS, A_VERSE, A_CHORUS, A_WIND, A_AURORA, A_CHORUS],
+};

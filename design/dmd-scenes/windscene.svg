@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- SUMMIT DMD scene: WIND - the anemometer cups spin up, the speed digits climb. Ridge combos; idle personality.
+       8 frames of 128x32: #fff=3, #888=2, #666=1, black=0. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="38.0" cy="12.0" r="2" fill="#fff"/>
+    <circle cx="23.0" cy="16.3" r="2" fill="#fff"/>
+    <circle cx="23.0" cy="7.7" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">20</text>
+  </g>
+  <g transform="translate(128,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="30.2" cy="16.9" r="2" fill="#fff"/>
+    <circle cx="18.4" cy="10.5" r="2" fill="#fff"/>
+    <circle cx="35.3" cy="8.6" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">29</text>
+  </g>
+  <g transform="translate(256,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="19.0" cy="14.2" r="2" fill="#fff"/>
+    <circle cx="28.7" cy="7.0" r="2" fill="#fff"/>
+    <circle cx="36.3" cy="14.8" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">38</text>
+  </g>
+  <g transform="translate(384,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="21.8" cy="8.1" r="2" fill="#fff"/>
+    <circle cx="37.9" cy="11.3" r="2" fill="#fff"/>
+    <circle cx="24.4" cy="16.7" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">47</text>
+  </g>
+  <g transform="translate(512,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="34.2" cy="8.1" r="2" fill="#fff"/>
+    <circle cx="31.7" cy="16.7" r="2" fill="#fff"/>
+    <circle cx="18.1" cy="11.3" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">56</text>
+  </g>
+  <g transform="translate(640,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="37.0" cy="14.2" r="2" fill="#fff"/>
+    <circle cx="19.7" cy="14.8" r="2" fill="#fff"/>
+    <circle cx="27.2" cy="7.0" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">65</text>
+  </g>
+  <g transform="translate(768,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="25.8" cy="16.9" r="2" fill="#fff"/>
+    <circle cx="20.7" cy="8.6" r="2" fill="#fff"/>
+    <circle cx="37.6" cy="10.5" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">74</text>
+  </g>
+  <g transform="translate(896,0)">
+    <line x1="28" y1="12" x2="28" y2="26" stroke="#666" stroke-width="1.4"/>
+    <circle cx="18.0" cy="12.0" r="2" fill="#fff"/>
+    <circle cx="33.0" cy="7.7" r="2" fill="#fff"/>
+    <circle cx="33.0" cy="16.3" r="2" fill="#fff"/>
+    <text x="80" y="16" font-family="monospace" font-size="10" fill="#888">83</text>
+  </g>
+</svg>

@@ -11,6 +11,7 @@ import type { TableId } from "./specs";
 import type { Song } from "../audio/songs";
 import {
   GLASSHOUSE_SONG,
+  SUMMIT_SONG,
   MIDWAY_SONG,
   MOONDIAL_SONG,
   NIGHTMAIL_SONG,
@@ -33,6 +34,8 @@ import sumpPlayfield from "../../design/tables/sump/playfield.svg?raw";
 import sumpBackglass from "../../design/tables/sump/backglass.svg?raw";
 import glasshousePlayfield from "../../design/tables/glasshouse/playfield.svg?raw";
 import glasshouseBackglass from "../../design/tables/glasshouse/backglass.svg?raw";
+import summitPlayfield from "../../design/tables/summit/playfield.svg?raw";
+import summitBackglass from "../../design/tables/summit/backglass.svg?raw";
 
 import orbitScene from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierScene from "../../design/dmd-scenes/multiplier.svg?raw";
@@ -76,6 +79,12 @@ import crossingScene from "../../design/dmd-scenes/crossingscene.svg?raw";
 import swarmScene from "../../design/dmd-scenes/swarmscene.svg?raw";
 import lightsoutScene from "../../design/dmd-scenes/lightsoutscene.svg?raw";
 import centuryScene from "../../design/dmd-scenes/centuryscene.svg?raw";
+import windScene from "../../design/dmd-scenes/windscene.svg?raw";
+import carScene from "../../design/dmd-scenes/carscene.svg?raw";
+import readScene from "../../design/dmd-scenes/readscene.svg?raw";
+import avalancheScene from "../../design/dmd-scenes/avalanchescene.svg?raw";
+import launchScene from "../../design/dmd-scenes/launchscene.svg?raw";
+import auroraScene from "../../design/dmd-scenes/aurorascene.svg?raw";
 import dialScene from "../../design/dmd-scenes/dial.svg?raw";
 import mastScene from "../../design/dmd-scenes/mast.svg?raw";
 import callerScene from "../../design/dmd-scenes/caller.svg?raw";
@@ -189,5 +198,18 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       century: { svg: centuryScene, frames: 8 },
     },
     song: GLASSHOUSE_SONG,
+  },
+  summit: {
+    playfieldSvg: summitPlayfield,
+    backglassSvg: summitBackglass,
+    dmdScenes: {
+      wind: { svg: windScene, frames: 8 },
+      car: { svg: carScene, frames: 8 },
+      read: { svg: readScene, frames: 8 },
+      avalanche: { svg: avalancheScene, frames: 8 },
+      launchscene: { svg: launchScene, frames: 8 },
+      aurora: { svg: auroraScene, frames: 8 },
+    },
+    song: SUMMIT_SONG,
   },
 };

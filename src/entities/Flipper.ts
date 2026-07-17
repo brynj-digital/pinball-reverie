@@ -24,6 +24,12 @@ export class Flipper {
     readonly side: FlipperSide,
     tuning: Tuning,
     pivot: Pt,
+    /**
+     * M15 (Summit's terrace): optional height band (metres) — the bat only
+     * touches balls inside it, gated by PhysicsWorld's pre-solve like any
+     * banded wall. Ground flippers omit it (always solid at ball height).
+     */
+    zBand?: { min: number; max: number },
   ) {
     const restAngle = side === "left" ? FLIPPER.restAngle : -FLIPPER.restAngle;
 
@@ -32,12 +38,15 @@ export class Flipper {
       position: new Vec2(pivot.x, pivot.y),
       angle: restAngle,
     });
+    const tag: FixtureTag = zBand
+      ? { kind: "flipper", zMin: zBand.min, zMax: zBand.max }
+      : { kind: "flipper" };
     this.body.createFixture({
       shape: new Polygon(flipperVerts(side).map((p) => new Vec2(p.x, p.y))),
       density: 60, // ~0.1 kg — realistic flipper mass at this scale
       friction: 0.1,
       restitution: 0.08,
-      userData: { kind: "flipper" } satisfies FixtureTag,
+      userData: tag,
     });
     // round base over the pivot: closes the wall–flipper notch that traps the ball
     this.body.createFixture({
@@ -45,7 +54,7 @@ export class Flipper {
       density: 60,
       friction: 0.1,
       restitution: 0.08,
-      userData: { kind: "flipper" } satisfies FixtureTag,
+      userData: tag,
     });
 
     this.joint = world.createJoint(

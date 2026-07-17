@@ -312,6 +312,7 @@ export class Game {
     if (g.flippers.upper) {
       this.upperFlipper = new Flipper(
         this.physics.world, this.table.body, g.flippers.upper.side, this.tuning, g.flippers.upper,
+        g.flippers.upper.z,
       );
       this.flippers.push(this.upperFlipper);
     }

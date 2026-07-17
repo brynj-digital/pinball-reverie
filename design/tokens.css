@@ -63,6 +63,15 @@
   --conservatory-500: #24382b; /* leaf wall/rail body (steel-500 analog) */
   --conservatory-300: #4a6b52; /* leaf wall/rail highlight (steel-300 analog) */
 
+  /* field, alpine variant — Summit's granite-and-old-snow ramp: the
+     lineup's lightest field, moonlit blue-grey that faintly glows (added
+     2026-07-17 per the table 8 brief; STYLE-GUIDE §2) */
+  --alpine-900: #0d1116; /* couloir dark / deep shadow */
+  --alpine-800: #141a22; /* alpine field base */
+  --alpine-700: #1d2733; /* snowfield panels */
+  --alpine-500: #31435a; /* granite wall/rail body (steel-500 analog) */
+  --alpine-300: #5c7894; /* granite wall/rail highlight (steel-300 analog) */
+
   /* marquee bulb — incandescent white-gold for bulb strings, chase lamps,
      platform gas lamps and lit carriage windows
      (added 2026-07-05, scope widened 2026-07-15; NOT brass — brass stays
@@ -103,6 +112,12 @@
                            the dial, insert arrows. NOT brass (ball-touch metal)
                            and NOT bulb (incandescent points). */
   --amber-600: #b35f0e;
+  --ice-400: #b8e6ff; /* aurora ice — Summit's feature hue (added
+                          2026-07-17, table 8): sky and snow light only —
+                          aurora sheets, cornice glow. Paler and COLDER
+                          than abyssal cyan; if a specimen reads as
+                          Tidebreaker, whiten ice, never saturate it. */
+  --ice-600: #5aa3cc;
   --rose-400: #ff8fae; /* orchid rose — Glasshouse's feature hue (added
                            2026-07-17, table 7): organic light only — bloom
                            inserts, the lit lamp halo. Pale/warm vs the

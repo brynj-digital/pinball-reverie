@@ -215,7 +215,9 @@ export interface TableGeometry {
   flippers: {
     left: Pt;
     right: Pt;
-    upper?: Pt & { side: FlipperSide };
+    /** M15: `z` puts the upper flipper's contacts in a height band —
+     * Summit's terrace bat touches platform balls only. */
+    upper?: Pt & { side: FlipperSide; z?: { min: number; max: number } };
     mini?: { left: Pt; right: Pt };
   };
   bumpers: readonly BumperDef[];
