@@ -97,7 +97,9 @@ export class DotMatrix {
 
   set(x: number, y: number, level: number): void {
     if (x < 0 || x >= DMD_COLS || y < 0 || y >= DMD_ROWS) return;
-    this.grid[y * DMD_COLS + x] = level;
+    // clamp: a level past the sprite ramp would feed drawImage undefined and
+    // kill the frame loop — degrade to full-lit instead
+    this.grid[y * DMD_COLS + x] = level > 3 ? 3 : level;
     this.dirty = true;
   }
 

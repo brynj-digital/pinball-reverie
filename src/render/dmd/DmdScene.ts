@@ -293,7 +293,7 @@ export class FireworksScene implements DmdScene {
       const age = this.t - b.born;
       if (age > 1.0) continue;
       const r = age * 16;
-      const lv = age < 0.35 ? 4 : age < 0.7 ? 2 : 1;
+      const lv = age < 0.35 ? 3 : age < 0.7 ? 2 : 1;
       for (let i = 0; i < b.rays; i++) {
         const a = (i / b.rays) * Math.PI * 2;
         dmd.set(Math.round(b.x + Math.cos(a) * r), Math.round(b.y + Math.sin(a) * r * 0.6), lv);

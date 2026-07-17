@@ -147,6 +147,7 @@ export class Renderer3D implements Renderer {
   private hudEl?: HTMLDivElement;
   private dmdMounted = false;
   private hudAccum = 0;
+  private panelLayoutKey = "";
 
   private lastW = 0;
   private lastH = 0;
@@ -635,6 +636,43 @@ export class Renderer3D implements Renderer {
     document.body.appendChild(this.hudEl);
   }
 
+  /** Size + centre the panel in the void left of the table, mirroring the 2D
+   * renderer's landscape rule (min(void − 32, 560) css px, centred in the
+   * void; the stylesheet's 272px stays as the narrow fallback). Portrait and
+   * the short-landscape slimming remain the CSS media queries' business —
+   * inline styles are cleared so they can win. */
+  private layoutPanel(camera: Camera): void {
+    if (!this.panelEl) return;
+    const w = this.lastW;
+    const h = this.lastH;
+    const key = `${w}x${h}:${camera.viewH.toFixed(4)}:${this.view}`;
+    if (key === this.panelLayoutKey) return;
+    this.panelLayoutKey = key;
+    const clear = () => {
+      this.panelEl!.style.width = "";
+      this.panelEl!.style.left = "";
+    };
+    if (w <= h) return clear();
+    // Void left of the table at its widest on-screen line, css px.
+    let margin: number;
+    if (this.view === "flat") {
+      // ortho: px per metre is availH / viewH (see the flat framing above)
+      margin = w / 2 - (this.lastAvailH / camera.viewH) * (this.table.width / 2);
+    } else {
+      // tilted: widest at the window-bottom ground line (view-space depth
+      // ≈ 1.126·viewH — drawFrame's framing constant); ≤ 0 whenever the
+      // camera had to pull back (k > 1) to cover the width, i.e. no void.
+      const tanHalfW = Math.tan((this.cam3.fov * Math.PI) / 360) * (w / this.lastAvailH);
+      margin =
+        (w / 2) * (1 - (this.table.width / 2 + 0.012) / (tanHalfW * camera.viewH * 1.126));
+    }
+    if (margin < 240) return clear();
+    // DMD (w/4) + backglass (1.2·w) + gaps must also fit the window height
+    const pw = Math.max(160, Math.min(margin - 32, 560, (h - 90) / 1.45));
+    this.panelEl.style.width = `${Math.round(pw)}px`;
+    this.panelEl.style.left = `${Math.round((margin - pw) / 2)}px`;
+  }
+
   /** Element meshes are built from the first snapshot — the renderer learns
    * counts and placements from the world, not from table constants. */
   private buildDynamic(snap: WorldSnapshot): void {
@@ -875,6 +913,7 @@ export class Renderer3D implements Renderer {
 
   drawFrame(snap: WorldSnapshot, camera: Camera): void {
     this.resize(snap.renderScale);
+    this.layoutPanel(camera);
     if (!this.built) this.buildDynamic(snap);
     const now = performance.now() / 1000;
     const dt = this.lastT ? Math.min(now - this.lastT, 0.1) : 0.016;

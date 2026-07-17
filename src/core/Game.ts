@@ -397,10 +397,15 @@ export class Game {
       },
       addBalls: (n, at, v) => {
         if (this.phase !== "play") return;
+        // no serve point → the spawn, which is the shooter lane — and the
+        // plunger only drives the PRIMARY ball, so a dead-dropped extra
+        // parks there unlaunchable. Auto-plunge at full strength instead
+        // (the real-machine auto-launcher).
+        const serveV = v ?? (at ? { x: 0, y: 0 } : { x: 0, y: -this.tuning.plungerMaxSpeed });
         for (let i = 0; i < n; i++)
           this.spawnQueue.push({
             at: at ?? { x: g.table.spawn.x, y: g.table.spawn.y },
-            v: v ?? { x: 0, y: 0 },
+            v: serveV,
             delay: 0.15 + i * 0.5,
           });
       },
