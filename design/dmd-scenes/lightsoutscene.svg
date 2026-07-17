@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- GLASSHOUSE DMD scene: LIGHTS OUT - the lamps fail one by one; the moonlit pane flickers side to side. The video mode set.
+       8 frames of 128x32: #fff=3, #888=2, #666=1, black=0. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <rect x="96" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+  <g transform="translate(128,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <rect x="108" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+  <g transform="translate(256,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <rect x="96" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+  <g transform="translate(384,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <rect x="108" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+  <g transform="translate(512,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <rect x="96" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+  <g transform="translate(640,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#888" stroke="#666" stroke-width="1"/>
+    <rect x="108" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+  <g transform="translate(768,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <rect x="96" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+  <g transform="translate(896,0)">
+    <circle cx="22" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="46" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="70" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <circle cx="94" cy="10" r="4" fill="#000" stroke="#666" stroke-width="1"/>
+    <rect x="108" y="4" width="10" height="14" fill="#fff" opacity="0.9"/>
+    <line x1="4" y1="24" x2="124" y2="24" stroke="#666" stroke-width="1"/>
+  </g>
+</svg>

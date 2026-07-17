@@ -1,6 +1,6 @@
 # Table differentiation plan
 
-**Status: proposed (2026-07-16), not yet scheduled.** Companion briefs:
+**Status: COMPLETE through Phase 4 (2026-07-17).** Phase 0 + retrofits: PRs #10–#16; M13 The Sump: #17; M14 Glasshouse: #18; M15 Summit: #19. Every phase's deltas live in its table's BRIEF; the lineup summary in CLAUDE.md. Remaining: Thunderhead stays gated in backlog (§8) pending the player feel sign-off its brief demands. Companion briefs:
 `design/tables/{sump,glasshouse,summit,thunderhead}/BRIEF.md`. This plan
 covers (A) a **retrofit pass** giving each built table a structural
 differentiator, and (B) **tables 6–9**, each of which breaks one piece
@@ -71,13 +71,26 @@ left/right/upper.
 
 | # | Task | Size | Notes |
 |---|---|---|---|
-| 0.1 | **Confirm per-kicker eject vector.** CLAUDE.md says speed is `tuning.kickerEject`; kickbacks already eject up while scoops eject to the left flipper, so direction should be per-def — verify, and if any part is global, add a per-kicker override. Retrofits 1.4/1.5 and all new tables assume it. | S | entcheck |
-| 0.2 | **Inert diverter blade.** The gnomon (1.1) and the floodgate (M13) want a Diverter where one "blade" is effectively absent. Blade paths are arbitrary SVG, so an off-field sliver inside a wall should already work — prove it in entcheck rather than discovering it in soak. | S | entcheck |
-| 0.3 | **`TableLogic.slingBoost?()` hook** (optional multiplier on sling kick impulse, polled like `kickerLit`/`diverterBlade`). Wanted by 1.5 (Small Hours' TUNED slings); trivially ignored by other tables. | S | entcheck + simcheck |
-| 0.4 | **Skill-shot pattern note in STYLE-GUIDE §4**: a `sensor-skill-<id>` band partway up the shooter lane, awarded by TableLogic on a soft plunge that peaks inside it. Pure SVG + rules — no engine change; the guide entry is so five tables author it consistently. | S | docs |
-| 0.5 | **"No copy-paste kit" authoring rule in STYLE-GUIDE §4**: new tables must diverge sling verts, scoop positions and eject hands from the existing set unless a brief argues otherwise. Codifies the lesson so table 10 doesn't regress. | S | docs |
+| 0.1 | **DONE (verified 2026-07-17):** eject direction is per-kicker (`KickerDef.eject`) and speed per-kicker (`ejectSpeed?`, tuning fallback) — no engine change needed. ~~Confirm per-kicker eject vector.~~ CLAUDE.md says speed is `tuning.kickerEject`; kickbacks already eject up while scoops eject to the left flipper, so direction should be per-def — verify, and if any part is global, add a per-kicker override. Retrofits 1.4/1.5 and all new tables assume it. | S | entcheck |
+| 0.2 | **DONE (2026-07-17, entcheck "gnomon" cases):** an off-field sliver blade is legal; post rises/retracts cleanly. ~~Inert diverter blade.~~ The gnomon (1.1) and the floodgate (M13) want a Diverter where one "blade" is effectively absent. Blade paths are arbitrary SVG, so an off-field sliver inside a wall should already work — prove it in entcheck rather than discovering it in soak. | S | entcheck |
+| 0.3 | **DONE (2026-07-17):** `TableLogic.slingBoost?()` multiplies the kick impulse in Game AND all three sims. ~~hook~~ (optional multiplier on sling kick impulse, polled like `kickerLit`/`diverterBlade`). Wanted by 1.5 (Small Hours' TUNED slings); trivially ignored by other tables. | S | entcheck + simcheck |
+| 0.4 | **DONE (2026-07-17, STYLE-GUIDE §4 "Differentiation-pass conventions"):** ~~Skill-shot pattern note~~: a `sensor-skill-<id>` band partway up the shooter lane, awarded by TableLogic on a soft plunge that peaks inside it. Pure SVG + rules — no engine change; the guide entry is so five tables author it consistently. | S | docs |
+| 0.5 | **DONE (2026-07-17, same §4 block):** ~~"No copy-paste kit" authoring rule~~: new tables must diverge sling verts, scoop positions and eject hands from the existing set unless a brief argues otherwise. Codifies the lesson so table 10 doesn't regress. | S | docs |
 
-## 4. Phase 1 — the retrofit pass (one PR per table)
+## 4. Phase 1 — the retrofit pass (one PR per table) — DONE 2026-07-17
+
+All five shipped (order 1.1 → 1.2 → 1.4 → 1.5 → 1.3 as planned). Outcome
+notes against the specs below: the gnomon shipped as specced (the
+dead-centre both-flipper pinch is a known sim artifact, watch in play);
+Tidebreaker's slings grew DOWN-AND-OUT only (a taller top clipped the
+winch habitrail landing); **1.4's relocation was abandoned with cause**
+(the target sat under the incline carry corridor; the eject-hand flip
+alone re-maps the flow — brief has the full geometry argument); Small
+Hours' phone-move rates were checked across three seeds (noise, not
+starvation); Midway's budgeted trap arrived on soak seed 2 and is fixed
+by a sloped coaster-back. Midway also gained the skill shot the spec
+below omitted (lineup consistency). Full-lineup simcheck + entcheck +
+soak green at close-out; no DEFAULT_TUNING value changed.
 
 Each item: SVG/defs/rules edit → simcheck → soak (standard seeds) →
 instrumented feature-rates before/after → brief amended with the delta
@@ -150,7 +163,7 @@ Amend all five briefs with deltas; update
 full suite (`simcheck` all tables, `soak` all seeds × tables,
 `entcheck`). Ship the STYLE-GUIDE amendments (0.4/0.5) with this pass.
 
-## 5. Phase 2 — M13: The Sump (table 6)
+## 5. Phase 2 — M13: The Sump (table 6) — DONE 2026-07-17 (PR #17)
 
 The lower-playfield table — the drain itself becomes the feature. Full
 design in `design/tables/sump/BRIEF.md`. Engine scope (details in the
@@ -165,7 +178,7 @@ entcheck case for the second pair; gate-descent/chamber-exit/dwell
 feature-rates per the brief; soak proves the chamber (a new enclosed
 space = the highest trap surface since the striker throat).
 
-## 6. Phase 3 — M14: Glasshouse (table 7)
+## 6. Phase 3 — M14: Glasshouse (table 7) — DONE 2026-07-17 (PR #18)
 
 The widebody with the left-hand launch and four return lanes. Full
 design in `design/tables/glasshouse/BRIEF.md`. Engine scope (brief
@@ -179,7 +192,7 @@ right-handed and land the mirror in a follow-up — width is the bigger
 felt change. Exit criteria: vine-run speed sweep, outer-inlane feed
 rates, lit-lamp hit rate.
 
-## 7. Phase 4 — M15: Summit (table 8)
+## 7. Phase 4 — M15: Summit (table 8) — DONE 2026-07-17 (PR #19)
 
 The playable elevated platform — a flipper and furniture at height.
 Full design in `design/tables/summit/BRIEF.md`. Engine scope (brief

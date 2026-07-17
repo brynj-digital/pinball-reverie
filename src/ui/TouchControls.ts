@@ -70,6 +70,8 @@ export class TouchControls {
     container: HTMLElement,
     private hasUpper: boolean,
     private haptics: Haptics,
+    /** M14: the shooter lane's side — the plunger corner zone follows it. */
+    private plungerSide: "left" | "right" = "right",
   ) {
     this.root = document.createElement("div");
     this.root.className = "touch-overlay";
@@ -135,6 +137,12 @@ export class TouchControls {
   private buildPlungerZone(): void {
     const zone = document.createElement("div");
     zone.className = "touch-zone touch-plunger";
+    // M14: the CSS pins the zone bottom-right (the lineup convention); a
+    // left-plunger table flips it to the bottom-left corner
+    if (this.plungerSide === "left") {
+      zone.style.right = "auto";
+      zone.style.left = "0";
+    }
     this.plungerZone = zone;
     const active = new Set<number>();
     const press = (on: boolean) => {

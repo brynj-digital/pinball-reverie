@@ -2,7 +2,28 @@
 
 **Status: v1 built (2026-07-16); renamed from "Night Waves" 2026-07-17**
 (two "Night" tables in one lineup — the mail train keeps the word; this
-table takes its own song's name). Table id: `smallhours`. This brief is
+table takes its own song's name).
+
+Differentiation pass (2026-07-17, plan item 1.5):
+
+- **TUNED slings** — while TUNED IN the studio monitors are up: sling
+  kicks run at `dial.slingBoost` (1.15) via the Phase-0
+  `TableLogic.slingBoost` hook. Rules-side flavour with real feel; soak
+  covers both states (TUNED cycles in random play).
+- **The phone moved** +28/+30 to `(300,480)`, toward the record deck —
+  off the lineup-shared `(272,450)` scoop spot (STYLE-GUIDE §4
+  no-copy-paste rule). Eject re-aimed `(−0.25, 0.96)`; still the left-bat
+  return (simcheck x 0.209) — this table's left/right hand division is
+  designed and stays.
+- **NIGHT OWLS** — the skill shot (§4 pattern): `sensor-skill-nightowls`
+  y 440–500, ≤ 0.75 m/s pays 15,000 + a 2,000-listener bundle, once per
+  ball. No lane spot — listeners are this table's currency.
+- Rates check (feature-difficulty rule): random-soak phone attempts run
+  4–9/600 s across seeds 1–3 vs 5–14 baseline — inside seed noise (the
+  first seed-1 "14 → 4" read was an outlier scare). Soak 1/2/3/7 = 0
+  stuck.
+
+Table id: `smallhours`. This brief is
 the design truth; `playfield.svg` + `rules.json` + `src/table/defs/
 smallhours.ts` + `src/game/smallhours.ts` are the specifics. Deltas from
 the concept, found during clearance-solving and simcheck/soak/

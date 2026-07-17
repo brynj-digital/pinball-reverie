@@ -90,6 +90,12 @@ const GEOMETRY: TableGeometry = {
     },
   ],
   subways: [],
+  /**
+   * THE GNOMON (differentiation pass): retractable centre post between the
+   * flipper tips, risen while the ball-saver is live and during LUNAR
+   * ECLIPSE. "down" is an inert sliver in the sealed under-saddle void.
+   */
+  diverters: [{ id: "gnomon", blades: ["up", "down"], initial: "down" }],
 };
 
 export const MOONDIAL_SPEC: TableSpec = {
@@ -100,6 +106,10 @@ export const MOONDIAL_SPEC: TableSpec = {
   scoring: rules,
   createLogic: (ctx) => new MoondialLogic(ctx),
   // pre-M10 key, kept so existing players' scores survive the multi-table move
+  attractTips: [
+    ["SPOT SIGHTINGS", "AT THE TELESCOPE"],
+    ["BANKS + ORBITS", "LIGHT THE ECLIPSE"],
+  ],
   highScoreKey: "pinball-highscores-v2",
   // steel + chrome, dayglo glass; violet element lamps (the Reverie signature)
   theme: {

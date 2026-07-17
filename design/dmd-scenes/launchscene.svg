@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- SUMMIT DMD scene: THE LAUNCH - the ball arcs off the platform edge clear across the frame. Launch / SUMMIT JACKPOT.
+       8 frames of 128x32: #fff=3, #888=2, #666=1, black=0. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="20.0" cy="22.0" r="2.6" fill="#fff"/>
+    <circle cx="14.0" cy="24.0" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(128,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="34.3" cy="13.9" r="2.6" fill="#fff"/>
+    <circle cx="28.3" cy="15.9" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(256,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="48.6" cy="8.5" r="2.6" fill="#fff"/>
+    <circle cx="42.6" cy="10.5" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(384,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="62.9" cy="5.8" r="2.6" fill="#fff"/>
+    <circle cx="56.9" cy="7.8" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(512,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="77.1" cy="5.8" r="2.6" fill="#fff"/>
+    <circle cx="71.1" cy="7.8" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(640,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="91.4" cy="8.5" r="2.6" fill="#fff"/>
+    <circle cx="85.4" cy="10.5" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(768,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="105.7" cy="13.9" r="2.6" fill="#fff"/>
+    <circle cx="99.7" cy="15.9" r="1" fill="#666"/>
+  </g>
+  <g transform="translate(896,0)">
+    <rect x="4" y="18" width="24" height="3" fill="#888"/>
+    <circle cx="120.0" cy="22.0" r="2.6" fill="#fff"/>
+    <circle cx="114.0" cy="24.0" r="1" fill="#666"/>
+  </g>
+</svg>

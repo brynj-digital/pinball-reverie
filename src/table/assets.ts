@@ -10,10 +10,13 @@
 import type { TableId } from "./specs";
 import type { Song } from "../audio/songs";
 import {
+  GLASSHOUSE_SONG,
+  SUMMIT_SONG,
   MIDWAY_SONG,
   MOONDIAL_SONG,
   NIGHTMAIL_SONG,
   SMALLHOURS_SONG,
+  SUMP_SONG,
   TIDEBREAKER_SONG,
 } from "../audio/songs";
 
@@ -27,6 +30,12 @@ import nightmailPlayfield from "../../design/tables/nightmail/playfield.svg?raw"
 import nightmailBackglass from "../../design/tables/nightmail/backglass.svg?raw";
 import smallhoursPlayfield from "../../design/tables/smallhours/playfield.svg?raw";
 import smallhoursBackglass from "../../design/tables/smallhours/backglass.svg?raw";
+import sumpPlayfield from "../../design/tables/sump/playfield.svg?raw";
+import sumpBackglass from "../../design/tables/sump/backglass.svg?raw";
+import glasshousePlayfield from "../../design/tables/glasshouse/playfield.svg?raw";
+import glasshouseBackglass from "../../design/tables/glasshouse/backglass.svg?raw";
+import summitPlayfield from "../../design/tables/summit/playfield.svg?raw";
+import summitBackglass from "../../design/tables/summit/backglass.svg?raw";
 
 import orbitScene from "../../design/dmd-scenes/orbit.svg?raw";
 import multiplierScene from "../../design/dmd-scenes/multiplier.svg?raw";
@@ -58,6 +67,24 @@ import couplingScene from "../../design/dmd-scenes/coupling.svg?raw";
 import tunnelScene from "../../design/dmd-scenes/tunnel.svg?raw";
 import connectionScene from "../../design/dmd-scenes/connection.svg?raw";
 import sortingScene from "../../design/dmd-scenes/sorting.svg?raw";
+import gaugeScene from "../../design/dmd-scenes/gauge.svg?raw";
+import gateScene from "../../design/dmd-scenes/gate.svg?raw";
+import valveScene from "../../design/dmd-scenes/valve.svg?raw";
+import outflowScene from "../../design/dmd-scenes/outflow.svg?raw";
+import pumpsScene from "../../design/dmd-scenes/pumps.svg?raw";
+import highwaterScene from "../../design/dmd-scenes/highwater.svg?raw";
+import mothScene from "../../design/dmd-scenes/mothscene.svg?raw";
+import bloomScene from "../../design/dmd-scenes/bloomscene.svg?raw";
+import crossingScene from "../../design/dmd-scenes/crossingscene.svg?raw";
+import swarmScene from "../../design/dmd-scenes/swarmscene.svg?raw";
+import lightsoutScene from "../../design/dmd-scenes/lightsoutscene.svg?raw";
+import centuryScene from "../../design/dmd-scenes/centuryscene.svg?raw";
+import windScene from "../../design/dmd-scenes/windscene.svg?raw";
+import carScene from "../../design/dmd-scenes/carscene.svg?raw";
+import readScene from "../../design/dmd-scenes/readscene.svg?raw";
+import avalancheScene from "../../design/dmd-scenes/avalanchescene.svg?raw";
+import launchScene from "../../design/dmd-scenes/launchscene.svg?raw";
+import auroraScene from "../../design/dmd-scenes/aurorascene.svg?raw";
 import dialScene from "../../design/dmd-scenes/dial.svg?raw";
 import mastScene from "../../design/dmd-scenes/mast.svg?raw";
 import callerScene from "../../design/dmd-scenes/caller.svg?raw";
@@ -145,5 +172,44 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       dawn: { svg: dawnScene, frames: 9 },
     },
     song: SMALLHOURS_SONG,
+  },
+  sump: {
+    playfieldSvg: sumpPlayfield,
+    backglassSvg: sumpBackglass,
+    dmdScenes: {
+      gauge: { svg: gaugeScene, frames: 8 },
+      gate: { svg: gateScene, frames: 8 },
+      valve: { svg: valveScene, frames: 8 },
+      outflow: { svg: outflowScene, frames: 8 },
+      pumps: { svg: pumpsScene, frames: 8 },
+      highwater: { svg: highwaterScene, frames: 8 },
+    },
+    song: SUMP_SONG,
+  },
+  glasshouse: {
+    playfieldSvg: glasshousePlayfield,
+    backglassSvg: glasshouseBackglass,
+    dmdScenes: {
+      moth: { svg: mothScene, frames: 8 },
+      bloom: { svg: bloomScene, frames: 8 },
+      crossing: { svg: crossingScene, frames: 8 },
+      swarm: { svg: swarmScene, frames: 8 },
+      lightsout: { svg: lightsoutScene, frames: 8 },
+      century: { svg: centuryScene, frames: 8 },
+    },
+    song: GLASSHOUSE_SONG,
+  },
+  summit: {
+    playfieldSvg: summitPlayfield,
+    backglassSvg: summitBackglass,
+    dmdScenes: {
+      wind: { svg: windScene, frames: 8 },
+      car: { svg: carScene, frames: 8 },
+      read: { svg: readScene, frames: 8 },
+      avalanche: { svg: avalancheScene, frames: 8 },
+      launchscene: { svg: launchScene, frames: 8 },
+      aurora: { svg: auroraScene, frames: 8 },
+    },
+    song: SUMMIT_SONG,
   },
 };

@@ -47,6 +47,12 @@ export interface TableLogicCtx {
   /** Release every parked lock into play as multiball extras; returns how
    * many were released (top up with addBalls for a fixed-count multiball). */
   releaseLocks?: () => number;
+  /**
+   * Whether the ball-saver is live right now (differentiation pass; e.g.
+   * Moondial's gnomon rises with the saver). Game owns the saver; sims
+   * provide a stand-in window so saver-gated geometry gets soak coverage.
+   */
+  saverActive?: () => boolean;
 }
 
 export interface TableLogic {
@@ -81,12 +87,36 @@ export interface TableLogic {
    */
   onFlipper?(side: "left" | "right"): void;
   /**
+   * A sensor-skill-<id> band fired (Game gates: play phase, not tilted)
+   * with the ball's speed (m/s) at that instant. STYLE-GUIDE §4: a soft
+   * plunge peaking inside the band arrives slow; a full plunge rips
+   * through fast — the qualifying threshold is the table's rules call.
+   */
+  onSkillShot?(id: string, speed: number): void;
+  /**
    * Which blade of a diverter should be solid right now (M12, polled per
    * frame). Absent hook or unknown name: the def's `initial` blade holds.
    */
   diverterBlade?(id: string): string;
   /** Whether a magnet is armed right now (M12; default unlit = inert). */
   magnetLit?(id: string): boolean;
+  /**
+   * One-line live status for the score readout's bottom ticker (DMD pass):
+   * collected letters, mode timers — max ~21 glyphs. Undefined = no line.
+   */
+  dmdStatus?(): string | undefined;
+  /**
+   * Paged progress readout (DMD pass): shown when the player holds both
+   * flippers ~2 s in play. Each page is [line1, line2?].
+   */
+  statusReport?(): string[][];
+  /**
+   * Multiplier on the sling kick impulse right now (differentiation pass;
+   * e.g. Small Hours' TUNED monitors). Absent hook or 1 = stock kick. Keep
+   * it modest (~0.8–1.3): the sling geometry was trap-proofed at stock
+   * strength, and soak only covers the values a table actually returns.
+   */
+  slingBoost?(): number;
   /** A rotating disc's spin rate, signed rad/s (M12; default 0 = parked). */
   discSpin?(id: string): number;
 }

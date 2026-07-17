@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- THE SUMP DMD scene: WATER LEVEL — the gauge needle climbs past the graduations and quivers at the top. Level advances; the table's idle personality.
+       8 frames of 128x32 (style guide 6): #fff=3, #888=2, #666=1, black=0.
+       Art rows 0..22; caption row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#666"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#666"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#666"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#666"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#666"/>
+    <line x1="64" y1="20" x2="37.3" y2="12.7" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(128,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#666"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#666"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#666"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#666"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#666"/>
+    <line x1="64" y1="20" x2="42.8" y2="8.7" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(256,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#666"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#666"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#666"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#666"/>
+    <line x1="64" y1="20" x2="50.4" y2="5.7" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(384,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#666"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#666"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#666"/>
+    <line x1="64" y1="20" x2="59.3" y2="4.2" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(512,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#666"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#666"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#666"/>
+    <line x1="64" y1="20" x2="68.7" y2="4.2" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(640,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#666"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#666"/>
+    <line x1="64" y1="20" x2="77.6" y2="5.7" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(768,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#666"/>
+    <line x1="64" y1="20" x2="85.2" y2="8.7" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+  <g transform="translate(896,0)">
+    <path d="M 30 20 A 34 34 0 0 1 98 20" fill="none" stroke="#888" stroke-width="1.2"/>
+    <circle cx="33.7" cy="11.4" r="1" fill="#fff"/>
+    <circle cx="43.2" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="56.6" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="71.4" cy="1.5" r="1" fill="#fff"/>
+    <circle cx="84.8" cy="5.0" r="1" fill="#fff"/>
+    <circle cx="94.3" cy="11.4" r="1" fill="#fff"/>
+    <line x1="64" y1="20" x2="89.4" y2="12.7" stroke="#fff" stroke-width="1.4"/>
+    <circle cx="64" cy="20" r="2" fill="#888"/>
+  </g>
+</svg>

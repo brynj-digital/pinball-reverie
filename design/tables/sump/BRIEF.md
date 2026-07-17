@@ -1,9 +1,39 @@
 # The Sump — Table 6 design brief
 
-**Status: concept (2026-07-16), not yet scheduled.** Table id: `sump`.
-Planned engine milestone: **M13 (lower playfield — a second flipper pair
-and a table that continues below the drain line)**. See
-`docs/plans/table-differentiation-plan.md` for sequencing.
+**Status: v1 built (2026-07-17).** Table id: `sump`. Engine milestone
+**M13 shipped with it**: `TableGeometry.flippers.mini` (a second full
+pair on the main left/right actions, `anchor-flipper-mini-*`), and the
+per-table envelope proven at 575 × 1250 (STYLE-GUIDE §3 amended). Deltas
+from the concept, found during clearance-solving and simcheck/soak:
+
+- **The chute is OFFSET, not centred, and there is no deflector.** The
+  concept's centred throat dropped every descent dead-centre through the
+  mini tip gap (sump play lasted zero seconds). Three roof-and-shed
+  fixes each produced a cap-corner cradle at the delivery point (all
+  simcheck-found); the shape that has nowhere to pocket is a chute that
+  funnels down-LEFT so descents drop from the mouth (x 160–232) straight
+  onto the left mini bat. A short **mouth jamb** sheds right-hugging
+  descents (the diagonal wall and the open blade both lean them right)
+  back onto the bat, clear of the tip gap.
+- **Gate-shut is one continuous slide.** The shut blade runs from the
+  chute's left wall to the landing-shelf root (sealed end-to-end); a
+  shut ball rides blade → shelf → right void → true drain in a single
+  28° slide. The first two-piece wall+shelf corner cradled a ball in
+  its V; a 6.6° shelf was too shallow to shed at all (planck static
+  friction holds it) — the shelf now runs steep from the jamb root past
+  the chamber wall.
+- **The valve manifold hangs SEALED under the shelf** (parallel, ~10 mm)
+  — an open gap between the two converging faces was a wedge band.
+- **Both chamber shoulders are shed-walled**; the sub-27 mm slots between
+  caps pass nothing, and every trap drop in the new bottom third
+  (throat seams, shed ridges, voids, mouth, shelf) drains clean in the
+  suite.
+- Suite: 21 sump checks green (settle/orbit/gate-both-ways/mini-flipper
+  valve reach/return ride + relight/8 trap drops/level/skill); the
+  return ride carries the ball to y 0.61 (the left inlane) and the
+  relit gate is proven by the loose ball's second descent.
+
+See `docs/plans/table-differentiation-plan.md` for the plan context.
 
 **Premise:** the storm-drain junction under the same city, on the same
 night. Brick culverts, iron ladders, gauge dials, torch beams on wet

@@ -110,6 +110,7 @@ export class SmallHoursLogic implements TableLogic {
   private spins = 0;
   private tuned = false;
   private boosts = 0;
+  private skillUsed = false;
   // aerial run
   private boarded = false;
   // phone ladder
@@ -131,6 +132,8 @@ export class SmallHoursLogic implements TableLogic {
   // outlanes
   private generatorLit = false;
   private sidedoorLit = false;
+  private onAirStartTotal = 0;
+  private chorusStartTotal = 0;
   // request show video mode
   private rsActive = false;
   private rsStart = 0;
@@ -202,18 +205,37 @@ export class SmallHoursLogic implements TableLogic {
       this.onAirWasActive = false;
       if (!this.chorusActive) this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "onairEnd" });
-      this.ctx.push(new MessageScene([["AND THAT IS THE SHOW", "STAY TUNED"]], 1.4), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["AND THAT IS THE SHOW", "STAY TUNED"],
+            ["ON AIR TOTAL", fmtScore(this.ctx.scoring.total - this.onAirStartTotal)],
+          ],
+          1.4,
+        ),
+        2,
+      );
       this.checkChorusReady();
     }
     if (this.chorusWasActive && !this.chorusActive) {
       this.chorusWasActive = false;
       this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "chorusEnd" });
-      this.ctx.push(new MessageScene([["THE CITY WOKE", "WITH THE RADIO ON"]], 1.6), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["THE CITY WOKE", "WITH THE RADIO ON"],
+            ["DAWN CHORUS TOTAL", fmtScore(this.ctx.scoring.total - this.chorusStartTotal)],
+          ],
+          1.6,
+        ),
+        2,
+      );
     }
   }
 
   endBall(): void {
+    this.skillUsed = false;
     this.sweepStep = 0;
     this.lastSweepAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -327,6 +349,23 @@ export class SmallHoursLogic implements TableLogic {
       this.sidedoorLit = false;
       this.ctx.push(new MessageScene([["THE SIDE DOOR", "DOWN THE BACK STAIRS"]], 1.2), 2);
     }
+  }
+
+  /** While TUNED the studio monitors are up: sling kicks run hotter. */
+  slingBoost(): number {
+    return this.tuned ? rules.dial.slingBoost : 1;
+  }
+
+  /** NIGHT OWLS: soft plunge peaking in the lane band. Once per ball. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "nightowls" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "NIGHT OWLS");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["NIGHT OWLS", fmtScore(points)]], 1.4, true), 2);
   }
 
   /** A completed Aerial Run ride: SIGNAL, or the tuned SIGNAL BOOST. */
@@ -492,6 +531,7 @@ export class SmallHoursLogic implements TableLogic {
   private startOnAir(): void {
     this.callers = 0;
     this.onAirs++;
+    this.onAirStartTotal = this.ctx.scoring.total;
     this.onAirUntil = this.now + rules.onAir.durationS;
     this.onAirWasActive = true;
     this.lastJackpotShot = null;
@@ -537,6 +577,7 @@ export class SmallHoursLogic implements TableLogic {
     this.dawn = false;
     this.onAirs = 0;
     this.boosts = 0;
+    this.chorusStartTotal = this.ctx.scoring.total;
     this.chorusUntil = this.now + rules.dawnChorus.durationS;
     this.chorusWasActive = true;
     this.lastJackpotShot = null;
@@ -661,5 +702,33 @@ export class SmallHoursLogic implements TableLogic {
     } else {
       this.ctx.push(new MessageScene([[`${this.rsCleared} REQUESTS`, "PLAYED RIGHT"]], 1.3), 3);
     }
+  }
+
+  /** Live ticker for the score readout (DMD pass). */
+  dmdStatus(): string | undefined {
+    if (this.chorusActive) return `DAWN CHORUS ${Math.ceil(this.chorusUntil - this.now)}`;
+    if (this.chorusReady) return "START AT THE PHONE";
+    if (this.onAirActive) return `ON AIR ${Math.ceil(this.onAirUntil - this.now)}`;
+    const letters = ["W", "A", "V", "E"].map((c, i) => (this.litLanes.has(String(i + 1)) ? c : ".")).join("");
+    return `${letters}  CALLERS ${this.callers}/${rules.onAir.callersRequired}`;
+  }
+
+  /** Both-flipper progress readout (DMD pass). */
+  statusReport(): string[][] {
+    const missing =
+      `${this.dawn ? "" : "5 AM "}${this.onAirs >= 1 ? "" : "ON AIR "}${this.boosts >= 1 ? "" : "BOOST"}`.trim();
+    return [
+      [
+        `THE CLOCK  ${this.hour === 0 ? "MIDNIGHT" : rules.clock.hours[this.hour - 1]}`,
+        `MULTIPLIER X${this.ctx.scoring.multiplier}`,
+      ],
+      [
+        `CALLERS ${this.callers} OF ${rules.onAir.callersRequired}`,
+        this.callerLit ? "CALLER IS LIT" : "DROP THE FADERS",
+      ],
+      this.chorusReady
+        ? ["THE SKY IS PALING", "START AT THE PHONE"]
+        : ["FOR THE DAWN CHORUS", missing || "READY SOON"],
+    ];
   }
 }

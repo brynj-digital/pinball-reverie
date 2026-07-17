@@ -33,36 +33,47 @@ const GEOMETRY: TableGeometry = {
     { id: "2", x: 0.272, y: 0.232, r: 0.028 },
     { id: "3", x: 0.2, y: 0.345, r: 0.028 },
   ],
-  /** Net rigs above the inlanes; hypotenuse is the kicking face. */
+  /**
+   * PRESSURE SLINGS (differentiation pass): the hull flexing under depth —
+   * longer, lower-angled net rigs with a flatter, harder kick than the
+   * lineup's shared set (this is the first table off the copy-paste kit,
+   * STYLE-GUIDE §4). Grown DOWN and OUT only — the top edge stays at the
+   * shared y 0.72: raising it 15 mm clipped the winch habitrail's landing
+   * path (simcheck: the drop-off stopped reaching the left inlane).
+   * Hypotenuse is the kicking face.
+   */
   slings: [
     {
       id: "left",
       verts: [
         { x: 0.097, y: 0.72 },
-        { x: 0.147, y: 0.805 },
-        { x: 0.097, y: 0.805 },
+        { x: 0.152, y: 0.81 },
+        { x: 0.097, y: 0.81 },
       ],
-      kick: { x: 0.848, y: -0.53 },
+      kick: { x: 0.91, y: -0.415 },
     },
     {
       id: "right",
       verts: [
         { x: 0.423, y: 0.72 },
-        { x: 0.423, y: 0.805 },
-        { x: 0.373, y: 0.805 },
+        { x: 0.423, y: 0.81 },
+        { x: 0.368, y: 0.81 },
       ],
-      kick: { x: -0.848, y: -0.53 },
+      kick: { x: -0.91, y: -0.415 },
     },
   ],
   /**
-   * The airlock: three hatch-bolt drop targets recessed into the orbit
+   * The airlock: FOUR hatch-bolt drop targets (L-O-C-K, differentiation
+   * pass — grown from the lineup-standard three) recessed into the orbit
    * wall's field face (left side), faces pointing right — the right
-   * flipper's cross-field shot. Housing brackets seal the recess.
+   * flipper's cross-field shot. Housing brackets seal the recess; the bank
+   * grew upward (the ground below y 555 is the orbit channel's exit).
    */
   dropTargets: {
     hw: 0.004,
     hh: 0.018,
     targets: [
+      { id: "4", x: 0.09, y: 0.401 },
       { id: "1", x: 0.09, y: 0.443 },
       { id: "2", x: 0.09, y: 0.485 },
       { id: "3", x: 0.09, y: 0.527 },
@@ -130,6 +141,10 @@ export const TIDEBREAKER_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new TidebreakerLogic(ctx),
+  attractTips: [
+    ["D-I-V-E DEEPENS", "THE GAUGE"],
+    ["HAUL THE BELL", "WAKE LEVIATHAN"],
+  ],
   highScoreKey: "pinball-highscores-tidebreaker-v1",
   // dark verdigris field walls (abyss-300/500 blend); habitrail stays chrome;
   // ramp glass is cyan-400 abyssal blue, not the dayglo default (STYLE-GUIDE §2)

@@ -101,6 +101,7 @@ export class NightMailLogic implements TableLogic {
   private lastExpressAt = -Infinity;
   // timetable
   private litLanes = new Set<string>();
+  private skillUsed = false;
   private station = 0;
   private terminus = false;
   // points
@@ -132,6 +133,8 @@ export class NightMailLogic implements TableLogic {
   private sbRequired: ("left" | "right")[] = [];
   private sbResults: (boolean | null)[] = [];
   private sbCleared = 0;
+  private departureStartTotal = 0;
+  private connectionStartTotal = 0;
 
   constructor(private ctx: TableLogicCtx) {
     ctx.bus.on("sensor", ({ kind, id }) => {
@@ -180,18 +183,37 @@ export class NightMailLogic implements TableLogic {
       this.departureWasActive = false;
       if (!this.connectionActive) this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "departureEnd" });
-      this.ctx.push(new MessageScene([["RIGHT AWAY", "DRIVER"]], 1.4), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["RIGHT AWAY", "DRIVER"],
+            ["DEPARTURE TOTAL", fmtScore(this.ctx.scoring.total - this.departureStartTotal)],
+          ],
+          1.4,
+        ),
+        2,
+      );
       this.checkConnectionReady();
     }
     if (this.connectionWasActive && !this.connectionActive) {
       this.connectionWasActive = false;
       this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "connectionEnd" });
-      this.ctx.push(new MessageScene([["THE MAILS", "GO THROUGH"]], 1.6), 2);
+      this.ctx.push(
+        new MessageScene(
+          [
+            ["THE MAILS", "GO THROUGH"],
+            ["CONNECTION TOTAL", fmtScore(this.ctx.scoring.total - this.connectionStartTotal)],
+          ],
+          1.6,
+        ),
+        2,
+      );
     }
   }
 
   endBall(): void {
+    this.skillUsed = false;
     this.expressStep = 0;
     this.lastExpressAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -231,6 +253,10 @@ export class NightMailLogic implements TableLogic {
 
   /** M-A-I-L lanes: all four advance the timetable + light the banker. */
   onRollover(id: string): void {
+    this.spotLetter(id);
+  }
+
+  private spotLetter(id: string): void {
     this.litLanes.add(id);
     if (this.litLanes.size === 4) {
       this.litLanes.clear();
@@ -248,6 +274,21 @@ export class NightMailLogic implements TableLogic {
       );
       this.checkConnectionReady();
     }
+  }
+
+  /** THE SIGNAL: soft plunge peaking in the lane band. Once per ball. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "signal" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "THE SIGNAL");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["THE SIGNAL", fmtScore(points)]], 1.4, true), 2);
+    // spot one uncollected timetable letter (shared completion logic)
+    const unlit = ["1", "2", "3", "4"].find((m) => !this.litLanes.has(m));
+    if (unlit) this.spotLetter(unlit);
   }
 
   /** Classic lane change: flippers rotate the collected letters. */
@@ -480,6 +521,7 @@ export class NightMailLogic implements TableLogic {
   private startDeparture(): void {
     this.wagons = 0;
     this.departures++;
+    this.departureStartTotal = this.ctx.scoring.total;
     this.departureUntil = this.now + rules.departure.durationS;
     this.departureWasActive = true;
     // the full consist departs (M12 3-ball multiball): the physically
@@ -528,6 +570,7 @@ export class NightMailLogic implements TableLogic {
     this.terminus = false;
     this.departures = 0;
     this.snags = 0;
+    this.connectionStartTotal = this.ctx.scoring.total;
     this.connectionUntil = this.now + rules.connection.durationS;
     this.connectionWasActive = true;
     this.ctx.scoring.eclipseFactor = rules.connection.scoreFactor;
@@ -619,5 +662,33 @@ export class NightMailLogic implements TableLogic {
         3,
       );
     }
+  }
+
+  /** Live ticker for the score readout (DMD pass). */
+  dmdStatus(): string | undefined {
+    if (this.connectionActive) return `CONNECTION ${Math.ceil(this.connectionUntil - this.now)}`;
+    if (this.connectionReady) return "SHOOT THE SORTING";
+    if (this.departureActive) return `DEPARTURE ${Math.ceil(this.departureUntil - this.now)}`;
+    const letters = ["M", "A", "I", "L"].map((c, i) => (this.litLanes.has(String(i + 1)) ? c : ".")).join("");
+    return `${letters}  WAGONS ${this.wagons}/${rules.departure.wagonsRequired}`;
+  }
+
+  /** Both-flipper progress readout (DMD pass). */
+  statusReport(): string[][] {
+    const missing =
+      `${this.terminus ? "" : "TERMINUS "}${this.departures >= 1 ? "" : "DEPART "}${this.snags >= 1 ? "" : "SNAG"}`.trim();
+    return [
+      [
+        `STATION ${this.station} OF ${rules.timetable.stations.length}`,
+        `MULTIPLIER X${this.ctx.scoring.multiplier}`,
+      ],
+      [
+        `WAGONS ${this.wagons} OF ${rules.departure.wagonsRequired}`,
+        this.lockLit ? "THE LOCK IS LIT" : "HIT THE GANTRY",
+      ],
+      this.connectionReady
+        ? ["THE DAWN TRAIN WAITS", "SHOOT THE SORTING"]
+        : ["FOR THE CONNECTION", missing || "READY SOON"],
+    ];
   }
 }

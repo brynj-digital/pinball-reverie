@@ -1,6 +1,28 @@
 import { FONT_5X7, GLYPH_W } from "./font5x7";
 
 /**
+ * Tall numerals for the score readout (DMD pass, 2026-07-17): 8×12 digits
+ * plus a narrow comma, the double-height look of real 90s displays. Rows
+ * are bit patterns, MSB = left column.
+ */
+const BIG_DIGITS: Record<string, number[]> = {
+  "0": [0x3c, 0x66, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0x66, 0x3c],
+  "1": [0x18, 0x38, 0x78, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x18, 0x7e],
+  "2": [0x3c, 0x66, 0xc3, 0x03, 0x03, 0x06, 0x0c, 0x18, 0x30, 0x60, 0xc0, 0xff],
+  "3": [0x3c, 0x66, 0xc3, 0x03, 0x06, 0x1c, 0x1c, 0x06, 0x03, 0xc3, 0x66, 0x3c],
+  "4": [0x06, 0x0e, 0x1e, 0x36, 0x66, 0xc6, 0xc6, 0xff, 0x06, 0x06, 0x06, 0x06],
+  "5": [0xff, 0xc0, 0xc0, 0xc0, 0xfc, 0xe6, 0x03, 0x03, 0x03, 0xc3, 0x66, 0x3c],
+  "6": [0x1c, 0x30, 0x60, 0xc0, 0xfc, 0xe6, 0xc3, 0xc3, 0xc3, 0xc3, 0x66, 0x3c],
+  "7": [0xff, 0x03, 0x03, 0x06, 0x06, 0x0c, 0x0c, 0x18, 0x18, 0x30, 0x30, 0x30],
+  "8": [0x3c, 0x66, 0xc3, 0xc3, 0x66, 0x3c, 0x3c, 0x66, 0xc3, 0xc3, 0x66, 0x3c],
+  "9": [0x3c, 0x66, 0xc3, 0xc3, 0xc3, 0x67, 0x3f, 0x03, 0x03, 0x06, 0x0c, 0x38],
+};
+const BIG_COMMA = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0x60, 0x60, 0xc0];
+const BIG_W = 8;
+const BIG_COMMA_W = 4;
+export const BIG_H = 12;
+
+/**
  * The LED dot-matrix surface (plan §5b): a 128×32 grid of 4-level amber dots
  * drawn to its own offscreen canvas. Renderer-agnostic — the 2D renderer
  * blits the canvas; a 3D renderer would map it onto the cabinet mesh.
@@ -87,6 +109,46 @@ export class DotMatrix {
           if (glyph[r] & (1 << (4 - c))) this.set(x + c, y + r, level);
       x += GLYPH_W;
     }
+  }
+
+  /** Width (dots) of a big-digit string (digits + commas only). */
+  static bigWidth(str: string): number {
+    let w = 0;
+    for (const ch of str) w += (ch === "," ? BIG_COMMA_W : BIG_W) + 1;
+    return w - 1;
+  }
+
+  /** Tall 8×12 numerals (score readout); non-digit glyphs render as commas
+   * only — callers format with fmtScore. */
+  bigText(str: string, x: number, y: number, level: number): void {
+    for (const ch of str) {
+      const glyph = ch === "," ? BIG_COMMA : BIG_DIGITS[ch];
+      const w = ch === "," ? BIG_COMMA_W : BIG_W;
+      if (glyph)
+        for (let r = 0; r < BIG_H; r++)
+          for (let c = 0; c < 8; c++)
+            if (glyph[r] & (1 << (7 - c))) this.set(x + c, y + r, level);
+      x += w + 1;
+    }
+  }
+
+  centerBigText(str: string, y: number, level: number): void {
+    this.bigText(str, Math.max(0, Math.floor((DMD_COLS - DotMatrix.bigWidth(str)) / 2)), y, level);
+  }
+
+  /** Snapshot of the current grid (DMD pass: transition wipes). */
+  copyGrid(): Uint8Array {
+    return this.grid.slice();
+  }
+
+  /** Restore `old` for every column >= fromCol (the un-wiped remainder). */
+  overlayFrom(old: Uint8Array, fromCol: number): void {
+    if (fromCol >= DMD_COLS) return;
+    for (let y = 0; y < DMD_ROWS; y++) {
+      const row = y * DMD_COLS;
+      for (let x = Math.max(0, fromCol); x < DMD_COLS; x++) this.grid[row + x] = old[row + x];
+    }
+    this.dirty = true;
   }
 
   centerText(str: string, y: number, level: number): void {

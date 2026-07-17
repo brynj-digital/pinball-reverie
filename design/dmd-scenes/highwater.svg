@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- THE SUMP DMD scene: HIGH WATER — the cross-section fills to the brim, both needles past red, then the pumps win and it drains. Wizard start/end; attract closer.
+       8 frames of 128x32 (style guide 6): #fff=3, #888=2, #666=1, black=0.
+       Art rows 0..22; caption row 24. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="23.9" y2="3.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="91.9" y2="3.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+  <g transform="translate(128,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="28.9" y2="2.0" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="96.9" y2="2.0" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 19 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+  <g transform="translate(256,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="34.3" y2="2.6" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="102.3" y2="2.6" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 14 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+  <g transform="translate(384,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="38.4" y2="4.7" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="106.4" y2="4.7" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 9 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+  <g transform="translate(512,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="38.9" y2="5.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="106.9" y2="5.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+  <g transform="translate(640,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="38.9" y2="5.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="106.9" y2="5.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 6 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+  <g transform="translate(768,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="32.2" y2="2.1" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="100.2" y2="2.1" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 16 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+  <g transform="translate(896,0)">
+    <path d="M 18 8 A 12 12 0 0 1 42 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="8" x2="23.9" y2="3.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 86 8 A 12 12 0 0 1 110 8" fill="none" stroke="#666" stroke-width="1"/>
+    <line x1="98" y1="8" x2="91.9" y2="3.3" stroke="#fff" stroke-width="1.2"/>
+    <path d="M 0 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 16 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 32 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 48 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 64 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 80 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 96 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+    <path d="M 112 24 q 4 -2 8 0 t 8 0" fill="none" stroke="#888" stroke-width="1"/>
+  </g>
+</svg>

@@ -22,6 +22,7 @@ import { DotMatrix } from "../render/dmd/DotMatrix";
 import { DmdQueue } from "../render/dmd/DmdQueue";
 import {
   AttractScene,
+  type DmdScene,
   BakedDmdScene,
   InitialsScene,
   MatchScene,
@@ -29,6 +30,8 @@ import {
   ScoreScene,
   SequenceScene,
   fmtScore,
+  BonusScene,
+  FireworksScene,
 } from "../render/dmd/DmdScene";
 import { SettingsPanel } from "../ui/SettingsPanel";
 import { PauseOverlay } from "../ui/PauseOverlay";
@@ -43,6 +46,7 @@ import {
 import { Haptics, saveHapticsPref } from "../ui/Haptics";
 import { TableSelect } from "../ui/TableSelect";
 import { TABLE_ORDER, saveTableId } from "../table/specs";
+import { inShooterLane, onPlayfieldSide } from "../table/geometry";
 import { bakeDmdFrames } from "../render/dmd/bake";
 import { AudioEngine } from "../audio/AudioEngine";
 import { ChipMusic } from "../audio/ChipMusic";
@@ -192,6 +196,10 @@ export class Game {
   private nextBallId = 1;
   private spawnQueue: { at: { x: number; y: number }; v: { x: number; y: number }; delay: number }[] = [];
   private flippers: Flipper[];
+  private upperFlipper?: Flipper;
+  private miniFlippers: Flipper[] = [];
+  private statusHeldS = 0;
+  private statusShown = false;
   private bumpers: Bumper[];
   private slings: Slingshot[];
   private targetBank: DropTargetBank;
@@ -305,11 +313,23 @@ export class Game {
       new Flipper(this.physics.world, this.table.body, "left", this.tuning, g.flippers.left),
       new Flipper(this.physics.world, this.table.body, "right", this.tuning, g.flippers.right),
     ];
-    // optional upper (third) flipper — Midway's mallet; index 2 by convention
-    if (g.flippers.upper)
-      this.flippers.push(
-        new Flipper(this.physics.world, this.table.body, g.flippers.upper.side, this.tuning, g.flippers.upper),
+    // optional upper (third) flipper — Midway's mallet
+    if (g.flippers.upper) {
+      this.upperFlipper = new Flipper(
+        this.physics.world, this.table.body, g.flippers.upper.side, this.tuning, g.flippers.upper,
+        g.flippers.upper.z,
       );
+      this.flippers.push(this.upperFlipper);
+    }
+    // M13: optional mini pair (the Sump's chamber) — same hardware, driven
+    // by the main left/right actions (one button works both storeys)
+    if (g.flippers.mini) {
+      this.miniFlippers = [
+        new Flipper(this.physics.world, this.table.body, "left", this.tuning, g.flippers.mini.left),
+        new Flipper(this.physics.world, this.table.body, "right", this.tuning, g.flippers.mini.right),
+      ];
+      this.flippers.push(...this.miniFlippers);
+    }
     this.prevFlipAngles = this.flippers.map((f) => f.body.getAngle());
     this.bumpers = g.bumpers.map((def) => new Bumper(this.physics.world, def));
     this.slings = g.slings.map((def) => new Slingshot(this.physics.world, def));
@@ -384,6 +404,11 @@ export class Game {
             delay: 0.15 + i * 0.5,
           });
       },
+      saverActive: () =>
+        this.phase === "play" &&
+        this.ballStarted &&
+        this.gameTime < this.saverUntil &&
+        !this.tilted,
       lockBall: (kickerId, berth) => {
         if (this.phase !== "play") return false;
         const k = this.kickers.find((k) => k.def.id === kickerId);
@@ -464,6 +489,7 @@ export class Game {
       canvas.parentElement ?? document.body,
       spec.geometry.flippers.upper != null,
       this.haptics,
+      spec.geometry.table.plungerSide ?? "right",
     );
     this.touch.setEnabled(resolveTouchEnabled(this.touchPref));
     this.input.onReset(() => {
@@ -601,12 +627,21 @@ export class Game {
     };
     document.body.appendChild(this.gearBtn);
 
-    this.scoreScene = new ScoreScene(() => ({
-      score: this.scoring.total,
-      ball: this.ballNum,
-      mult: this.scoring.multiplier,
-    }));
-    this.attractScene = new AttractScene(() => this.highScores.top, spec.name, TABLE_ORDER.length);
+    this.scoreScene = new ScoreScene(
+      () => ({
+        score: this.scoring.total,
+        ball: this.ballNum,
+        mult: this.scoring.multiplier,
+      }),
+      () => this.logic.dmdStatus?.(),
+    );
+    this.attractScene = new AttractScene(
+      () => this.highScores.list,
+      spec.name,
+      TABLE_ORDER.length,
+      spec.attractTips ?? [],
+      () => [...this.baked.values()],
+    );
     this.initialsScene = new InitialsScene(() => ({
       letters: this.initialsLetters,
       slot: this.initialsSlot,
@@ -655,6 +690,11 @@ export class Game {
           this.audio.sfx("scoop");
           this.logic.onCapture?.(id);
         }
+      } else if (kind === "skill" && id) {
+        if (this.phase === "play" && !this.tilted) {
+          const v = sBall.body.getLinearVelocity();
+          this.logic.onSkillShot?.(id, Math.hypot(v.x, v.y));
+        }
       } else if (kind === "rollover" && id) {
         this.rolloverLit.set(id, 1);
         this.audio.sfx("rollover");
@@ -685,7 +725,8 @@ export class Game {
         this.audio.sfx("bumper");
       } else if (kind === "sling") {
         const sl = this.slings.find((s) => s.def.id === id);
-        if (sl?.kick(hBall, this.physics, this.tuning.slingKick)) {
+        const slingBoost = this.logic.slingBoost?.() ?? 1;
+        if (sl?.kick(hBall, this.physics, this.tuning.slingKick * slingBoost)) {
           const c = sl.def.verts.reduce(
             (a, p) => ({ x: a.x + p.x / 3, y: a.y + p.y / 3 }),
             { x: 0, y: 0 },
@@ -835,7 +876,7 @@ export class Game {
     const flipU = flippersLive && (s.upper || tapU);
     if (flipL && !this.prevFlip.left) this.audio.sfx("flipper");
     if (flipR && !this.prevFlip.right) this.audio.sfx("flipper");
-    if (this.flippers[2] && flipU && !this.prevFlip.upper) this.audio.sfx("flipper");
+    if (this.upperFlipper && flipU && !this.prevFlip.upper) this.audio.sfx("flipper");
     // lane change (flippersLive already excludes tilt): main flippers only —
     // the upper defaults to sharing the right keys, so it must not re-fire
     if (this.phase === "play") {
@@ -845,9 +886,24 @@ export class Game {
     this.prevFlip.left = flipL;
     this.prevFlip.right = flipR;
     this.prevFlip.upper = flipU;
+    // status report (DMD pass): hold both flippers ~1.8 s in play for the
+    // classic paged progress readout
+    if (this.phase === "play" && flipL && flipR && !this.tilted) {
+      this.statusHeldS += dt;
+      if (this.statusHeldS >= 1.8 && !this.statusShown) {
+        this.statusShown = true;
+        const pages = this.logic.statusReport?.();
+        if (pages?.length) this.dmdQueue.push(new MessageScene(pages, 1.8), 1);
+      }
+    } else {
+      this.statusHeldS = 0;
+      this.statusShown = false;
+    }
     this.flippers[0].update(flipL, t);
     this.flippers[1].update(flipR, t);
-    this.flippers[2]?.update(flipU, t);
+    this.upperFlipper?.update(flipU, t);
+    // M13 mini pair: keyed by side off the MAIN actions
+    for (const f of this.miniFlippers) f.update(f.side === "left" ? flipL : flipR, t);
     if (this.phase === "play") this.updatePlunger(dt, s.plunger, t);
     else if (this.phase === "attract" && s.plunger) {
       if (!browsing) this.startGame();
@@ -976,10 +1032,10 @@ export class Game {
     let followY = this.prevBall.y + (this.ball.body.getPosition().y - this.prevBall.y) * a;
     if (this.extraBalls.length > 0) {
       const cand: number[] = [];
-      if (this.ball.body.getPosition().x < g.table.laneWallX) cand.push(followY);
+      if (onPlayfieldSide(g.table, this.ball.body.getPosition().x)) cand.push(followY);
       for (let i = 0; i < this.extraBalls.length; i++) {
         const p = this.extraBalls[i].body.getPosition();
-        if (p.x < g.table.laneWallX)
+        if (onPlayfieldSide(g.table, p.x))
           cand.push(this.prevExtras[i].y + (p.y - this.prevExtras[i].y) * a);
       }
       if (cand.length > 0) followY = Math.max(...cand);
@@ -994,7 +1050,7 @@ export class Game {
   private ballInLane(): boolean {
     const g = this.spec.geometry.table;
     const p = this.ball.body.getPosition();
-    return p.x > g.laneWallX && p.y > g.laneTopY;
+    return inShooterLane(g, p.x, p.y);
   }
 
   private updatePlunger(dt: number, held: boolean, t: Tuning): void {
@@ -1247,11 +1303,16 @@ export class Game {
     this.saverUntil = -Infinity;
     // TILT forfeits the end-of-ball bonus (real-machine rule)
     let bonus = 0;
+    const bonusUnits = this.scoring.bonusUnits;
+    const bonusMult = this.scoring.multiplier;
     if (wasTilted) this.scoring.forfeitBonus();
     else bonus = this.scoring.collectBonus();
     this.logic.endBall();
     this.scoring.multiplier = 1;
-    const bonusPage: string[][] = bonus > 0 ? [["BONUS", fmtScore(bonus)]] : [];
+    // the classic tally ceremony (DMD pass): units tick up with pips
+    const bonusScene = () =>
+      new BonusScene(bonusUnits, bonusMult, bonus, () => this.audio.sfx("rollover"));
+    const bonusDur = bonus > 0 ? BonusScene.duration(bonusUnits, bonusMult) : 0;
     if (this.ballNum >= BALLS_PER_GAME) {
       this.music.stop();
       this.clearLocks(); // no wagons parked through attract mode
@@ -1267,14 +1328,16 @@ export class Game {
         this.input.setTextCapture(true);
         this.dmdQueue.clear();
         this.dmdQueue.setIdle(this.initialsScene);
-        if (bonusPage.length) this.dmdQueue.push(new MessageScene(bonusPage, 1.8), 2);
+        const celebration: DmdScene[] = bonus > 0 ? [bonusScene()] : [];
+        celebration.push(new FireworksScene("NEW HIGH SCORE"));
+        this.dmdQueue.push(new SequenceScene(celebration), 2);
       } else {
         this.phase = "gameOver";
-        const parts = [];
+        const parts: DmdScene[] = [];
         let dur = 0.3;
-        if (bonusPage.length) {
-          parts.push(new MessageScene(bonusPage, 1.8));
-          dur += 1.8;
+        if (bonus > 0) {
+          parts.push(bonusScene());
+          dur += bonusDur;
         }
         const match = this.makeMatchScene();
         parts.push(match.scene);
@@ -1296,7 +1359,12 @@ export class Game {
     } else {
       this.ballNum++;
       this.respawn();
-      this.dmdQueue.push(new MessageScene([...bonusPage, [`BALL ${this.ballNum}`]], 1.6), 2);
+      this.dmdQueue.push(
+        bonus > 0
+          ? new SequenceScene([bonusScene(), new MessageScene([[`BALL ${this.ballNum}`]], 1.4)])
+          : new MessageScene([[`BALL ${this.ballNum}`]], 1.6),
+        2,
+      );
     }
   }
 

@@ -438,3 +438,212 @@ export const SMALLHOURS_SONG: Song = {
   bpm: 100,
   arrangement: [V_VERSE, V_CHORUS, V_VERSE, V_CHORUS, V_CALLER, V_TRANSMITTER, V_CHORUS],
 };
+
+// ────────────────────────── THE SUMP — D minor, 92 bpm ──────────────────────────
+// "Under the City": the lineup's most reverberant song — dub space, long
+// echoing gaps, a pulse bass like distant pumps. The verse answers itself
+// (phrase, silence, the echo of the phrase); the chorus is the floodgate
+// open and the water moving; the breather is drips in a big dark room; the
+// middle eight is the pump hall hammering. Straight time throughout.
+
+/** Deep water: a sparse triangle line that leaves room for its own echo. */
+// prettier-ignore
+const S_VERSE: Section = {
+  chords: ["Dm", "Bb", "F", "C", "Dm", "Bb", "Gm", "C"],
+  lead: [
+    74, -1, -1, -1,  0,  0, 77, -1,    0,  0,  0,  0, 74, -1,  0,  0,
+     0,  0, 72, -1,  0,  0,  0,  0,   69, -1, -1, -1,  0,  0,  0,  0,
+    74, -1, -1, -1,  0,  0, 77, -1,    0,  0, 81, -1, 77, -1,  0,  0,
+     0,  0, 74, -1, 72, -1,  0,  0,   67, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.2, crash: false, swing: 0,
+};
+
+/** The gate is open: the water moving, the pulse doubled under it. */
+// prettier-ignore
+const S_CHORUS: Section = {
+  chords: ["Dm", "Gm", "Bb", "C", "Dm", "Gm", "C", "Dm"],
+  lead: [
+    74, -1, 77, -1, 74, -1, 72, -1,   70, -1, -1, -1, 74, -1, 70, -1,
+    77, -1, -1, -1, 74, -1, 77, -1,   79, -1, 77, -1, 74, -1, 72, -1,
+    74, -1, 77, -1, 81, -1, 77, -1,   82, -1, -1, -1, 79, -1, 77, -1,
+    79, -1, 77, -1, 74, -1, 72, -1,   74, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "roll",
+  arp: true, leadVol: 0.22, crash: false, swing: 0,
+};
+
+/** The breather: drips in the dark — near-silence, plinks off the beat. */
+// prettier-ignore
+const S_DRIPS: Section = {
+  chords: ["Dm", "Dm", "Bb", "Bb", "Dm", "Dm", "C", "C"],
+  lead: [
+     0,  0,  0,  0, 86, -1,  0,  0,    0,  0,  0,  0,  0,  0, 81, -1,
+     0,  0,  0,  0,  0,  0,  0,  0,   89, -1,  0,  0,  0,  0,  0,  0,
+     0,  0, 86, -1,  0,  0,  0,  0,    0,  0,  0,  0, 82, -1,  0,  0,
+     0,  0,  0,  0, 81, -1,  0,  0,    0,  0,  0,  0,  0,  0,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.16, crash: false, swing: 0,
+};
+
+/** The pump hall: pistons hammering — the middle eight drives. */
+// prettier-ignore
+const S_PUMPS: Section = {
+  chords: ["Dm", "C", "Bb", "C", "Dm", "C", "Gm", "Am"],
+  lead: [
+    74, 74, -1, 74,  0, 74, 72, -1,   72, 72, -1, 72,  0, 72, 70, -1,
+    70, 70, -1, 70,  0, 70, 72, -1,   72, -1, 74, -1, 76, -1, 77, -1,
+    74, 74, -1, 74,  0, 74, 72, -1,   72, 72, -1, 72,  0, 72, 70, -1,
+    79, -1, 77, -1, 76, -1, 72, -1,   74, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "square", drums: "full", bass: "pump",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/** Form: deep water, the gate, deep water, the gate, drips, pumps, the gate. */
+export const SUMP_SONG: Song = {
+  bpm: 92,
+  arrangement: [S_VERSE, S_CHORUS, S_VERSE, S_CHORUS, S_DRIPS, S_PUMPS, S_CHORUS],
+};
+
+// ────────────────────────── GLASSHOUSE — A minor, 116 bpm ──────────────────────────
+// "Nocturne for the Night Shift": a music-box lead (thin, high, short
+// phrases) over a soft pulse — the waltz the brief asked for, carried as a
+// 3-against-4 cross-rhythm (ChipMusic bars are 16 sixteenths; true 3/4
+// needs a sequencer seam noted as the brief's cut line). The chorus adds a
+// counter-voice like a second moth; the breather is condensation; the
+// middle eight is the swarm running in triplet-feel eighths.
+
+/** The house at night: music-box thirds drifting over a slow pulse. */
+// prettier-ignore
+const G_VERSE: Section = {
+  chords: ["Am", "F", "Dm", "E", "Am", "F", "C", "E"],
+  lead: [
+    81, -1, -1, 84, -1, -1, 81, -1,    0,  0, 76, -1, -1, -1,  0,  0,
+    77, -1, -1, 81, -1, -1, 77, -1,    0,  0, 74, -1, -1, -1,  0,  0,
+    81, -1, -1, 84, -1, -1, 88, -1,   -1, -1, 84, -1, 81, -1,  0,  0,
+    80, -1, -1, 76, -1, -1, 74, -1,   76, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.2, swing: 0, crash: false,
+};
+
+/** In flower: the counter-moth joins, the pulse warms. */
+// prettier-ignore
+const G_CHORUS: Section = {
+  chords: ["Am", "C", "F", "G", "Am", "C", "Dm", "E"],
+  lead: [
+    84, -1, 81, 84, -1, 88, 84, -1,   81, -1, 79, -1, 81, -1,  0,  0,
+    84, -1, 81, 84, -1, 88, 84, -1,   86, -1, 84, -1, 81, -1,  0,  0,
+    88, -1, 86, 88, -1, 91, 88, -1,   86, -1, 84, -1, 81, -1, 79, -1,
+    81, -1, 79, 76, -1, 74, 76, -1,   81, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "bounce",
+  arp: true, leadVol: 0.22, swing: 0, crash: false,
+};
+
+/** Condensation: near-silence, drips off the panes. */
+// prettier-ignore
+const G_DRIPS: Section = {
+  chords: ["Am", "Am", "F", "F", "Dm", "Dm", "E", "E"],
+  lead: [
+     0,  0,  0,  0, 88, -1,  0,  0,    0,  0, 84, -1,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0, 89, -1,    0,  0,  0,  0,  0,  0,  0,  0,
+     0,  0, 86, -1,  0,  0,  0,  0,    0,  0,  0,  0, 81, -1,  0,  0,
+     0,  0,  0,  0,  0,  0, 80, -1,    0,  0,  0,  0,  0,  0,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "bounce",
+  arp: false, leadVol: 0.15, swing: 0, crash: false,
+};
+
+/** The swarm: running sixteenth triplet-feel on the thin pulse. */
+// prettier-ignore
+const G_SWARM: Section = {
+  chords: ["Am", "G", "F", "E", "Am", "G", "F", "E"],
+  lead: [
+    81, 84, 88, 81, 84, 88, 81, 84,   79, 83, 86, 79, 83, 86, 79, 83,
+    77, 81, 84, 77, 81, 84, 77, 81,   76, 80, 83, 76, 80, 83, 80, 83,
+    81, 84, 88, 81, 84, 88, 81, 84,   79, 83, 86, 79, 83, 86, 79, 83,
+    77, 81, 84, 77, 81, 84, 88, -1,   88, -1, 87, -1, 88, -1,  0,  0,
+  ],
+  leadStep: 1, wave: "pulse125", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.22, swing: 0, crash: true,
+};
+
+/** Form: the house, in flower, the house, in flower, drips, swarm, in flower. */
+export const GLASSHOUSE_SONG: Song = {
+  bpm: 116,
+  arrangement: [G_VERSE, G_CHORUS, G_VERSE, G_CHORUS, G_DRIPS, G_SWARM, G_CHORUS],
+};
+
+// ────────────────────────── SUMMIT — A minor, 76 bpm ──────────────────────────
+// "Thin Air": the lineup's slowest, widest song. Long pedal bass, a lead
+// that moves in whole phrases with real silence between them, cold
+// intervals (fifths and fourths). The chorus is the cable car moving — a
+// steady climbing arpeggio under the lead; the breather is wind alone;
+// the middle eight doubles the SUBDIVISION, not the speed. The aurora
+// section is the one warm place in the song.
+
+/** The valley station: fifths in the cold, half the sky. */
+// prettier-ignore
+const A_VERSE: Section = {
+  chords: ["Am", "Em", "F", "C", "Am", "Em", "G", "Am"],
+  lead: [
+    69, -1, -1, -1, 76, -1, -1, -1,    0,  0,  0,  0, 74, -1, -1, -1,
+     0,  0, 72, -1, -1, -1,  0,  0,   69, -1, -1, -1, -1, -1,  0,  0,
+    69, -1, -1, -1, 76, -1, -1, -1,    0,  0, 81, -1, -1, -1, 79, -1,
+     0,  0, 76, -1, -1, -1, 72, -1,   74, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.2, crash: false, swing: 0,
+};
+
+/** The car climbing: a steady rising figure under the wide lead. */
+// prettier-ignore
+const A_CHORUS: Section = {
+  chords: ["Am", "F", "C", "G", "Am", "F", "Dm", "E"],
+  lead: [
+    76, -1, 79, -1, 81, -1, -1, -1,   77, -1, 81, -1, 84, -1, -1, -1,
+    79, -1, 84, -1, 88, -1, -1, -1,   86, -1, 83, -1, 79, -1,  0,  0,
+    76, -1, 79, -1, 81, -1, -1, -1,   77, -1, 81, -1, 84, -1, -1, -1,
+    86, -1, 84, -1, 81, -1, 77, -1,   76, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "half", bass: "roll",
+  arp: true, leadVol: 0.22, crash: false, swing: 0,
+};
+
+/** The breather: wind alone on the ridge — one held tone, then nothing. */
+// prettier-ignore
+const A_WIND: Section = {
+  chords: ["Am", "Am", "Em", "Em", "F", "F", "E", "E"],
+  lead: [
+    81, -1, -1, -1, -1, -1, -1, -1,   -1, -1, -1, -1,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,   76, -1, -1, -1, -1, -1,  0,  0,
+     0,  0,  0,  0, 79, -1, -1, -1,   -1, -1,  0,  0,  0,  0,  0,  0,
+     0,  0,  0,  0,  0,  0,  0,  0,   80, -1, -1, -1, -1, -1, -1, -1,
+  ],
+  leadStep: 2, wave: "triangle", drums: "sparse", bass: "pump",
+  arp: false, leadVol: 0.16, crash: false, swing: 0,
+};
+
+/** The aurora: the only warm chords in the song, still slow. */
+// prettier-ignore
+const A_AURORA: Section = {
+  chords: ["F", "C", "G", "Am", "F", "C", "E", "Am"],
+  lead: [
+    84, -1, 86, -1, 88, -1, 91, -1,   88, -1, 86, -1, 84, -1, 81, -1,
+    84, -1, -1, -1, 88, -1, -1, -1,   86, -1, 84, -1, 81, -1,  0,  0,
+    84, 86, 88, -1, 91, -1, 93, -1,   91, -1, 88, -1, 86, -1, 84, -1,
+    81, -1, 84, -1, 88, -1, 84, -1,   81, -1, -1, -1, -1, -1,  0,  0,
+  ],
+  leadStep: 2, wave: "pulse25", drums: "full", bass: "roll",
+  arp: true, leadVol: 0.24, crash: true, swing: 0,
+};
+
+/** Form: the valley, the climb, the valley, the climb, wind, aurora, the climb. */
+export const SUMMIT_SONG: Song = {
+  bpm: 76,
+  arrangement: [A_VERSE, A_CHORUS, A_VERSE, A_CHORUS, A_WIND, A_AURORA, A_CHORUS],
+};

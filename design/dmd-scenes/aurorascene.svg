@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 32" width="1024" height="32">
+  <!-- SUMMIT DMD scene: AURORA - curtains of light sweep and fold over the ridge. Wizard, looped; attract closer.
+       8 frames of 128x32: #fff=3, #888=2, #666=1, black=0. -->
+  <rect width="1024" height="32" fill="#000"/>
+
+  <g transform="translate(0,0)">
+    <path d="M 12 24 Q 18 12.0 15 8.0" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 6.652755839631389 41 2.6527558396313893" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 7.149021577082458 67 3.1490215770824577" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 12.946474164859492 93 8.946474164859492" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 17.709612443337097 119 13.709612443337097" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(128,0)">
+    <path d="M 12 24 Q 18 7.310713882124659 15 3.3107138821246593" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 6.537103771475838 41 2.537103771475838" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 11.733389035857394 67 7.733389035857394" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 17.22102882999492 93 13.221028829994921" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 17.00308781841624 119 13.00308781841624" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(256,0)">
+    <path d="M 12 24 Q 18 6.149219868079751 15 2.1492198680797507" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 10.531237648257356 41 6.531237648257356" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 16.51833031982751 67 12.518330319827509" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 17.567756568529333 93 13.567756568529333" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 12.532695249225865 119 8.532695249225865" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(384,0)">
+    <path d="M 12 24 Q 18 9.38932034662855 15 5.3893203466285495" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 15.630334646638456 41 11.630334646638456" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 17.904091083755645 67 13.904091083755645" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 13.725810985631334 93 9.725810985631334" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 7.661551255036404 119 3.6615512550364038" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(512,0)">
+    <path d="M 12 24 Q 18 14.593458598792129 15 10.593458598792129" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 17.998298253125796 41 13.998298253125796" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 14.848151046751228 67 10.848151046751228" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 8.585522282955312 93 4.585522282955312" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 6.054261254957712 119 2.054261254957712" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(640,0)">
+    <path d="M 12 24 Q 18 17.846514631520698 15 13.846514631520698" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 15.853688158227492 41 11.853688158227492" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 9.649521371990634 67 5.649521371990634" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 6.013975863454988 93 2.013975863454988" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 8.920003965815951 119 4.920003965815951" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(768,0)">
+    <path d="M 12 24 Q 18 16.7011851459536 15 12.701185145953598" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 10.809913816686988 41 6.809913816686988" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 6.219177900220497 67 2.2191779002204974" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 7.945769217090529 93 3.945769217090529" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 14.102855382795665 119 10.102855382795665" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+  <g transform="translate(896,0)">
+    <path d="M 12 24 Q 18 12.019111810758828 15 8.019111810758828" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 38 24 Q 44 6.66145200989784 41 2.6614520098978396" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 64 24 Q 70 7.13779886453187 67 3.13779886453187" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 90 24 Q 96 12.927596836823394 93 8.927596836823394" fill="none" stroke="#fff" stroke-width="1.6"/>
+    <path d="M 116 24 Q 122 17.70370979032758 119 13.70370979032758" fill="none" stroke="#888" stroke-width="1.6"/>
+    <path d="M 0 27 L 50 22 L 90 26 L 128 21" fill="none" stroke="#666" stroke-width="1.2"/>
+  </g>
+</svg>

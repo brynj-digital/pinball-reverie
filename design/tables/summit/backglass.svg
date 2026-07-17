@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360">
+  <!-- SUMMIT backglass: shown in the landscape side panel above the DMD
+       and as the table-select card. Chrome wordmark under the aurora, the
+       cable car crossing to the station on the ridge, the valley lights
+       far below — the Night Mail's lamp somewhere on the plain. Alpine
+       field ramp + aurora-ice feature color per STYLE-GUIDE §2
+       (2026-07-17 amendments). Same moon, small and hard in thin sky. -->
+  <defs>
+    <linearGradient id="smSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d2733"/>
+      <stop offset="0.6" stop-color="#141a22"/>
+      <stop offset="1" stop-color="#0d1116"/>
+    </linearGradient>
+    <linearGradient id="smChrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.46" stop-color="#d7dce8"/>
+      <stop offset="0.52" stop-color="#565d6e"/>
+      <stop offset="0.60" stop-color="#aeb6c8"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="smAurora" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b8e6ff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#b8e6ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="smGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="300" height="360" fill="url(#smSky)"/>
+
+  <!-- the aurora -->
+  <path d="M 10 20 Q 70 70 130 34 Q 200 -4 292 44 L 292 96 Q 200 46 140 84 Q 74 122 10 72 Z"
+        fill="url(#smAurora)"/>
+  <g stroke="#b8e6ff" opacity="0.4" fill="none" stroke-width="1.6">
+    <path d="M 40 40 Q 120 84 220 40"/>
+    <path d="M 70 26 Q 150 70 260 30"/>
+  </g>
+  <circle cx="258" cy="26" r="7" fill="#f5f2e8" opacity="0.9"/>
+
+  <!-- the ridge, the station, the cable -->
+  <path d="M 0 210 L 66 152 L 118 176 L 190 128 L 246 158 L 300 140"
+        fill="none" stroke="#31435a" stroke-width="5"/>
+  <path d="M 0 208 L 66 150 L 118 174 L 190 126 L 246 156 L 300 138"
+        fill="none" stroke="#5c7894" stroke-width="1.4"/>
+  <g transform="translate(190,126)">
+    <rect x="-12" y="-16" width="24" height="14" fill="#141a22" stroke="#5c7894" stroke-width="1.6"/>
+    <rect x="-4" y="-11" width="8" height="6" fill="#ffdf9e" opacity="0.85"/>
+    <line x1="0" y1="-16" x2="0" y2="-28" stroke="#5c7894" stroke-width="1.6"/>
+  </g>
+  <path d="M 20 260 L 190 132" fill="none" stroke="#aeb6c8" stroke-width="1" stroke-dasharray="1 5"/>
+  <g transform="translate(96,204)">
+    <rect x="-8" y="0" width="16" height="11" fill="#d7dce8" stroke="#07080d" stroke-width="1.2"/>
+    <line x1="0" y1="0" x2="0" y2="-6" stroke="#d7dce8" stroke-width="1.4"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="150" y="292" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="52" font-weight="bold" letter-spacing="4"
+        fill="#5aa3cc" opacity="0.5" filter="url(#smGlow)">SUMMIT</text>
+  <text x="150" y="288" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="52" font-weight="bold" letter-spacing="4"
+        fill="url(#smChrome)" stroke="#07080d" stroke-width="2" paint-order="stroke">SUMMIT</text>
+  <text x="150" y="288" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="52" font-weight="bold" letter-spacing="4"
+        fill="none" stroke="#b8e6ff" stroke-width="0.8" opacity="0.9">SUMMIT</text>
+  <text x="150" y="312" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="10" letter-spacing="5" fill="#5c7894">THE LAST CAR UP</text>
+
+  <!-- valley lights, and one moving lamp on the plain -->
+  <g fill="#ffdf9e" opacity="0.55">
+    <circle cx="60" cy="342" r="1.4"/><circle cx="104" cy="348" r="1.2"/>
+    <circle cx="168" cy="344" r="1.4"/><circle cx="228" cy="350" r="1.2"/>
+  </g>
+  <circle cx="196" cy="338" r="1.8" fill="#39ff14" opacity="0.7"/>
+  <text x="150" y="332" text-anchor="middle" font-family="ui-monospace, monospace"
+        font-size="8" letter-spacing="2" fill="#5c7894" opacity="0.8">READ THE SKY BEFORE DAWN</text>
+</svg>

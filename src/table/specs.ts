@@ -5,6 +5,9 @@ import { TIDEBREAKER_SPEC } from "./defs/tidebreaker";
 import { MIDWAY_SPEC } from "./defs/midway";
 import { NIGHTMAIL_SPEC } from "./defs/nightmail";
 import { SMALLHOURS_SPEC } from "./defs/smallhours";
+import { SUMP_SPEC } from "./defs/sump";
+import { GLASSHOUSE_SPEC } from "./defs/glasshouse";
+import { SUMMIT_SPEC } from "./defs/summit";
 
 /** Scoring values every table's rules JSON must carry (Scoring.ts reads these). */
 export interface ScoringRules {
@@ -36,6 +39,8 @@ export interface TableSpec {
   createLogic(ctx: TableLogicCtx): TableLogic;
   /** localStorage key — each table keeps its own high-score list. */
   highScoreKey: string;
+  /** Attract-reel rules-teaser cards (DMD pass): [line1, line2] pages. */
+  attractTips?: string[][];
   /**
    * Renderer theming that can't live in the SVG (3D materials). Wall art
    * colors themselves are per-table IN the SVG (STYLE-GUIDE §2); these keep
@@ -55,7 +60,7 @@ export interface TableSpec {
   };
 }
 
-export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail" | "smallhours";
+export type TableId = "moondial" | "tidebreaker" | "midway" | "nightmail" | "smallhours" | "sump" | "glasshouse" | "summit";
 
 export const TABLE_SPECS: Record<TableId, TableSpec> = {
   moondial: MOONDIAL_SPEC,
@@ -63,6 +68,9 @@ export const TABLE_SPECS: Record<TableId, TableSpec> = {
   midway: MIDWAY_SPEC,
   nightmail: NIGHTMAIL_SPEC,
   smallhours: SMALLHOURS_SPEC,
+  sump: SUMP_SPEC,
+  glasshouse: GLASSHOUSE_SPEC,
+  summit: SUMMIT_SPEC,
 };
 
 export const TABLE_ORDER: TableId[] = [
@@ -71,6 +79,9 @@ export const TABLE_ORDER: TableId[] = [
   "midway",
   "nightmail",
   "smallhours",
+  "sump",
+  "glasshouse",
+  "summit",
 ];
 
 const TABLE_KEY = "pinball-table-v1";

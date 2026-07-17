@@ -1,9 +1,61 @@
 # Glasshouse — Table 7 design brief
 
-**Status: concept (2026-07-16), not yet scheduled.** Table id:
-`glasshouse`. Planned engine milestone: **M14 (envelope generalization —
-the widebody and the left-hand plunger)**. See
-`docs/plans/table-differentiation-plan.md` for sequencing.
+**Status: v1 built (2026-07-17).** Table id: `glasshouse`. Engine
+milestone **M14 shipped with it**: `table.plungerSide` with the
+`inShooterLane`/`onPlayfieldSide` helpers routing every lane test (Game,
+camera, all three sims, the touch plunger corner), the widebody envelope
+proven at 660 × 1050. Deltas from the concept, found during
+clearance-solving and simcheck:
+
+- **The arch has no flat crown.** The concept's "mirror the standard
+  shell and spend the extra 85 mm as a flat crown" stalled dying
+  launches (anything under ~17° holds a resting ball — the Sump's shelf
+  lesson, remeasured here); a gable ridge couldn't be both low enough
+  to launch over and steep enough to shed. The shipped arch warps each
+  mirrored half with an identity-slope-at-both-ends blend
+  (`f(s) = a·s + (1−a)(3s²−2s³)`) so the apex and the lane-side corner
+  keep standard curvature and the width bulges mid-arc; the orbit is a
+  constant 65 mm inward offset of that shell (guaranteed channel).
+  Three generator bugs found by the launch trace: doubled-back mirrored
+  point lists (twice) and offset normals flipping on near-vertical
+  segments — each read as "the launch dies mid-channel".
+- **The vine run climbs at the mouth, not across the field.** A single
+  0→38 profile put ball-height rails across the whole mid-field — a
+  lateral wall cutting the table in half. Shipped: two chained profiles
+  (0→32 over the first 83 mm, then 32→38 across), so the crossing rails
+  gate off for ground balls. The mouth also moved up-field to (170,640):
+  between the splitter and the sling there is no room for a 52 mm mouth
+  plus clearances (the aerial-run wedge lesson, again).
+- The lamp zones are plain `sensor-lane` zones paired with the roving
+  insert lamps; the moving jackpot needs no engine support.
+- Suite: 25 glasshouse checks green (left-saddle settle, mirrored orbit
+  both ways, orchid capture + right-bat return, pollen count, a full
+  west→east vine ride at 38 mm, marginal-launch crown sweeps at three
+  speeds, 10 trap drops, skill, lamp wander).
+
+- **The right-shell deflector and the crest windows arrived by
+  feature-rates, post-suite:** without a mirrored deflector every
+  Gallery exit ran down the shell into the right outlane (bumpers
+  0/600 s, the cold frame eating 96 balls); and the closed crown starved
+  lanes 1–3 AND the lantern nest (1 bumper hit/600 s) — two mouths over
+  lanes 2/3 framed by risen dividers (the Midway/Night Mail apex
+  pattern, applied at build time) took the table to 3 lane-set
+  completions and 63 bumper hits per 600 s.
+- **The bloom roof took four shapes** (all soak/simcheck-found): the
+  crest windows rain balls onto the bank's flat back — a gable cradled
+  against the hood cap, a low shed made a valley, a crest-level shed
+  parked slow balls on the hood crest's own 5° flat. Shipped: one
+  continuous 20° shed from a west wall, running FLUSH over the hood
+  crest into its right shoulder, with east/west walls sealing the
+  under-roof cavity (a 37 mm south gap admitted balls onto the flat).
+- Soak seeds 1/2/3/5/7/11/13 = 0 stuck. WATCH ITEM: weak plunges roll back more than the lineup norm (pre-deflector soak peaked at ~250 launches/600 s; post-fix ~126, still watch): the
+  lineup's ~130 — the widebody's taller/longer launch channel returns a
+  bigger slice of the random plunger range to the saddle (weak plunges
+  roll back). Real widebodies do demand a fuller pull; if play shows the
+  launch feeling doughy, lower the crown apex a few mm before touching
+  the global plunger tuning.
+
+See `docs/plans/table-differentiation-plan.md` for the plan context.
 
 **Premise:** the great glasshouse of the city's botanic garden, locked
 for the night. Moonlight through a thousand panes, night-blooming

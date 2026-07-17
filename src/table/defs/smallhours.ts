@@ -100,9 +100,11 @@ const GEOMETRY: TableGeometry = {
   kickers: [
     {
       /** The Phone, mid-field; ejects to the left flipper. */
+      // moved off the lineup-shared (272,450) scoop spot toward the deck
+      // (differentiation pass); eject re-aimed to keep the left-bat landing
       id: "phone",
-      hold: { x: 0.272, y: 0.45 },
-      eject: { x: -0.12, y: 0.99 },
+      hold: { x: 0.3, y: 0.48 },
+      eject: { x: -0.25, y: 0.96 },
       holdS: rules.phone.holdS,
       cooldownS: 0.4,
     },
@@ -145,6 +147,10 @@ export const SMALLHOURS_SPEC: TableSpec = {
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new SmallHoursLogic(ctx),
+  attractTips: [
+    ["TUNE IN THEN", "RIDE THE AERIAL"],
+    ["THREE CALLERS", "PUT YOU ON AIR"],
+  ],
   highScoreKey: "pinball-highscores-smallhours-v1",
   // warm asphalt field walls (rooftop-500/300 blend); the aerial run stays
   // chrome; ramp glass is transmitter amber (STYLE-GUIDE §2, table 5)

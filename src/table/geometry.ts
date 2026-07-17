@@ -186,6 +186,12 @@ export interface TableGeometry {
     /** y where the plunger lane's inner wall ends. */
     laneTopY: number;
     spawn: Pt;
+    /**
+     * Which side of the playfield the shooter lane lives on (M14, the
+     * Glasshouse). Default "right" (the lineup convention). All
+     * lane-vs-playfield tests must go through the helpers below.
+     */
+    plungerSide?: "left" | "right";
   };
   /** Plunger visuals: rod + spring assembly under the saddle bar. */
   plunger: {
@@ -200,8 +206,20 @@ export interface TableGeometry {
    * (M10+, Midway's mallet): placed by anchor-flipper-upper in the SVG,
    * driven by the "upper" input action (defaults to the same keys as its
    * `side`'s lower flipper). Same hardware (FLIPPER constants) as the pair.
+   *
+   * `mini` (M13, the Sump's chamber pair): an optional SECOND full pair,
+   * placed by anchor-flipper-mini-left/right and driven by the SAME
+   * left/right actions as the main pair — one button works both storeys,
+   * the real-machine lower-playfield convention. Same hardware.
    */
-  flippers: { left: Pt; right: Pt; upper?: Pt & { side: FlipperSide } };
+  flippers: {
+    left: Pt;
+    right: Pt;
+    /** M15: `z` puts the upper flipper's contacts in a height band —
+     * Summit's terrace bat touches platform balls only. */
+    upper?: Pt & { side: FlipperSide; z?: { min: number; max: number } };
+    mini?: { left: Pt; right: Pt };
+  };
   bumpers: readonly BumperDef[];
   slings: readonly SlingDef[];
   dropTargets: DropTargetsDef;
@@ -230,6 +248,24 @@ export interface TableGeometry {
  * circle's chord (x = 0, |y| = baseRadius) so bat + base form one convex
  * profile with no re-entrant corner for the ball to seat in.
  */
+/** Is (x, y) inside the shooter lane? (M14: side-aware — never hand-roll.) */
+export function inShooterLane(
+  t: { laneWallX: number; laneTopY: number; plungerSide?: "left" | "right" },
+  x: number,
+  y: number,
+): boolean {
+  if (y <= t.laneTopY) return false;
+  return t.plungerSide === "left" ? x < t.laneWallX : x > t.laneWallX;
+}
+
+/** Is x on the playfield side of the lane wall? (Camera follow, gates.) */
+export function onPlayfieldSide(
+  t: { laneWallX: number; plungerSide?: "left" | "right" },
+  x: number,
+): boolean {
+  return t.plungerSide === "left" ? x > t.laneWallX : x < t.laneWallX;
+}
+
 export function flipperVerts(side: FlipperSide): Pt[] {
   const L = FLIPPER.length;
   const r = FLIPPER.baseRadius;

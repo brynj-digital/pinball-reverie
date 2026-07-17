@@ -1,6 +1,43 @@
 import type { TableLogic, TableLogicCtx } from "./TableLogic";
+import type { DmdScene } from "../render/dmd/DmdScene";
+import type { DotMatrix } from "../render/dmd/DotMatrix";
 import { BakedDmdScene, MessageScene, SequenceScene, fmtScore } from "../render/dmd/DmdScene";
 import rules from "../../design/tables/tidebreaker/rules.json";
+
+/**
+ * SONAR SWEEP — the DMD video mode (SIGNAL BOX pattern: pure display; the
+ * logic owns every timer and outcome, sim-safe).
+ */
+export class SonarScene implements DmdScene {
+  constructor(
+    private read: () => {
+      active: boolean;
+      sweepX: number; // 0..1 across the display
+      contacts: number[]; // 0..1 positions
+      results: (boolean | null)[];
+    },
+  ) {}
+
+  update(_dt: number, dmd: DotMatrix): boolean {
+    const s = this.read();
+    if (!s.active) return true;
+    dmd.clear();
+    dmd.centerText("SONAR SWEEP", 0, 3);
+    for (let x = 4; x < 124; x += 3) dmd.set(x, 24, 1); // the scan floor
+    s.contacts.forEach((c, i) => {
+      const x = 8 + Math.round(c * 112);
+      const lv = s.results[i] === null ? 2 : s.results[i] ? 4 : 1;
+      dmd.set(x, 20, lv);
+      dmd.set(x - 1, 21, lv);
+      dmd.set(x + 1, 21, lv);
+      dmd.set(x, 22, lv);
+    });
+    const sx = 8 + Math.round(s.sweepX * 112);
+    for (let y = 9; y <= 24; y++) dmd.set(sx, y, 3);
+    dmd.set(sx, 8, 4);
+    return false;
+  }
+}
 
 /** Entry→exit (either direction) within this window counts as a Current loop. */
 const CURRENT_PAIR_WINDOW = 3.5;
@@ -41,6 +78,14 @@ export class TidebreakerLogic implements TableLogic {
   leviathanReady = false;
   private leviathanUntil = -Infinity;
   private leviathanWasActive = false;
+  private skillUsed = false;
+  private sonarLit = false;
+  private snActive = false;
+  private snStart = 0;
+  private snContacts: number[] = [];
+  private snResults: (boolean | null)[] = [];
+  private snLastPress = -Infinity;
+  private leviathanStartTotal = 0;
 
   /** A haul only counts when the ramp was boarded at the mouth (both ends
    * of the winch circuit sit at ground height). */
@@ -79,15 +124,24 @@ export class TidebreakerLogic implements TableLogic {
 
   update(dt: number): void {
     this.now += dt;
+    if (this.snActive) this.updateSonar();
     if (this.leviathanWasActive && !this.leviathanActive) {
       this.leviathanWasActive = false;
       this.ctx.scoring.eclipseFactor = 1;
       this.ctx.bus.emit("mode", { kind: "leviathanEnd" });
-      this.ctx.push(new MessageScene([["IT RETURNS", "TO THE DEEP"]], 1.5), 2);
+      this.ctx.push(
+        new MessageScene(
+          [["IT RETURNS", "TO THE DEEP"], ["LEVIATHAN TOTAL", fmtScore(this.ctx.scoring.total - this.leviathanStartTotal)]],
+          1.4,
+        ),
+        2,
+      );
     }
   }
 
   endBall(): void {
+    if (this.snActive) this.endSonar(true);
+    this.skillUsed = false;
     this.currentStep = 0;
     this.lastCurrentAt = -Infinity;
     this.entryAt = this.exitAt = -Infinity;
@@ -113,6 +167,10 @@ export class TidebreakerLogic implements TableLogic {
 
   /** D-I-V-E lanes: all four advance the depth gauge + light the hatch. */
   onRollover(id: string): void {
+    this.spotLane(id);
+  }
+
+  private spotLane(id: string): void {
     this.litLanes.add(id);
     if (this.litLanes.size === 4) {
       this.litLanes.clear();
@@ -136,6 +194,21 @@ export class TidebreakerLogic implements TableLogic {
     return this.litLanes.has(id) ? 0.55 : 0;
   }
 
+  /** SOUNDING: soft plunge peaking in the lane band. Once per ball. */
+  onSkillShot(id: string, speed: number): void {
+    if (id !== "sounding" || this.skillUsed) return;
+    if (speed > rules.skill.maxSpeed) return;
+    if (this.ctx.scoring.muted) return; // tilted
+    this.skillUsed = true;
+    const points = this.ctx.scoring.award(rules.skill.points, "SOUNDING");
+    this.ctx.scoring.bonusUnits += rules.skill.bonusUnit;
+    this.ctx.sfx("rollover");
+    this.ctx.push(new MessageScene([["SOUNDING", fmtScore(points)]], 1.4, true), 2);
+    // spot one unlit D-I-V-E lane (completion logic shared with onRollover)
+    const unlit = ["1", "2", "3", "4"].find((m) => !this.litLanes.has(m));
+    if (unlit) this.spotLane(unlit);
+  }
+
   /** Depth-gauge inserts g1..g5 lit up to the reached stage; the outlane
    * save inserts mirror their kickback/subway lit state. */
   lamp(id: string): number {
@@ -154,6 +227,15 @@ export class TidebreakerLogic implements TableLogic {
   /** Game confirmed a kicker/subway capture (awards live here, not on the
    * raw sensor, so a cooldown re-trigger can't double-award). */
   onCapture(id: string): void {
+    if (id === "divebell" && this.sonarLit && !this.snActive && !this.ctx.scoring.muted) {
+      this.startSonar();
+      return;
+    }
+    if (id === "divebell") {
+      if (this.snActive) return; // captures during the hold don't re-award
+      this.onHaul();
+      return;
+    }
     if (id === "divebell") this.onHaul();
     else if (id === "trench") {
       if (this.ctx.scoring.muted) return;
@@ -193,6 +275,7 @@ export class TidebreakerLogic implements TableLogic {
     const haul = B.hauls[this.haulIdx];
     const last = B.lastSpotsLeviathan && this.haulIdx === B.hauls.length - 1;
     this.haulIdx = (this.haulIdx + 1) % B.hauls.length;
+    if (this.haulIdx === 0) this.sonarLit = true; // the manifest is full: sweep
     const points = this.ctx.scoring.award(haul.points, haul.name);
     this.ctx.scoring.bonusUnits += B.bonusUnit;
     this.gutterLit = true;
@@ -289,6 +372,7 @@ export class TidebreakerLogic implements TableLogic {
     this.leviathanReady = false;
     this.banks = 0;
     this.trenchFloor = false;
+    this.leviathanStartTotal = this.ctx.scoring.total;
     this.leviathanUntil = this.now + rules.leviathan.durationS;
     this.leviathanWasActive = true;
     this.ctx.scoring.eclipseFactor = rules.leviathan.scoreFactor;
@@ -300,6 +384,92 @@ export class TidebreakerLogic implements TableLogic {
       frames
         ? new BakedDmdScene(frames, 8, `ALL SCORES X${rules.leviathan.scoreFactor}`, 1.0)
         : new MessageScene([["LEVIATHAN", `ALL SCORES X${rules.leviathan.scoreFactor}`]], 1.5, true),
+      3,
+    );
+  }
+
+  /** Live ticker for the score readout (DMD pass). */
+  dmdStatus(): string | undefined {
+    if (this.leviathanActive) return `LEVIATHAN ${Math.ceil(this.leviathanUntil - this.now)}`;
+    if (this.leviathanReady) return "SHOOT THE CURRENT";
+    const letters = ["D", "I", "V", "E"].map((c, i) => (this.litLanes.has(String(i + 1)) ? c : ".")).join("");
+    return `${letters}  DEPTH ${this.stage}/5`;
+  }
+
+  /** Both-flipper progress readout (DMD pass). */
+  statusReport(): string[][] {
+    const B = rules.diveBell;
+    return [
+      [`DEPTH ${this.stage} OF 5`, `MULTIPLIER X${this.ctx.scoring.multiplier}`],
+      [`AIRLOCKS ${this.banks}`, this.leviathanReady ? "LEVIATHAN IS LIT" : "WAKE LEVIATHAN"],
+      ["NEXT HAUL", B.hauls[this.haulIdx].name],
+    ];
+  }
+
+  // ─────────────── SONAR SWEEP (DMD video mode) ───────────────
+  // The sweep crosses the scope in sweepS; contact i is "hit" when a
+  // flipper press lands within windowS of the sweep passing it. Ends at
+  // sonar.durationS regardless of the DMD (sim-safe).
+
+  onFlipper(): void {
+    if (this.snActive) this.snLastPress = this.now;
+  }
+
+  private startSonar(): void {
+    this.sonarLit = false;
+    this.snActive = true;
+    this.snStart = this.now;
+    this.snContacts = Array.from(
+      { length: rules.sonar.pings },
+      (_, i) => 0.18 + (i / rules.sonar.pings) * 0.62 + Math.random() * 0.12,
+    );
+    this.snResults = this.snContacts.map(() => null);
+    this.snLastPress = -Infinity;
+    this.ctx.holdScoop?.("divebell", true);
+    this.ctx.sfx("multiplier");
+    this.ctx.push(
+      new SequenceScene([
+        new MessageScene([["SONAR SWEEP", "FLIP ON EACH CONTACT"]], 1.4, true),
+        new SonarScene(() => ({
+          active: this.snActive,
+          sweepX: Math.min(1, Math.max(0, (this.now - this.snStart - 1.6) / (rules.sonar.durationS - 3))),
+          contacts: this.snContacts,
+          results: this.snResults,
+        })),
+      ]),
+      3,
+    );
+  }
+
+  private updateSonar(): void {
+    const t = this.now - this.snStart;
+    const sweep = Math.min(1, Math.max(0, (t - 1.6) / (rules.sonar.durationS - 3)));
+    this.snContacts.forEach((c, i) => {
+      if (this.snResults[i] === null && sweep >= c) {
+        const ok = this.now - this.snLastPress <= rules.sonar.windowS;
+        this.snResults[i] = ok;
+        if (ok) {
+          this.ctx.scoring.award(rules.sonar.pingValue, "CONTACT");
+          this.ctx.sfx("rollover");
+        } else {
+          this.ctx.sfx("target");
+        }
+      }
+    });
+    if (t >= rules.sonar.durationS) this.endSonar(false);
+  }
+
+  private endSonar(abandoned: boolean): void {
+    this.snActive = false;
+    this.ctx.holdScoop?.("divebell", false);
+    if (abandoned) return;
+    const hits = this.snResults.filter(Boolean).length;
+    this.ctx.push(
+      new MessageScene(
+        [hits === this.snResults.length ? ["FULL CONTACT", "THE TRENCH ANSWERS"] : [`${hits} CONTACTS`]],
+        1.4,
+        hits === this.snResults.length,
+      ),
       3,
     );
   }

@@ -9,8 +9,9 @@
 import { Vec2 } from "planck";
 import { EventBus } from "../src/core/EventBus";
 import { PhysicsWorld, FIXED_DT } from "../src/core/PhysicsWorld";
-import { contactApplies } from "../src/table/Surfaces";
+import { buildSurfaces, contactApplies } from "../src/table/Surfaces";
 import { Ball } from "../src/entities/Ball";
+import { Flipper } from "../src/entities/Flipper";
 import { Diverter } from "../src/entities/Diverter";
 import { Lift } from "../src/entities/Lift";
 import { Magnet } from "../src/entities/Magnet";
@@ -53,6 +54,78 @@ function profile(
   for (let i = 1; i < pts.length; i++)
     cumLen.push(cumLen[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
   return { name, pts, layer: 1, hFrom, hTo, cumLen };
+}
+
+// ─────────────── Flipper z-band (M15, the terrace bat) ───────────────
+// A banded flipper must ignore a ground ball rolling past and bat a ball
+// standing on a platform surface. Rig: a flat h=0.034 terrace surface
+// under the bat line; a flipper at (0.3, 0.5) banded 0.030..0.080. The
+// platform ball gets there the real way: released airborne and landing
+// (the M11 ballistic landing the lift uses).
+{
+  const t = { ...DEFAULT_TUNING };
+  const bus = new EventBus();
+  const pw = new PhysicsWorld(bus, t);
+  const terraceProfile: HeightProfile = {
+    ...profile("terrace", [
+      { x: 0.1, y: 0.5 },
+      { x: 0.5, y: 0.5 },
+    ], 0.034, 0.034),
+    surface: "terrace",
+    surfaceHalfWidth: 0.1,
+  };
+  const surfaces = buildSurfaces([terraceProfile]);
+  const ball = new Ball(pw.world, t, { x: 0.3, y: 0.3 }, surfaces);
+  pw.setZGate((tag, x, y) => contactApplies(tag, surfaces, x, y, ball.height.z));
+  const flipper = new Flipper(pw.world, pw.world.createBody(), "left", t,
+    { x: 0.3, y: 0.52 }, { min: 0.03, max: 0.08 });
+  const step = () => {
+    flipper.update(false, t);
+    pw.update(
+      FIXED_DT,
+      () => ball.height.applyForces(ball.body),
+      () => {
+        const p = ball.body.getPosition();
+        const v = ball.body.getLinearVelocity();
+        ball.height.step(FIXED_DT, p.x, p.y, Math.hypot(v.x, v.y));
+      },
+    );
+  };
+  const runS = (secs: number) => {
+    for (let i = 0; i < secs / FIXED_DT; i++) step();
+  };
+  // ground ball rolls straight through the bat line
+  ball.height.reset();
+  ball.body.setGravityScale(1);
+  ball.body.setTransform(new Vec2(0.18, 0.51), 0);
+  ball.body.setLinearVelocity(new Vec2(0.6, 0));
+  runS(0.8);
+  check(
+    "z-band flipper: ground ball passes beneath",
+    ball.body.getPosition().x > 0.4,
+    `x=${ball.body.getPosition().x.toFixed(3)}`,
+  );
+  // platform ball: released airborne over the terrace, lands at h34, rolls
+  // into the bat and is deflected (it then slides off the bat face and
+  // drops to the field — legitimate; what matters is the block at height)
+  ball.body.setTransform(new Vec2(0.18, 0.51), 0);
+  ball.body.setLinearVelocity(new Vec2(0.6, 0));
+  ball.height.beginTransit(0.05);
+  ball.height.endTransitAirborne();
+  let landed = false;
+  let maxXAtHeight = 0;
+  for (let i = 0; i < 0.8 / FIXED_DT; i++) {
+    step();
+    if (ball.height.supportName === "terrace") {
+      landed = true;
+      maxXAtHeight = Math.max(maxXAtHeight, ball.body.getPosition().x);
+    }
+  }
+  check(
+    "z-band flipper: platform ball lands and is blocked by the bat",
+    landed && maxXAtHeight < 0.37,
+    `maxX@h=${maxXAtHeight.toFixed(3)}`,
+  );
 }
 
 // ─────────────────────────── Diverter ───────────────────────────
@@ -112,6 +185,80 @@ function profile(
   run(1.0, step);
   const blockedB = ball.body.getPosition();
   check("diverter: selected blade is solid", blockedB.y < 0.5, `y=${blockedB.y.toFixed(3)}`);
+}
+
+// ─────────────── Diverter: inert (off-field) blade ───────────────
+// The retractable-post pattern (Moondial's gnomon, the Sump's floodgate):
+// one blade is the feature, the other a tiny sliver parked where no ball
+// can reach — selecting it is how a diverter "retracts". Prove the sliver
+// is a legal blade and that the post position is genuinely open while the
+// sliver is selected.
+{
+  const { t, pw, ball, place, run } = makeRig();
+  const blades = [
+    {
+      diverter: "gnomon",
+      blade: "up",
+      pts: [
+        { x: 0.24, y: 0.5 },
+        { x: 0.28, y: 0.5 },
+      ],
+      radius: 0.005,
+    },
+    {
+      // inert sliver: 4 mm chain tucked at the rig edge, unreachable
+      diverter: "gnomon",
+      blade: "down",
+      pts: [
+        { x: 0.02, y: 0.02 },
+        { x: 0.024, y: 0.02 },
+      ],
+      radius: 0.002,
+    },
+  ];
+  const dv = new Diverter(pw.world, pw, {
+    id: "gnomon",
+    blades: ["up", "down"],
+    initial: "down",
+  }, blades, t);
+
+  const step = () =>
+    pw.update(
+      FIXED_DT,
+      () => ball.height.applyForces(ball.body),
+      () => {
+        const p = ball.body.getPosition();
+        ball.height.step(FIXED_DT, p.x, p.y);
+      },
+    );
+
+  place(0.26, 0.4, 0, 0.5);
+  run(1.0, step);
+  check(
+    "diverter: inert blade leaves the post position open",
+    ball.body.getPosition().y > 0.55,
+    `y=${ball.body.getPosition().y.toFixed(3)}`,
+  );
+
+  dv.setBlade("up");
+  place(0.26, 0.4, 0, 0.5);
+  run(1.0, step);
+  check(
+    "diverter: post rises when selected",
+    ball.body.getPosition().y < 0.5,
+    `y=${ball.body.getPosition().y.toFixed(3)}`,
+  );
+
+  // retract under a ball parked NEXT to the post (not overlapping): the
+  // swap must go through immediately — deferral is only for overlap.
+  dv.setBlade("down");
+  place(0.26, 0.4, 0, 0.5);
+  run(1.0, step);
+  check(
+    "diverter: post retracts and the lane reopens",
+    ball.body.getPosition().y > 0.55,
+    `y=${ball.body.getPosition().y.toFixed(3)}`,
+  );
 }
 
 // ───────────────────────────── Lift ─────────────────────────────

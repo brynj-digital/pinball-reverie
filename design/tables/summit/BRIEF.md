@@ -1,9 +1,43 @@
 # Summit — Table 8 design brief
 
-**Status: concept (2026-07-16), not yet scheduled.** Table id: `summit`.
-Planned engine milestone: **M15 (playable elevation — furniture and a
-flipper that live at height)**. See
-`docs/plans/table-differentiation-plan.md` for sequencing.
+**Status: v1 built (2026-07-17).** Table id: `summit`. Engine milestone
+**M15 shipped with it**: `flippers.upper.z` — a height band on the upper
+flipper's fixtures, gated by the existing per-contact z-gate
+(entcheck-proven: the terrace bat blocks a platform ball and ignores
+ground traffic rolling beneath). Deltas from the concept, found during
+clearance-solving and simcheck:
+
+- **The terrace sits at h 34** (not the concept's 30): rails follow the
+  local surface height and RAIL_BOTTOM is 1 mm, so a 30 mm deck's rails
+  graze a 27 mm ball at ground — 34 is the aerial run's proven straddle
+  height, reused.
+- **The cable car is the M12 Lift UNCHANGED.** The concept asked for a
+  "grounded release" engine variant; unnecessary — the lift releases
+  airborne 10 mm over the deck and the M11 ballistic landing puts the
+  ball on the platform (simcheck traces the full ride: dock capture →
+  carry to z 44 → land at z 34 → roll south across the instrument pads).
+- **The platform's exits took the mallet's lessons:** the bat's base
+  seals into the west rail (the 12 mm pattern); dribblers leave through
+  a 19° SE gutter (a flat south rail would rest balls the tip can't
+  reach); THE LAUNCH is the flip out the east opening ABOVE the gutter
+  line — the leave event's y coordinate splits launch from dribble.
+- **Ground traffic passes under the platform**: the launch sweep runs
+  beneath the east shoulder (suite-asserted at z 0.0 mm through the
+  whole orbit), lanes feed under the north rail, and the z-banded
+  instrument pads never read a ground ball.
+- **LAST CAR UP ships with virtual locks** (the brief's own cut line):
+  lockBall needs a holding kicker and the lift carries instead — lit
+  rides bank as counters, the multiball serves extras.
+- Suite: 23 summit checks green; soak 1/2/3/7 = 0 stuck; the car sees
+  2 random-soak rides/600 s (the coaster/aerial class — an aimed shot by
+  design), the bothy 4 captures. WATCH ITEM (the Small Hours lane
+  lesson): P-E-A-K completions run 0/600 s in random soak — the lanes
+  feed from below only. If real play shows the forecast ladder stalling,
+  the proven crest-window pattern applies, but here it must thread
+  between the launch sweep and the terrace's north rail — open flank
+  mouths over lanes 1/2 (left of the platform) first.
+
+See `docs/plans/table-differentiation-plan.md` for the plan context.
 
 **Premise:** the last cable car of the night, up to the weather station
 on the summit. The valley and its lights far below, the aurora starting
