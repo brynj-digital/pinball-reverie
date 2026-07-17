@@ -1,11 +1,13 @@
 # Thunderhead — Table 9 design brief (backlog)
 
-**Status: GREY-BOX PROTOTYPE BUILT (2026-07-17) — awaiting the §7.1
-feel sign-off.** The gate build exists on every machine-checkable axis
-(see §9); master art, the style-guide amendment (storm yellow + stratus
-field) and the final audio mix stay gated until the player plays the
-stagger and signs it off. If the stagger fails the feel test, the
-documented fallback stands: level flippers, everything else kept.
+**Status: BUILT (2026-07-17) — the §7.1 gate is CLOSED: the player
+signed off the stagger and commissioned the master art the same day.**
+The grey-box prototype (see §9 for its build record) was dressed in
+place: stratus field variant + storm yellow shipped to tokens.css and
+STYLE-GUIDE §2, master playfield + backglass art shipped over the
+soak-proven geometry UNCHANGED, `TableSpec.theme` carries the
+yellow-400/600 accent, tagline "HOLDING STATION". The 140 BPM song from
+the gate build stands as the mix.
 
 **Original gate note (2026-07-16):**
 Table id: `thunderhead`. This is the lineup's riskiest structural

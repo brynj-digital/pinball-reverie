@@ -80,12 +80,12 @@ const GEOMETRY: TableGeometry = {
     { id: "3", x: 0.291, y: 0.11 },
     { id: "4", x: 0.355, y: 0.11 },
   ],
-  /** Cell arcs + save inserts (grey-box: neutral chrome, no storm yellow yet). */
+  /** Cell arcs + save inserts in storm yellow; the nacelle telltale is bulb-warm. */
   lamps: [
-    { id: "cell1", x: 0.2, y: 0.27, rgb: "216, 222, 233" },
-    { id: "cell2", x: 0.33, y: 0.255, rgb: "216, 222, 233" },
-    { id: "static", x: 0.044, y: 0.775, rgb: "216, 222, 233" },
-    { id: "keel", x: 0.496, y: 0.885, rgb: "216, 222, 233" },
+    { id: "cell1", x: 0.2, y: 0.27, rgb: "244, 244, 145" },
+    { id: "cell2", x: 0.33, y: 0.255, rgb: "244, 244, 145" },
+    { id: "static", x: 0.044, y: 0.775, rgb: "244, 244, 145" },
+    { id: "keel", x: 0.496, y: 0.885, rgb: "244, 244, 145" },
     { id: "nacelle", x: 0.4, y: 0.462, rgb: "255, 223, 158" },
   ],
   /** THE VANE: spinner across the nacelle approach. */
@@ -150,22 +150,22 @@ const GEOMETRY: TableGeometry = {
 export const THUNDERHEAD_SPEC: TableSpec = {
   id: "thunderhead",
   name: "THUNDERHEAD",
-  tagline: "GREY-BOX PROTOTYPE",
+  tagline: "HOLDING STATION",
   geometry: GEOMETRY,
   scoring: rules,
   createLogic: (ctx) => new ThunderheadLogic(ctx),
   attractTips: [
-    ["RIDE THE STORM", "DONT GET EATEN"],
-    ["GREY-BOX BUILD", "FEEL TEST ONLY"],
+    ["CHARGE THE CELLS", "THE STORM COMES ABOARD"],
+    ["RIDE THE ROUTE", "BANK THE STRIKES"],
   ],
   highScoreKey: "pinball-highscores-thunderhead-v1",
-  // grey-box: neutral chrome throughout; storm yellow arrives with the
-  // style-guide amendment AFTER the feel gate (brief §4)
+  // storm iron rails, chrome rigging; storm-yellow glass + accents
+  // (stratus/yellow tokens — STYLE-GUIDE §2, amended with the master art)
   theme: {
-    rail3d: 0x3a4152,
-    rail3dElevated: 0xaeb6c8,
-    rampGlass3d: 0xd8dee9,
-    accent: 0xd8dee9,
-    accentDeep: 0x8790b3,
+    rail3d: 0x34324a,
+    rail3dElevated: 0xbdc9dc,
+    rampGlass3d: 0xf4f491,
+    accent: 0xf4f491,
+    accentDeep: 0x9fa02c,
   },
 };

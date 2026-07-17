@@ -72,6 +72,16 @@
   --alpine-500: #31435a; /* granite wall/rail body (steel-500 analog) */
   --alpine-300: #5c7894; /* granite wall/rail highlight (steel-300 analog) */
 
+  /* field, stratus variant — Thunderhead's moonlit cloud-deck ramp: the
+     lineup's only field that is a SURFACE OF WEATHER rather than ground —
+     grey-violet cloud-top seen from the airship's bow (added 2026-07-17
+     per the table 9 brief; STYLE-GUIDE §2) */
+  --stratus-900: #101019; /* storm shadow / the deep cloud well */
+  --stratus-800: #16161f; /* stratus field base */
+  --stratus-700: #201f2e; /* moonlit cloud panels */
+  --stratus-500: #34324a; /* storm-iron wall/rail body (steel-500 analog) */
+  --stratus-300: #5e5b80; /* storm-iron wall/rail highlight (steel-300 analog) */
+
   /* marquee bulb — incandescent white-gold for bulb strings, chase lamps,
      platform gas lamps and lit carriage windows
      (added 2026-07-05, scope widened 2026-07-15; NOT brass — brass stays
@@ -130,6 +140,14 @@
                           signage only — colder/pinker than --alert-400 (the
                           UI tilt/danger lamp), never blood, never brass. */
   --red-600: #b01226;
+  --yellow-400: #f4f491; /* storm yellow — Thunderhead's feature hue (added
+                             2026-07-17, table 9): lightning, charge arcs,
+                             the barograph line. The lineup's first yellow —
+                             kept ELECTRIC-COLD, toward white, so it never
+                             drifts into transmitter amber's sodium warmth
+                             (the amber discipline note, applied from the
+                             other side). Never bulb, never brass. */
+  --yellow-600: #9fa02c;
   --alert-400: #ff5555; /* tilt, danger lamps */
 
   /* DMD — amber plasma, 4 brightness levels + off */
