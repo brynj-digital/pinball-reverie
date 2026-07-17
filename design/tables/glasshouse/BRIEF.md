@@ -33,7 +33,15 @@ clearance-solving and simcheck:
   west→east vine ride at 38 mm, marginal-launch crown sweeps at three
   speeds, 10 trap drops, skill, lamp wander).
 
-- Soak 1/2/3/7 = 0 stuck. WATCH ITEM: launches run ~250/600 s vs the
+- **The right-shell deflector and the crest windows arrived by
+  feature-rates, post-suite:** without a mirrored deflector every
+  Gallery exit ran down the shell into the right outlane (bumpers
+  0/600 s, the cold frame eating 96 balls); and the closed crown starved
+  lanes 1–3 AND the lantern nest (1 bumper hit/600 s) — two mouths over
+  lanes 2/3 framed by risen dividers (the Midway/Night Mail apex
+  pattern, applied at build time) took the table to 3 lane-set
+  completions and 63 bumper hits per 600 s.
+- Soak 1/2/3/7 = 0 stuck. WATCH ITEM: weak plunges roll back more than the lineup norm (pre-deflector soak peaked at ~250 launches/600 s; post-fix ~126, still watch): the
   lineup's ~130 — the widebody's taller/longer launch channel returns a
   bigger slice of the random plunger range to the saddle (weak plunges
   roll back). Real widebodies do demand a fuller pull; if play shows the

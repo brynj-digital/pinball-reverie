@@ -101,11 +101,16 @@
       <!-- plunger lane inner wall — the LEFT side (M14) -->
       <path data-width="12" data-z="all" id="collision-wall-lane" d="M 55 300 L 55 1050"/>
       <!-- orbit inner wall (the Gallery): far lane on the RIGHT, crown flat -->
-      <path data-width="12" id="collision-wall-orbit" d="M 55.0 300.0 L 69.8 266.5 L 75.8 243.1 L 84.2 220.6 L 95.1 199.1 L 108.4 178.8 L 124.5 159.7 L 143.4 141.7 L 165.1 124.9 L 189.4 109.9 L 216.0 96.6 L 244.4 85.4 L 273.8 76.5 L 303.2 70.1 L 331.5 66.2 L 360.5 64.9 L 354.3 64.9 L 378.3 66.0 L 401.4 69.1 L 425.7 74.2 L 450.2 81.4 L 473.8 90.4 L 495.8 101.0 L 515.8 113.0 L 533.4 126.2 L 548.6 140.2 L 561.3 155.0 L 571.7 170.4 L 580.1 186.9 L 586.6 204.1 L 591.2 222.2 L 594.0 240.9 L 595.1 263.3 L 595.0 300.0 L 595.0 550.0"/>
+      <path data-width="12" id="collision-wall-orbit-left" d="M 55.0 300.0 L 69.8 266.5 L 75.8 243.1 L 84.2 220.6 L 95.1 199.1 L 108.4 178.8 L 124.5 159.7 L 143.4 141.7 L 165.1 124.9 L 189.4 109.9 L 216.0 96.6 L 244.4 85.4 L 262.0 80.1"/>
+      <!-- crest windows over lanes 2/3 (feature-rates found the closed
+           crown starving the lanes AND the bumpers: 0-1 hits/600 s — the
+           Midway/Night Mail apex lesson, applied at build time): dying
+           sweeps drop through the two mouths onto the lantern nest -->
+      <path data-width="12" id="collision-wall-orbit-right" d="M 453.0 82.5 L 473.8 90.4 L 495.8 101.0 L 515.8 113.0 L 533.4 126.2 L 548.6 140.2 L 561.3 155.0 L 571.7 170.4 L 580.1 186.9 L 586.6 204.1 L 591.2 222.2 L 594.0 240.9 L 595.1 263.3 L 595.0 300.0 L 595.0 550.0"/>
       <!-- M-O-T-H top-lane dividers under the wide crown -->
-      <path data-width="12" id="collision-wall-divider-1" d="M 262 84 L 262 150"/>
-      <path data-width="12" id="collision-wall-divider-2" d="M 357 69 L 357 150"/>
-      <path data-width="12" id="collision-wall-divider-3" d="M 453 86 L 453 150"/>
+      <path data-width="12" id="collision-wall-divider-1" d="M 262 80 L 262 150"/>
+      <path data-width="12" id="collision-wall-divider-2" d="M 357 65 L 357 150"/>
+      <path data-width="12" id="collision-wall-divider-3" d="M 453 82 L 453 150"/>
       <!-- BLOOM 5-bank housing: free-standing in the beds; the back wall
            sits 8 mm behind the target line (recess shallower than a ball
            radius) with curled end caps sealing the sides -->
@@ -114,6 +119,11 @@
       <path data-width="12" id="collision-wall-orchid-hood" d="M 544 484 L 542.3 477.7 L 539.8 468.9 L 536 461 L 530.6 455.3 L 524 450.6 L 517 447 L 509.9 444.5 L 502.4 443.1 L 495 443 L 487.3 444.5 L 479.7 447.3 L 473 451 L 467.5 456.3 L 463 462.6 L 460 467"/>
       <!-- lane-wall deflector sheltering the MISTER kickback -->
       <path data-width="12" id="collision-wall-deflector" d="M 55 598 L 89 619 L 55 670"/>
+      <!-- right-shell deflector: sheds Gallery exits LEFT into the field
+           (without it every orbit exit ran straight down the shell into
+           the right outlane — feature-rates found bumpers at 0/600 s and
+           the cold frame eating 96 balls) -->
+      <path data-width="12" id="collision-wall-deflector-right" d="M 660 598 L 626 619 L 660 670"/>
       <!-- DOUBLE inlanes (M14/Fathom convention): full outlane guides ending
            tangent to the flipper bases, plus short splitters making two
            entry slots per side that merge below y 800 -->
