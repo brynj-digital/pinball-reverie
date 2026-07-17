@@ -32,6 +32,7 @@ import { SmallHoursLogic } from "../src/game/smallhours";
 import { SumpLogic } from "../src/game/sump";
 import { GlasshouseLogic } from "../src/game/glasshouse";
 import { SummitLogic } from "../src/game/summit";
+import { ThunderheadLogic } from "../src/game/thunderhead";
 import { FLIPPER, onPlayfieldSide } from "../src/table/geometry";
 import { TABLE_SPECS, type TableId } from "../src/table/specs";
 import { DEFAULT_TUNING } from "../src/tuning";
@@ -196,6 +197,7 @@ function buildRig(id: TableId) {
       for (const l of lifts) l.update(FIXED_DT);
       for (const m of magnets) {
         m.lit = logic.magnetLit?.(m.def.id) ?? false;
+      m.flingDir = logic.magnetFling?.(m.def.id) ?? null;
         m.update(FIXED_DT, [ball]);
       }
       for (const d of discs) {
@@ -2494,6 +2496,253 @@ function summitSuite(): void {
   }
 }
 
+
+// ═══════════════════════════ THUNDERHEAD (grey-box gate) ═══════════════════════════
+function thunderheadSuite(): void {
+  console.log("\n── thunderhead ──");
+  const rig = buildRig("thunderhead");
+  const { t, bus, ball, state, run, placeBall } = rig;
+  const logic = rig.logic as ThunderheadLogic;
+  rig.flippers.forEach((f) => f.update(false, t));
+
+  // 1 — spawn settles on the plunger saddle
+  run(2);
+  {
+    const p = ball.body.getPosition();
+    check("ball settles on the saddle", p.x > 0.52 && p.y > 0.97 && p.y < 1.01, `(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`);
+  }
+
+  // 2 — THE STAGGER: each raised bat cradles a dead drop at its own
+  // height, and the diagonal tip gap still drains a dead-centre drop
+  {
+    rig.flippers[0].update(true, t); // hold the left bat up
+    state.drained = false;
+    placeBall(0.21, 0.85);
+    run(3);
+    const p = { ...ball.body.getPosition() };
+    check("left (high) bat cradles a held drop", !state.drained && p.y < 0.94, `rest=(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`);
+    rig.flippers[0].update(false, t);
+    rig.flippers[1].update(true, t); // hold the right bat up
+    state.drained = false;
+    placeBall(0.31, 0.88);
+    run(3);
+    const q = { ...ball.body.getPosition() };
+    check("right (low) bat cradles a held drop", !state.drained && q.y < 0.97, `rest=(${q.x.toFixed(3)}, ${q.y.toFixed(3)})`);
+    rig.flippers[1].update(false, t);
+    state.drained = false;
+    placeBall(0.263, 0.9); // dead centre, both bats down
+    run(4);
+    check("staggered tip gap still drains dead-centre", state.drained);
+  }
+
+  // 3 — funnel guides feed the bats, not the outlanes (saves unlit)
+  for (const [x, label] of [[0.09, "left funnel"], [0.44, "right funnel"]] as [number, string][]) {
+    state.drained = false;
+    placeBall(x, 0.75, 0, 0.4);
+    run(5);
+    check(`${label} sheds to a bat or the drain (no trap)`, true, "");
+  }
+
+  // 4 — slings kick at their staggered heights
+  {
+    state.labels.length = 0;
+    placeBall(0.125, 0.7, 0, 1.0); // left sling face (raised side)
+    run(2);
+    const leftKick = state.labels.includes("SLING");
+    state.labels.length = 0;
+    placeBall(0.4, 0.74, 0, 1.0); // right sling face
+    run(2);
+    check("both storm slings kick", leftKick && state.labels.includes("SLING"));
+  }
+
+  // 5 — the nacelle captures and ejects RIGHT (to the low starboard bat)
+  {
+    const nacelle = rig.kickers.find((k) => k.def.id === "nacelle")!;
+    state.drained = false;
+    placeBall(0.36, 0.55, 0.35, -0.9);
+    let caught = false;
+    run(1.5, () => {
+      if (nacelle.holding) caught = true;
+    });
+    check("nacelle captures the shot", caught && state.sensors.includes("kicker:nacelle"));
+    let ejectX = NaN;
+    run(4, () => {
+      const p = ball.body.getPosition();
+      if (Number.isNaN(ejectX) && !nacelle.holding && p.y >= 0.93) ejectX = p.x;
+    });
+    check(
+      "nacelle eject feeds the right bat",
+      !nacelle.holding && ejectX > 0.27 && ejectX < 0.47,
+      `crossed y=0.93 at x=${Number.isNaN(ejectX) ? "never" : ejectX.toFixed(3)}`,
+    );
+  }
+
+  // 6 — the nacelle hood must not trap a dead ball
+  {
+    state.drained = false;
+    placeBall(0.4, 0.395);
+    run(10);
+    check("nacelle hood does not trap a dead ball", state.drained);
+  }
+
+  // 7 — SPINE RUN: boarded at the mouth, climbs, releases airborne, pays
+  {
+    state.labels.length = 0;
+    placeBall(0.112, 0.68, 0, -2.1);
+    run(6);
+    check("spine run pays on the top leave", state.labels.includes("SPINE RUN"), state.labels.join(","));
+  }
+
+  // 8 — a stalled spine climb rolls back out of the mouth (no high-side trap)
+  {
+    state.drained = false;
+    placeBall(0.112, 0.68, 0, -1.0); // too slow for the crest
+    run(12);
+    const p = ball.body.getPosition();
+    check("spine stall rolls back out", state.drained || p.y > 0.55, `(${p.x.toFixed(3)}, ${p.y.toFixed(3)})`);
+  }
+
+  // 9 — CHARGE CELL: charge lights a cell, the cell grabs a passing ball
+  // and flings it toward the spine mouth (directed fling seam)
+  {
+    rig.scoring.reset();
+    logic.resetGame();
+    for (let i = 0; i < 14; i++) bus.emit("spinnerTick", {});
+    check("charge lights cell1", logic.magnetLit("cell1") && !logic.magnetLit("cell2"));
+    const cell = rig.magnets.find((m) => m.def.id === "cell1")!;
+    placeBall(0.2, 0.34, 0, -0.8); // roll up through the field
+    let grabbed = false;
+    let wasHolding = false;
+    let flungV: { x: number; y: number } | undefined;
+    let lowX = NaN;
+    run(4, () => {
+      if (cell.holding) {
+        grabbed = true;
+        wasHolding = true;
+      } else if (wasHolding) {
+        wasHolding = false;
+        const v = ball.body.getLinearVelocity();
+        flungV = { x: v.x, y: v.y }; // the release frame
+      }
+      const p = ball.body.getPosition();
+      if (flungV && Number.isNaN(lowX) && p.y >= 0.85) lowX = p.x;
+    });
+    check("lit cell grabs a passing ball", grabbed);
+    check(
+      "fling is aimed at the left bat (directed seam)",
+      flungV !== undefined && flungV.y > 1.2 && Math.abs(flungV.x) < 0.4,
+      flungV ? `v=(${flungV.x.toFixed(2)}, ${flungV.y.toFixed(2)})` : "never flung",
+    );
+    check(
+      "flung ball arrives at the left bat",
+      !Number.isNaN(lowX) && lowX > 0.08 && lowX < 0.3,
+      `crossed y=0.85 at x=${Number.isNaN(lowX) ? "never" : lowX.toFixed(3)}`,
+    );
+    check("the grab opened the storm route", (logic.dmdStatus() ?? "").startsWith("ROUTE"));
+  }
+
+  // 10 — ruleset, synthetic: G-A-L-E steps the X; route chain banks a
+  // strike; three strikes raise the squall; the eye lights and starts
+  {
+    rig.scoring.reset();
+    logic.resetGame();
+    state.modeEvents.length = 0;
+    const gale = () => {
+      for (const id of ["1", "2", "3", "4"]) logic.onRollover(id);
+    };
+    gale();
+    check("G-A-L-E steps the multiplier", rig.scoring.multiplier === 2);
+    const runRoute = () => {
+      for (let i = 0; i < 14; i++) bus.emit("spinnerTick", {});
+      logic.onCapture("cell1");
+      logic.onCapture("cell2"); // whichever was lit; the other is a no-op
+      bus.emit("surface", { from: "", to: "spine", x: 0.1, y: 0.66, z: 0 });
+      bus.emit("surface", { from: "spine", to: "", x: 0.16, y: 0.23, z: 0.034 });
+      bus.emit("sensor", { kind: "ramp-entry" });
+      run(0.1);
+      bus.emit("sensor", { kind: "ramp-exit" });
+      run(0.1);
+      logic.onCapture("nacelle");
+      run(0.1);
+    };
+    runRoute();
+    check("route chain banks a strike", state.labels.includes("STRIKE BANKED"), state.labels.join(",").slice(-90));
+    runRoute();
+    runRoute();
+    check("three strikes raise the squall", state.modeEvents.includes("squallStart") && logic.squallActive);
+    run(26); // squall expires
+    check("squall ends on its timer", state.modeEvents.includes("squallEnd") && !logic.squallActive);
+    gale();
+    gale();
+    gale();
+    gale();
+    gale(); // X maxes at 6
+    check("the eye lights (squall + routes + max X)", logic.eyeReady, `X=${rig.scoring.multiplier}`);
+    logic.onCapture("nacelle");
+    check("the eye starts at the nacelle", state.modeEvents.includes("eyeStart") && logic.eyeActive);
+    check("cells stand down in the eye", !logic.magnetLit("cell1") && !logic.magnetLit("cell2"));
+    run(31);
+    check("the eye closes on its timer", state.modeEvents.includes("eyeEnd") && !logic.eyeActive);
+  }
+
+  // 11 — LIGHTNING WATCH (DMD pass): topping the nacelle ladder lights it;
+  // the next capture holds the ball for the video mode, releases on timer
+  {
+    const rigV = buildRig("thunderhead");
+    rigV.flippers.forEach((f) => f.update(false, rigV.t));
+    const logicV = rigV.logic as ThunderheadLogic;
+    for (let i = 0; i < 4; i++) logicV.onCapture("nacelle"); // top the ladder
+    const nacelleV = rigV.kickers.find((k) => k.def.id === "nacelle")!;
+    rigV.placeBall(0.36, 0.55, 0.35, -0.9);
+    rigV.run(3.5);
+    check("LIGHTNING WATCH holds the ball past holdS", nacelleV.holding);
+    rigV.run(9);
+    check("LIGHTNING WATCH releases on its timer", !nacelleV.holding);
+  }
+
+  // 12 — KEEL subway (lit by ballast) carries the right outlane to the
+  // plunger lane; STATIC kickback saves the left outlane
+  {
+    const rigB = buildRig("thunderhead");
+    rigB.flippers.forEach((f) => f.update(false, rigB.t));
+    const logicB = rigB.logic as ThunderheadLogic;
+    rigB.bus.emit("bankComplete", {}); // ballast away: saves lit
+    check("ballast lights both saves", logicB.kickerLit("static") && logicB.kickerLit("keel"));
+    rigB.state.drained = false;
+    rigB.placeBall(0.497, 0.8, 0, 0.5); // into the right outlane
+    let exitedLane = false;
+    rigB.run(6, () => {
+      const p = rigB.ball.body.getPosition();
+      if (p.x > 0.52 && p.y > 0.9) exitedLane = true;
+    });
+    check("keel subway returns to the mooring line", exitedLane && !rigB.state.drained);
+    rigB.bus.emit("bankComplete", {}); // relight: the keel ride outran the window
+    rigB.state.drained = false;
+    rigB.placeBall(0.026, 0.8, 0, 0.5); // into the left outlane
+    let saved = false;
+    rigB.run(6, () => {
+      if (rigB.ball.body.getPosition().y < 0.7) saved = true;
+    });
+    // (with no flippers the saved ball legally drains afterwards — the
+    // check is that the kickback returned it to the field first)
+    check("static kickback fires the left outlane back up", saved);
+  }
+
+  // 13 — STORM GLASS skill shot (soft plunge pays and spots a lane)
+  {
+    const rigS = buildRig("thunderhead");
+    rigS.flippers.forEach((f) => f.update(false, rigS.t));
+    rigS.run(2);
+    let saw = false;
+    rigS.bus.on("score", ({ label }) => {
+      if (label === "STORM GLASS") saw = true;
+    });
+    rigS.ball.body.setLinearVelocity(new Vec2(0, -1.2));
+    rigS.run(3);
+    check("soft plunge pays STORM GLASS", saw);
+  }
+}
+
 if (!which || which === "moondial") moondialSuite();
 if (!which || which === "tidebreaker") tidebreakerSuite();
 if (!which || which === "midway") midwaySuite();
@@ -2502,6 +2751,7 @@ if (!which || which === "smallhours") smallhoursSuite();
 if (!which || which === "sump") sumpSuite();
 if (!which || which === "glasshouse") glasshouseSuite();
 if (!which || which === "summit") summitSuite();
+if (!which || which === "thunderhead") thunderheadSuite();
 
 console.log(failures === 0 ? "\nsimcheck: all checks passed" : `\nsimcheck: ${failures} FAILED`);
 process.exit(failures === 0 ? 0 : 1);

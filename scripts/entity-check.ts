@@ -364,6 +364,20 @@ function profile(
     v.x > 0.9 && Math.abs(v.y) < 0.4,
     `v=(${v.x.toFixed(2)}, ${v.y.toFixed(2)})`,
   );
+
+  // directed fling (Thunderhead): flingDir overrides def.fling at release
+  run(1.1, step); // clear the post-fling cooldown first
+  magnet.flingDir = { x: 0, y: -1 };
+  place(0.25, 0.5, 1.0, 0);
+  run(0.2, step);
+  run(0.5, step);
+  const vd = ball.body.getLinearVelocity();
+  check(
+    "magnet: flingDir overrides def.fling",
+    !magnet.holding && vd.y < -0.6 && Math.abs(vd.x) < 0.4,
+    `v=(${vd.x.toFixed(2)}, ${vd.y.toFixed(2)})`,
+  );
+  magnet.flingDir = null;
 }
 
 // ───────────────────────────── Disc ─────────────────────────────

@@ -929,6 +929,7 @@ export class Game {
     for (const l of this.lifts) l.update(dt);
     for (const m of this.magnets) {
       m.lit = this.phase === "play" && !this.tilted && (this.logic.magnetLit?.(m.def.id) ?? false);
+      m.flingDir = this.logic.magnetFling?.(m.def.id) ?? null;
       m.update(dt, live);
     }
     for (const d of this.discs) {

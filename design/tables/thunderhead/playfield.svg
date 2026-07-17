@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 575 1050" width="575" height="1050">
+  <!-- THUNDERHEAD grey-box prototype (table 9 gate build, BRIEF §7.1).
+       DELIBERATELY UNDRESSED: no field art, no palette tokens — the stagger
+       feel gate comes before the style-guide amendment and all master art.
+       Collision walls render as bare strokes; 1 unit = 1 mm. -->
+  <rect width="575" height="1050" fill="#141824"/>
+  <g id="art-labels" fill="#3a4152" font-family="monospace" font-size="13" text-anchor="middle">
+    <text x="260" y="380">THUNDERHEAD</text>
+    <text x="260" y="396" font-size="9">GREY-BOX FEEL PROTOTYPE</text>
+    <text x="260" y="410" font-size="9">STAGGERED FLIPPERS - NO BUMPERS</text>
+    <text x="9" y="600" font-size="8" transform="rotate(-90 9 600)">BALLAST</text>
+    <text x="400" y="466" font-size="8">NACELLE</text>
+    <text x="120" y="500" font-size="8" transform="rotate(-85 120 500)">SPINE RUN</text>
+    <text x="200" y="273" font-size="8">CELL 1</text>
+    <text x="330" y="258" font-size="8">CELL 2</text>
+    <text x="26" y="990" font-size="8">STATIC</text>
+    <text x="497" y="890" font-size="8">KEEL</text>
+  </g>
+  <g id="art-cells" fill="none" stroke="#3a4152" stroke-width="1.5">
+    <circle cx="200" cy="270" r="34" stroke-dasharray="4 4"/>
+    <circle cx="330" cy="255" r="34" stroke-dasharray="4 4"/>
+  </g>
+  <g id="collision-paths" fill="none" stroke="#8790b3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path data-width="12" data-z="all" id="collision-loop-shell" d="M 0 1050 L 0 260 L 1.3 234.5 L 5 209.3 L 11.2 184.5 L 19.8 160.5 L 30.7 137.4 L 43.8 115.6 L 59 95.1 L 76.2 76.2 L 95.1 59 L 115.6 43.8 L 137.4 30.7 L 160.5 19.8 L 184.5 11.2 L 209.3 5 L 234.5 1.3 L 260 0 L 290.9 1.5 L 321.5 6.1 L 351.4 13.6 L 380.5 24 L 408.5 37.2 L 435 53.1 L 459.8 71.5 L 482.7 92.3 L 503.5 115.2 L 521.9 140 L 537.8 166.5 L 551 194.5 L 561.4 223.6 L 568.9 253.5 L 573.5 284.1 L 575 315 L 575 1050 Z"/>
+    <path data-width="12" id="collision-wall-lane" data-z="all" d="M 520 300 L 520 1050"/>
+    <path data-width="12" id="collision-wall-orbit-a" d="M 65 550 L 65 260 L 66.5 236.2 L 70.8 212.8 L 78 190.1 L 87.8 168.5 L 100.3 148.2 L 115.1 129.5 L 132.1 112.8 L 151 98.3 L 171.5 86.3 L 193.3 76.8"/>
+    <path data-width="12" id="collision-wall-orbit-b" d="M 239.6 66.1 L 263.4 65"/>
+    <path data-width="12" id="collision-wall-orbit-c" d="M 310.5 71.6 L 333 79.2 L 354.5 89.4 L 374.6 102.2 L 393 117.4 L 409.4 134.7 L 520 300"/>
+    <path data-width="12" id="collision-wall-divider-1" d="M 185 80 L 185 148"/>
+    <path data-width="12" id="collision-wall-divider-2" d="M 257 68 L 257 148"/>
+    <path data-width="12" id="collision-wall-divider-3" d="M 329 80 L 329 148"/>
+    <path data-width="12" id="collision-wall-nacelle-hood" d="M 358 505 L 361 474 L 369 449 L 381 431 L 390 424 L 414 434 L 428 448 L 437 468 L 441 505"/>
+    <path data-width="12" id="collision-wall-guide-left" d="M 52 785 L 52 875 L 181.2 908.4"/>
+    <path data-width="12" id="collision-wall-guide-right" d="M 470 690 L 470 905 L 338.9 938.4"/>
+    <path data-width="12" id="collision-wall-deflector" d="M 0 556 L 34 590 L 30 640 L 30 746 L 0 758"/>
+    <path data-width="12" id="collision-wall-plunger-saddle" d="M 526 1000 L 569 1000"/>
+    <path data-width="12" data-surface="spine" id="collision-wall-spine-west" d="M 89 611.1 L 87 560.6 L 86 505.2 L 86 450 L 86 400.3 L 84 329.8 L 87.4 285.8 L 102 249.5 L 126.7 223.5 L 153.2 213.2"/>
+    <path data-width="12" data-surface="spine" id="collision-wall-spine-east" d="M 132 653.7 L 129 608.9 L 127 559.4 L 126 504.8 L 126 450 L 126 399.7 L 124 330.2 L 126.6 294.2 L 136 270.5 L 149.3 256.5 L 166.8 250.8"/>
+  </g>
+  <g id="height-profiles" fill="none" stroke="#4a5168" stroke-width="1" stroke-dasharray="3 3">
+    <path id="height-profile-spine-a" data-layer="1" data-surface="spine" data-surface-width="40" data-height-from="0" data-height-to="22" d="M 112 655 L 109 610 L 107 560 L 106 505 L 106 450"/>
+    <path id="height-profile-spine-b" data-layer="1" data-surface="spine" data-surface-width="40" data-height-from="22" data-height-to="34" d="M 106 450 L 106 400 L 104 330 L 107 290"/>
+    <path id="height-profile-spine-c" data-layer="1" data-surface="spine" data-surface-width="40" data-height-from="34" data-height-to="34" d="M 107 290 L 119 260 L 138 240 L 160 232"/>
+    <path id="height-profile-keel" data-layer="-1" data-height-from="-8" data-height-to="-8" d="M 494 938 L 520 1006 L 547 986"/>
+  </g>
+  <g id="sensors" fill="none" stroke="#2c3352" stroke-width="1">
+    <rect id="sensor-drain" x="0" y="1005" width="520" height="30"/>
+    <rect id="sensor-rollover-1" x="140" y="100" width="30" height="20"/>
+    <rect id="sensor-rollover-2" x="204" y="100" width="30" height="20"/>
+    <rect id="sensor-rollover-3" x="276" y="100" width="30" height="20"/>
+    <rect id="sensor-rollover-4" x="340" y="100" width="30" height="20"/>
+    <rect id="sensor-ramp-entry" x="2" y="505" width="60" height="16"/>
+    <rect id="sensor-ramp-exit" x="440" y="115" width="36" height="36"/>
+    <rect id="sensor-spinner" x="450" y="576" width="60" height="12"/>
+    <rect id="sensor-kicker-nacelle" x="378" y="442" width="44" height="42"/>
+    <rect id="sensor-kicker-static" x="6" y="910" width="38" height="34"/>
+    <rect id="sensor-subway-keel" x="478" y="903" width="36" height="34"/>
+    <rect id="sensor-skill-stormglass" x="526" y="440" width="43" height="60"/>
+  </g>
+  <g id="anchors" fill="#4a5168">
+    <circle id="anchor-flipper-left" cx="178" cy="920" r="5"/>
+    <circle id="anchor-flipper-right" cx="342" cy="950" r="5"/>
+    <circle id="anchor-spawn" cx="547.5" cy="980" r="5"/>
+    <circle id="anchor-magnet-cell1" cx="200" cy="270" r="5"/>
+    <circle id="anchor-magnet-cell2" cx="330" cy="255" r="5"/>
+    <circle id="anchor-kicker-nacelle" cx="400" cy="462" r="5"/>
+    <circle id="anchor-kicker-static" cx="44" cy="775" r="5"/>
+  </g>
+</svg>

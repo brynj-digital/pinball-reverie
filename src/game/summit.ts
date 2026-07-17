@@ -567,7 +567,12 @@ export class SummitLogic implements TableLogic {
     this.ctx.sfx("multiplier");
     this.ctx.push(
       new SequenceScene([
-        new MessageScene([["HOLD THE CABLE", "FLIP AGAINST THE GUST"]], 1.4, true),
+        (() => {
+          const f = this.ctx.baked("cablescene");
+          return f
+            ? new BakedDmdScene(f, 9, "FLIP AGAINST THE GUST")
+            : new MessageScene([["HOLD THE CABLE", "FLIP AGAINST THE GUST"]], 1.4, true);
+        })(),
         new CableScene(() => ({
           active: this.ctActive,
           gust: this.ctCurrentGust(),

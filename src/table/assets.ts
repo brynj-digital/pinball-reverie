@@ -12,6 +12,7 @@ import type { Song } from "../audio/songs";
 import {
   GLASSHOUSE_SONG,
   SUMMIT_SONG,
+  THUNDERHEAD_SONG,
   MIDWAY_SONG,
   MOONDIAL_SONG,
   NIGHTMAIL_SONG,
@@ -85,12 +86,24 @@ import readScene from "../../design/dmd-scenes/readscene.svg?raw";
 import avalancheScene from "../../design/dmd-scenes/avalanchescene.svg?raw";
 import launchScene from "../../design/dmd-scenes/launchscene.svg?raw";
 import auroraScene from "../../design/dmd-scenes/aurorascene.svg?raw";
+import alignscopeScene from "../../design/dmd-scenes/alignscope.svg?raw";
+import sonarsweepScene from "../../design/dmd-scenes/sonarsweep.svg?raw";
+import bellgameScene from "../../design/dmd-scenes/bellgame.svg?raw";
+import pressureScene from "../../design/dmd-scenes/pressure.svg?raw";
+import cableScene from "../../design/dmd-scenes/cablescene.svg?raw";
 import dialScene from "../../design/dmd-scenes/dial.svg?raw";
 import mastScene from "../../design/dmd-scenes/mast.svg?raw";
 import callerScene from "../../design/dmd-scenes/caller.svg?raw";
 import onairScene from "../../design/dmd-scenes/onair.svg?raw";
 import staticScene from "../../design/dmd-scenes/static.svg?raw";
 import dawnScene from "../../design/dmd-scenes/dawn.svg?raw";
+import thunderheadPlayfield from "../../design/tables/thunderhead/playfield.svg?raw";
+import thunderheadBackglass from "../../design/tables/thunderhead/backglass.svg?raw";
+import barographScene from "../../design/dmd-scenes/barograph.svg?raw";
+import chargeScene from "../../design/dmd-scenes/chargescene.svg?raw";
+import strikeScene from "../../design/dmd-scenes/strike.svg?raw";
+import squallScene from "../../design/dmd-scenes/squallscene.svg?raw";
+import eyeScene from "../../design/dmd-scenes/eyescene.svg?raw";
 
 export interface TableAssets {
   playfieldSvg: string;
@@ -110,6 +123,7 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       eclipse: { svg: eclipseScene, frames: 9 },
       bank: { svg: bankScene, frames: 7 },
       telescope: { svg: telescopeScene, frames: 8 },
+      alignscope: { svg: alignscopeScene, frames: 8 },
     },
     song: MOONDIAL_SONG,
   },
@@ -126,6 +140,7 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       gutter: { svg: gutterScene, frames: 8 },
       trench: { svg: trenchScene, frames: 8 },
       leviathan: { svg: leviathanScene, frames: 9 },
+      sonarsweep: { svg: sonarsweepScene, frames: 8 },
     },
     song: TIDEBREAKER_SONG,
   },
@@ -143,6 +158,7 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       stamp: { svg: stampScene, frames: 8 },
       chicken: { svg: chickenScene, frames: 8 },
       fireworks: { svg: fireworksScene, frames: 8 },
+      bellgame: { svg: bellgameScene, frames: 8 },
     },
     song: MIDWAY_SONG,
   },
@@ -183,6 +199,7 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       outflow: { svg: outflowScene, frames: 8 },
       pumps: { svg: pumpsScene, frames: 8 },
       highwater: { svg: highwaterScene, frames: 8 },
+      pressure: { svg: pressureScene, frames: 8 },
     },
     song: SUMP_SONG,
   },
@@ -209,7 +226,20 @@ export const TABLE_ASSETS: Record<TableId, TableAssets> = {
       avalanche: { svg: avalancheScene, frames: 8 },
       launchscene: { svg: launchScene, frames: 8 },
       aurora: { svg: auroraScene, frames: 8 },
+      cablescene: { svg: cableScene, frames: 8 },
     },
     song: SUMMIT_SONG,
+  },
+  thunderhead: {
+    playfieldSvg: thunderheadPlayfield,
+    backglassSvg: thunderheadBackglass,
+    song: THUNDERHEAD_SONG,
+    dmdScenes: {
+      barograph: { svg: barographScene, frames: 8 },
+      charge: { svg: chargeScene, frames: 8 },
+      strike: { svg: strikeScene, frames: 8 },
+      squall: { svg: squallScene, frames: 8 },
+      eye: { svg: eyeScene, frames: 8 },
+    },
   },
 };
